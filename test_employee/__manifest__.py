@@ -5,6 +5,8 @@
     'depends':['base','sale','mail', 'board','web_google_maps'],
     'installable':True,
     'application':True,
+    'version': '14.0.1',
+    'license': 'AGPL-3',
     'category':'sale',
     'author':'web author',
     'website':'https://www.testemployee.com',
