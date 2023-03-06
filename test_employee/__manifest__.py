@@ -41,6 +41,7 @@
     ],
     'price': 49.99,
     'currency': 'USD',
+    'images': ['static/description/test_emp.jpg'],
 
 
 
