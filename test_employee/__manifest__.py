@@ -8,7 +8,7 @@
     'version': '14.0.1',
     'license': 'AGPL-3',
     'category':'sale',
-    'author':'web author',
+    'author':'Ajay Kumar Ravidas',
     'website':'https://www.testemployee.com',
     'data':[
         'security/security.xml',
