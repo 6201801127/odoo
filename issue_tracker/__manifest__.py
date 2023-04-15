@@ -25,4 +25,7 @@
     ],
     'installable': True,
     'application': True,
+    'price': 9.99,
+    'currency': 'USD',
+    'images': ['static/description/issue_tracker.png'],
 }
