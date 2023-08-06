@@ -1,12 +1,12 @@
 {
-    'name' : "BSSCL Employee Appriasal / बिहार सरिफ स्मार्ट सिटी लिमिटेड कर्मचारी मूल्यांकन",
-    'summary' : """Bihar sarif smart city limited Appraisal module / बिहार सरिफ स्मार्ट सिटी लिमिटेड मूल्यांकन मापांक """,
+    'name' : "Employee Appriasal",
+    'summary' : """Employee Appraisal module""",
     'description' : """Hr employee appraisal management""",
     'version': '14.0',
     'category' : "Web Application",
-    'author' : "BSSCL / बिहार सरिफ स्मार्ट सिटी लिमिटेड",
+    'author' : "Ajay",
     'license': 'LGPL-3',
-    'website' : "https://www.bsscl.bihar.co.in",
+    'website' : "https://employee.appraisal.com",
     'depends' : ['base','hr','fetchmail','bsscl_fiscal_year'],
     'data' : [
             'security/security.xml',

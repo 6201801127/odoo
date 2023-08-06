@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!--********************************* Fiscal year form view******************************************-->
+        <record id="view_account_fiscalyear_form" model="ir.ui.view">
+            <field name="name">account.fiscalyear.form</field>
+            <field name="model">account.fiscalyear</field>
+            <field name="arch" type="xml">
+                <form string="Fiscal year">
+                <header>
+                    <button name="create_period" states="draft" string="Create Monthly Periods / मासिक काल बनाएँ"
+                            type="object" class="oe_highlight"/>
+                    <field name="state" widget="statusbar" nolabel="1" />
+                </header>
+                <style>
+                    .o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 200px !important;}
+                  </style>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_stop"/>
+                        </group>
+                    </group>
+                    <field colspan="4" name="period_ids" nolabel="1" widget="one2many_list">
+                        <form string="Period">
+                            <style>
+                                .o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 200px !important;}
+                              </style>
+                            <group col="4">
+                                <field name="name"/>
+                                <field name="code"/>
+                                <field name="date_start"/>
+                                <field name="date_stop"/>
+                                <field name="special"/>
+                                <field name="state" invisible="1"/>
+                            </group>
+                        </form>
+                    </field>
+                </form>
+            </field>
+        </record>
+
+        <!--********************************* Fiscal year tree view******************************************-->
+        <record id="view_account_fiscalyear_tree" model="ir.ui.view">
+            <field name="name">account.fiscalyear.tree</field>
+            <field name="model">account.fiscalyear</field>
+            <field name="arch" type="xml">
+                <tree  string="Fiscalyear">
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="company_id"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <!--********************************* Fiscal year search view******************************************-->
+        <record id="view_account_fiscalyear_search" model="ir.ui.view">
+            <field name="name">account.fiscalyear.search</field>
+            <field name="model">account.fiscalyear</field>
+            <field name="arch" type="xml">
+                <search string="Search Fiscalyear">
+                    <field name="name" string="Fiscal Year"
+                           filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]"/>
+                    <filter name="open" string="Open" domain="[('state','=','draft')]"/>
+                    <filter name="closed" string="Closed" domain="[('state','=','done')]"/>
+                    <field name="state"/>
+                    <group expand="0" string="Group By">
+                        <filter name="status" string="Status" context="{'group_by': 'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!--********************************* Fiscal year Action view******************************************-->
+        <record id="action_account_fiscalyear" model="ir.actions.act_window">
+            <field name="name">Fiscal Years / वित्तीय वर्ष</field>
+            <field name="res_model">account.fiscalyear</field>
+            <!-- <field name="view_type">form</field> -->
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to start a new fiscal year./ नया वित्तीय वर्ष शुरू करने के लिए क्लिक करें।
+              </p><p>
+                Define your company's financial year according to your needs. A
+                financial year is a period at the end of which a company's
+                accounts are made up (usually 12 months). The financial year is
+                usually referred to by the date in which it ends. For example,
+                if a company's financial year ends November 30, 2011, then
+                everything between December 1, 2010 and November 30, 2011
+                would be referred to as FY 2011. / अपनी आवश्यकताओं के अनुसार अपनी कंपनी के वित्तीय वर्ष को परिभाषित करें। ए
+                वित्तीय वर्ष एक अवधि है जिसके अंत में एक कंपनी की
+                खाते बनाए जाते हैं (आमतौर पर 12 महीने)। वित्तीय वर्ष है
+                आमतौर पर उस तिथि से संदर्भित किया जाता है जिसमें यह समाप्त होता है। उदाहरण के लिए,
+                यदि किसी कंपनी का वित्तीय वर्ष 30 नवंबर, 2011 को समाप्त होता है, तब
+                1 दिसंबर, 2010 और 30 नवंबर, 2011 के बीच सब कुछ
+                वित्तीय वर्ष 2011 के रूप में संदर्भित किया जाएगा।
+              </p>
+            </field>
+        </record>
+
+        <!--***********************fiscal year menu*************************-->
+        <menuitem id="menu_action_account_fiscalyear"
+                name="Fiscal Year"
+                action="action_account_fiscalyear"
+                parent="base.menu_users"/>
+
+        <!--**************************Account Period form view***********************-->
+        <record id="view_account_period_form" model="ir.ui.view">
+            <field name="name">account.period.form</field>
+            <field name="model">account.period</field>
+            <field name="arch" type="xml">
+                <form string="Account Period">
+                    <header>
+                        
+                        <field name="state" widget="statusbar" nolabel="1"/>
+                    </header>
+                    <style>
+                        .o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 200px !important;}
+                      </style>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="fiscalyear_id" widget="selection"/>
+                                <label for="date_start" string="Duration"/>
+                                <div>
+                                    <field name="date_start" class="oe_inline" nolabel="1"/> -
+                                    <field name="date_stop" nolabel="1" class="oe_inline"/>
+                                </div>
+                            </group>
+                            <group>
+                                <field name="code"/>
+                                <field name="special"/>
+                                <field name="company_id" widget="selection"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!--**************************Account Period tree view***********************-->
+        <record id="view_account_period_tree" model="ir.ui.view">
+            <field name="name">account.period.tree</field>
+            <field name="model">account.period</field>
+            <field name="arch" type="xml">
+              <tree  string="Period">
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="date_start"/>
+                    <field name="date_stop"/>
+                    <field name="special"/>
+                    <field name="company_id" />
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <!--**************************Account Period search view***********************-->
+        <record id="view_account_period_search" model="ir.ui.view">
+            <field name="name">account.period.search</field>
+            <field name="model">account.period</field>
+            <field name="arch" type="xml">
+                <search string="Search Period">
+                    <field name="name" string="Period"
+                           filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]"/>
+                    <filter string="To Close" name="draft" domain="[('state','=','draft')]"/>
+                </search>
+            </field>
+        </record>
+
+        <!--*********************Account Period action***********************-->
+        <record id="action_account_period" model="ir.actions.act_window">
+            <field name="name">Periods / काल</field>
+            <field name="res_model">account.period</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_draft': 1}</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to add a fiscal period. / वित्तीय अवधि जोड़ने के लिए क्लिक करें
+              </p><p>
+                An accounting period typically is a month or a quarter. It
+                usually corresponds to the periods of the tax declaration. / 
+                एक लेखा अवधि आमतौर पर एक महीने या एक चौथाई होती है। यह
+                                आमतौर पर कर घोषणा की अवधि से मेल खाती है।
+              </p>
+            </field>
+        </record>
+
+
+    </data>
+</odoo>
