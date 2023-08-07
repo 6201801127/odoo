@@ -1,5 +1,5 @@
 {
-    'name' : "Employee Appriasal",
+    'name' : "My Appriasal",
     'summary' : """Employee Appraisal module""",
     'description' : """Hr employee appraisal management""",
     'version': '14.0',
