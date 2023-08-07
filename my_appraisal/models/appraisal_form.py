@@ -73,16 +73,16 @@ class BssclEmployeeAppraisal(models.Model):
 
     @api.depends()
     def _compute_boolean(self):
-        if self.env.user.has_group('employee_appraisal.appraisal_reporting_authority_group_id'):
+        if self.env.user.has_group('my_appraisal.appraisal_reporting_authority_group_id'):
             self.ra_group_bool_check = True
         else: 
             self.ra_group_bool_check = False
 
-        if self.env.user.has_group('employee_appraisal.appraisal_reviewing_authority_group_id'):
+        if self.env.user.has_group('my_appraisal.appraisal_reviewing_authority_group_id'):
             self.review_group_bool_check = True
         else: 
             self.review_group_bool_check = False
-        if self.env.user.has_group('employee_appraisal.appraisal_manager_group_id'):
+        if self.env.user.has_group('my_appraisal.appraisal_manager_group_id'):
             self.manager_group_bool_check = True
         else: 
             self.manager_group_bool_check = False
@@ -119,7 +119,7 @@ class BssclEmployeeAppraisal(models.Model):
         res.kpia_ids2 = kpi_kpa2
         email1 = res.employee_id.work_email
         name = res.employee_id.name
-        template = self.env.ref('employee_appraisal.create_appraisal_email_template_id')
+        template = self.env.ref('my_appraisal.create_appraisal_email_template_id')
         template.with_context(email_to=email1,names=name).send_mail(res.id)
         return res
     
@@ -175,7 +175,7 @@ class BssclEmployeeAppraisal(models.Model):
                 'res_model': 'bsscl.employee.appraisal',
                 'type': 'ir.actions.act_window',
                 'target': 'current',
-                'view_id': self.env.ref('employee_appraisal.appraisal_view_tree').id,
+                'view_id': self.env.ref('my_appraisal.appraisal_view_tree').id,
                 'domain': [('state','=','draft')],
                 }
 
@@ -205,7 +205,7 @@ class BssclEmployeeAppraisal(models.Model):
                 'res_model': 'bsscl.employee.appraisal',
                 'type': 'ir.actions.act_window',
                 'target': 'current',
-                'view_id': self.env.ref('employee_appraisal.appraisal_view_tree').id,
+                'view_id': self.env.ref('my_appraisal.appraisal_view_tree').id,
                 'domain': [('state','=','self_review')],
                 }
     # def button_reviewing_authority_reviewed(self):
@@ -237,7 +237,7 @@ class BssclEmployeeAppraisal(models.Model):
     #             'res_model': 'bsscl.employee.appraisal',
     #             'type': 'ir.actions.act_window',
     #             'target': 'current',
-    #             'view_id': self.env.ref('employee_appraisal.appraisal_view_tree').id,
+    #             'view_id': self.env.ref('my_appraisal.appraisal_view_tree').id,
     #             'domain': [('state','=','reporting_authority_review')],
     #             }
 
@@ -262,7 +262,7 @@ class BssclEmployeeAppraisal(models.Model):
                 'res_model': 'bsscl.employee.appraisal',
                 'type': 'ir.actions.act_window',
                 'target': 'current',
-                'view_id': self.env.ref('employee_appraisal.appraisal_view_tree').id,
+                'view_id': self.env.ref('my_appraisal.appraisal_view_tree').id,
                 'domain': [('state','=','reviewing_authority_review')],
                 }
     def button_reject(self):
@@ -283,7 +283,7 @@ class BssclEmployeeAppraisal(models.Model):
             'res_model': 'appraisal.raisequery',
             'type': 'ir.actions.act_window',
             'target': 'new',
-            'view_id': self.env.ref('employee_appraisal.appraisal_raisequery_view_form').id,
+            'view_id': self.env.ref('my_appraisal.appraisal_raisequery_view_form').id,
             }
         return action
     
@@ -379,12 +379,12 @@ class BssclEmployeeAppraisal(models.Model):
 
         @api.depends()
         def _compute_boolean(self):
-            if self.env.user.has_group('employee_appraisal.appraisal_reporting_authority_group_id'):
+            if self.env.user.has_group('my_appraisal.appraisal_reporting_authority_group_id'):
                 self.ra_group_bool_check = True
             else: 
                 self.ra_group_bool_check = False
 
-            if self.env.user.has_group('employee_appraisal.appraisal_reviewing_authority_group_id'):
+            if self.env.user.has_group('my_appraisal.appraisal_reviewing_authority_group_id'):
                 self.review_group_bool_check = True
             else: 
                 self.review_group_bool_check = False

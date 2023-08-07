@@ -1,4 +1,4 @@
-odoo.define('employee_appraisal.button_hide', function (require) {
+odoo.define('my_appraisal.button_hide', function (require) {
     "use strict";
   
     var FormController = require('web.FormController');
