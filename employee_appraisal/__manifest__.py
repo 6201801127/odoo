@@ -7,7 +7,7 @@
     'author' : "Ajay",
     'license': 'LGPL-3',
     'website' : "https://employee.appraisal.com",
-    'depends' : ['base','hr','fetchmail','bsscl_fiscal_year'],
+    'depends' : ['base','hr','fetchmail','fiscal_year'],
     'data' : [
             'security/security.xml',
             'security/ir.model.access.csv',
