@@ -9,7 +9,7 @@
         Long description of module's purpose
     """,
     'author': "Ajay Kumar Ravidas",
-    'website': "http://www.yourcompany.com",
+    'website': "https://www.ask.com",
     'category': 'Uncategorized',
     'version': '0.1',
     'depends': ['base','mail'],

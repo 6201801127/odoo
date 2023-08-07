@@ -4,9 +4,9 @@
     'description' : """Hr employee appraisal management""",
     'version': '14.0',
     'category' : "Web Application",
-    'author' : "Ajay",
+    'author' : "Ajay Kumar Ravidas",
     'license': 'LGPL-3',
-    'website' : "https://employee.appraisal.com",
+    'website' : "https://www.ask.com",
     'depends' : ['base','hr','fetchmail','fiscal_year'],
     'data' : [
             'security/security.xml',
@@ -28,4 +28,7 @@
     'auto_install' : False,
     'installable' : True,
     'sequence' : 1,
+     'price': 49.99,
+    'currency': 'USD',
+    'images': ['static/description/test_appraisal.jpeg'],
 }

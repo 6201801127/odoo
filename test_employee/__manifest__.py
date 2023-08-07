@@ -9,7 +9,7 @@
     'license': 'AGPL-3',
     'category':'sale',
     'author':'Ajay Kumar Ravidas',
-    'website':'https://www.testemployee.com',
+    'website':'https://www.ask.com',
     'data':[
         'security/security.xml',
         'security/security_rules.xml',

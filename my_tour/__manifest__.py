@@ -4,8 +4,8 @@
     'description': "Tour management module",
     'version': '14.0',
     'category' : "Web Application",
-    'website': "https://www.bsscl.bihar.co.in",
-    'author': 'Ajay',
+    'website': "https://www.ask.com",
+    'author': 'Ajay Kumar Ravidas',
     'depends' : ['base','hr'],
     'data':['security/ir.model.access.csv',
             'security/tour_security.xml',
@@ -30,4 +30,7 @@
     'installable': True,
     'auto_install': False,
     'sequence': 1,
+    'price': 49.99,
+    'currency': 'USD',
+    'images': ['static/description/test_tour.jpg'],
 }

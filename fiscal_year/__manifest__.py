@@ -8,8 +8,8 @@
         This module provide feature to define fiscal year and period for company 
         and link with journal entry and journal items 
     """,
-    'author': 'Ajay',
-    'website': 'http://www.csm.tech',
+    'author': 'Ajay Kumar Ravidas',
+    'website': 'https://www.ask.com',
     'depends': ['account'],
     'data': [
         'security/ir.model.access.csv',
@@ -17,4 +17,7 @@
     ],
     'installable': True,
     'application': True,
+    'price': 49.99,
+    'currency': 'USD',
+    'images': ['static/description/test_fiscal_year.jpeg'],
 }
