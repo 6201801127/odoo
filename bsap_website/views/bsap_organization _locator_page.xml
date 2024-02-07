@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <template id="bsap_organization_locator_page" name="Organization Locator">
+            <style>
+                <!-- /* Set the size of the div element that contains the map */ -->
+                #map {
+                    height: 500px; /* The height is 400 pixels */
+                    width: 95%; /* The width is the width of the web page */
+                    }
+            </style>
+          
+            <t t-call="website.layout">
+                <div class="banner-navigation" style="height: 83px !important; margin-top: -41px;">
+                    <div class="container">
+                        <nav aria-label="breadcrumb" class="breadcrumb-Area">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item text-white">
+                                    <a href="/">
+                                        <i class="bi bi-house-fill"></i>
+                                    </a>
+                                </li>
+                                <li class="breadcrumb-item active text-secondary"
+                                    aria-current="page">Organization Locator</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+                <div class="inner-layout">
+                    <div class="about__Section--Inner">
+                        <div class="container">
+                            <h3 class="text-blue section__Heading">BSAP Locations</h3>
+                <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+                <div id="map"></div>
+
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+                <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDPrdpvH534RKeXADA_CHWtHJYr3lT5EKo&amp;callback=Function.prototype&amp;libraries=places"></script>
+                <!-- Make sure you replace YOUR_API_KEY in the API URL with your actual Google Maps API key. -->
+               
+                <script type="text/javascript">
+                    $(document).ready(function(){
+                        var locations = [
+                            <t t-foreach="bsap_locations" t-as="location">
+                                {
+                                    'latitude': "<t t-esc="location.lat"/>",
+                                    'longitude': "<t t-esc="location.lng"/>",
+                                    'name': "<t t-esc="location.name"/>"
+                                },
+                            </t>
+                        ];
+                        <!-- // Filter locations that have both latitude and longitude defined -->
+                        var filteredLocations = locations.filter(function (location) {
+                            return location.latitude !== '' &amp;&amp; location.longitude !== '';
+                        });
+                        console.log("--------------locations---", locations,filteredLocations);
+                    
+                        <!-- // Initialize and add the map -->
+                        let map;
+                        async function initMap() {
+                            const { Map } = await google.maps.importLibrary("maps");
+                            const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+                    
+                            map = new google.maps.Map(document.getElementById("map"), {
+                                zoom: 4,
+                                center: { lat: parseFloat(filteredLocations[0].latitude), lng: parseFloat(filteredLocations[0].longitude) },
+                                mapId: "DEMO_MAP_ID",
+                            });
+                    
+                            filteredLocations.forEach(function(location) {
+                                const marker = new AdvancedMarkerElement({
+                                    map: map,
+                                    position: {
+                                        lat: parseFloat(location.latitude),
+                                        lng: parseFloat(location.longitude)
+                                    },
+                                    title: location.name
+                                });
+                                console.log("Marker added:", marker);
+                            });
+                        }
+                    
+                        initMap();
+                    });
+                </script>
+                </div></div></div>
+            </t>
+        </template>
+    </data>
+</odoo>
