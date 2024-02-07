@@ -246,8 +246,8 @@ class EmployeeDetails(models.Model):
             print("Payslip...", payslip)
         
 
-    def create_twitter(self):
-        print("abc")
+    # def create_twitter(self):
+    #     print("abc")
     
     def create_calendar(self):
         print("abc")
