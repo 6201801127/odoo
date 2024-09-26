@@ -1,0 +1,509 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+        <!-- salary advance report-->
+        <record model="ir.ui.view" id="kw_apply_salary_advance_tree_report">
+            <field name="name">kw_apply_salary_advance.tree</field>
+            <field name="model">kw_advance_apply_salary_advance</field>
+            <field name="arch" type="xml">
+                <tree string="Apply Salary Advance Report Tree" default_order='id desc' create="false" import="false">
+                    <field name="name"/>
+                    <field name="employee_id" string='Employee'/>
+                    <field name="department_id"/>
+                    <field name="job_id"/>
+                    <field name="interest" invisible="1"/>
+                    <field name="adv_purpose"/>
+                    <field name="currency_id"/>
+                    <field name="eligibility_amt" string="Eligible Amt." widget="monetary"/>
+                    <field name="adv_amnt" sum="Total" string="Advance Amt." widget="monetary"/>
+<!--                    <field name="total_install"/>-->
+                    <field name="install_amnt" invisible="1"/>
+                    <field name="create_date" string="Applied Date" widget="date"/>
+                    <field name="req_date"/>
+                    <field name="payment_date"/>
+                    <field name="description" invisible="1"/>
+                    <field name="forwarded_by" invisible="1"/>
+                    <field name="state"/>
+                    <!-- <field name="action_to_be_taken_by"/> -->
+                </tree>
+            </field>
+        </record>
+
+ <record model="ir.ui.view" id="kw_apply_salary_advance_report_form">
+            <field name="name">kw_apply_salary_advance.report.form</field>
+            <field name="model">kw_advance_apply_salary_advance</field>
+            <field name="arch" type="xml">
+                <form duplicate='0' delete='false' create='false' edit='false'>
+                    <header>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,applied,forward,approve,hold,grant,cancel,reject"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="hide_btn_cancel" invisible='1'/>
+                                <field name="show_ra_button" invisible='1'/>
+                                <field name="show_apply_btn" invisible='1'/>
+                                <field name="show_ra_button" invisible='1'/>
+                                <field name="current_user" invisible='1'/>
+                                <!-- <field name="finace_take_action" invisible='1'/> -->
+                                <field name="show_accounts_button" invisible='1'/>
+                                <field name="name" invisible='1'/>
+                                <field name="applicant" widget="radio" options="{'horizontal': true}" readonly="1" invisible='1'/>
+                                <field name="employee_id"  force_save="1" attrs="{'required': [('applicant','=', 'other')],'readonly':[('applicant','=','self')]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="department_id"  force_save="1" attrs="{'readonly':['|',('state','!=','applied'),('state','!=','applied')]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+<!--                                <field name="division"  force_save="1" attrs="{'invisible': [('division','=', False)],'readonly':[('state','!=','applied')]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>-->
+<!--                                <field name="section"  force_save="1" attrs="{'invisible': [('section','=', False)],'readonly':[('state','!=','applied')]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>-->
+<!--                                <field name="practise"  force_save="1" attrs="{'invisible': [('practise','=', False)],'readonly':[('state','!=','applied')]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>-->
+                                <field name="job_id"  force_save="1" attrs="{'readonly':[('state','!=','applied')]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+<!--                                <field name="emp_grade" readonly="1" options="{'no_open': True,'no_create':True,'no_edit':True}"/>-->
+<!--                                <field name="emp_band" readonly="1"  options="{'no_open': True,'no_create':True,'no_edit':True}"/>-->
+                                <field name="adv_purpose" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="description"/>
+                                <field name="req_date" widget="date"/>
+                                <p style="color:#fc0307"><i>(Advance amount required date.)</i></p>
+                                <field name="emi_start_date" invisible='1'/>
+                            </group>
+                            <group>
+                                <field name="eligibility_amt" widget="monetary"/>
+                                <field name="interest"/>
+                                <field name="currency_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="adv_amnt" widget="monetary"/>
+<!--                                <field name="total_install"/>-->
+                                <field name="install_amnt" invisible="1"/>
+                                <field name="payment_date" string="Disbursed Date" attrs="{'invisible': [('payment_date','=', False)]}" readonly="1"/>
+                                <field name="buffer_period" invisible="1"/>
+                                <field name="closer_type" invisible='1'/>
+                                <field name="total_month_count" invisible='1'/>
+                                
+                            </group>
+                        </group>
+                        <notebook>
+                            <page name="Deduction" string="Installments">
+                                <field name="deduction_line_ids" readonly="1" force_save="1" style="pointer-events:none;">
+                                    <tree editable="bottom">
+                                        <field name="deduction_date" invisible="1"/>
+                                        <field name="installment_month"/>
+                                        <field name="principal_amt" widget="monetary"/>
+                                        <field name="monthly_interest" widget="monetary"/>
+                                        <field name="amount" widget="monetary"/>
+                                        <field name="balance" widget="monetary"/>
+                                        <field name="tax_amount" invisible="1"/>
+                                        <field name="status" invisible="0"/>
+                                        <field name="pay_slip" invisible="0"/>
+                                        <field name="payment_by" invisible="0"/>
+                                        <field name="employee_id" invisible="1"/>
+                                    </tree>
+                                </field>
+                                <div width="100%" style="display: flex;flex-flow: row nowrap;justify-content: space-between;">
+                                    <div width="45%">
+                                        <label for="relaxation_line_ids" string="Relaxation Period" attrs="{'invisible': [('buffer_period','=', False)]}"/>
+                                        <field name="relaxation_line_ids" readonly="1" force_save="1" style="pointer-events:none;" attrs="{'invisible': [('buffer_period','=', False)]}">
+                                            <tree>
+                                                <field name="relaxation_period"/>
+                                                <field name="description"/>
+                                                <field name="approved_on"/>
+                                                <field name="approve_by"/>
+                                            </tree>
+                                        </field>
+                                    </div>
+                                    <div width="45%">
+                                        <label for="p_deduction_line_ids" string=" Pre closure Payment" attrs="{'invisible': [('closer_type','=', False)]}"/>
+                                        <field name="p_deduction_line_ids" readonly="1" force_save="1" style="pointer-events:none;" attrs="{'invisible': [('closer_type','=', False)]}">
+                                            <tree>
+                                                <field name="paid_date"/>
+                                                <field name="closer_type"/>
+                                                <field name="month_count" string="No. of Installment(s)"/>
+                                                <field name="amount" widget="monetary"/>
+                                                <field name="payment_by" invisible="1"/>
+                                                <field name="employee_id" invisible="1"/>
+                                            </tree>
+                                        </field>
+                                    </div>
+                                </div>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread" options='{"thread_level": 1}'/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_apply_salary_advance_report_search_view" model="ir.ui.view">
+            <field name="name">kw_apply_salary_advance.report.search</field>
+            <field name="model">kw_advance_apply_salary_advance</field>
+            <field name="arch" type="xml">
+                <search string="Fields">
+                        <field name="name"/>
+                        <field name="employee_id"/>
+                        <field name ='department_id'/>
+                        <field name="job_id"/>
+                        <field name ='adv_purpose'/>
+                        <field name="currency_id"/>
+                        <field name="eligibility_amt"/>
+                        <field name ='adv_amnt'/>
+<!--                        <field name ='total_install'/>-->
+                        <field name ='create_date'/>
+                        <field name ='req_date'/>
+                        <field name="payment_date"/>
+                        <field name="state"/>
+                        <separator/>
+					    <filter string="This Year" domain="[('payment_date', 'like',context_today().strftime('%Y'))]" 
+                                name="current_year_required_date"/>
+                        <separator/>
+                        <filter string="Applied Date" name="create_date" date="create_date" />
+                        <filter string="Required Date" name="req_date" date="req_date"/>
+                        <filter string="Disbursed Date" name="payment_date" date="payment_date" />
+                        <separator/>
+                        <filter string="Draft" name="state" domain="[('state', '=','draft')]"/>
+                        <filter string="Applied" name="state" domain="[('state', '=','applied')]"/>
+                        <filter string="Approved" name="state" domain="[('state', '=','approve')]"/>
+                        <filter string="Hold" name="state" domain="[('state', '=','hold')]"/>
+                        <filter string="Grant" name="state" domain="[('state', '=','grant')]"/>
+                        <filter string="Cancel" name="state" domain="[('state', '=','cancel')]"/>
+                        <filter string="Reject" name="state" domain="[('state', '=','reject')]"/>
+                        <filter string="Release" name="state" domain="[('state', '=','release')]"/>
+                        <filter string="Paid" name="state" domain="[('state', '=','paid')]"/>
+                    <group expand="1" string="Group By">
+                        <filter string="State" name="group_by_state" domain="[]" context="{'group_by':'state'}"/>
+                        <filter string="Designation" name="job_id" domain="[]" context="{'group_by':'job_id'}"/>
+                        <filter string="Department" name="department_id" domain="[]" context="{'group_by':'department_id'}"/>
+                        <filter string="Advance Purpose" name="adv_purpose" domain="[]" context="{'group_by':'adv_purpose'}"/>
+                    </group> 
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_apply_salary_advance_report_action">
+            <field name="name">Salary Advance Report</field>
+            <field name="res_model">kw_advance_apply_salary_advance</field>
+            <field name="binding_view_types">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'user_loaded_view':True}</field>
+            <field name="search_view_id" ref="kw_advance_claim.kw_apply_salary_advance_report_search_view" />
+            <field name="view_ids" eval="[(5, 0, 0),
+		(0, 0, {'view_mode': 'tree', 'view_id': ref('kw_apply_salary_advance_tree_report')}),
+		(0, 0, {'view_mode': 'form', 'view_id': ref('kw_apply_salary_advance_report_form')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No records to show...
+                </p>
+            </field>
+        </record>
+        <!-- petty cash report -->
+        <record model="ir.ui.view" id="kw_apply_petty_cash_tree_report">
+            <field name="name">kw_adv_apply_petty_cash.tree</field>
+            <field name="model">kw_advance_apply_petty_cash</field>
+            <field name="arch" type="xml">
+                <tree string="Apply Petty cash Report Tree" default_order='settlement_status desc' create="false" import="false">
+                    <field name="name"/>
+                    <field name="user_emp_id" string='Employee'/>
+                    <field name="department_id"/>
+                    <field name="job_id"/>
+                    <field name="description" invisible="1"/>
+                    <field name="currency_id"/>
+                    <field name="advance_amt" string="Advance Amt." widget="monetary"/>
+                    <field name="create_date" string="Applied Date" widget="date"/>
+                    <field name="req_date" widget="date"/>
+                    <field name="payment_date"/>
+                    <field name="state"/>
+                    <field name="settlement_status"/>
+                    <field name="forwarded_by" invisible="1"/>
+                    <button class="btn-primary" type="object" name="get_records" attrs="{'invisible': [('settlement_status','!=', 'settle')]}" string="View Settlement"></button>
+                </tree>
+            </field>
+        </record>
+
+
+        <record model="ir.ui.view" id="kw_apply_petty_cash_form_report">
+            <field name="name">kw_adv_apply_petty_cash.form</field>
+            <field name="model">kw_advance_apply_petty_cash</field>
+            <field name="arch" type="xml">
+                <form delete='false' create='false' edit='0' duplicate='0'>
+                    <header>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,applied,forward,approve,forward_acc,hold,grant,reject"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box" groups="kw_advance_claim.group_kw_advance_claim_user">
+                            <button class="oe_stat_button " type="object" name="get_claim_record" icon="fa-inr fa-lg" style="float:right;height=60px;" attrs="{'invisible': ['|','|',('state','!=', 'release'),('check_settlement_user','=',False),('hide_btm_claim','=', True)]}" string="Claim Settlement">
+                            </button>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="hide_btn_cancel" invisible='1'/>
+                                <field name="show_ra_button" invisible='1'/>
+                                <field name="show_accounts_button" invisible='1'/>
+                                <field name="show_apply_btn" invisible='1'/>
+                                <field name="hide_btm_claim" invisible='1'/>
+                                <field name="name" invisible='1'/>
+                                <field name="user_emp_id" string='Employee Name' readonly='1' options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="department_id" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly='1'/>
+<!--                                <field name="division"  force_save="1" attrs="{'invisible': [('division','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly='1'/>-->
+<!--                                <field name="section"  force_save="1" attrs="{'invisible': [('section','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly='1'/>-->
+<!--                                <field name="practise"  force_save="1" attrs="{'invisible': [('practise','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly='1'/>-->
+                                <field name="job_id" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly='1'/>
+                                <field name="petty_cash_type" widget="radio" options="{'horizontal': true}" invisible="1"/>
+                                <field name="action_by" invisible='1'/>
+                                <field name="mail_sent" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="currency_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="advance_amt" string="Amount" widget="monetary"/>
+                                <field name="req_date" widget="date"/>
+                                <field name="category_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="claim_type_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="description"/>
+                                <field name="payment_date" attrs="{'invisible': [('payment_date','=', False)]}" readonly="1"/>
+                                <field name="check_settlement_user" invisible='1'/>
+
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="kw_apply_petty_cash_report_search_view" model="ir.ui.view">
+            <field name="name">kw_adv_apply_petty_cash.search</field>
+            <field name="model">kw_advance_apply_petty_cash</field>
+            <field name="arch" type="xml">
+                <search string="Fields">
+                        <field name="name"/>
+                        <field name="user_emp_id"/>
+                        <field name ='department_id'/>
+                        <field name="job_id"/>
+                        <field name="currency_id"/>
+                        <field name ='advance_amt'/>
+                        <field name ='create_date'/>
+                        <field name ='req_date'/>
+                        <field name="payment_date"/>
+                        <field name="state"/>
+                        <field name="settlement_status"/>
+                        <separator/>
+					    <filter string="This Year" domain="[('payment_date', 'like',context_today().strftime('%Y'))]" 
+                                name="current_year_required_date"/>
+                        <separator/>
+                        <filter string="Applied Date" name="create_date" date="create_date" />
+                        <filter string="Required Date" name="req_date" date="req_date"/>
+                        <filter string="Disbursed Date" name="payment_date" date="payment_date" />
+                        <separator/>
+                        <filter string="Draft" name="state" domain="[('state', '=','draft')]"/>
+                        <filter string="Applied" name="state" domain="[('state', '=','applied')]"/>
+                        <filter string="Approved" name="state" domain="[('state', '=','approve')]"/>
+                        <filter string="Hold" name="state" domain="[('state', '=','hold')]"/>
+                        <filter string="Grant" name="state" domain="[('state', '=','grant')]"/>
+                        <filter string="Cancel" name="state" domain="[('state', '=','cancel')]"/>
+                        <filter string="Reject" name="state" domain="[('state', '=','reject')]"/>
+                        <filter string="Release" name="state" domain="[('state', '=','release')]"/>
+                        <separator/>
+                        <filter string="Settled" name="settlement_status" domain="[('settlement_status', '=','settle')]"/>
+                        <filter string="Not Settled" name="settlement_status" domain="[('settlement_status', '=','notsettle')]"/>
+
+                    <group expand="1" string="Group By">
+                        <filter string="State" name="group_by_state" domain="[]" context="{'group_by':'state'}"/>
+                        <filter string="Designation" name="job_id" domain="[]" context="{'group_by':'job_id'}"/>
+                        <filter string="Department" name="department_id" domain="[]" context="{'group_by':'department_id'}"/>
+                    </group> 
+                </search>
+            </field>
+        </record>       
+
+
+        <!-- Claim Settlement report -->
+        <record model="ir.ui.view" id="kw_claim_settlement_tree_report">
+            <field name="name">kw_adv_claim_settlement.tree</field>
+            <field name="model">kw_advance_claim_settlement</field>
+            <field name="arch" type="xml">
+                <tree string="Petty Cash Settlement Report" default_order='id desc' create="false" import="false">
+                    <field name="name"/>
+                    <field name="petty_cash_id"/>
+                    <field name="empl_id"/>
+                    <field name="department_id"/>
+                    <field name="job_id"/>
+                    <field name="applied_date" widget="date"/>
+                    <field name="payment_date"/>
+                    <field name="pending_status"/>
+                    <field name="petty_cash_type" invisible="1"/>
+                    <field name="currency_id"/>
+                    <field name="net_total" string="Claim Amt." widget="monetary"/>
+                    <field name="state"/>
+                    <field name="forwarded_by" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_adv_claim_settlement_report_form">
+            <field name="name">kw_adv_claim_settlement.report.form</field>
+            <field name="model">kw_advance_claim_settlement</field>
+            <field name="arch" type="xml">
+                <form delete='false' create='false' edit='false'>
+                    <header>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,applied,forward,approve,forward_acc,cancel,hold,grant,reject"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="advance_taken" widget="radio" options="{'horizontal': true}" readonly="1" invisible="1"/>
+                                <field name="petty_cash_id" options="{'no_open': True,'no_create':True,'no_edit':True}"  attrs="{'invisible': [('advance_taken','=', 'no')]}" readonly="1"/>
+                                <field name="show_apply_btn" invisible='1'/>
+                                <field name="empl_id" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1"/>
+                                <field name="department_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+<!--                                <field name="division"  force_save="1" attrs="{'invisible': [('division','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>-->
+<!--                                <field name="section"  force_save="1" attrs="{'invisible': [('section','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>-->
+<!--                                <field name="practise"  force_save="1" attrs="{'invisible': [('practise','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>-->
+                                <field name="job_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="applied_date" widget="date" readonly="1"/>
+                                <field name="currency_id" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1"/>
+                                <field name="advance_amt" widget="monetary" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="petty_cash_type" invisible="1"/>
+                                <field name="mode_of_payment" required='1' attrs="{'readonly': [('state','in', ['grant','release'])]}"/>
+                                <field name="bank_id" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'invisible': [('mode_of_payment','=','cash')],'required':[('mode_of_payment','=','bank')],'readonly': [('state','=', 'release')]}"/>
+                                <field name="payment_date" string="Disbursed Date" attrs="{'invisible': [('state','not in', ['release'])]}" readonly="1"/>
+                                <field name="hide_btn_cancel" invisible='1'/>
+                                <field name="show_ra_button" invisible='1'/>
+                                <field name="show_accounts_button" invisible='1'/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page name="Claim_bill" string="Claim Details">
+                                <field name="claim_bill_line_ids" force_save="1">
+                                    <tree editable="bottom">
+                                        <field name="sr_no" invisible="1"/>
+                                        <field name="date" widget="date"/>
+                                        <field name="category_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="claim_type_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="description"/>
+                                        <field name="amount" widget="monetary"/>
+                                        <field name="upload_bill" filename="file_name" widget="FieldBinary"/>
+                                        <field name="file_name" invisible="1"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                        <group class="oe_subtotal_footer oe_right">
+                            <field name="amount_total" readonly="1" widget="monetary" attrs="{'invisible':[('advance_taken','=', 'no')]}"/>
+                            <field name="expenses" readonly="1" widget="monetary" attrs="{'invisible':[('advance_taken','=', 'no')]}"/>
+                            <field name="net_total" class="oe_subtotal_footer_separator" readonly="1" widget="monetary" string="Payble/Receivable" attrs="{'invisible':[('advance_taken','=', 'no')]}"/>
+                            <field name="total_expenditure" class="oe_subtotal_footer_separator" readonly="1" widget="monetary" string="Total Expenditure" attrs="{'invisible':[('advance_taken','=', 'yes')]}"/>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_apply_petty_cash_settelment_report_search_view" model="ir.ui.view">
+            <field name="name">kw_petty_cash_settelment.search</field>
+            <field name="model">kw_advance_claim_settlement</field>
+            <field name="arch" type="xml">
+                <search string="Fields">
+                    <field name="name"/>
+                    <field name="petty_cash_id"/>
+                    <field name="empl_id"/>
+                    <field name="department_id"/>
+                    <field name="job_id"/>
+                    <field name="applied_date"/>
+                    <field name="currency_id"/>
+                    <field name="net_total"/>
+                    <field name="state"/>
+                        <separator/>
+					    <filter string="This Year" domain="[('payment_date', 'like',context_today().strftime('%Y'))]" 
+                                name="current_year_required_date"/>
+                        <separator/>
+                        <filter string="Applied Date" name="create_date" date="create_date" />
+                        <separator/>
+                        <filter string="Draft" name="state" domain="[('state', '=','draft')]"/>
+                        <filter string="Applied" name="state" domain="[('state', '=','applied')]"/>
+                        <filter string="Approved" name="state" domain="[('state', '=','approve')]"/>
+                        <filter string="Hold" name="state" domain="[('state', '=','hold')]"/>
+                        <filter string="Grant" name="state" domain="[('state', '=','grant')]"/>
+                        <filter string="Cancel" name="state" domain="[('state', '=','cancel')]"/>
+                        <filter string="Reject" name="state" domain="[('state', '=','reject')]"/>
+                        <filter string="Release" name="state" domain="[('state', '=','release')]"/>
+
+                    <group expand="1" string="Group By">
+                        <filter string="State" name="group_by_state" domain="[]" context="{'group_by':'state'}"/>
+                        <filter string="Designation" name="job_id" domain="[]" context="{'group_by':'job_id'}"/>
+                        <filter string="Department" name="department_id" domain="[]" context="{'group_by':'department_id'}"/>
+                    </group> 
+                </search>
+            </field>
+        </record>       
+
+
+        <record model="ir.actions.act_window" id="kw_adv_claim_settlement_report_action">
+            <field name="name">Petty Cash Settlement Report</field>
+            <field name="res_model">kw_advance_claim_settlement</field>
+            <field name="binding_view_types">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('create_uid','=',uid)]</field>
+            <field name="context">{'default_hide_btn_cancel':True,'default_show_ra_button':False}</field>
+            <field name="search_view_id" ref="kw_advance_claim.kw_apply_petty_cash_settelment_report_search_view" />
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_claim_settlement_tree_report')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_adv_claim_settlement_report_form')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+					No records to show...
+                </p>
+            </field>
+        </record>
+
+        <!-- EMI Ledger(deduction lines) report -->
+        <record model="ir.ui.view" id="kw_emi_tree_report">
+            <field name="name">kw_deduction_line.tree</field>
+            <field name="model">kw_advance_deduction_line</field>
+            <field name="arch" type="xml">
+                <tree string="EMI Report Tree" default_order='create_date desc' create="false" import="false">
+                    <field name="employee_id"/>
+                    <field name="deduction_date"/>
+                    <field name="principal_amt"/>
+                    <field name="monthly_interest"/>
+                    <field name="amount"/>
+                    <field name="balance"/>
+                    <field name="tax_amount"/>
+                    <field name="pay_slip"/>
+                    <field name="payment_by"/>
+                    <field name="status"/>
+                </tree>
+            </field>
+        </record>
+        <record id="search_view_emi" model="ir.ui.view">
+            <field name="name">kw_deduction_line.search</field>
+            <field name="model">kw_advance_deduction_line</field>
+            <field name="arch" type="xml">
+                <search string="EMI">
+                    <field name="deduction_id"/>
+                    <field name="employee_id"/>
+                    <field name="deduction_date"/>
+                    <field name="principal_amt"/>
+                    <field name="monthly_interest"/>
+                    <field name="amount"/>
+                    <field name="balance"/>
+                    <field name="tax_amount"/>
+                    <field name="pay_slip"/>
+                    <field name="payment_by"/>
+                    <field name="status"/>
+
+                    <!-- <filter name="settlement_status" string="Settlement Status"/> -->
+                    <filter string="EMI Date" name="deduction_date"  date='deduction_date'/>
+                    <filter string="EMI Status - Paid" name="paid"  domain="[('status','=','paid')]"/>
+                    <filter string="EMI Status - Unpaid" name="draft"  domain="[('status','=','draft')]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Salary Advance Ref" name="group_by_deduction_id" context="{'group_by':'deduction_id'}"/>
+                        <filter string="Employee" name="group_by_employee_id" context="{'group_by':'employee_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+    </data>
+</odoo>

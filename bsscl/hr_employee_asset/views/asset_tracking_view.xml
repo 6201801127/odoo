@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="asset_tracking_form_view" model="ir.ui.view">
+            <field name="name">asset.tracking.form</field>
+            <field name="model">asset.tracking</field>
+            <field name="arch" type="xml"> 
+                <form string="Asset Allocation" duplicate="0">
+                    <header>
+                        <button name="submit_for_approval" type="object" states="draft" string="Submit For Approval" groups="hr_employee_asset.group_mro_manager" class="oe_highlight"/>
+                       <!--  <button name="approve" type="object" states="approve" string="Approve" class="oe_highlight" groups="hr_employee_asset.group_mro_manager"/> -->
+                        <!-- <button name="refuse" type="object" states="approve" string="Refuse" class="oe_highlight" groups="hr_employee_asset.group_mro_manager"/> -->
+                        <button name="confirm_allocation" states="confirm" type="object" string="Confirm Allocation" groups="bsscl_employee.deputy_com_id" class="oe_highlight"/>
+                        <button name="cancel_allocation" states="confirm" type="object" string="Cancel Allocation" groups="bsscl_employee.deputy_com_id" class="oe_highlight"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,allocated,confirm"/>
+                    </header>
+                        <sheet>
+                            <div class="oe_title">                           
+                                <h1>   
+                                    <field name="number" class="oe_inline" readonly="1"/>
+                                </h1>
+                            </div>
+                            <group>
+                                <group>
+                                    <field name="employee_id" required="1" on_change="onchange_employee_id(employee_id)" attrs="{'readonly':[('state', '!=', 'draft')]}" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                                    <field name="business_unit" invisible="1"/>
+                                    <field name="designation" readonly="1"/>
+                                    <field name="department" readonly="1"/>
+                                    <field name="role" invisible="1"/>
+                                    <field name="d_o_j" readonly="1"/> 
+                                </group>
+                                <group>
+                                    <field name="created_by" readonly="1"/>
+                                    <field name="request_date" readonly="1"/>
+                                    <field name="requested_by" readonly="1"/>
+                                    <field name="allocation_date" readonly="1"/>
+                                </group>    
+                            </group>
+                            <notebook>
+                                <page string="Asset" >
+                                    <field name="asset_tracking_ids" attrs="{'readonly':[('state','in',['confirm','allocated','cancel'])]}">
+                                        <tree string="Asset" editable="bottom">
+                                            <field name="asset_type" required="1" string="Asset Type"/>
+                                          <!--   <field name="asset_id" domain="[('state','=', 'available'),
+                                             ('asset_type','=', asset_type)]" 
+                                            attrs="{'required':[('parent.state', '=', 'confirm')]}"
+                                            /> -->
+
+                                            <field name="remarks"/>
+                                        </tree>
+                                    </field>
+                                </page> 
+                            </notebook>
+                            <separator string="Reason For Cancellation"  attrs="{'invisible':[('state','in', ['draft','allocated','cancel'])]}"/>
+                            <field name="cancellation" attrs="{'invisible':[('state','in', ['draft','allocated','cancel'])]}"/>   
+                        </sheet>
+                        <div class="oe_chatter">
+                            <field name="message_follower_ids" widget="mail_followers"/>
+                            <field name="message_ids" widget="mail_thread"/>
+                        </div>
+                </form>
+            </field>
+        </record>
+        <!-- Asset Allocation Graph view -->
+        <record model="ir.ui.view" id="view_asset_tracking_graph">
+            <field name="name">asset.tracking.graph</field>
+            <field name="model">asset.tracking</field>
+            <field name="priority">20</field>
+            <field name="arch" type="xml">
+                <graph string="Asset Allocation" type="pivot">
+                    <field name="employee_id" type="row"/>
+                    <field name="role" type="row"/>
+                </graph>
+            </field>
+        </record>
+
+        <record id="asset_tracking_tree_view" model="ir.ui.view">
+            <field name="name">asset.tracking.tree</field>
+            <field name="model">asset.tracking</field>
+            <field name="arch" type="xml"> 
+                <tree>
+                    <field name="number" string="Reference #"/>
+                    <field name="employee_id"/>
+                    <field name="designation"/>
+                    <field name="department"/>
+                    <field name="request_date"/>
+                    <field name="requested_by"/>
+                    <field name="allocation_date"/>
+                    <field name="state"/>
+                    <field name="business_unit" invisible="1"/>
+                    <field name="role" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_asset_tracking_system" model="ir.actions.act_window">
+            <field name="name">Asset Allocation</field>
+            <field name="res_model">asset.tracking</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="context">{'readonly_by_pass': True, 'default_project': 'active_id'}</field>
+            
+            <field name="view_mode">tree,form</field> 
+        </record>
+
+        <record id="action_asset_tracking_system_own" model="ir.actions.act_window">
+            <field name="name">Asset Allocation</field>
+            <field name="res_model">asset.tracking</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="context">{'readonly_by_pass': True, 'default_project': 'active_id', "create": False,"import": False,"delete": False,"edit": False}</field>
+            <field name="domain">[('employee_id.user_id.id', '=', uid)]</field>
+            <field name="view_mode">tree,form</field> 
+        </record>
+
+
+        <!-- <record id="view_asset_tracking_filter" model="ir.ui.view">
+            <field name="name">Asset Allocation</field>
+            <field name="model">asset.tracking</field>
+            <field name="arch" type="xml">
+                <search string="Asset Allocation">
+                    <field name="employee_id" string="Employee"/>
+                    <field name='state' string="Status"/>
+                    <filter string="Draft" name='draft' 
+                            domain="[('state','=', 'draft')]" />
+                    <filter string="Cancel" name="cancel" 
+                            domain="[('state','=', 'cancel')]" />
+                    <filter string="Allocated" name="allocated" 
+                            domain="[('state','=', 'allocated')]" />
+                    <group expand="0" string="Group By">
+                        <filter string="Employee"
+                                        domain="[]" context="{'group_by':'employee_id'}"/>
+                        <filter string="Status" 
+                                domain="[]"
+                                context="{'group_by':'state'}"/> 
+                    </group>
+                </search>
+            </field>
+        </record> -->
+
+        <record id="asset_tracking_change_form_view" model="ir.ui.view">
+            <field name="name">asset.tracking.change.form</field>
+            <field name="model">asset.tracking.change</field>
+            <field name="arch" type="xml"> 
+                <form string="Asset Change">
+                    <header>
+                        <button name="submit_for_approval" type="object" states="draft" string="Submit For Approval" class="oe_highlight"/>
+                        <button name="approve" type="object" states="approve" string="Approve" class="oe_highlight" groups="hr_employee_asset.group_mro_manager"/>
+                        <button name="refuse" type="object" states="approve" string="Refuse" class="oe_highlight" groups="hr_employee_asset.group_mro_manager"/>
+                        <button name="confirm_asset_change" type="object" states="confirm" string="Process Request" class="oe_highlight"/>
+                        <button name="cancel_asset_change" type="object" states="confirm" string="Cancel Request" class="oe_highlight"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,confirm"/>
+                    </header>
+                        <sheet>
+                            <div class="oe_title">                           
+                                <h1>   
+                                    <field name="number_change" class="oe_inline" readonly="1"/>
+                                </h1>
+                            </div>
+                            <group>
+                                <group>
+                                    <field name="employee_id" required="1" on_change="onchange_employee_id(employee_id)" attrs="{'readonly':[('state', 'not in', 'draft')]}"/>
+                                    <field name="employee_code" invisible="1"/>
+                                    <field name="business_unit" invisible="1"/>
+                                    <field name="designation"/>
+                                    <field name="department"/>
+                                    <field name="role" invisible="1"/>
+                                    <field name="date_of_join" invisible="1"/>
+                                </group>
+                                <group>
+                                    <!-- <field name="creation_date" readonly="True"/>
+                                    <field name="created_by" readonly="True"/> -->
+                                    <field name="allocation_date"/>
+                                    <field name="requested_by" readonly="1"/>
+                                    <field name="request_date" readonly="1"/>
+                                </group>    
+                            </group>
+                            <group>
+                                <field name="asset_change_ids" nolabel="1" attrs="{'readonly':[('state','=', 'allocated')]}">
+                                    <tree editable="top">
+                                        <field name="current_assets_id" required="1"/>
+                                        <field name="reason" required="1"/>
+                                        <field name="asset_name" domain="[('state','=', 'available')]" attrs="{'readonly':[('state', '=', 'draft')]}"/>
+                                        <field name="remarks"/>
+                                        <field name="state" invisible="1"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            <separator string="Reason For Cancellation"/>
+                            <field name="cancellation"/>
+                        </sheet>
+                        <div class="oe_chatter">
+                            <field name="message_follower_ids" widget="mail_followers"/>
+                            <field name="message_ids" widget="mail_thread"/>
+                        </div>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="asset_tracking_change_tree_view" model="ir.ui.view">
+            <field name="name">asset.tracking.change.tree</field>
+            <field name="model">asset.tracking.change</field>
+            <field name="arch" type="xml"> 
+                <tree>
+                    <field name="number_change" string="Reference #"/>
+                    <field name="employee_id"/>
+                    <field name="designation"/>
+                    <field name="department"/>
+                    <field name="request_date"/>
+                    <field name="requested_by"/>
+                    <field name="allocation_date"/>
+                    <field name="state"/>
+                    <field name="business_unit" invisible="1"/>
+                    <field name="role" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+       <!--  <record id="view_asset_change_filter" model="ir.ui.view">
+            <field name="name">Asset Change</field>
+            <field name="model">asset.tracking.change</field>
+            <field name="arch" type="xml">
+                <search string="Asset Change">
+                    <field name="employee_id" string="Employee"/>
+                    <field name='state' string="Status"/>
+                    <filter string="Draft" name='draft' 
+                            domain="[('state','=', 'draft')]" />
+                    <filter string="Cancel" name="cancel" 
+                            domain="[('state','=', 'cancel')]" />
+                    <filter string="Allocated" name="allocated" 
+                            domain="[('state','=', 'allocated')]" />
+                    <group expand="0" string="Group By">
+                        <filter string="Employee"
+                                        domain="[]" context="{'group_by':'employee_id'}"/>
+                        <filter string="Status" 
+                                domain="[]"
+                                context="{'group_by':'state'}"/> 
+                    </group>
+                </search>
+            </field>
+        </record>
+ -->
+        <!-- Asset Allocation Change Graph view -->
+        <record model="ir.ui.view" id="view_asset_tracking_change_graph">
+            <field name="name">asset.tracking.change.graph</field>
+            <field name="model">asset.tracking.change</field>
+            <field name="priority">20</field>
+            <field name="arch" type="xml">
+                <graph string="Asset Change" type="pivot">
+                    <field name="employee_id" type="row"/>
+                    <field name="state" type="row"/>
+                </graph>
+            </field>
+        </record>
+
+        <record id="action_asset_tracking_change_system" model="ir.actions.act_window">
+            <field name="name">Asset Change</field>
+            <field name="res_model">asset.tracking.change</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="context">{'readonly_by_pass': True, 'default_project': 'active_id'}</field>
+            
+            <field name="view_mode">tree,form,graph</field> 
+        </record>
+
+        <menuitem groups="hr_employee_asset.group_asset_user" id="menu_asset_tracking" name="Asset Tracking" parent="hr_employee_asset.menu_mro_root" sequence="12"/>
+        <menuitem groups="hr_employee_asset.group_asset_user" id="menu_asset_allocation_owm" name="My Asset Allocation" parent="menu_asset_tracking" sequence="1" action="action_asset_tracking_system_own"/> 
+
+        <menuitem groups="hr_employee_asset.group_mro_manager" id="menu_asset_allocation" name="Asset Allocation" parent="menu_asset_tracking" sequence="2"
+        action="action_asset_tracking_system"/>  
+
+        <!-- <menuitem groups="hr_employee_asset.group_mro_manager" id="menu_asset_chnage" name="Asset Change/Return"  parent="menu_asset_tracking" sequence="2"
+        action="action_asset_tracking_change_system"/> -->
+      
+    </data>
+</openerp>                               

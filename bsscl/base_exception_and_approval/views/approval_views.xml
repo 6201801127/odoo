@@ -1,0 +1,287 @@
+<odoo>
+  <data>
+        <record id="approvals_list_tree" model="ir.ui.view">
+            <field name="name">approvals.list.tree</field>
+            <field name="model">approvals.list</field>
+            <field name="arch" type="xml">
+               <tree  create="0" delete="0">
+                   <field name="name"/>
+                   <field name ='model_id'/>
+                   <field name="resource_ref" readonly="1"/>
+                   <field name ='date'/>
+                   <field name="approval_deadline"/>
+                   <field name ='user_id'/>
+                   <field name ='group_id'/>
+                   <field name="rule_id"/>
+                   <field name="state"/>
+                   <field name ='approvals_required'/>
+                   <field name ='approvals_done'/>
+                   <field name ='rejections_required'/>
+                   <field name ='rejections_done'/>
+               </tree>
+            </field>
+        </record>
+ <record id="approvals_list_form" model="ir.ui.view">
+		<field name="name">approvals.list.form</field>
+		<field name="model">approvals.list</field>
+		<field name="arch" type="xml">
+        <form string="Approval" create="0" delete="0" edit="0">
+            <header>
+                <field name="state" widget="statusbar"/>
+                <button name="approve" type="object" string="Approve" class="oe_highlight" attrs="{'invisible':[('state','!=','pending_approval')]}"/>
+                <button name="reject" type="object" string="Reject" attrs="{'invisible':[('state','!=','pending_approval')]}"/>
+            </header>
+            <style>
+                .o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 200px !important;}
+              </style>
+            <sheet>
+                <div class="oe-tittle">
+                     <h1>
+                         <field name="name" readonly="1" class="oe_inline"/>
+                     </h1>
+                </div>
+
+                <group>
+                    <group>
+                        <label for="model_name"/>
+                        <div class="oe-tittle">
+                        <field name ='model_name' placeholder="Model" class="oe_inline" readonly="1"/>
+                            - <field name="resource_ref" class="oe_inline"  readonly="1"/>
+                        </div>
+                        <field name="day_approval" readonly="1" invisible="1"/>
+                        <field name="branch_id" readonly="1" />
+                        <field name="approval_deadline" readonly="1"/>
+                        <field name="rule_id" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name ='user_id' readonly="1" invisible="1"/>
+                        <field name ='date' readonly="1"/>
+                        <field name ='group_id' invisible="1" readonly="1"/>
+                        <field name="condition_check"/>
+
+                    </group>
+                </group>
+                <notebook>
+                    <page string="Approval User Matrix / अनुमति उपयोगकर्ता मैट्रिक्स">
+                        <field name="approval_user_matrix_id" options="{'reload_on_button': True}">
+                            <tree editable="bottom">
+                                <field name="user" string="Approving User / अनुमति उपयोगकर्ता" readonly="1"/>
+                                <field name="accepted" string="Approved / स्वीकृत" readonly="1"/>
+                                <field name="rejected" string="Rejected / अस्वीकार कर दिया" readonly="1"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Other Information / अन्य सूचना">
+                        <group>
+                             <group>
+                                <field name ='approvals_required' string="Approvals Required / अनुमति आवश्यक" readonly="1"/>
+                                <field name ='rejections_required' string="Rejections Required / अस्वीकार आवश्यक" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name ='approvals_done' string="Approval Done / अनुमति किया गया" readonly="1"/>
+                                <field name ='rejections_done' string="Rejections Done / अस्वीकार किया गया" readonly="1"/>
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+
+            </sheet>
+           <div class="oe_chatter">
+                <field name="message_follower_ids" widget="mail_followers"/>
+                <field name="activity_ids" widget="mail_activity"/>
+                <field name="message_ids" widget="mail_thread"/>
+           </div>
+        </form>
+        </field>
+ </record>
+
+
+    <record id="approvals_list_search" model="ir.ui.view">
+        <field name="name">approvals.list.search</field>
+        <field name="model">approvals.list</field>
+        <field name="arch" type="xml">
+            <search string="Fields">
+
+                    <filter string="State" name="group_by_state" domain="[]" context="{'group_by':'state'}"/>
+                    <filter string="Model" name="group_by_model" domain="[]" context="{'group_by':'model_id'}"/>
+                    <filter string="Requesting User" name="group_by_r_user" domain="[]" context="{'group_by':'user_id'}"/>
+                    <filter string="Approval Matrix" name="group_by_matrix" domain="[]" context="{'group_by':'rule_id'}"/>
+                    <field name="name"/>
+                    <field name ='group_id'/>
+                    <field name="resource_ref"/>
+                    <field name ='date'/>
+                    <field name="approval_deadline"/>
+                    <field name="user_id"/>
+                    <field name ='approvals_required'/>
+                    <field name ='approvals_done'/>
+                    <field name ='rejections_required'/>
+                    <field name ='rejections_done'/>
+
+                    <separator/>
+                    <filter string="My Approval Request" name="my_approval_request" domain="[('user_id', '=', uid)]"/>
+                    <filter string="Approval For Me" name="approval_for_me" domain="[('approval_user_matrix_id.user', '=', uid)]"/>
+                    <separator/>
+                    <filter string="Late Activities" name="activities_overdue"
+                            domain="[('activity_ids.date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
+                            help="Show all opportunities for which the next action date is before today"/>
+                    <filter string="Today Activities" name="activities_today"
+                            domain="[('activity_ids.date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                    <filter string="Future Activities" name="activities_upcoming_all"
+                        domain="[('activity_ids.date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
+                    <separator/>
+                    <filter string="Pending Approval" name="pending_approval" domain="[('state','=','pending_approval')]"/>
+                    <filter string="Accepted Approval" name="accepted_approval" domain="[('state','=','approved')]"/>
+                    <filter string="Rejected Approval" name="rejected_approval" domain="[('state','=','rejected')]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Date" name="group_by_date" domain="[]" context="{'group_by':'date'}"/>
+                    <filter string="Approval Deadline" name="group_by_app_date" domain="[]" context="{'group_by':'approval_deadline'}"/>
+                    <filter string="Record" name="group_by_record" domain="[]" context="{'group_by':'resource_ref'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="approvals_list_kanban" model="ir.ui.view">
+        <field name="name">approvals.list.kanban</field>
+        <field name="model">approvals.list</field>
+         <field name="priority" eval="1"/>
+            <field name="arch" type="xml">
+                <kanban default_group_by="state" class="o_kanban_small_column o_opportunity_kanban" archivable="false" create="0" delete="0">
+                    <field name="name"/>
+                    <field name="color"/>
+                    <field name="model_id"/>
+                    <field name="resource_ref"/>
+                    <field name="rule_id"/>
+                    <field name="user_id"/>
+                    <field name ='date'/>
+                    <field name="activity_state" />
+                    <field name="activity_ids" />
+                    <field name="state" options='{"group_by_tooltip": {"requirements": "Description", "legend_priority": "Use of stars"}}'/>
+                    <progressbar field="activity_state" colors='{"planned": "success", "today": "warning", "overdue": "danger"}' sum_field="planned_revenue"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click">
+                                <div class="o_dropdown_kanban dropdown">
+
+                                    <a class="dropdown-toggle o-no-caret btn" role="button" data-toggle="dropdown" href="#" aria-label="Dropdown menu" title="Dropdown menu">
+                                        <span class="fa fa-ellipsis-v"/>
+                                    </a>
+                                    <div class="dropdown-menu" role="menu">
+                                        <t t-if="widget.editable"><a role="menuitem" type="edit" class="dropdown-item">Edit</a></t>
+                                        <t t-if="widget.deletable"><a role="menuitem" type="delete" class="dropdown-item">Delete</a></t>
+                                        <ul class="oe_kanban_colorpicker" data-field="color"/>
+                                    </div>
+                                </div>
+
+                                <div class="oe_kanban_content">
+
+                                    <div class="o_kanban_record_title">
+                                        <span style="font-size:20px;"><t t-esc="record.name.value"/></span> <t t-esc="record.rule_id.value"/>
+                                    </div>
+
+                                    <div>
+                                        <strong><t t-esc="record.model_id.value"/> - <t t-esc="record.resource_ref.value"/></strong>
+                                    </div>
+                                    <!-- <div>
+                                        Requesting User- <t t-esc="record.user_id.value"/>
+                                    </div> -->
+                                    <div>
+                                        <strong><t t-esc="record.date.value"/></strong>
+                                    </div>
+
+                                    <div>
+                                        <span class="pull-right text-right">
+                                            <field name="state" widget="kanban_label_selection"
+                                                   options="{'classes': {'pending_approval': 'primary','approved': 'success','rejected':'danger'}}"/>
+                                        </span>
+                                    </div>
+
+                                     <div class="o_kanban_record_bottom">
+                                        <div class="oe_kanban_bottom_left">
+                                            <field name="activity_ids" widget="kanban_activity"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+      <record id="approvals_list_calendar" model="ir.ui.view">
+            <field name="name">approvals.list.calendar</field>
+            <field name="model">approvals.list</field>
+
+            <field name="arch" type="xml">
+                <calendar string="Apprval List" date_start="activity_date_deadline" color="user_id">
+                    <field name="name"/>
+                    <field name="model_id"/>
+                </calendar>
+            </field>
+      </record>
+
+      <record id="approvals_list_pivot" model="ir.ui.view">
+            <field name="name">approvals.list.pivot</field>
+            <field name="model">approvals.list</field>
+            <field name="arch" type="xml">
+                <pivot string="Approval List" disable_linking="True">
+                    <field name="model_id" type="row"/>
+                    <field name="user_id" type="col"/>
+                    <field name="state" type="col"/>
+                    <field name ='approvals_required'/>
+                    <field name ='approvals_done'/>
+                    <field name ='rejections_required'/>
+                    <field name ='rejections_done'/>
+                </pivot>
+            </field>
+        </record>
+
+      <record id="approvals_list_graph" model="ir.ui.view">
+            <field name="name">approvals.list.graph</field>
+            <field name="model">approvals.list</field>
+            <field name="arch" type="xml">
+                <graph string="Approval List">
+                    <field name="model_id" type="col"/>
+                    <field name="state" type="row"/>
+                    <field name="user_id" type="row"/>
+                </graph>
+            </field>
+      </record>
+
+     <record id="approvals_list_activity" model="ir.ui.view">
+            <field name="name">approvals.list.graph</field>
+            <field name="model">approvals.list</field>
+            <field name="arch" type="xml">
+                <tree string="Next Activities" decoration-danger="activity_date_deadline and (activity_date_deadline &lt; current_date)" default_order="activity_date_deadline" create="0" delete="0" edit="0">
+                    <field name="name"/>
+                    <field name="model_id"/>
+                    <field name="activity_date_deadline"/>
+                    <field name="activity_type_id"/>
+                    <field name="activity_summary"/>
+                    <field name="state"/>
+                    <field name="approval_deadline"/>
+                </tree>
+            </field>
+        </record>
+
+
+    <record id="approvals_list_action" model="ir.actions.act_window">
+        <field name="name">Approvals / अनुमति</field>
+        <field name="res_model">approvals.list</field>
+        <field name="view_mode">kanban,tree,form,calendar,pivot,graph,activity</field>
+        <field name="view_ids" eval="[(5,0,0),
+                    (0,0,{'view_mode':'kanban','view_id': ref('approvals_list_kanban')}),
+                    (0,0,{'view_mode':'tree','view_id': ref('approvals_list_tree')}),
+                    (0,0,{'view_mode':'form', 'view_id': ref('approvals_list_form')}),
+                    (0,0,{'view_mode':'calendar', 'view_id': ref('approvals_list_calendar')}),
+                    (0,0,{'view_mode':'pivot', 'view_id': ref('approvals_list_pivot')}),
+                    (0,0,{'view_mode':'graph', 'view_id': ref('approvals_list_graph')}),
+                    (0,0,{'view_mode':'activity', 'view_id': ref('approvals_list_activity')}),
+                    ]"
+        />
+        <field name="domain">[('approval_user_matrix_id.user', '=', uid), ('condition_check', '=', True)]</field>
+        <field name="context">{'search_default_approval_for_me': 1,'search_default_pending_approval':1}</field>
+    </record>
+  </data>
+</odoo>

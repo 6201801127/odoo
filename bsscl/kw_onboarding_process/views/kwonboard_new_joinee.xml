@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="action_get_users" model="ir.actions.act_window">
+            <field name="name">Users</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.users</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+    (0, 0, {'view_mode': 'tree', 'view_id': ref('base.view_users_tree')}),
+    (0, 0, {'view_mode': 'form', 'view_id': ref('base.view_users_form')})]"/>
+            <field name="search_view_id" ref="base.view_users_search"/>
+            <field name="domain">[('new_joinee_id','=', active_id)]</field>
+            <field name="context">{'search_default_new_joinee_id': [active_id], 'default_new_joinee_id': active_id}</field>
+        </record>
+         
+        <record id="kwonboard_new_joinee_tree" model="ir.ui.view">
+            <field name="name">kwonboard_new_joinee.tree</field>
+            <field name="model">kwonboard_new_joinee</field>
+            <field name="arch" type="xml">
+                <tree string="New Joinee" create="false" delete="false">
+                    <field name="enrollment_id" invisible="1"/>
+                    <field name="fullname" />
+                    <field name="username" />
+                    <field name="dept_id" />
+                    <field name="division_id" />
+                    <field name="section_id" />
+                    <field name="practise_id" />
+                    <field name="designation" />
+                    <field name="tagged_to" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kwonboard_new_joinee_form" model="ir.ui.view">
+            <field name="name">kwonboard_new_joinee.form</field>
+            <field name="model">kwonboard_new_joinee</field>
+            <field name="arch" type="xml">
+                <form string="New Joinee" create="false" delete="false">
+                    <script>
+                        $(document).ready(function(){
+                            state =  $("[aria-pressed=true]").text().trim();
+                            if ( state === 'Authenticated' | state === 'Rejected'){
+                                $('.o_form_button_edit').hide();
+                            }
+                        });
+                    </script>
+                    <header>
+                        <button name="create_employee_user" type="object" string="Create Employee" class="btn-success" attrs="{'invisible': ['|', ('state','in',['authenticated','rejected']),('emp_user_created','=',True)]}" groups="kw_onboarding.group_kw_onboarding_manager" confirm="Are you sure, you want to create employee?"/>
+                        <!-- <button name="create_employee" type="object" string="Create Employee" class="btn-success" groups="kw_onboarding.group_kw_onboarding_manager" attrs="{'invisible': [('state','in',['authenticated','rejected'])]}" confirm="Are you sure, you want create employee?"/> -->
+                        <button name="new_joinee_cancel" type="object" string="Reject" states="draft" class="btn-danger" groups="kw_onboarding.group_kw_onboarding_manager" confirm="Are you sure, you want to reject?"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,authenticated"/>
+                        <field name="emp_user_created" invisible="1" />
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <!-- <button class="oe_stat_button"
+                                icon="fa-user-o"
+                                name="%(action_get_users)d"
+                                attrs="{'invisible': [('emp_user_created','=',False)]}"
+                                type="action">
+                                <field name="user_count" widget="statinfo" string="Application Access"/>
+                            </button> -->
+                        </div>
+                        <div id="o_employee_container">
+                            <div id="o_employee_main">
+                                <!-- <field name="image" widget='image' class="oe_avatar" options='{"preview_image":"image_medium"}'/> --> <!-- force_save="1" -->
+                                <!-- <div class="oe_title">
+                                    <label for="fullname" class="oe_edit_only"/>
+                                    <h1>
+                                        
+                                    </h1>
+                                </div> -->
+                                
+                                <group string="Account Information">
+                                    <group>
+                                        <field name="enrollment_id" options="{'no_open': True,'no_create':True,'no_edit':True}" required="True" invisible="1"/>
+                                        <field name="employee_code" invisible="1"/>
+                                        <field name="fullname" required="1"/>
+                                        <field name="username" attrs="{'required':['|','|','|',('employement_type_code','in',['P','S','C','R']),('need_sync','=',True),('direct_indirect','=','1'),('need_user','=',True)]}"/>
+                                        <field name="domain_name" attrs="{'required':['|','|',('employement_type_code','in',['P','S','C','R']),('need_sync','=',True),('direct_indirect','=','1')]}"/>
+                                        <field name="email_id" attrs="{'required':['|','|','|',('employement_type_code','in',['P','S','C','R']),('need_sync','=',True),('direct_indirect','=','1'),('need_user','=',True)]}"/>
+                                        <field name="dept_id" options="{'no_open': True,'no_create':True,'no_edit':True}" required="1"/>
+                                        <field name="division_id" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs= "{'invisible': [('dept_id', '=', False)]}" domain="[('parent_id','=', dept_id)]" required="1"/>
+                                        <field name="section_id" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs= "{'invisible': [('division_id', '=', False)]}" domain="[('parent_id','=', division_id)]"/>
+                                        <field name="practise_id" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs= "{'invisible': [('section_id', '=', False)]}" domain="[('parent_id','=', section_id)]"/>
+                                        <field name="designation" options="{'no_open': True,'no_create':True,'no_edit':True}" required="1"/>
+                                        <field name="tagged_to" options="{'no_open': True,'no_create':True,'no_edit':True}" invisible="1"/>
+                                        <field name="proj_bill_amnt" invisible="1"/>
+                                        <field name="func_area" options="{'no_open': True,'no_create':True,'no_edit':True}" invisible="1"/>
+                                        <field name="job_loc_name" options="{'no_open': True,'no_create':True,'no_edit':True}" invisible="1"/>
+                                        <field name="office_unit" options="{'no_open': True,'no_create':True,'no_edit':True}" required="1"/>
+                                        <!-- <field name="job_profile" /> -->
+                                        <field name="job_position" invisible="1"/>
+                                        <field name="work_location_id" options="{'no_open': True,'no_create':True,'no_edit':True}" invisible="1"/>
+                                        <field name="worklocation_id" options="{'no_open': True,'no_create':True,'no_edit':True}" required="1"/>
+                                        <field name="location" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="client_loc_id" attrs="{'invisible':[('location','!=','onsite')]}" options="{'no_open': True,'no_create':True,'no_edit':True}" domain="[('is_company','=',True)]" invisible="1"/>
+                                        <field name="client_location" attrs="{'invisible':[('location','!=','onsite')], 'required': [('location','=','onsite')]}"/>
+                                        <field name="shift" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'required':['|','|',('employement_type_code','in',['P','S','C','R']),('need_sync','=',True),('direct_indirect','=','1')]}"/>
+                                    </group>
+                                    <group>
+                                        <field name="need_sync" help="Need this record to be created in portal?"/>
+                                        <field name="need_user" help="Need user id for this candidate?"/>
+                                        <field name="grade" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                            attrs="{'required':['|','|',('employement_type_code','in',['P','S','C','R']),('need_sync','=',True),('direct_indirect','=','1')]}"/>
+                                        <field name="band" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                            attrs="{'required':['|','|',('employement_type_code','in',['P','S','C','R']),('need_sync','=',True),('direct_indirect','=','1')]}"/>
+                                        
+                                        <field name="join_date" attrs="{'required':['|',('employement_type_code','in',['P','S','C','R','O']),('need_sync','=',True)]}" />
+                                        <field name="on_probation"/> 
+                                        <field name="prob_compl_date"  attrs="{'required':[('on_probation','=',True)],
+                                            'invisible':[('on_probation','=',False)]}"/>
+                                        <field name="confirm_status" widget="radio" options="{'horizontal': true}" invisible="1"/>
+                                        <field name="id_card" widget="radio" options="{'horizontal': true}" invisible="1"/>
+                                        <!-- <field name="emp_role" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1" attrs="{'required':['|',('employement_type_code','in',['P','S','C','R']),('need_sync','=',True)]}"/> -->
+                                        <field name="emp_role" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1" attrs="{'required':[('need_sync','=',True)]}"/>
+                                        <!-- <field name="emp_category" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1" attrs="{'required':['|',('employement_type_code','in',['P','S','C','R']),('need_sync','=',True)]}"/> -->
+                                        <field name="emp_category" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1" attrs="{'required':[('need_sync','=',True)]}"/>
+                                        <!-- <field name="employ_type" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'required':['|',('employement_type_code','in',['P','S','C','R','O']),('need_sync','=',True)]}" readonly="1"/> -->
+                                        <field name="employ_type" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'required':[('need_sync','=',True)]}" readonly="1"/>
+                                        <field name="employement_type_code" invisible="1"/>
+                                        <field name="direct_indirect" widget='radio' options="{'horizontal': true}" attrs="{'invisible':[('employement_type_code','!=','O')]}" readonly="1"/>
+                                        <field name="project_id" attrs="{'invisible':[('employement_type_code','=','P')]}" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1"/>
+                                        <!-- <field name="start_dt" attrs="{'invisible':[('employement_type_code', 'not in', ['S','C','O',False])], 'required':[('employement_type_code', 'in', ['S','C','O',False])]}" readonly="1"/> -->
+                                        <field name="start_dt" attrs="{'invisible':[('employement_type_code', 'not in', ['S','C','O',False])]}" readonly="1"/>
+                                        <!-- <field name="end_dt" attrs="{'invisible':[('employement_type_code', 'not in', ['S','C','O',False])], 'required':[('employement_type_code', 'in', ['S','C','O',False])]}" readonly="1"/> -->
+                                        <field name="end_dt" attrs="{'invisible':[('employement_type_code', 'not in', ['S','C','O',False])]}" readonly="1"/>
+                                        <field name="card_no" readonly="1"/>
+                                        <field name="image" widget='image' class="oe_avatar" options='{"preview_image":"image"}' string="Profile Photo" required="1"/>
+                                        <field name="image_url" invisible="1"/>
+                                        <field name="super_admin_access" invisible="1"/>
+                                    </group>
+                                </group>
+
+                                <group>
+                                    <group string="Personnel Information">
+                                        <field name="religion" options="{'no_open': True,'no_create':True,'no_edit':True}" required="1"/>
+                                        <field name="dob" required="1"/>
+                                        <field name="gender" required="1"/>
+                                        <field name="marital_stat" options="{'no_open': True,'no_create':True,'no_edit':True}" required="1"/>
+                                        <field name="marriage_date" attrs="{'invisible': ['|',('marital_stat','=', False),('marital_ref','!=','M')]}"/> 
+                                        <field name="source_id" options="{'no_open': True,'no_create':True,'no_edit':True}" required="1"/>
+                                        <field name="reference_walkindrive"  attrs="{'invisible':[('code_ref','!=','walkindrive')]}"/>
+                                        <field name="reference_print_media"  attrs="{'invisible':[('code_ref','!=','printmedia')]}"/>
+                                        <field name="reference_job_fair"  attrs="{'invisible':[('code_ref','!=','jobfair')]}"/>
+                                        <field name="employee_referred"  attrs="{'invisible':[('code_ref','!=','employee')]}"/>
+                                        <field name="media_id" attrs="{'invisible':[('code_ref','!=','social')]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="institute_id" attrs="{'invisible':[('code_ref','!=','institute')]}" domain="[('institute','=',True)]" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="consultancy_id" attrs="{'invisible':[('code_ref','!=','consultancy')]}" domain="[('consultancy','=',True)]" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="jportal_id" attrs="{'invisible':[('code_ref','!=','job')]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="service_partner_id" attrs="{'invisible':[('code_ref','!=','partners')]}" domain="[('service_partner','=',True)]" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="reference" attrs="{'invisible':['|', ('code_ref','in',['job','consultancy','social','employee','institute','partners','website','career','walkindrive','printmedia','jobfair']),('code_ref','=', False)]}"/>
+                                        <field name="code_ref" invisible="1"/>
+                                        <field name="marital_ref" invisible="1"/>
+                                    </group>
+                                    <group string="Attendance Information">
+                                        <field name="enable_attendance" widget="radio" options="{'horizontal': true}"/>
+                                    </group>
+                                </group>
+
+                                <group>
+                                    <group string="Payroll Information">
+                                        <field name="enable_payroll" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="enable_epf" widget="radio" options="{'horizontal': true}" attrs="{'invisible':[('enable_payroll','!=','yes')]}"/>
+                                        <field name="enable_gratuity" widget="radio" options="{'horizontal': true}" attrs="{'invisible':[('enable_payroll','!=','yes')]}"/>
+                                    </group>
+                                    <group string="Salary Information (CTC)">
+                                        <field name="at_join_time" required="1"/>
+                                        <field name="current" />
+                                    </group>
+                                </group>
+                                
+                                <group>
+                                    <group string="Basic Amount" attrs="{'invisible':[('enable_payroll','!=','yes')]}">
+                                        <field name="basic_at_join_time" force_save="1" attrs="{'required':[('enable_payroll','=','yes')]}"/>
+                                        <field name="current_basic" required="1"/>
+                                        <field name="hra" attrs="{'required':[('enable_payroll','=','yes')]}"/>
+                                        <field name="conveyance" attrs="{'required':[('enable_payroll','=','yes')]}"/>
+                                        <field name="medical_reimb" attrs="{'required':[('enable_payroll','=','yes')]}"/>
+                                    </group>
+                                    <group string="Allowance Information at Joining Time" attrs="{'invisible':[('enable_payroll','!=','yes')]}">
+                                        <field name="transport" attrs="{'required':[('enable_payroll','=','yes')]}"/>
+                                        <field name="productivity" attrs="{'required':[('enable_payroll','=','yes')]}"/>
+                                        <field name="commitment" attrs="{'required':[('enable_payroll','=','yes')]}"/>
+                                    </group>
+                                </group>
+
+                                <group>
+                                    <group string="Bank Information" attrs="{'invisible':[('enable_payroll','!=','yes')]}">
+                                        <field name="bank_account"/>
+                                        <field name="bank_id" options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                                    </group>
+                                    <group string="Consolidate Amount" attrs="{'invisible':[('enable_payroll','=','yes')]}">
+                                        <field name="cosolid_amnt" attrs="{'required':[('enable_payroll','!=','yes')]}"/>
+                                    </group>
+                                </group>
+
+                                <group>
+                                    <group string="Reporting Authority">
+                                        <field name="admin_auth" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'required':['|','|',('employement_type_code','in',['P','S','C','R']),('need_sync','=',True),('direct_indirect','=','1')]}"/>
+                                        <field name="func_auth" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'required':['|','|',('employement_type_code','in',['P','S','C','R']),('need_sync','=',True),('direct_indirect','=','1')]}"/>
+                                    </group>
+                                </group>
+                                
+                            </div>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="kwonboard_new_joinee_view_search" model="ir.ui.view">
+            <field name="name">kwonboard_new_joinee.search</field>
+            <field name="model">kwonboard_new_joinee</field>
+            <field name="arch" type="xml">
+                <search string="Search">
+                    <field name="fullname" string="Candidate"/>
+                    <group expand="0" string="Group By">
+                        <filter name="state" string="Status" context="{'group_by': 'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="kwonboard_new_joinee_action" model="ir.actions.act_window">
+            <field name="name">New Joinee</field>
+            <field name="res_model">kwonboard_new_joinee</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','not in', ['authenticated','rejected'])]</field>
+            <field name="view_ids" eval="[(5, 0, 0),(0, 0, {'view_mode': 'tree', 'view_id': ref('kwonboard_new_joinee_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('kwonboard_new_joinee_form')})]"/>
+        </record>
+
+        <record model="ir.actions.act_window" id="kwonboard_new_joinee_report_action_window">
+            <field name="name">Onboarding Report</field>
+            <field name="res_model">kwonboard_new_joinee</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','!=','draft')]</field>
+            <field name="context">{"create": False,"edit": False}</field>
+            <field name="search_view_id" ref="kwonboard_new_joinee_view_search"/>
+        </record>
+    </data>
+</odoo>

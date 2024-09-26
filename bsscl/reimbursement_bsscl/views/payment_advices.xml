@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="reimbursement_payment_advice_form_view" model="ir.ui.view">
+        <field name="name">reimbursement.payment.advice.form</field>
+        <field name="model">reimbursement.payment.advice</field>
+        <field name="arch" type="xml">
+            <form string="Payment Advice" create="0">
+                <header>
+                    <button name="action_to_approve" string="Submit" class="oe_highlight" type="object" states="draft"/>
+                    <button name="action_confirm" string="Confirm" class="oe_highlight" type="object" states="to_approve"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,to_approve,confirm"/>
+                </header>
+                <sheet>
+                    <group>
+                        <label for="name" class="oe_edit_only" string="Name"/>
+                        <h2><field name="name"
+                                    attrs="{'readonly':[('state', '=', 'confirm')]}"/></h2>
+                        <newline/>
+                        <label for="date" class="oe_edit_only"/>
+                        <div><field name="date" readonly="1"/></div>
+                        <newline/>
+                        <group>
+                          <field name="bank_id" options="{'no_create_edit': True,'no_open': True}"
+                                    attrs="{'readonly':[('state', '=', 'confirm')]}"
+                                    invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook colspan="4">
+                        <page string="Payment Lines">
+                            <field name="line_ids" colspan="4" nolabel="1" readonly="1">
+                                <tree string="Payment Lines" editable="bottom">
+                                    <field name="employee_id" 
+                                            options="{'no_create_edit': True,'no_open': True}"/>
+                                    <field name="bank_name"/>
+                                    <field name="account_no"/>
+                                    <field name="ifsc_code"/>
+                                    <field name="amount"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Other Information">
+                                <group colspan="4" col="6">
+                                    <field name="company_id" groups="base.group_multi_company" 
+                                        options="{'no_create_edit': True,'no_open': True}"
+                                         attrs="{'readonly':[('state', '=', 'confirm')]}"/>
+                                    <field name="cheque_no"
+                                            attrs="{'readonly':[('state', '=', 'confirm')]}"/>
+                                    <field name="cheque_date" 
+                                            attrs="{'readonly':[('state', '=', 'confirm')]}"/>
+                                <newline/>
+                                </group>
+                                <separator colspan="4" string="Letter Details"/>
+                                <field name="note" colspan="4" nolabel="1"
+                                        attrs="{'readonly':[('state', '=', 'confirm')]}"/>
+                            </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="reimbursement_payment_advice_tree_view" model="ir.ui.view">
+        <field name="name">reimbursement.payment.advice.tree</field>
+        <field name="model">reimbursement.payment.advice</field>
+        <field name="arch" type="xml">
+            <tree string="Payment Advice" create="0">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="company_id"/>
+                <field name="bank_id" invisible="1"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_payment_advice" model="ir.actions.act_window">
+        <field name="name">Payment Advice</field>
+        <field name="res_model">reimbursement.payment.advice</field>
+        
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_reimbursement_payment_advice"
+                action="action_payment_advice"
+                parent="reimbursement_menu_id" sequence="2" groups="reimbursement_bsscl.group_finance_authority"/>
+
+    <record model="ir.ui.menu" id="menu_reimbursement_payment_advice">
+        <field name="groups_id" eval="[(3, ref('reimbursement_bsscl.group_approving_authority'))]"/>
+    </record>
+
+    <record id="action_create_payment_advices" model="ir.actions.server">
+            <field name="name">Create Payment Advices</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="reimbursement_bsscl.model_reimbursement"/>
+            <field name="binding_model_id" ref="reimbursement_bsscl.model_reimbursement"/>
+            <field name="state">code</field>
+            <field name="code">records.create_payment_advices()</field>
+        </record>
+
+</odoo>

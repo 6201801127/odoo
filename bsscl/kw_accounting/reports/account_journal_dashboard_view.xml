@@ -1,0 +1,98 @@
+<odoo>
+    <template id="base.onboarding_container">
+        <div class="modal o_onboarding_modal o_technical_modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Remove Configuration Tips</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-label="Close">&amp;times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Do you want to remove this configuration panel?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <a type="action" class="btn btn-primary" data-dismiss="modal"
+                        data-toggle="collapse" href=".o_onboarding_container"
+                        t-att-data-model="close_model" t-att-data-method="close_method">
+                            Remove
+                        </a>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Discard</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="o_onboarding_container collapse show">
+            <div t-att-class="'o_onboarding ' + ('o_onboarding_completed ' if steps_completed else ' ') + classes"
+                 t-att-style="'background-image:url(' + bg_image + ')'">
+                <div class="o_onboarding_wrap">
+                    <!-- <a href="#" data-toggle="modal" data-target=".o_onboarding_modal"
+                       class="float-right o_onboarding_btn_close">
+                        <i class="fa fa-times" title="Close the onboarding panel" />
+                    </a> -->
+                    <div class="o_onboarding_steps">
+                        <t t-raw="0" />
+                    </div>
+                    <!-- <div t-att-class="'o_onboarding_completed_message text-center' + (' o_onboarding_steps_done' if state.get('onboarding_state') in ('done', 'just_done') else '') + (' o_onboarding_steps_just_done' if state.get('onboarding_state') == 'just_done' else '')">
+                        <i class="fa fa-check text-success mr8" />
+                        <span class="h3 mr16">
+                            <t t-if="text_completed" t-esc="text_completed" />
+                            <t t-else="">Nice work! Your configuration is done.</t>
+                        </span>
+                        <div class="btn btn-primary btn-sm">
+                            <a type="action" class="btn btn-primary" data-toggle="collapse" href=".o_onboarding_container"
+                            t-att-data-model="close_model" t-att-data-method="close_method">
+                                Close
+                            </a>
+                        </div>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+    </template>
+    <record model="ir.ui.view" id="account_reports_journal_dashboard_kanban_view">
+        <field name="name">account.journal.dashboard.kanban.reports</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="account.account_journal_dashboard_kanban_view" />
+        <field name="arch" type="xml">
+
+
+            <xpath expr="//div[hasclass('o_kanban_manage_reports')]" position="inside">
+                <div t-if="journal_type == 'sale'">
+                    <a type="action" name="%(action_account_report_ar)d">Aged Receivables</a>
+                    <a type="action" name="%(action_view_list_customer_statements)d">Follow-up reports</a>
+                </div>
+                <div t-if="journal_type == 'purchase'">
+                    <a type="action" name="%(action_account_report_ap)d">Aged Payables</a>
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Only replace the label if in the group ; groups cannot be placed on a xpath tag -->
+    <record model="ir.ui.view" id="account_reports_journal_dashboard_kanban_view_account_manager">
+        <field name="name">account.journal.dashboard.kanban.reports</field>
+        <field name="model">account.journal</field>
+        <field name="groups_id" eval="[(4,ref('account.group_account_manager'))]"/>
+        <field name="inherit_id" ref="account.account_journal_dashboard_kanban_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='latest_statement']" position="replace">
+                <div name="latest_statement" class="row">
+                    <div class="col-7">
+                        <span title="Latest Statement">Latest Statement</span>
+                    </div>
+                    <div class="col-5 text-right">
+                        <span><t t-esc="dashboard.last_balance"/></span>
+                    </div>
+                </div><div class="row" t-if="dashboard.difference">
+
+                    <div class="col-5 text-right">
+                        <span><t t-esc="dashboard.difference"/></span>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

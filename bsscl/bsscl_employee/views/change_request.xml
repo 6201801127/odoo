@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="view_change_request_tree">
+            <field name="name">view.change.request.tree</field>
+            <field name="model">change.request</field>
+            <field name="arch" type="xml">
+                <tree >
+                   
+                    <field name="employee_id" />
+                    <field name="job_id"/>
+                    <field name="department_id" />
+                    <field name="country_id" string="Nationality (Country) / राष्ट्रीयता (देश)"/>
+                    <field name="applied_on"/>
+                    <field name="status" />
+                    <field name="aadhar_no" required="False" string="Aadhar Card No. / आधार कार्ड संख्या"/>
+                    <field name="aadhar_upload" filename="aadhar_upload_filename" string="Upload(Aadhar) / अपलोड (आधार)"/>
+                    <field name="applied_on"/>
+                    <field name="employee_type"/>
+                    <field name="work_location"/>
+                    <field name="work_email"/>
+                    <field name="mobile_phone"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_change_request_form">
+            <field name="name">view.change.request.form</field>
+            <field name="model">change.request</field>
+            <field name="arch" type="xml">
+                <form string="VRS" version="9.0">
+                    <header>
+						<button name="apply_change" string="Apply" type="object" class="oe_highlight" attrs="{'invisible':[('status','not in','draft')]}" />
+                        <!-- <button name="approve_change" string="Approve" type="object" class="oe_highlight" groups="bsscl_employee.deputy_com_id" attrs="{'invisible':[('status','not in','applied')]}" /> -->
+						<button name="confirm_change" string="Confirm" type="object" class="oe_highlight" attrs="{'invisible':['|',('check_user','!=',False),('status','in',['draft','confirm','reject'])]}" />
+						<field name="status" widget="statusbar" statusbar_visible="draft,applied,confirm" />
+						<button name="%(reject_change_request)d" string="Reject" type="action" class="oe_highlight" attrs="{'invisible':['|',('check_user','!=',False),('status','in',['draft','confirm','reject'])]}"  />
+						<!-- <button name="reject_change" string="Reject" type="object" class="oe_highlight" attrs="{'invisible':['|',('check_user','!=',False),('status','in',['draft','confirm'])]}"  /> -->
+
+					</header>
+                    <sheet>
+                        <style>
+							.o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 180px !important;}
+						</style>
+						<div class="oe-tittle">
+							<h1 style="color:#3aadaa">
+							Applicant Information
+                         </h1>
+						</div>
+						
+                        <group>
+                            <group>
+                                
+                                <field name="employee_id"/>
+                                <field name="job_id"  attrs="{'readonly':[('status','in',['applied','approved','confirm','reject'])]}" options="{'no_create':True,'no_edit':True,'no_open':True}"/>
+                                <field name="department_id" options="{'no_create':True,'no_edit':True,'no_open':True}" attrs="{'readonly':[('status','in',['confirm','reject'])]}"/>
+                                <field name="country_id" string="Nationality (Country) / राष्ट्रीयता (देश)" options="{'no_create':True,'no_edit':True,'no_open':True}" attrs="{'readonly':[('status','in',['applied','approved','confirm','reject'])]}"/>
+                                <field name="aadhar_no" required="False" string="Aadhar Card No. / आधार कार्ड संख्या" attrs="{'readonly':[('status','in',['applied','approved','confirm','reject'])]}"/>
+                                <!-- <field name="aadhar_upload" attrs="{'readonly':[('status','in',['applied','approved','confirm','reject'])]}" filename="aadhar_upload_filename" string="Upload(Aadhar) / अपलोड (आधार)"/> -->
+                        
+
+								
+								<label for="aadhar_upload" />
+                            <div>
+                                <field name="aadhar_upload" attrs="{'readonly':[('status','in',['applied','approved','confirm','reject'])]}" filename="aadhar_upload_filename" string="Upload(Aadhar) / अपलोड (आधार)"/>
+                                <p style="color:red;">(Only .jpeg, .jpg, .png, .pdf, .doc, .docx format are allowed.Maximum file size is 2 MB)</p>
+                            </div>
+                            <field name="check_user" invisible='1' />
+
+                            </group>
+                            <group>
+                                <field name="applied_on" attrs="{'readonly':[('status','in',['draft','confirm','reject'])]}"/>
+                                <field name="employee_type" attrs="{'readonly':[('status','in',['confirm','reject'])]}"/>
+                                <field name="work_location" attrs="{'readonly':[('status','in',['confirm','reject'])]}"/>
+                                <field name="work_email" attrs="{'readonly':[('status','in',['confirm','reject'])]}"/>
+                                <field name="mobile_phone" attrs="{'readonly':[('status','in',['applied','approved','confirm','reject'])]}"/>
+                            </group>
+                            <group>
+                                <separator/>
+                                <field name="remarks"  attrs="{'readonly':[('status','in', ['draft','confirm','reject'])]}"/>
+                                <field name="reason" attrs="{'invisible':[('status','not in', 'reject')]}" readonly="1" string ="Reason Of Cancellation/Rejection / रद्द करने का कारण"/>
+                            </group>
+                            <group>
+                            </group>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" groups="base.group_user"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+        
+        <!-- <record id="action_to_approve_action" model="ir.actions.act_window">
+            <field name="name">Change Request</field>
+            <field name="res_model">change.request</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'create':False,'delete':True}</field>
+            <field name="domain">[('status', '=', 'applied')]</field>
+
+        </record> -->
+        <record id="action_to_approve_action_by_com" model="ir.actions.act_window">
+            <field name="name">Change Request</field>
+            <field name="res_model">change.request</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','=','apply'),('employee_id.parent_id.user_id','=',uid)]</field>
+
+            <field name="context">{'create':False,'delete':True}</field>
+            <field name="domain">[('status', '=', 'applied')]</field>
+
+        </record>
+        <!-- <record id="action_change_request_action" model="ir.actions.act_window">
+            <field name="name">Change Request</field>
+            <field name="res_model">change.request</field>
+            <field name="view_mode">form</field>
+            <field name="context">{'edit':True,'delete':True}</field>
+            <field name="domain">[('employee_id.id', '=', active_id)]</field>
+
+        </record> -->
+        
+        <!-- Action for to approve menu -->
+
+         <!-- <record id="action_changerequest_user" model="ir.actions.act_window">
+            <field name="name">Change Request</field>
+            <field name="res_model">change.request</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'create':False,'delete':True}</field>
+             <field name="domain">[('employee_id.user_id.id', '=', uid)]</field>
+
+        </record> -->
+
+        <menuitem id="to_approve_change_request" name="Change Request / अनुरोध बदलो" parent="bsscl_employee.admin_activity" groups="bsscl_employee.group_hr_ra"  sequence="1"/>
+        <!-- <menuitem id="to_approve" name="To Approve / अनुमोदन करना" action="action_to_approve_action" parent="to_approve_change_request" groups="bsscl_employee.deputy_com_id"  sequence="1"/> -->
+        <menuitem id="to_approve_by_com" name="To Confirm/ अनुमोदन करना" action="action_to_approve_action_by_com" parent="to_approve_change_request" groups="bsscl_employee.group_hr_ra"  sequence="1"/>
+
+
+
+
+
+
+        <record model="ir.ui.view" id="view_legal_issue_tree">
+            <field name="name">legal.issue.tree</field>
+            <field name="model">legal.issue</field>
+            <field name="arch" type="xml">
+                <tree >
+
+                    <field name="employee_id" />
+                    <field name="description" />
+
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_legal_issue_form">
+            <field name="name">legal.issue.form</field>
+            <field name="model">legal.issue</field>
+            <field name="arch" type="xml">
+                <form string="VRS" version="9.0" duplicate="false">
+                   <script >
+                        $('textarea[name="description"]').on("input", function() {
+                            $('#dscr').show()
+                            var currentLength = $(this).val().length;
+                            $('textarea[name="description"]').attr('maxlength',500);
+                            var textlen = 500 - $(this).val().length;
+                            $('#dscr').text(textlen + " Left");
+                        });
+                        
+                        $('#dscr').text() == '500 Left'?$('#dscr').hide():$('#dscr').show()
+                    </script>
+                    <sheet>
+                        <group>
+                            <group>
+
+                                <field name="employee_id" readonly="1"/>
+                                <label for="description"/>
+                                <div>
+                                    <field name="description" required="1"/>
+                                    <p id="dscr"></p>
+                                </div>
+                            </group>
+
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" groups="base.group_user"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_legal_issue_action" model="ir.actions.act_window">
+            <field name="name">Legal Issue</field>
+            <field name="res_model">legal.issue</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'edit':True,'delete':True}</field>
+            <field name="domain">[('employee_id.id', '=', active_id)]</field>
+
+        </record>
+
+
+    </data>
+</odoo>

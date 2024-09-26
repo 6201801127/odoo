@@ -1,0 +1,172 @@
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="ks_dashboard_ninja.board_form">
+            <field name="name">ks_dashboard_ninja View</field>
+            <field name="model">ks_dashboard_ninja.board</field>
+            <field name="arch" type="xml">
+                <form string="Dashboards">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="ks_dashboard_state" invisible="1"/>
+                                <field name="name" attrs="{'readonly':[('ks_dashboard_state','=','Locked')]}"/>
+                                <field name="ks_dashboard_menu_name"
+                                       attrs="{'readonly':[('ks_dashboard_state','=','Locked')], 'required':[('ks_dashboard_state','!=','Locked')]}"/>
+                                <field name="ks_dashboard_top_menu_id"
+                                       options="{'no_create': True, 'no_create_edit':True, 'no_open': True}"
+                                       attrs="{'readonly':['|',('id','>', 0),('ks_dashboard_state','=','Locked')], 'required':[('ks_dashboard_state','!=','Locked')]}"/>
+                                <field name="ks_dashboard_active"
+                                       attrs="{'readonly':[('ks_dashboard_state','=','Locked')]}"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="ks_dashboard_ninja.board_tree">
+            <field name="name">ks_dashboard_ninja View</field>
+            <field name="model">ks_dashboard_ninja.board</field>
+            <field name="arch" type="xml">
+                <tree import="False" string="My Dashboard" editable="top">
+                    <field name="ks_dashboard_state" invisible="1"/>
+                    <field name="id" invisible="1"/>
+                    <field name="name"/>
+                    <field name="ks_dashboard_menu_name"
+                           attrs="{'required':[('ks_dashboard_state','!=','Locked')]}"/>
+                    <field name="ks_dashboard_menu_sequence"/>
+                    <field name="ks_dashboard_top_menu_id"
+                           options="{'no_create': True, 'no_create_edit':True, 'no_open': True}"
+                           attrs="{'readonly':[('ks_dashboard_state','=','Locked')], 'required':[('ks_dashboard_state','!=','Locked')]}"/>
+                    <field name="ks_dashboard_active"
+                           attrs="{'readonly':[('ks_dashboard_state','=','Locked')]}"/>
+                    <field name="ks_dashboard_default_template"
+                           attrs="{'readonly':[('id','>', 0)], 'required':[('id','&lt;', 1)]}"
+                           options="{'no_create': True, 'no_create_edit':True, 'no_open': True}"/>
+                    <field name="ks_set_interval"/>
+                    <field name="ks_date_filter_selection" required="1"/>
+                    <field name="ks_dashboard_start_date"
+                           attrs="{'readonly':[('ks_date_filter_selection','!=','l_custom')], 'required':[('ks_date_filter_selection','=','l_custom')]}"/>
+                    <field name="ks_dashboard_end_date"
+                           attrs="{'readonly':[('ks_date_filter_selection','!=','l_custom')], 'required':[('ks_date_filter_selection','=','l_custom')]}"/>
+                    <field name="ks_dashboard_group_access" widget="many2many_tags"/>
+                    <button name="ks_view_items_view" string="View Items" type="object" class="btn-primary"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Dashboard -->
+        <record id="ks_dashboard_ninja.board_dashboard_action_window" model="ir.actions.client">
+            <field name="name">My Dashboard</field>
+            <field name="tag">ks_dashboard_ninja</field>
+            <field name="params" eval="{'ks_dashboard_id': ref('ks_dashboard_ninja.ks_my_default_dashboard_board')}"/>
+            <field name="res_model">ks_dashboard_ninja.board</field>
+        </record>
+
+
+        <record model="ir.actions.act_window" id="ks_dashboard_ninja.board_form_tree_action_window">
+            <field name="name">Dashboard Manager</field>
+            <field name="res_model">ks_dashboard_ninja.board</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'form_view_ref':'ks_dashboard_ninja.board_form','tree_view_ref':'ks_dashboard_ninja.board_tree'}</field>
+        </record>
+
+
+        <menuitem name="Dashboard"
+                  id="ks_dashboard_ninja.board_menu_root"
+                  web_icon="ks_dashboard_ninja,static/description/icon.png"
+                  groups="ks_dashboard_ninja_group_manager,ks_dashboard_ninja_group_user"
+                  sequence="1"/>
+
+        <menuitem name="My Dashboard"
+                  id="ks_dashboard_ninja.my_dashboard"
+                  parent="ks_dashboard_ninja.board_menu_root"
+                  sequence="1"
+                  action="ks_dashboard_ninja.board_dashboard_action_window"/>
+
+        <menuitem name="Configuration"
+                  id="ks_dashboard_ninja.configuration_menu"
+                  parent="ks_dashboard_ninja.board_menu_root"
+                  groups="ks_dashboard_ninja_group_manager"
+                  sequence="100"/>
+
+        <menuitem name="Dashboard Manager"
+                  id="ks_dashboard_ninja.dashboard_menu"
+                  parent="ks_dashboard_ninja.configuration_menu"
+                  action="ks_dashboard_ninja.board_form_tree_action_window"
+                  groups="ks_dashboard_ninja_group_manager"
+                  sequence="1"/>
+
+        <menuitem name="Portlet Master"
+                  id="ks_dashboard_ninja.portlet_master"
+                  parent="ks_dashboard_ninja.configuration_menu"
+                  action="ks_dashboard_ninja.action_portlet_master_act_window"
+                  groups="ks_dashboard_ninja_group_manager"
+                  sequence="2"/>
+
+        <menuitem name="Dashboard Items"
+                  id="ks_dashboard_ninja.dashboard_items"
+                  parent="ks_dashboard_ninja.configuration_menu"
+                  action="ks_dashboard_ninja.dashboard_item_action_window"
+                  groups="ks_dashboard_ninja_group_manager"
+                  sequence="3"/>
+
+<!-- for changing the string in login screen -->
+        <template id="auth_signup.login" inherit_id="web.login" name="Sign up - Reset Password">
+            <xpath expr="//button[@type='submit']" position="after">
+                <div class="justify-content-between mt-2 d-flex small">
+                    <a t-if="signup_enabled" t-attf-href="/web/signup?{{ keep_query() }}">Don't have an account?</a>
+                    <a t-if="reset_password_enabled" t-attf-href="/web/reset_password?{{ keep_query() }}">Forgot Password ?</a>
+                </div>
+            </xpath>
+        </template>
+
+
+<!-- for disable password to copy paste in login screen -->
+        <template id="web.login" name="Login">
+        <t t-call="web.login_layout">
+            <form class="oe_login_form" role="form" t-attf-action="/web/login" method="post" onsubmit="this.action = '/web/login' + location.hash">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                <div class="form-group field-db" t-if="databases and len(databases) &gt; 1">
+                    <label for="db" class="col-form-label">Database</label>
+                    <div t-attf-class="input-group {{'input-group-sm' if form_small else ''}}">
+                        <input type="text" name="db" t-att-value="request.db" id="db" t-attf-class="form-control #{'form-control-sm' if form_small else ''}" required="required" readonly="readonly"/>
+                        <span class="input-group-append">
+                            <a role="button" href="/web/database/selector" class="btn btn-secondary">Select <i class="fa fa-database" role="img" aria-label="Database" title="Database"></i></a>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="form-group field-login">
+                    <label for="login">Email</label>
+                    <input type="text" placeholder="Email" name="login" t-att-value="login" id="login" oncopy="return false" onpaste="return false" t-attf-class="form-control #{'form-control-sm' if form_small else ''}" required="required" autofocus="autofocus" autocapitalize="off"/>
+                </div>
+
+                <div class="form-group field-password">
+                    <label for="password">Password</label>
+                    <input type="password" placeholder="Password" name="password" id="password" oncopy="return false" onpaste="return false" t-attf-class="form-control #{'form-control-sm' if form_small else ''}" required="required" autocomplete="current-password" t-att-autofocus="'autofocus' if login else None" maxlength="4096"/>
+                </div>
+
+                <p class="alert alert-danger" t-if="error" role="alert">
+                    <t t-esc="error"/>
+                </p>
+                <p class="alert alert-success" t-if="message" role="status">
+                    <t t-esc="message"/>
+                </p>
+
+                <div t-attf-class="clearfix oe_login_buttons text-center mb-1 {{'pt-2' if form_small else 'pt-3'}}">
+                    <button type="submit" class="btn btn-primary btn-block">Log in</button>
+                    <t t-if="debug">
+                        <button type="submit" name="redirect" value="/web/become" class="btn btn-link btn-sm btn-block">Log in as superuser</button>
+                    </t>
+                    <div class="o_login_auth"/>
+                </div>
+
+                <input type="hidden" name="redirect" t-att-value="redirect"/>
+            </form>
+        </t>
+    </template>
+    </data>
+</odoo>

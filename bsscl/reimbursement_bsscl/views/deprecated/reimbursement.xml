@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <!--=======Tree view of Reimbursement=======-->
+    <record id="reimbursement_tree_view" model="ir.ui.view">
+        <field name="name">reimbursement.tree</field>
+        <field name="model">reimbursement</field>
+        <field name="arch" type="xml">
+            <tree string="Reimbursement">
+                  <field name="employee_id"/>
+                  <field name="name"/>
+                <field name="from_date"/>
+                <field name="to_date"/>
+                 <field name="state"/>
+                <field name="__last_update"/>
+                <field name="write_uid"/>
+            </tree>
+        </field>
+    </record>
+
+    <!--=======Form view of Reimbursement=======-->
+    <record id="reimbursement_form_view" model="ir.ui.view">
+        <field name="name">reimbursement.form</field>
+        <field name="model">reimbursement</field>
+        <field name="arch" type="xml">
+            <form string="Reimbursement">
+                <header>
+                    <button name="button_submit" string="Submit" class="oe_highlight" type="object" states="draft"/>
+                     <button name="button_reset_to_draft" string="Revert" type="object" states="waiting_for_approval"/>
+                    <button name="button_approved" string="Approve" class="oe_highlight" type="object" states="waiting_for_approval" groups="reimbursement_stpi.group_approving_authority"/>
+                    <button name="button_reject" string="Reject" type="object" attrs="{'invisible':[('state','not in',('waiting_for_approval'))]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,waiting_for_approval ,approved" />
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="reimbursement_sequence" attrs="{'invisible':[('reimbursement_sequence','=', False)], 'readonly':[('reimbursement_sequence','!=', False)]}"/>
+                            <field name="employee_id" readonly="1" required="1"/>
+                            <field name="job_id" readonly="1"/>
+                            <field name="branch_id" readonly="1"/>
+                            <field name="department_id" readonly="1"/>
+                            <field name="name" attrs="{'readonly':[('state','not in',('draft'))], 'required':[('state','in',('draft'))]}"/>
+                            <field name="claimed_amount" attrs="{'invisible':[('name','not in',('telephone','mobile'))]}"/>
+                            <field name="Approved_amount" readonly="1" attrs="{'invisible':[('name','not in',('telephone','mobile'))]}"/>
+                            <field name="from_date" attrs="{'readonly':[('state','not in',('draft'))], 'required':[('state','in',('draft'))]}"/>
+                            <field name="to_date" attrs="{'readonly':[('state','not in',('draft'))], 'required':[('state','in',('draft'))]}"/>
+                            <field name="dob" invisible="1"/>
+                            <field name="lunch_tds_amt" invisible="1"/>
+                            <field name="brief_amount" attrs="{'invisible': [('name', '!=', 'briefcase')], 'required': [('name', '=', 'briefcase')], 'readonly':[('state','not in',('draft'))]}"/>
+                        </group>
+                        <group>
+                            <field name="__last_update"/>
+                            <field name="write_uid"/>
+                            <field name="claim_date_from" attrs="{'invisible': [('name', '=', 'briefcase')], 'readonly': [('name', '!=', 'briefcase')]}"/>
+                            <field name="claim_date_to" attrs="{'invisible': [('name', '=', 'briefcase')], 'readonly': [('name', '!=', 'briefcase')]}"/>
+                            <field name="claim_date" attrs="{'invisible': [('name', '=', 'briefcase')], 'readonly': [('name', '!=', 'briefcase')]}"/>
+                            <field name="approved_date" attrs="{'invisible':[('state','not in',('approved'))], 'readonly':[('state','in',('approved'))]}"/>
+                            <field name="rejected_date" attrs="{'invisible':[('state','not in',('rejected'))], 'readonly':[('state','in',('rejected'))]}"/>
+                         </group>
+                    </group>
+                    <notebook>
+                        <page string="Reimbursement Details">
+                                <tree>
+                                    <group>
+                                        <group>
+                                            <field name="working_days" readonly="1" attrs="{'invisible': [('name', '!=', 'lunch')]}"/>
+                                            <field name="lunch_daily" readonly="1" attrs="{'invisible':[('name','not in',('lunch'))]}"/>
+                                            <field name="service_provider" attrs="{'invisible': [('name', '!=', 'telephone'), ('name', '!=', 'mobile')], 'readonly':[('state','not in',('draft'))]}"/>
+                                            <field name="phone" string='Phone Attachment' attrs="{'invisible':[('name','not in',('telephone','mobile'))],'required':[('name','in',('telephone','mobile'))], 'readonly':[('state','not in',('draft'))]}"/>
+                                            <field name="bill_no" attrs="{'invisible': [('name', '!=', 'telephone'), ('name', '!=', 'mobile'), ('name', '!=', 'quarterly')], 'readonly':[('state','not in',('draft'))]}"/>
+                                            <field name="no_of_months" attrs="{'invisible': [('name', '!=', 'telephone'), ('name', '!=', 'mobile'), ('name', '!=', 'quarterly'), ('name', '!=', 'medical')], 'readonly':[('state','not in',('draft'))]}"/>
+                                            <field name="bill_due_date" attrs="{'invisible': [('name', '!=', 'telephone'), ('name', '!=', 'mobile')], 'readonly':[('state','not in',('draft'))]}"/>
+                                            <field name="amount_phone" attrs="{'invisible': [('name', '!=', 'telephone'), ('name', '!=', 'mobile'), ('name', '!=', 'quarterly')], 'readonly':[('state','not in',('draft'))]}"/>
+                                            <field name="total_amount" attrs="{'invisible': [('name', '!=', 'medical')], 'readonly':[('state','not in',('draft'))]}"/>
+                                            <field name="net_amount" readonly="1" attrs="{'invisible':[('name','not in',('lunch'))]}"/>
+                                            <field name="remarks" attrs="{'invisible': [('name', '!=', 'lunch')], 'readonly':[('state','not in',('draft'))]}"/>
+                                        </group>
+                                        <field name="relative_ids" attrs="{'invisible': [('name', '!=', 'tuition_fee')], 'readonly':[('state','not in',('draft'))]}">
+                                            <tree editable="bottom">
+                                                <field name="reimbursement" invisible="1"/>
+                                                <field name="employee_id"/>
+                                                <field name="family_details" placeholder="Family Details..." options="{'color_field': 'color', 'no_create_edit': True}" required="1"/>
+                                                <field name="name_of_school" required="1"/>
+                                                <field name="class_current" required="1"/>
+                                                <field name="academic_year" required="1"/>
+                                                 <field name="dis_child"/>
+                                                <field name="bc_school"/>
+                                                <field name="bc_amount"/>
+                                                <field name="fee_enclose"/>
+                                            </tree>
+                                        </field>
+                                    </group>
+                                </tree>
+                            </page>
+                        </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="seq_reimbursement_sequence" model="ir.sequence">
+        <field name="name">Reimbursement</field>
+        <field name="code">reimbursement</field>
+        <field name="padding">3</field>
+        <field name="company_id" eval="False"/>
+     </record>
+
+
+        <record id="reimbursement_analysis_view_pivot" model="ir.ui.view">
+            <field name="name">reimbursement.pivot</field>
+            <field name="model">reimbursement</field>
+            <field name="arch" type="xml">
+                <pivot string="Reimbursement Analysis">
+                    <field name="employee_id" type="row"/>
+                    <field name="name" type="col"/>
+                    <!--<field name="name" type="col"/>-->
+                    <!--<field name="employee_id" type="measure"/>-->
+                    <field name="claimed_amount" type="measure"/>
+                    <field name="Approved_amount" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+
+        <record id="reimbursement_reimbursement_analysis_action" model="ir.actions.act_window">
+            <field name="name">Reimbursement Pivot</field>
+            <field name="res_model">reimbursement</field>
+            <field name="view_mode">pivot,tree</field>
+        </record>
+
+    <!--=======Search view of Reimbursement=======-->
+    <record model='ir.ui.view' id='reimbursement_search_view'>
+            <field name="name">reimbursement.search</field>
+            <field name="model">reimbursement</field>
+            <field name="arch" type="xml">
+                <search string="Reimbursement">
+                    <filter string="My Claims" name="my_claims" domain="[('employee_id.user_id.id', '=', uid)]" />
+                    <field name="employee_id"/>
+                    <field name="name"/>
+                    <field name="from_date"/>
+                    <field name="to_date"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter string="Status" name="status" domain="[]" context="{'group_by':'state'}"/>
+                        <filter string="Employee" name="employee" domain="[]" context="{'group_by':'employee_id'}"/>
+                        <filter string="Center" name="branch" domain="[]" context="{'group_by':'branch_id'}"/>
+                        <filter string="Department" name="department" domain="[]" context="{'group_by':'department_id'}"/>
+                        <filter string="Job Position" name="job" domain="[]" context="{'group_by':'job_id'}"/>
+                        <filter string="Reimbursement Type" name="reim_type" domain="[]" context="{'group_by':'name'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+    <!--============Action view of Reimbursement Draft============-->
+    <record id="reimbursement_menu_action" model="ir.actions.act_window">
+        <field name="name">Reimbursement</field>
+        <field name="res_model">reimbursement</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_my_claims': 1}</field>
+        <field name="search_view_id" ref="reimbursement_search_view"/>
+        <field name="domain">[('state','=','draft')]</field>
+    </record>
+    <!--============Action view of Reimbursement Waiting============-->
+    <record id="reimbursement_pending_action" model="ir.actions.act_window">
+        <field name="name">Reimbursement</field>
+        <field name="res_model">reimbursement</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_my_claims': 1}</field>
+        <field name="search_view_id" ref="reimbursement_search_view"/>
+        <field name="domain">[('state','in',('waiting_for_approval','forwarded'))]</field>
+    </record>
+    <!--============Action view of Reimbursement approved============-->
+    <record id="reimbursement_approved_action" model="ir.actions.act_window">
+        <field name="name">Reimbursement</field>
+        <field name="res_model">reimbursement</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_my_claims': 1}</field>
+        <field name="search_view_id" ref="reimbursement_search_view"/>
+        <field name="domain">[('state','=','approved')]</field>
+    </record>
+    <!--============Action view of Reimbursement rejected============-->
+    <record id="reimbursement_rejected_action" model="ir.actions.act_window">
+        <field name="name">Reimbursement</field>
+        <field name="res_model">reimbursement</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_my_claims': 1}</field>
+        <field name="search_view_id" ref="reimbursement_search_view"/>
+        <field name="domain">[('state','=','rejected')]</field>
+    </record>
+
+    <!--============Action view of Reimbursement rejected============-->
+    <record id="reimbursement_all_menu_action" model="ir.actions.act_window">
+        <field name="name">Reimbursement</field>
+        <field name="res_model">reimbursement</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_my_claims': 1}</field>
+        <field name="search_view_id" ref="reimbursement_search_view"/>
+    </record>
+
+
+    <!--============Action view of Reimbursement rejected============-->
+    <record id="reimbursement_department_menu_action" model="ir.actions.act_window">
+        <field name="name">Reimbursement</field>
+        <field name="res_model">reimbursement</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_department': 1}</field>
+        <field name="search_view_id" ref="reimbursement_search_view"/>
+    </record>
+
+
+    <!--============Action view of Reimbursement rejected============-->
+    <record id="reimbursement_branch_menu_action" model="ir.actions.act_window">
+        <field name="name">Reimbursement</field>
+        <field name="res_model">reimbursement</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_branch': 1}</field>
+        <field name="search_view_id" ref="reimbursement_search_view"/>
+    </record>
+
+
+    <!--============Action view of Reimbursement rejected============-->
+    <record id="reimbursement_job_menu_action" model="ir.actions.act_window">
+        <field name="name">Reimbursement</field>
+        <field name="res_model">reimbursement</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_job': 1}</field>
+        <field name="search_view_id" ref="reimbursement_search_view"/>
+    </record>
+
+    <!--============Action view of Reimbursement rejected============-->
+    <record id="reimbursement_employee_menu_action" model="ir.actions.act_window">
+        <field name="name">Reimbursement</field>
+        <field name="res_model">reimbursement</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_employee': 1}</field>
+        <field name="search_view_id" ref="reimbursement_search_view"/>
+    </record>
+
+    <!--============Action view of Reimbursement rejected============-->
+    <record id="reimbursement_status_menu_action" model="ir.actions.act_window">
+        <field name="name">Reimbursement</field>
+        <field name="res_model">reimbursement</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_status': 1}</field>
+        <field name="search_view_id" ref="reimbursement_search_view"/>
+    </record>
+
+
+    <!--============Action view of Reimbursement rejected============-->
+    <record id="reimbursement_type_menu_action" model="ir.actions.act_window">
+        <field name="name">Reimbursement</field>
+        <field name="res_model">reimbursement</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_reim_type': 1}</field>
+        <field name="search_view_id" ref="reimbursement_search_view"/>
+    </record>
+
+
+    <!--=====Form view of Reimbursement Configuration=====-->
+    <record id="reimbursement_configuration_form_view" model="ir.ui.view">
+        <field name="name">reimbursement.configuration.form</field>
+        <field name="model">reimbursement.configuration</field>
+        <field name="arch" type="xml">
+            <form string="Reimbursement">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="group_ids" widget="many2many_tags" placeholder="Groups..." options="{'color_field': 'color', 'no_create_edit': True}"/>
+                        </group>
+                        <group>
+                            <field name="full"/>
+                            <field name="allowed" attrs="{'readonly':[('full','=',True)]}"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!--=====Tree view of Reimbursement Configuration=====-->
+    <record id="reimbursement_configuration_tree_view" model="ir.ui.view">
+        <field name="name">reimbursement.configuration.tree</field>
+        <field name="model">reimbursement.configuration</field>
+        <field name="arch" type="xml">
+            <tree string="Reimbursement" editable="bottom">
+                  <field name="name" required="1"/>
+                  <field name="group_ids" widget="many2many_tags" placeholder="Groups..." options="{'color_field': 'color', 'no_create_edit': True}" required="1"/>
+                <field name="full" required="1"/>
+                <field name="allowed" attrs="{'readonly':[('full','=',True)], 'required':[('full','=',False)]}"/>
+                <field name="open"/>
+            </tree>
+        </field>
+    </record>
+
+    <!--==========Action view of ReimbursementConfiguration==========-->
+    <record id="reimbursement_configuration_menu_action" model="ir.actions.act_window">
+        <field name="name">Configuration</field>
+        <field name="res_model">reimbursement.configuration</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+
+        <menuitem id = "reimbursement_menu_id"
+                  name = "Reimbursement"
+                  web_icon="reimbursement_stpi,static/description/icon.png"
+                  sequence="6"
+                  />
+
+        <menuitem id = "reimbursement_main_menu_id"
+                  name = "Reimbursement"
+                  parent ="reimbursement_menu_id"
+                  sequence="1"
+                  />
+
+        <menuitem id = "reimbursement_new_menu_id"
+                  name = "New"
+                  parent ="reimbursement_main_menu_id"
+                  action ="reimbursement_menu_action"
+                  />
+
+        <menuitem id = "reimbursement_pending_menu_id"
+                  name = "Pending Approvals"
+                  parent ="reimbursement_main_menu_id"
+                  action ="reimbursement_pending_action"
+                  />
+        <menuitem id = "reimbursement_approved_menu_id"
+                  name = "Approved"
+                  parent ="reimbursement_main_menu_id"
+                  action ="reimbursement_approved_action"
+                  />
+        <menuitem id = "reimbursement_rejected_menu_id"
+                  name = "Rejected"
+                  parent ="reimbursement_main_menu_id"
+                  action ="reimbursement_rejected_action"
+                  />
+
+        <menuitem id = "reimbursement_configuration_menu_id"
+                  name = "Configuration"
+                  parent ="reimbursement_menu_id"
+                  groups="reimbursement_stpi.group_approving_authority"
+                  sequence="100"
+                  />
+        <menuitem id = "reimbursement_configuration_master_id"
+                  name = "Master"
+                  action ="reimbursement_configuration_menu_action"
+                  parent ="reimbursement_configuration_menu_id"
+                  />
+
+        <menuitem id = "reimbursement_reporting_menu_id"
+                  name = "Reporting"
+                  parent ="reimbursement_menu_id"
+                  groups="reimbursement_stpi.group_approving_authority"
+                  sequence="50"
+                  />
+        <menuitem id = "reimbursement_reimbursement_analysis_id"
+                  name = "Reimbursement Analysis"
+                  parent ="reimbursement_reporting_menu_id"
+                  action="reimbursement_reimbursement_analysis_action"
+                  />
+        <menuitem id = "reimbursement_all_menu_id"
+                  name = "All Reimbursements"
+                  parent ="reimbursement_reporting_menu_id"
+                  action="reimbursement_all_menu_action"
+                  />
+        <menuitem id = "reimbursement_department_menu_id"
+                  name = "Reimbursement by Department"
+                  parent ="reimbursement_reporting_menu_id"
+                  action="reimbursement_department_menu_action"
+                  />
+        <menuitem id = "reimbursement_branch_menu_id"
+                  name = "Reimbursements by Branch"
+                  parent ="reimbursement_reporting_menu_id"
+                  action="reimbursement_branch_menu_action"
+                  />
+        <menuitem id = "reimbursement_job_menu_id"
+                  name = "Reimbursement by Job Position"
+                  parent ="reimbursement_reporting_menu_id"
+                  action="reimbursement_job_menu_action"
+                  />
+        <menuitem id = "reimbursement_employee_menu_id"
+                  name = "Reimbursement by Employee"
+                  parent ="reimbursement_reporting_menu_id"
+                  action="reimbursement_employee_menu_action"
+                  />
+        <menuitem id = "reimbursement_status_menu_id"
+                  name = "Reimbursements by Status"
+                  parent ="reimbursement_reporting_menu_id"
+                  action="reimbursement_status_menu_action"
+                  />
+        <menuitem id = "reimbursement_type_menu_id"
+                  name = "Reimbursement by Type"
+                  parent ="reimbursement_reporting_menu_id"
+                  action="reimbursement_type_menu_action"
+                  />
+
+
+
+
+
+</odoo>

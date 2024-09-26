@@ -1,0 +1,718 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+        <!-- Top menu item -->
+        <menuitem name="Asset"
+            id="menu_mro_root"
+            parent="hr.menu_hr_root"
+            sequence="4"/>
+
+        <!-- Asset menu -->
+       <!--  <menuitem name="Assets"
+            id="menu_maintenance_assets"
+            parent="menu_mro_root"
+            groups="hr_employee_asset.group_mro_manager,hr_employee_asset.group_asset_user"
+            sequence="9"/> -->
+
+        <!-- Asset Tree View  -->
+        <record id="assets_tree_view" model="ir.ui.view">
+            <field name="name">asset.asset.tree</field>
+            <field name="model">asset.asset</field>
+            <field name="arch" type="xml">
+                <tree string="Assets">
+                    <field name="asset_number" string='Reference #'/>
+                    <field name="asset_type"/>
+                    <field name="brands"/>
+                    <field name="model_no"/>
+                    <field name="serial"/>
+<!--                     <field name="service_area_id"/> -->
+                    <field name="employee_id"/>
+                    <field name="department_id"/>
+                    <field name="state"/>
+                    <field name="creation_date" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Asset Form View  -->
+        <record id="assets_form_view" model="ir.ui.view">
+            <field name="name">asset.asset.form</field>
+            <field name="model">asset.asset</field>
+            <field name="arch" type="xml">
+                <form string="Assets" version="7.0">
+                    <header>
+
+                        <button string="Ready" 
+                                name="button_ready" 
+                                type="object"
+                                attrs="{'invisible':[('state', '!=', 'draft')]}"
+                                class="oe_highlight"
+                                groups="hr_employee_asset.group_mro_manager"/>
+
+                        <button string="Scrapped" 
+                                name="button_scrapped" 
+                                type="object"
+                                attrs="{'invisible':[('state', '!=', 'hold')]}"
+                                class="oe_highlight"
+                                groups="hr_employee_asset.group_mro_manager"/>
+
+                        <button string="Lost" 
+                                name="button_lost" 
+                                type="object"
+                                attrs="{'invisible':[('state', '!=', 'hold')]}"
+                                class="oe_highlight"
+                                groups="hr_employee_asset.group_mro_manager"/>
+
+                        <button string="Sold" 
+                                name="button_sold" 
+                                type="object"
+                                attrs="{'invisible':[('state', '!=', 'hold')]}"
+                                class="oe_highlight"
+                                groups="hr_employee_asset.group_mro_manager"/>
+
+                        <button string="Repair" 
+                                name="button_repair" 
+                                type="object"
+                                attrs="{'invisible':[('state', '!=', 'hold')]}"
+                                class="oe_highlight"
+                                groups="hr_employee_asset.group_mro_manager"/>
+
+                        <button string="Hold" 
+                                name="button_hold" 
+                                type="object"
+                                attrs="{'invisible':[('state', 'not in', ('sold','lost','repair','scrapped', 'available'))]}"
+                                class="oe_highlight"
+                                groups="hr_employee_asset.group_mro_manager"/>
+
+                        <button string="Available" 
+                                name="button_available" 
+                                type="object"
+                                attrs="{'invisible':[('state', 'not in', ('hold','transfer','ready'))]}"
+                                class="oe_highlight"
+                                groups="hr_employee_asset.group_mro_manager"/>
+
+                        <field name="state" 
+                           widget="statusbar" 
+                           statusbar_visible="draft,ready,available,hold,allocated,lost,sold,repair,scrapped" class="oe_highlight"
+                           statusbar_colors='{"awaiting":"blue","allocated":"blue","lost":"red"}'/>
+                    </header>
+                    <sheet>
+                        <div>
+                            <!-- <label string="Asset #"/>                          -->
+                            <field name="asset_number" class="oe_inline" readonly="1"/>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="product_id" invisible="1"/>
+                                <field name="asset_type" required="1"
+                                    on_change="onchange_asset_type(asset_type)"
+                                    attrs="{'readonly':[('state','!=','draft')]}"
+                                    widget="selection"
+                                    options="{'no_create': True}"/>
+                                <field name="brand" invisible="1"/>
+                                <field name="model" invisible="1"/>
+                                <field name="mobile" invisible="1"/>
+                                <field name="brands"
+                                    options="{'no_create': True}"
+                                    attrs="{'required':[('brand','=',True)],
+                                            'readonly':[('state','!=','draft')]}"/>
+                                <field name="model_no"
+                                    options="{'no_create': True}"
+                                    attrs="{'required':[('model','=',True)],
+                                            'readonly':[('state','!=','draft')]}"/>
+                                <field name="serial" required="1"
+                                    attrs="{'readonly':[('state','!=','draft')]}"/>
+                                <field name="mobile_no" 
+                                    attrs="{'required':[('mobile','=',True)],
+                                    'readonly':[('state','!=','draft')]}"/>
+                                <field name='description' readonly="1"/>
+                            </group>
+                            <group>
+<!--                                 <field name="service_area_id" readonly="1"/> -->
+                                <field name="employee_id" readonly="1"/>
+                                <field name="department_id" readonly="1"/>
+                                <field name="active" readonly="1"/>
+                                <field name="property_stock_asset"
+                                    readonly="1"
+                                    options="{'no_create': True}"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Asset Movement">
+                                <field name="asset_move_id" readonly="1">
+                                    <tree name="Asset Movement" editable="bottom"> 
+                                        <field name="date"/>
+                                        <field name="employee_id"/>
+                                        <field name="department_id"/>
+                                        <field name="action"/>
+                                        <field name="executed_by"/>   
+                                    </tree> 
+                                </field> 
+                            </page>
+                            <page string="Other Information">
+                                <group>
+                                    <group>
+                                        <field name="partner_id"
+                                            readonly="1"
+                                            options="{'no_create': True}"
+                                            attrs="{'readonly':[('state','!=','draft')]}"/>
+                                        <field name="purchase_date"
+                                            readonly="1"
+                                            attrs="{'readonly':[('state','!=','draft')]}"/>
+                                    </group>
+                                    <group>
+                                         <field name="warranty_start_date"
+                                            attrs="{'readonly':[('state','!=','draft')]}"/>
+                                        <field name="warranty_end_date"
+                                            attrs="{'readonly':[('state','!=','draft')]}"/>
+                                        <field name="creation_date" readonly = "1"/>
+                                    </group>
+                                </group>
+                                <group>
+                                    <field name="specifications" attrs="{'readonly':[('state','!=','draft')]}"/>
+                                </group>
+                            </page>
+                        </notebook>
+                     </sheet>
+                     <div class="oe_chatter">
+                            <field name="message_follower_ids" widget="mail_followers"/>
+                            <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        
+        <!-- Asset Graph view -->
+       <record model="ir.ui.view" id="view_asset_graph">
+            <field name="name">asset.asset.graph</field>
+            <field name="model">asset.asset</field>
+            <field name="priority">20</field>
+            <field name="arch" type="xml">
+                <graph string="Asset" type="pivot">
+                    <field name="employee_id" type="row"/>
+                    <field name="name" type="row"/>
+                    <field name="asset_type" type="row"/>
+                    <field name="serial" type="row"/>
+                    <!--field name="service_area_id" type="row"/-->
+                </graph>
+            </field>
+        </record>
+        <!-- Asset Filter -->
+        <!-- <record id="view_asset_filter" model="ir.ui.view">
+            <field name="name">Asset</field>
+            <field name="model">asset.asset</field>
+            <field name="arch" type="xml">
+                <search string="Asset">
+                    <field name="employee_id" string="Employee"/>
+                    <field name="asset_type" string="Asset Type"/>
+                    <field name="name" string="Asset Name"/>
+                    <field name="serial" string="Serial/Identification no."/>
+                    <field name='state' string="Status"/>
+                    <filter string="Draft" name='draft' 
+                            domain="[('state','=', 'draft')]" />
+                    <filter string="Ready" name='ready' 
+                            domain="[('state','=', 'ready')]" />
+                    <filter string="In Transfer" name='transfer' 
+                            domain="[('state','=', 'transfer')]" />
+                    <filter string="Available" name='available' 
+                            domain="[('state','=', 'available')]" />
+                    <filter string="Allocated" name='allocated' 
+                            domain="[('state','=', 'allocated')]" />
+                    <filter string="Lost" name='lost' 
+                            domain="[('state','=', 'lost')]" />
+                    <filter string="Sold" name="sold" 
+                            domain="[('state','=', 'sold')]" />
+                    <filter string="Repair" name="repair" 
+                            domain="[('state','=', 'repair')]" />
+                    <filter string="Scrapped" name="scrapped" 
+                            domain="[('state','=', 'scrapped')]" />
+                    <group expand="0" string="Group By">
+                        <filter string="Employee"
+                                        domain="[]" context="{'group_by':'employee_id'}"/>
+                        <filter string="Vendor"
+                                        domain="[]" context="{'group_by':'partner_id'}"/>
+                        <filter string="Status" 
+                                domain="[]"
+                                context="{'group_by':'state'}"/>
+                        <filter string="Asset Type"
+                                        domain="[]" context="{'group_by':'asset_type'}"/> 
+                    </group>
+                </search>
+            </field>
+        </record>  -->
+
+        <record id="action_assets" model="ir.actions.act_window">
+            <field name="name">Assets</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">asset.asset</field>
+            
+            <field name="view_mode">tree,form,graph</field>
+            <field name="view_id" eval="False"/>
+        </record>
+
+
+        <record model="ir.actions.act_window.view" id="action_view_asset_graph">
+            <field name="sequence" eval="3"/>
+            <field name="view_mode">graph</field>
+            <field name="view_id" ref="view_asset_graph"/>
+            <field name="act_window_id" ref="action_assets"/>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="action_assets_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="assets_tree_view"/>
+            <field name="act_window_id" ref="action_assets"/>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="action_assets_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="assets_form_view"/>
+            <field name="act_window_id" ref="action_assets"/>
+        </record>
+
+        <!-- Asset item -->
+     <!--    <menuitem name="Assets"
+            action="action_assets"
+            id="menu_maintenance_assets_assets"
+            parent="menu_maintenance_assets"
+            groups="hr_employee_asset.group_mro_manager,hr_employee_asset.group_asset_user"
+            sequence="100"/> -->
+
+        <!-- Configuration menu -->
+        <menuitem name="Asset Configuration"
+            id="menu_maintenance_config"
+            parent="menu_mro_root" 
+            sequence="37"
+            groups="hr_employee_asset.group_mro_manager"/>
+
+           <!--  groups=asset.group_mro_manager,hr_recruitment.group_hr_recruitment_manager" -->
+        
+        <!-- Asset Type -->
+        <record id="asset_type_form_view" model="ir.ui.view">
+            <field name="name">asset.type.form</field>
+            <field name="model">asset.type</field>
+            <field name="arch" type="xml">
+                <form>
+                <group>
+                    <field name="name" required="1" string="Name"/>
+                </group>
+            </form>
+        </field>
+        </record>
+
+        <record id="asset_type_tree_view" model="ir.ui.view">
+            <field name="name">asset.type.tree</field>
+            <field name="model">asset.type</field>
+            <field name="arch" type="xml"> 
+                <tree>
+                    <field name="name" string="Name"/>
+                </tree>
+
+            </field>
+        </record>
+
+        <record id="action_asset_type" model="ir.actions.act_window">
+            <field name="name">Asset Type</field>
+            <field name="res_model">asset.type</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="context">{}</field>
+            
+            <field name="view_mode">tree,form</field> 
+        </record>
+
+        <menuitem id="menu_asset_type" name="Asset Type"  
+                  parent="menu_maintenance_config" sequence="1"
+                  action="action_asset_type"
+                  groups="hr_employee_asset.group_mro_manager"/>
+
+        <!-- Asset Model -->
+        
+        <record id="asset_model_form_view" model="ir.ui.view">
+            <field name="name">asset.model.form</field>
+            <field name="model">asset.model</field>
+            <field name="arch" type="xml">
+                <form>
+                <group>
+                    <field name="model_no" required="1"/>
+                    <field name="asset_type" required="1"/>
+                    <field name="asset_brand" required="1"/>
+                </group>
+            </form>
+        </field>
+        </record>
+
+        <record id="asset_model_tree_view" model="ir.ui.view">
+            <field name="name">asset.model.tree</field>
+            <field name="model">asset.model</field>
+            <field name="arch" type="xml"> 
+                <tree>
+                    <field name="model_no"/>
+                    <field name="asset_type"/>
+                </tree>
+
+            </field>
+        </record>
+
+        <record id="action_asset_model" model="ir.actions.act_window">
+            <field name="name">Asset Model</field>
+            <field name="res_model">asset.model</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="context">{}</field>
+            
+            <field name="view_mode">tree,form</field> 
+        </record>
+
+        <!-- <menuitem id="menu_asset_model" name="Asset Model"  
+                  parent="menu_maintenance_config" sequence="3"
+                  action="action_asset_model"
+                  groups="hr_employee_asset.group_mro_manager"/> -->
+
+        <record id="asset_brand_form_view" model="ir.ui.view">
+            <field name="name">asset.brand.form</field>
+            <field name="model">asset.brand</field>
+            <field name="arch" type="xml">
+                <form>
+                <group>
+                    <field name="brand" required="1"/>
+                    <field name="asset_type" required="1"/>
+                </group>
+            </form>
+        </field>
+        </record>
+
+        <record id="asset_brand_tree_view" model="ir.ui.view">
+            <field name="name">asset.brand.tree</field>
+            <field name="model">asset.brand</field>
+            <field name="arch" type="xml"> 
+                <tree>
+                    <field name="brand"/>
+                </tree>
+
+            </field>
+        </record>
+
+        <record id="action_asset_brand" model="ir.actions.act_window">
+            <field name="name">Asset Brand</field>
+            <field name="res_model">asset.brand</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="context">{}</field>
+            
+            <field name="view_mode">tree,form</field> 
+        </record>
+
+       <!--  <menuitem id="menu_asset_brand" name="Asset Brand"  
+                  parent="menu_maintenance_config" sequence="2"
+                  action="action_asset_brand"
+                  groups="hr_employee_asset.group_mro_manager"/> -->
+
+        <record id="asset_tag_form_view" model="ir.ui.view">
+            <field name="name">asset.tag.form</field>
+            <field name="model">asset.tag</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <field name="name" required="1"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="asset_tag_tree_view" model="ir.ui.view">
+            <field name="name">asset.tag.tree</field>
+            <field name="model">asset.tag</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                </tree>
+
+            </field>
+        </record>
+
+        <record id="action_asset_tag" model="ir.actions.act_window">
+            <field name="name">Asset Tag</field>
+            <field name="res_model">asset.tag</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="context">{}</field>
+            
+            <field name="view_mode">tree,form</field>
+        </record>
+
+       <!--  <menuitem id="menu_asset_tag" name="Asset Tag"
+          parent="menu_maintenance_config" sequence="4"
+          action="action_asset_tag" groups="hr_employee_asset.group_mro_manager"/> -->
+
+        <record id="asset_move_form_view" model="ir.ui.view">
+            <field name="name">asset.move.form</field>
+            <field name="model">asset.move</field>
+            <field name="arch" type="xml">
+                <form string="Asset Movement" version="7.0" create="false" write="false">
+                    <group>
+                        <group>
+                            <field name="asset_name" readonly="1"/>
+                            <field name="asset_serial" readonly="1"/>
+                            <field name="asset_number" readonly="1"/>
+                            <field name="date" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="employee_id" readonly="1"/>
+                            <field name="department_id" readonly="1"/>
+                            <field name="action" readonly="1"/>
+                            <field name="executed_by" readonly="1"/> 
+                        </group>
+                    </group>
+            </form>
+        </field>
+        </record>
+
+        <record id="asset_move_tree_view" model="ir.ui.view">
+            <field name="name">asset.move.tree</field>
+            <field name="model">asset.move</field>
+            <field name="arch" type="xml"> 
+                <tree string="Asset Movement">
+                    <field name="asset_name"/>
+                    <field name="employee_id"/>
+                    <field name="date"/>
+                    <field name="executed_by"/>
+                </tree>
+            </field>
+        </record>
+        
+        <!-- Asset Filter -->
+        <!-- <record id="view_asset_move_filter" model="ir.ui.view">
+            <field name="name">Asset Movement</field>
+            <field name="model">asset.move</field>
+            <field name="arch" type="xml">
+                <search string="Asset Movement">
+                    <field name="employee_id" string="Employee"/>
+                    <field name='asset_name' string="Asset Name"/>
+                    <field name='asset_number' string="Asset Number"/>
+                    <field name='asset_serial' string="Serial/Identification no."/>
+                    <field name="department_id" string="Department"/>
+                    <field name='action' string="Action"/>
+                    <filter string="Available" name='available' 
+                            domain="[('action','=', 'available')]" />
+                    <filter string="Allocation" name='allocation' 
+                            domain="[('action','=', 'allocation')]" />
+                    <filter string="Changed" name='change' 
+                            domain="[('action','=', 'change')]" />
+                    <filter string="Lost" name='lost' 
+                            domain="[('action','=', 'lost')]" />
+                    <filter string="Sold" name="sold" 
+                            domain="[('action','=', 'sold')]" />
+                    <filter string="Repair" name="repair" 
+                            domain="[('action','=', 'repair')]" />
+                    <filter string="Scrapped" name="scraped" 
+                            domain="[('action','=', 'scraped')]" />
+                    <filter string="Department" name="department_id"
+                            domain="[]"/>
+                    <filter string="Employee" name="employee_id"
+                            domain="[]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Employee"
+                                        domain="[]" context="{'group_by':'employee_id'}"/>
+                        <filter string="Action" 
+                                domain="[]"
+                                context="{'group_by':'action'}"/>
+                        <filter string="Department"
+                                        domain="[]" context="{'group_by':'department_id'}"/> 
+                    </group>
+                </search>
+            </field>
+        </record> -->
+        <record id="action_asset_move" model="ir.actions.act_window">
+            <field name="name">Asset Movement</field>
+            <field name="res_model">asset.move</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="context">{}</field>
+            
+            <field name="view_mode">tree,form</field> 
+        </record>
+
+        <!-- <menuitem id="menu_asset_move" name="Asset Movement"  
+                  action="action_asset_move"
+                  parent="menu_maintenance_assets" sequence="101"
+                  groups="hr_employee_asset.group_mro_manager,hr_employee_asset.group_asset_user"/>
+ -->
+        <!-- Asset Transfer -->
+        <record id="asset_transfer_form_view" model="ir.ui.view">
+            <field name="name">asset.transfer.form</field>
+            <field name="model">asset.transfer</field>
+            <field name="arch" type="xml">
+                <form string="Asset Transfer" version="7.0">
+                     <header>
+                        <button string="Confirm Transfer" 
+                                name="button_confirm" 
+                                type="object"
+                                attrs="{'invisible':[('state', '!=', 'draft')]}"
+                                class="oe_highlight"
+                                groups="hr.group_hr_user"/>
+                        <button string="Receive Asset" 
+                                name="button_transfer" 
+                                type="object"
+                                attrs="{'invisible':[('state', '!=', 'awaiting')]}"
+                                class="oe_highlight"
+                                groups="hr.group_hr_user"/>
+                        <button string="Cancel" 
+                                name="button_cancel" 
+                                type="object"
+                                attrs="{'invisible':[('state', '!=', 'awaiting')]}"
+                                class="oe_highlight"
+                                groups="hr.group_hr_user"/>
+                        <button string="Reset To Draft" 
+                                name="button_draft" 
+                                type="object"
+                                attrs="{'invisible':[('state', '!=', 'cancelled')]}"
+                                class="oe_highlight"
+                                groups="hr.group_hr_user"/>
+                        <field name="state" 
+                           widget="statusbar" 
+                           statusbar_visible="draft,awaiting,transferred" class="oe_highlight"
+                           statusbar_colors='{"awaiting":"upload"}'/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">                           
+                            <h1>   
+                                <field name="asset_number" class="oe_inline" readonly="1"/>
+                            </h1>
+                        </div>
+                    <group>
+                        <group>
+                            <field name="creation_date" invisible="1"/>
+                            <!--field name="service_area_id" 
+                                on_change="onchange_service(service_area_id)"
+                                required="1"
+                                widget="selection"
+                                options="{'no_create': True}"
+                                attrs="{'readonly':['|',('state','!=','draft')]}"/-->
+                            <field name="location_id"
+                                attrs="{'readonly':[('state','!=','draft')]}"/>
+                            <field name="business_partner" required="1"
+                                options="{'no_create': True}"
+                                attrs="{'readonly':[('state','!=','draft')]}"/>
+                            <field name="remarks"
+                                attrs="{'readonly':[('state','!=','draft')]}"/>
+                            <!--field name="check_hrbp" invisible="1"/-->
+                        </group>
+                        <group>
+                            <field name="transferred_by"
+                                options="{'no_create': True}" readonly="1"/>
+                            <field name="transferred_date" readonly="1"/>
+                            <field name="received_by"
+                                options="{'no_create': True}" readonly="1"/>
+                            <field name="received_date" readonly="1"/> 
+                            <!--field name="check_admin" invisible="1"/-->
+                            <field name="asset_ids" invisible="1"/>                            
+                        </group>
+                    </group>
+                    <group>
+                        <notebook>
+                            <page string="Asset">
+                                <field name="asset_transfer_ids"
+                                    attrs="{'readonly':[('state','=','transferred')]}"
+                                    groups="hr_employee_asset.group_mro_manager">
+                                    <tree string="Asset" editable="bottom">
+                                        <field name="asset_id" domain="[('state','=', 'ready')]"/>
+                                        <field name="receiving_status"/>
+                                        <field name="remarks"/>
+                                    </tree>
+                                </field>
+                            </page> 
+                        </notebook> 
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+        </record>
+
+        <record id="asset_transfer_tree_view" model="ir.ui.view">
+            <field name="name">asset.transfer.tree</field>
+            <field name="model">asset.transfer</field>
+            <field name="arch" type="xml"> 
+                <tree string="Asset Transfer">
+                    <field name="asset_number"/>
+                    <!--field name="service_area_id"/-->
+                    <field name="business_partner"/>
+                    <field name="transferred_by"/>
+                    <field name="transferred_date"/>
+                    <field name="received_by"/>
+                    <field name="received_date"/>
+                    <field name="remarks"/>
+                    <field name="state"/>
+                    <field name="creation_date" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Asset Filter -->
+       <!--  <record id="view_asset_transfer_filter" model="ir.ui.view">
+            <field name="name">Asset Transfer</field>
+            <field name="model">asset.transfer</field>
+            <field name="arch" type="xml">
+                <search string="Asset Transfer">
+                    <field name="transferred_by" string="Transfer By"/>
+                    <field name='state' string="Status"/>
+                    <filter string="Draft" name='draft' 
+                            domain="[('state','=', 'draft')]" />
+                    <filter string="Awaiting Receipt" name='awaiting' 
+                            domain="[('state','=', 'awaiting')]" />
+                    <filter string="Transferred" name='transferred' 
+                            domain="[('state','=', 'transferred')]" />
+                    <filter string="Cancelled" name='cancelled' 
+                            domain="[('state','=', 'cancelled')]" />
+                    <group expand="0" string="Group By">
+                        <filter string="Received By"
+                                        domain="[]" context="{'group_by':'received_by'}"/>
+                        
+                        <filter string="HR Business Partner"
+                                        domain="[]" context="{'group_by':'business_partner'}"/>
+                        <filter string="Transferred By"
+                                        domain="[]" context="{'group_by':'transferred_by'}"/>
+                        <filter string="Status" 
+                                domain="[]"
+                                context="{'group_by':'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record> -->
+
+        <record id="action_asset_transfer" model="ir.actions.act_window">
+            <field name="name">Assets Transfer</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">asset.transfer</field>
+            
+            <field name="view_mode">tree,form,graph</field>
+            <field name="view_id" eval="asset_transfer_tree_view"/>
+        </record>
+
+
+        <!--record model="ir.actions.act_window.view" id="action_assets_transfer_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="asset_transfer_tree_view"/>
+            <field name="act_window_id" ref="action_transfer"/>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="action_assets_transfer_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="asset_transfer_form_view"/>
+            <field name="act_window_id" ref="action_transfer"/>
+        </record-->
+
+        <!-- Asset item -->
+       <!--  <menuitem id="menu_asset_transfer" name="Assets Transfer"
+            action="action_asset_transfer"
+            parent="menu_maintenance_assets"
+            groups="asset.group_mro_manager"
+            sequence="100"/> -->
+
+ 	</data>
+</openerp>

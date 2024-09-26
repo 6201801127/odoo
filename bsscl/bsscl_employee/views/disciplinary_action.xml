@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+    <!-- disciplinary action page view in employee tree -->
+        <record model="ir.ui.view" id="hr_employee_form_inherit_disciplinary_action1">
+            <field name="name">hr.employee.form.inherit.disciplinary.action</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//notebook/page[@name='hr_settings']" position="after">
+                    <page name="disciplinary_action_page" string="Disciplinary Action / अनुशासनिक कार्यवाही" >
+                        <field name="disciplinary_action_id" readonly="1">
+                            <tree string="Disciplinary Action">
+                                <field name="employee_id" invisible='1' />
+                                <field name="discipline_reason" />
+                                <field name="note" />
+                                <field name="explanation" />
+                                <field name="action" />
+                                <field name="action_details" />
+                                <field name="state" />
+                            </tree>
+                        </field>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+
+
+    <!--Discipline Category Search View-->
+        <record id="disciplinary_search_view" model="ir.ui.view">
+            <field name="name">hr disciplinary category view</field>
+            <field name="model">discipline.category</field>
+            <field name="arch" type="xml">
+                <search string="Search information">
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="category_type"/>
+                    <field name="description"/>
+                    <group expand="1" string="Group By">
+                        <filter string="Department" name="department_name" context="{'group_by':'category_type'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+		    <!--Discipline Category Tree View-->
+        <record id="disciplinary_category_view_tree" model="ir.ui.view">
+                <field name="name">discipline.category.tree</field>
+                <field name="model">discipline.category</field>
+                <field name="arch" type="xml">
+                    <tree string="Discipline Categories">
+                    <field name="name"/>	
+                    <field name="category_type" />
+                    </tree>
+                </field>
+            </record>
+        
+            <!--Discipline Category Form View-->        
+        <record id="disciplinary_category_view_form" model="ir.ui.view">
+            <field name="name">discipline.category.form</field>
+            <field name="model">discipline.category</field>
+            <field name="arch" type="xml">
+                <form string="Discipline Category">
+                    <sheet>
+                        <group>
+                        <field name="name" required="True"/>
+                        <field name="code" required="True"/>
+                        <field name="category_type" required="True"/>
+                        <field name="description"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_disciplinary_category_view" model="ir.actions.act_window">
+                <field name="name">Discipline Categories / अनुशासनात्मक श्रेणी</field>
+                <field name="res_model">discipline.category</field>
+                <field name="view_mode">tree,form</field>
+            </record>
+
+
+
+            <!--Discipline Action Search View-->        
+
+         <record id="disciplinary_search_view" model="ir.ui.view">
+            <field name="name">hr disciplinary search view</field>
+            <field name="model">disciplinary.action</field>
+            <field name="arch" type="xml">
+                <search string="Search information">
+                    <field name="employee_id"/>
+                    <field name="department_name"/>
+                    <field name="joined_date"/>
+                    <field name="discipline_reason"/>
+                    <filter string="Draft" name="draft" domain="[('state','=','draft')]"/>
+                    <!-- <filter string="Waiting at Deputy Commissioner" name="explain" domain="[('state','=','explain')]"/> -->
+                    <filter string="Waiting at Manager" name="submitted" domain="[('state','=','submitted')]"/>
+                    <filter string="Completed" name="action" domain="[('state','=','action')]"/>
+                    <filter string="Cancelled" name="cancel" domain="[('state','=','cancel')]"/>
+                    <separator/>
+                    <group expand="1" string="Group By">
+                        <filter string="State" name="state" context="{'group_by': 'state'}"/>
+                        <filter string="Department" name="department_name" context="{'group_by':'department_name'}"/>
+                        <filter string="Joined Date" name="joined_date" context="{'group_by': 'joined_date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+            <!--Discipline Action Tree View-->        
+        <record id="employee_disciplinary_tree" model="ir.ui.view">
+            <field name="name">disciplinary.action.tree</field>
+            <field name="model">disciplinary.action</field>
+            <field name="arch" type="xml">
+                <tree string="Disciplinary Action">
+                    <field name="name"/>
+                    <field name="employee_id" />
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+
+            <!--Discipline Action Form View-->      
+        <record id="employee_disciplinary_form" model="ir.ui.view">
+            <field name="name">disciplinary.action.form</field>
+            <field name="model">disciplinary.action</field>
+            <field name="arch" type="xml">
+                <form string="Disciplinary Action">
+                    <header>
+                        <button name="assign_function" type="object" string="Submit / निवेदन करना" class="oe_highlight"
+                                states="draft"/>
+                        <!-- <button name="explanation_function" type="object" string="Proceed / आगे बढ़ना" class="oe_highlight"
+                                states="explain" groups="bsscl_employee.deputy_com_id"/> -->
+                        <button name="action_function" type="object" string="Validate / मान्य करना"
+                                class="oe_highlight" groups="bsscl_employee.group_hr_ra"
+                                attrs="{'invisible':['|',('check_manager','=',False),('state','not in',['submitted'])]}"/>
+                                
+                        <button name="cancel_function" type="object" string="Cancel / रद्द करना" 
+                                groups="bsscl_employee.group_hr_ra"
+                                attrs="{'invisible':['|',('check_manager','=',False),('state','not in',['submitted'])]}"/>
+
+                        <button name="set_to_function" type="object" class="oe_highlight" string="Set to Draft / ड्राफ्ट पर सेट करें" states="cancel"
+                                groups="bsscl_employee.group_hr_ra"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,submitted,action"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" readonly="1"/>
+                                <field name="check_manager" invisible='1'/>
+                                <field name="check_user" invisible='1'/>
+
+                            </h1>
+                        </div>
+                        <h2>
+                            <group colspan="4">
+                                <field name="employee_id" required="True"
+                                        options="{'no_create':True,'no_edit':True,'no_open':True}"
+                                       attrs="{'readonly': [('state','!=','draft')]}"/>
+                            </group>
+                        </h2>
+                        <group>
+                            <group>
+                                <field name="department_name" required="True" force_save='1'
+                                       attrs="{'readonly': 1}" />
+                                <field name="joined_date"  attrs="{'readonly': 1}" force_save='1'/>
+                                <!-- <field name="read_only" invisible="True"/> -->
+                                <field name="warning" invisible="True"/>
+                                <!-- <field name="user_dep_com" invisible="True"/> -->
+                                <!-- <field name="user_comm" invisible="True" /> -->
+
+                            </group>
+                        </group>
+
+
+                        <notebook>
+                            <page name="Disciplinary Information"
+                                  string="Disciplinary Information / अनुशासनात्मक जानकारी">
+                                <group colspan="4">
+                                    <group>
+                                        <field name="discipline_reason" required="True"
+                                               attrs="{'readonly': [('state','!=','draft')]}"
+                                               domain="[('category_type','=','disciplinary')]"/>
+                                    <!-- </group> -->
+                                    <!-- <group>
+                                        <field name="explanation"
+                                               attrs="{'invisible' :[('state','=','draft')],'readonly': ['|',('user_dep_com','!=',True),('state','=','action')]}"/>
+                                    </group> -->
+                                    <!-- <group> -->
+                                        <field name="attachment_ids" widget="many2many_binary" class="oe_inline"
+                                               attrs="{'readonly': [('state','!=','draft')]}"/>
+                                               <span style="color: red">(Only .jpeg, .jpg, .png, .pdf, .doc, .docx format are allowed.Maximum file size is 2 MB) / केवल .jpeg, .jpg, .png, .pdf, .doc, .docx प्रारूप की अनुमति है। अधिकतम फ़ाइल आकार 2 एमबी है </span>
+                                    </group>
+                                <group>
+                                    <field name="note" required='1' attrs="{'readonly': [('state','!=','draft')]}"/>
+                                        <span style="color: red">(maximum 500 character / अधिकतम 500 वर्ण ) </span>
+                                </group>
+                                </group>
+                            </page>
+                            <page name="action_information" states="submitted,action"
+                                  string="Action Information / कार्रवाई की जानकारी">
+                                <group>
+                                <group >
+                                    
+                                    <field name="action"
+                                           attrs="{'invisible': [('state','not in',['submitted','action'])],'readonly': ['|',('state','=','action'),('check_manager','=',False)]}"
+                                           domain="[('category_type','=','action')]" />
+                                </group>
+                                </group>
+                                <group>
+                                    <field name="warning_letter"
+                                           attrs="{'invisible' :[('warning','!=',1)],'readonly': ['|',('state','=','action'),('check_manager','=',False)]}"/>
+                                    <field name="suspension_letter"
+                                           attrs="{'invisible' :[('warning','!=',2)],'readonly': ['|',('state','=','action'),('check_manager','=',False)]}"/>
+                                    <field name="termination_letter"
+                                           attrs="{'invisible' :[('warning','!=',3)],'readonly': ['|',('state','=','action'),('check_manager','=',False)]}"/>
+                                    <field name="action_details"
+                                           attrs="{'invisible' :[('warning','not in',[4,5])],'readonly': ['|',('state','=','action'),('check_manager','=',False)]}"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- <record id="action_disciplinary_action" model="ir.actions.act_window">
+            <field name="name">Disciplinary Action / अनुशासनिक कार्यवाही</field>
+            <field name="res_model">disciplinary.action</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','in',('draft','explain','submitted','action','cancel'))]</field>
+        </record> -->
+
+        <record id="disciplinary_action_details" model="ir.actions.act_window">
+            <field name="name">Disciplinary Actions</field>
+            <field name="res_model">disciplinary.action</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'create': False}</field>
+            <field name="domain">[('state','!=','draft'),('employee_id.id', '=', active_id)]</field>
+        </record>
+
+        <record id="action_disciplinary_action" model="ir.actions.act_window">
+            <field name="name">Disciplinary Action / अनुशासनिक कार्यवाही</field>
+            <field name="res_model">disciplinary.action</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','in',('draft','explain','submitted','action','cancel'))]</field>
+        </record>
+  
+<!-- 
+        <record id="disciplinary_action_details_view" model="ir.actions.act_window">
+            <field name="name">Disciplinary Action Details</field>
+            <field name="res_model">disciplinary.action</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','!=','draft')]</field>
+        </record> -->
+
+        
+        <!--Add Discipline button in the Employee Form-->
+        <record id="employee_form_inherit_disciplinary" model="ir.ui.view">
+            <field name="name">inherit.employee.form.view</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='button_box']" position="inside">
+                    <button name="%(disciplinary_action_details)d"
+                            class="oe_stat_button"
+                            icon="fa-info-circle"
+                            type="action"
+                    >
+                        <field string="Disciplinary Action" name="discipline_count" widget="statinfo"/>
+                    </button>
+                </xpath>
+            </field>
+        </record>
+
+        <menuitem id="admin_activity" name="Administration Activity / प्रशासन गतिविधि " parent="hr.menu_hr_root" groups="bsscl_employee.group_hr_ra"  sequence="23"/>
+
+        <menuitem id="disciplinary_action" name="Disciplinary Actions / अनुशासनिक कार्यवाही" parent="admin_activity" groups="bsscl_employee.group_hr_ra"  sequence="23"/>
+        <menuitem id="disciplinary_action_create" action="action_disciplinary_action" groups="bsscl_employee.group_hr_ra"  name="Disciplinary Action / अनुशासनिक कार्यवाही" parent="disciplinary_action"  sequence="1"/>
+        <menuitem id="disciplinary_category_view" action="action_disciplinary_category_view" groups="bsscl_employee.group_hr_ra" name="Discipline Category / अनुशासनात्मक श्रेणी" parent="disciplinary_action"
+        sequence="3"/>
+
+     
+    </data>
+</odoo>

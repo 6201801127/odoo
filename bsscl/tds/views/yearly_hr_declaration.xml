@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="fiscal_year_filter_yearly_view">
+            <field name="name">Employee Data</field>
+            <field name="model">fiscal_year_filter_wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="date_range"  required="1"/>
+                        </group>
+                        <footer>
+                            <center>
+                                <button name="get_yearly_declarations" type="object" string="View" class="btn-primary"/>
+                                <button name="delete_yearly_declarations" type="object" string="Delete Data" class="btn-danger" style="margin-left:5px"/>
+
+                            </center>
+                        </footer>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <!-- yearly_hr_declaration form view -->
+        <record id="yearly_hr_declaration_view_form" model="ir.ui.view">
+            <field name="name">yearly_hr_declaration.view.form</field>
+            <field name="model">yearly_hr_declaration</field>
+            <field name="arch" type="xml">
+                <form string="">
+                    <sheet>
+                        <group><!-- Add your fields here -->
+                            <field name="employee_id"/>
+                            <field name="job_name"/>
+                            <field name="department_name"/>
+                            <field name="pan_number"/>
+                            <field name="date_range"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record><!-- yearly_hr_declaration search view -->
+        <record id="yearly_hr_declaration_view_search" model="ir.ui.view">
+            <field name="name">yearly_hr_declaration.view.search</field>
+            <field name="model">yearly_hr_declaration</field>
+            <field name="arch" type="xml">
+                <search string="Search Description"><!-- Add your fields here -->
+                    <field name="employee_id"/>
+                    <field name="date_range"/>
+                    <filter string="Not Submitted" domain="[(&apos;state&apos;,&apos;=&apos;,&apos;ns&apos;)]" name="not_submitted"/>
+                    <filter string="Submitted" domain="[(&apos;state&apos;,&apos;=&apos;,&apos;s&apos;)]" name="submitted"/>
+                    <filter string="Approved" domain="[(&apos;state&apos;,&apos;=&apos;,&apos;c&apos;)]" name="submitted"/>
+                    <group expand="0" string="Group By">
+                        <filter name="date_range" string="Financial Year" domain="" context="{&apos;group_by&apos;:&apos;date_range&apos;}"/>
+                    </group>
+                </search>
+            </field>
+        </record><!-- model.name tree view -->
+        <record id="yearly_hr_declaration_view_tree" model="ir.ui.view">
+            <field name="name">yearly_hr_declaration.view.tree</field>
+            <field name="model">yearly_hr_declaration</field>
+            <field name="arch" type="xml">
+                <tree create="0" decoration-info="state == &apos;s&apos;" decoration-danger="state == &apos;ns&apos;" decoration-success="state == &apos;c&apos;" delete="0"><!-- Add your fields here -->
+                    <field name="employee_id" groups="tds.group_report_manager_declaration"/>
+                    <field name="job_name" groups="tds.group_report_manager_declaration"/>
+                    <field name="department_name" groups="tds.group_report_manager_declaration"/>
+                    <field name="pan_number" groups="tds.group_report_manager_declaration"/>
+                    <field name="date_range" groups="tds.group_report_manager_declaration"/>
+                    <field name="state" groups="tds.group_report_manager_declaration"/>
+                    <button name="view_yearly_hr_declaration" type="object" string="View" class="oe_highlight" groups="tds.group_report_manager_declaration"/>
+                </tree>
+            </field>
+        </record>
+        <!-- model.name action window -->
+        <record id="fiscal_year_filter_wizard_yearly_action" model="ir.actions.act_window">
+            <field name="name">Declarations</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">fiscal_year_filter_wizard</field>
+            <field name="view_mode">form</field>
+            <field name="binding_view_types">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="fiscal_year_filter_yearly_view"/>
+        </record>
+        <record id="yearly_hr_declaration_report_action" model="ir.actions.server">
+            <field name="name">Yearly HR Declaration</field>
+            <field name="model_id" ref="model_yearly_hr_declaration"/>
+            <field name="groups_id" eval="[(6,0,[ref('tds.group_report_manager_declaration')])]"/>
+            <field name="state">code</field>
+            <field name="code">
+                action = model.action_yearly_tds()
+            </field>
+        </record>
+    </data>
+</odoo>

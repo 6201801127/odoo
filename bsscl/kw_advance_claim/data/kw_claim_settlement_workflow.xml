@@ -1,0 +1,420 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data noupdate="0">
+        <record id="kw_adv_claim_settlement_workflow_main" model="odoo.workflow">
+            <field name="name">Petty Cash Claim Settlement</field>
+            <field name="activities_add" eval="True"/>
+            <field name="followers_add" eval="False"/>
+            <field name="mail_thread_add" eval="True"/>
+            <field name="remove_default_attrs_mod" eval="False"/>
+            <field name="model_id" ref="kw_advance_claim.model_kw_advance_claim_settlement"/>
+        </record>
+
+        <record id="kw_adv_claim_settlement_workflow_node_1" model="odoo.workflow.node">
+            <field name="name">Draft</field>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="node_name">draft</field>
+            <field name="sequence" eval="1"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_start" eval="True"/>
+        </record>
+
+        <record id="kw_adv_claim_settlement_workflow_node_2" model="odoo.workflow.node">
+            <field name="name">Applied</field>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="node_name">applied</field>
+            <field name="sequence" eval="2"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="False"/>
+        </record>
+
+        <record id="kw_adv_claim_settlement_workflow_node_3" model="odoo.workflow.node">
+            <field name="name">Forward</field>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="node_name">forward</field>
+            <field name="sequence" eval="3"/>
+            <field name="is_visible" eval="False"/>
+            <field name="flow_end" eval="False"/>
+        </record>
+
+        <record id="kw_adv_claim_settlement_workflow_node_4" model="odoo.workflow.node">
+            <field name="name">Approved</field>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="node_name">approve</field>
+            <field name="sequence" eval="4"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="False"/>
+        </record>
+
+
+<!--         <record id="kw_adv_claim_settlement_workflow_node_5" model="odoo.workflow.node">
+            <field name="name">Hold</field>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="node_name">hold</field>
+            <field name="sequence" eval="5"/>
+            <field name="is_visible" eval="False"/>
+            <field name="flow_end" eval="False"/>
+        </record> -->
+
+        <record id="kw_adv_claim_settlement_workflow_node_6" model="odoo.workflow.node">
+            <field name="name">Grant</field>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="node_name">grant</field>
+            <field name="sequence" eval="6"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+        <record id="kw_adv_claim_settlement_workflow_node_7" model="odoo.workflow.node">
+            <field name="name">Settled</field>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="node_name">release</field>
+            <field name="sequence" eval="7"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+        
+        <record id="kw_adv_claim_settlement_workflow_node_8" model="odoo.workflow.node">
+            <field name="name">Cancelled</field>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="node_name">cancel</field>
+            <field name="sequence" eval="8"/>
+            <field name="is_visible" eval="False"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+        <record id="kw_adv_claim_settlement_workflow_node_9" model="odoo.workflow.node">
+            <field name="name">Rejected</field>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="node_name">reject</field>
+            <field name="sequence" eval="9"/>
+            <field name="is_visible" eval="False"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+
+        <record id="kw_adv_claim_settlement_workflow_button_1" model="odoo.workflow.node.button">
+            <field name="sequence" eval="1"/>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="name">Apply</field>
+            <field name="node_id" ref="kw_adv_claim_settlement_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_apply_btn','=',False),('state', 'not in', 'draft')]"/>
+            <field name="btn_hide_group">kw_advance_claim.group_kw_advance_claim_user</field>
+             <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+if user.has_group("kw_advance_claim.group_kw_advance_claim_user"):
+    result = True
+else :
+    warning("You are not authorized user to take action. ")
+    result = False
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+obj.apply_claim_request()
+
+            </field>
+        </record>
+
+        <record id="kw_adv_claim_settlement_workflow_button_2" model="odoo.workflow.node.button">
+            <field name="sequence" eval="2"/>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="name">Cancel</field>
+            <field name="node_id" ref="kw_adv_claim_settlement_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('hide_btn_cancel','=',False),('state', '!=', 'applied')]"/>
+            <field name="btn_class">btn-danger</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_advance_claim.kw_adv_claim_cancel_remark_wizard_form_view").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_adv_claim_cancel_remark_wizard',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'view_id': form_view_id,
+    'target': 'new',
+    'context': {'default_claim_record_id': obj.id},
+    }
+            </field>
+        </record>
+
+     <record id="kw_adv_claim_settlement_workflow_button_3" model="odoo.workflow.node.button">
+            <field name="sequence" eval="3"/>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="name">Approve</field>
+            <field name="node_id" ref="kw_adv_claim_settlement_workflow_node_2"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_ra_button','=',False),('state', 'in', ['draft','approve','cancel','reject','grant','release'])]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_advance_claim.kw_adv_claim_approv_remark_wizard_form_view").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_advance_claim_approve_remark_wizard',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'view_id': form_view_id,
+    'target': 'new',
+    'context': {'default_claim_record_id': obj.id},
+    }
+            </field>
+        </record>
+
+ <record id="kw_adv_claim_settlement_workflow_button_4" model="odoo.workflow.node.button">
+            <field name="sequence" eval="4"/>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="name">Forward</field>
+            <field name="node_id" ref="kw_adv_claim_settlement_workflow_node_2"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain"  eval="['|',('show_ra_button','=',False),('state', 'in', ['draft','approve','cancel','reject','grant','release'])]"/>
+            <field name="btn_class">btn-warning</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_advance_claim.kw_adv_apply_claim_forward_wizard_form").id 
+action= {
+    'name':'Forward To',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_advance_apply_claim_wizard',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'view_id': form_view_id,
+    'target': 'new',
+    'context': {'default_claim_record_id': obj.id},
+    }
+            </field>
+        </record>
+
+
+        <!-- <record id="kw_adv_claim_settlement_workflow_button_5" model="odoo.workflow.node.button">
+            <field name="sequence" eval="5"/>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="name">Hold</field>
+            <field name="node_id" ref="kw_adv_claim_settlement_workflow_node_2"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_ra_button','=',False),('state', 'in', ['hold','reject','grant','draft','approve','release'])]"/>
+            <field name="btn_class">btn-info</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_advance_claim.kw_adv_claim_hold_remark_wizard_form_view").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_adv_claim_hold_remark_wizard',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'view_id': form_view_id,
+    'target': 'new',
+    'context': {'default_claim_record_id': obj.id},
+    }
+            </field>
+        </record> -->
+
+
+     <!-- <record id="kw_adv_claim_settlement_workflow_button_6" model="odoo.workflow.node.button">
+            <field name="sequence" eval="6"/>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="name">Unhold</field>
+            <field name="node_id" ref="kw_adv_claim_settlement_workflow_node_2"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_ra_button','=',False),('state', 'not in', ['hold'])]"/>
+            <field name="btn_class">btn-info</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+obj.write({'state':'applied'})
+            </field>
+        </record> -->
+
+
+
+        <record id="kw_adv_claim_settlement_workflow_button_7" model="odoo.workflow.node.button">
+            <field name="sequence" eval="7"/>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="name">Reject</field>
+            <field name="node_id" ref="kw_adv_claim_settlement_workflow_node_2"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_ra_button','=',False),('state', 'in', ['draft','approve','reject','cancel','grant','release'])]"/>
+            <field name="btn_class">btn-danger</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_advance_claim.kw_adv_claim_reject_remark_wizard_form_view").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_advance_claim_reject_remark_wizard',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'view_id': form_view_id,
+    'target': 'new',
+    'context': {'default_claim_record_id': obj.id},
+    }
+            </field>
+        </record>
+
+
+<record id="kw_adv_claim_settlement_workflow_button_8" model="odoo.workflow.node.button">
+            <field name="sequence" eval="8"/>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="name">Grant</field>
+            <field name="node_id" ref="kw_adv_claim_settlement_workflow_node_4"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_accounts_button','=',False),('state', 'in', ['reject','grant','draft','applied','forward','release'])]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_advance_claim.kw_adv_claim_grant_remark_wizard_form_view").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_advance_claim_grant_remark_wizard',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'view_id': form_view_id,
+    'target': 'new',
+    'context': {'default_claim_record_id': obj.id},
+    }
+            </field>
+        </record>
+
+
+        <!-- <record id="kw_adv_claim_settlement_workflow_button_9" model="odoo.workflow.node.button">
+            <field name="sequence" eval="9"/>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="name">Hold</field>
+            <field name="node_id" ref="kw_adv_claim_settlement_workflow_node_4"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_accounts_button','=',False),('state', 'in', ['hold','reject','grant','draft','applied','forward','release'])]"/>
+            <field name="btn_class">btn-info</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_advance_claim.kw_adv_claim_acc_hold_remark_wizard_form_view").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_adv_claim_acc_hold_remark_wizard',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'view_id': form_view_id,
+    'target': 'new',
+    'context': {'default_claim_record_id': obj.id},
+    }
+            </field>
+        </record> -->
+
+        <record id="kw_adv_claim_settlement_workflow_button_10" model="odoo.workflow.node.button">
+            <field name="sequence" eval="10"/>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="name">Reject</field>
+            <field name="node_id" ref="kw_adv_claim_settlement_workflow_node_4"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_accounts_button','=',False),('state', 'in', ['reject','grant','draft','applied','forward','release'])]"/>
+            <field name="btn_class">btn-danger</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_advance_claim.kw_adv_claim_accounts_reject_remark_wizard_form_view").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_adv_claim_accounts_reject_remark_wizard',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'view_id': form_view_id,
+    'target': 'new',
+    'context': {'default_claim_record_id': obj.id},
+    }
+            </field>
+        </record>
+
+
+
+
+      <!-- <record id="kw_adv_claim_settlement_workflow_button_11" model="odoo.workflow.node.button">
+            <field name="sequence" eval="11"/>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="name">Unhold</field>
+            <field name="node_id" ref="kw_adv_claim_settlement_workflow_node_4"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_accounts_button','=',False),('state', 'not in', ['hold'])]"/>
+            <field name="btn_class">btn-info</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+obj.write({'state':'approve'})
+            </field>
+        </record> -->
+
+         <record id="kw_adv_claim_settlement_workflow_button_12" model="odoo.workflow.node.button">
+            <field name="sequence" eval="12"/>
+            <field name="workflow_id" ref="kw_adv_claim_settlement_workflow_main"/>
+            <field name="name">Release</field>
+            <field name="node_id" ref="kw_adv_claim_settlement_workflow_node_7"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_accounts_button','=',False),('state', '!=', 'grant')]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_advance_claim.kw_claim_release_remark_wizard_form_view").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_advance_claim_release_remark_wiz',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'view_id': form_view_id,
+    'target': 'new',
+    'context': {'default_claim_record_id': obj.id},
+
+    }
+            </field>
+        </record>
+
+
+    </data>
+</odoo>

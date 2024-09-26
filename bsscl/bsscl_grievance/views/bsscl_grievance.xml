@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+		<!-- explicit form view of kw handbook Opening -->
+		<record model="ir.ui.view" id="bsscl_emp_grievance_form_view">
+			<field name="name">BSAP Employee Grievance</field>
+			<field name="model">bsscl.grievance</field>
+			<field name="priority" eval="1" />
+			<field name="arch" type="xml">
+				<form>
+					<header>
+                        <button name="apply_grievance" string="Apply" type="object" class="oe_highlight" attrs="{'invisible':['|',('check_user','=',False),('state','not in',['draft','reset'])]}" />
+						<button name="submit_grievance" string="Approve" type="object" class="oe_highlight" attrs="{'invisible':['|',('check_user','!=',False),('state','in',['approve','draft','reset','reject'])]}"/>
+						<button name="%(reject_grievance_action)d" string="Revert" type="action" class="oe_highlight" attrs="{'invisible':['|',('check_user','!=',False),('state','in',['approve','draft','reset','reject'])]}"/>
+
+						<!-- <button name="approve_grievance" states="verify" string="Approve" type="object" class="oe_highlight" groups="bsscl_employee.commissioner_id" /> -->
+						<button name="%(reject_grievance_id)d" string="Reject" type="action" class="oe_highlight" attrs="{'invisible':['|',('check_user','!=',False),('state','in',['approve','draft','reset','reject'])]}"/>
+
+						
+						
+						<field name="state" widget="statusbar" statusbar_visible="draft,apply,approve,reject,reset" />
+						<!-- ,verify -->
+
+					</header>
+					<sheet>
+						<style>
+							.o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 180px !important;}
+						</style>
+						<div class="oe-tittle">
+							<h1 style="color:#3aadaa">
+							Applicant Information
+                         </h1>
+						</div>
+						<div class="oe-tittle">
+							<h3>
+								<field name="grievance_code" readonly='1' class="oe_inline" />
+							</h3>
+						</div>
+						<group>
+							<group>
+								<field name="check_user" invisible="1" />
+								<!-- <field name="new_boolean"/> -->
+								<!-- <field name="cmd_forward_boolean" invisible='1' /> -->
+								<field name="employee_id" readonly='1' options='{"no_open": True, "no_create": True, "no_edit": True}' />
+								<field name="department" />
+								<field name="designation" />
+								<field name="emp_branch" />
+								<!-- <field name="unit" />
+								<field name="show_grievance" invisible="1" /> -->
+							</group>
+							<group>
+								<!-- <field name="case_type" groups="bsscl_employee.commissioner_id" widget='radio' options="{'horizontal': true}" attrs="{'readonly':[('state','!=','receive')],'invisible':[('state','in',['draft','apply'])]}" /> -->
+								<field name="grievance_type_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" required="1" attrs="{'readonly':[('state','not in',['draft','reset'])]}"  />
+
+								<!-- <field name="subject" required='1' attrs="{'readonly':[('state','not in',['draft','reset'])]}" /> -->
+								<label for="subject" />
+                            <div>
+                                <field name="subject" required='1' attrs="{'readonly':[('state','not in',['draft','reset'])]}" />
+                                <p style="color:red;">(Subject must not exceed 100 characters)</p>
+                            </div>
+								<!-- <field name="description" required='1' attrs="{'readonly':[('state','not in',['draft','reset'])]}" /> -->
+								<label for="description" />
+                            <div>
+                                <field name="description" required='1' attrs="{'readonly':[('state','not in',['draft','reset'])]}" />
+                                <p style="color:red;">(Description must not exceed 500 characters)</p>
+                            </div>
+
+								<!-- <field name="uploaded_doc" widget="binary" filename="file_name" attrs="{'readonly':[('state','not in',['draft','reset'])]}" string="Upload File/(दस्तावेज अपलोड करें
+								)" /> -->
+								<label for="uploaded_doc" />
+                            <div>
+                                <field name="uploaded_doc" widget="binary" filename="file_name" attrs="{'readonly':[('state','not in',['draft','reset'])]}" string="Upload File/(दस्तावेज अपलोड करें
+								)" />
+                                <p style="color:red;">(Only .jpeg, .jpg, .png, .pdf, .doc, .docx format are allowed.Maximum file size is 2 MB)</p>
+                            </div>
+								<field name="file_name" invisible='1' />
+							</group>
+						</group>
+						<notebook attrs="{'invisible':[('state','in',['draft'])]}">
+							<page string="Manager Remark/प्रबंधक टिप्पणी " attrs="{'invisible':[('check_user','!=',False),('cc_verify_button','=',False)]}" >
+								<group>
+									<group>
+										<field name="cc_remark" string="Manager Remark/प्रबंधक टिप्पणी" attrs="{'readonly':[('check_user','!=',False),('state','=','approve')]}" />
+										<!-- <field name="cc_document" string="Upload File/(दस्तावेज अपलोड करें)
+										" widget="binary" filename="cc_file_name" attrs="{'readonly':['|',('check_cc_user','=',False),('state','!=','apply')]}" /> -->
+										<field name="cc_file_name" invisible='1' />
+										<field name="cc_verify_button" invisible='1' />
+										<field name="cc_action_taken_by" options='{"no_open": True, "no_create": True, "no_edit": True}' readonly="1" attrs="{'invisible':[('cc_verify_button','=',False)]}" string="Action Taken By/द्वारा कार्यवाही की गई" />
+										<!-- <field name="check_cc_user" invisible='1' /> -->
+										<field name="cc_action_taken_on" readonly='1' attrs="{'invisible':[('cc_verify_button','=',False)]}" string='Action Taken On/कार्रवाई की गई' />
+										<field name="rej_reas" attrs="{'invisible':[('state','not in', 'reject')]}" readonly="1" string ="Reason Of Cancellation/Rejection / रद्द करने का कारण"/>
+
+									</group>
+								</group>
+							</page>
+
+							
+							<!-- <page string="Commissioner Remark" attrs="{'invisible':['&amp;',('check_cmd_user','=',False),('state','not in',['approve','reject'])]}" name="third_level">
+								
+								<group col='2'>
+									<group string="Final Action Details">
+										<field name="show_approve_option" invisible='1' />
+										<field name="check_cmd_user" invisible='1' />
+											
+										<field name="commandant_remark"  attrs="{'readonly':[('show_approve_option','=',False)]}" force_save="1" />
+										<field name="cmd_action_taken_by" readonly='1' attrs="{'invisible':[('state','not in',['approve','reject'])]}" string="Action Taken By/द्वारा कार्यवाही की गई" options='{"no_open": True, "no_create": True, "no_edit": True}' />
+										<field name="cmd_action_taken_on" readonly='1' attrs="{'invisible':[('state','not in',['approve','reject'])]}" string='Action Taken On/कार्रवाई की गई' />
+									</group>
+								</group>
+							</page> -->
+						</notebook>
+					</sheet>
+					<div class="oe_chatter">
+						<field name="message_follower_ids" widget="mail_followers" />
+						<field name="activity_ids" widget="mail_activity" />
+						<field name="message_ids" widget="mail_thread" />
+					</div>
+				</form>
+			</field>
+		</record>
+		<record model="ir.ui.view" id="bsscl_emp_grievance_tree_view">
+			<field name="name">BSAP Grievance tree view</field>
+			<field name="model">bsscl.grievance</field>
+			<field name="arch" type="xml">
+				<tree >
+					<!-- <field name="sort" invisible='1' /> -->
+					<field name="grievance_code" />
+					<field name="employee_id" />
+					<field name="grievance_type_id" />
+					<field name="state" />
+					<field name="pending_at" />
+					<field name="create_date" widget="date" string="Created On(निर्माण की तारीख)" />
+
+				</tree>
+			</field>
+		</record>
+		
+
+		<record model="ir.ui.view" id="bsap_emp_grievance_fo_pending_tree_view">
+			<field name="name">BSAP Grievance tree view</field>
+			<field name="model">bsscl.grievance</field>
+			<field name="arch" type="xml">
+				<tree >
+					<!-- <field name="sort" invisible='1' /> -->
+					<field name="grievance_code" />
+					<field name="employee_id" />
+					<field name="grievance_type_id" />
+					<field name="state" />
+					<field name="pending_at" />
+					<field name="create_date" widget="date" string="Created On(निर्माण की तारीख)" />
+					<!-- <button name="create_fo_pending" string="Create FO" type="object" class="oe_highlight" context="{'grievance': grievance_code}"/> -->
+				</tree>
+			</field>
+		</record>
+
+		
+
+		<record model="ir.ui.view" id="bsscl_grievance_view_all_tree">
+			<field name="name">BSAP Employee Grievance tree view</field>
+			<field name="model">bsscl.grievance</field>
+			<field name="arch" type="xml">
+				<tree  create='0'>
+					<!-- <field name="sort" invisible='1' /> -->
+					<field name="grievance_code" />
+					<field name="employee_id" />
+					<field name="grievance_type_id" />
+					<field name="state" />
+					<field name="pending_at" />
+					<field name="create_date" widget="date" string="Created On(निर्माण की तारीख)"/>
+					<field name="check_user" invisible='1' />
+					<button name="btn_open_view" string="Take Action" type="object" class="oe_highlight"  />
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="bsscl_grievance_kanban">
+			<field name="name">BSAP Grievance Kanban view</field>
+			<field name="model">bsscl.grievance</field>
+			<field name="arch" type="xml">
+				<kanban create="0">
+					<templates>
+						<t t-name="kanban-box">
+							<div>
+								<div class="o_kanban_record_top">
+									<div class="o_kanban_record_headings">
+										<h2 class="text-primary font-weight-bold">
+											<field name="grievance_code" />
+											
+										</h2>
+										<div class="mb-4" />
+										<h5 class="font-weight-bold">
+											<span class="fa fa-user-circle-o mr-3" title="Employee" />
+											<field name="employee_id" />
+										</h5>
+										<h5 class="font-weight-bold">
+											<span class="fa fa-map-marker mr-3" style="font-size:19px" title="Branch" />
+											<field name="emp_branch" />
+											
+
+										</h5>
+										<h5 class="font-weight-bold">
+											<span class="fa fa-file-text mr-3" title="Grievance" />
+											<field name="grievance_type_id" />
+										</h5>
+
+										<h5 class="font-weight-bold">
+											<span class="fa fa-calendar mr-3" title="Create Date" />
+											<field name="create_date" widget="date" string="Created On(निर्माण की तारीख)"/>
+										</h5>
+										<field name="check_user" invisible='1' />
+										<button name="btn_open_view" type="object" class="btn btn-primary o_select_file_button  pull-right" attrs="{'invisible':[('check_user','=',True)]}">Take Action</button>
+									</div>
+								</div>
+							</div>
+						</t>
+					</templates>
+				</kanban>
+			</field>
+		</record>
+
+
+		<record model="ir.ui.view" id="bsap_grievance_apply_kanban">
+			<field name="name">BSAP Grievance Kanban view</field>
+			<field name="model">bsscl.grievance</field>
+			<field name="priority" eval="1021" />
+			<field name="arch" type="xml">
+				<kanban>
+					<templates>
+						<t t-name="kanban-box">
+							<div t-attf-class="oe_kanban_global_click">
+								<div class="o_kanban_record_top">
+									<div class="o_kanban_record_headings">
+										<h2 class="text-primary font-weight-bold">
+											<field name="grievance_code" />
+										</h2>
+										<div class="mb-4" />
+										<h5 class="font-weight-bold">
+											<span class="fa fa-user-circle-o mr-3" title="Employee" />
+											<field name="employee_id" />
+										</h5>
+										<h5 class="font-weight-bold">
+											<span class="fa fa-map-marker mr-3" style="font-size:19px" title="Branch" />
+											<field name="emp_branch" />
+										</h5>
+										<h5 class="font-weight-bold">
+											<span class="fa fa-file-text mr-3" title="Grievance" />
+											<field name="grievance_type_id" />
+										</h5>
+
+										<h5 class="font-weight-bold">
+											<span class="fa fa-calendar mr-3" title="Create Date" />
+											<field name="create_date" widget="date" string="Created On(निर्माण की तारीख)" />
+										</h5>
+									</div>
+								</div>
+							</div>
+						</t>
+					</templates>
+				</kanban>
+			</field>
+		</record>
+		
+
+	</data>
+</odoo>

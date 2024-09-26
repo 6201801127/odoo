@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <template id="kwonboard_educational_details" name="Educational Details">
+            <t t-call="website.layout">
+                <div class="container mt-2 mb-2">
+                    <div class="card">
+                        <div class="card-body p-0">
+                            <div class="menu-bar">
+                                <ol class="progresss progresss--medium">
+                                    <li class="is-complete" data-step="1">Personal Details</li>
+                                    <li class="is-active" data-step="2">Educational Details</li>
+                                    <li class="" data-step="3">Work Experience Details</li>
+                                    <li class="progresss__last" data-step="4">Identification Details</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="container">
+                    <div class="card bg-white">
+                        <div class="card-body pl-5 pr-5">
+
+                            <!--Start : Message Template -->
+                            <t t-call="kw_onboarding_process.kwonboard_response_message_template"></t>
+                            <!--END : Message Template -->
+
+
+                            <form name="frm_onboard_education" id="frm_onboard_education" class="form-horizontal" method="post" action="/educationaldata" autocomplete="off" enctype="multipart/form-data">
+
+
+                                <h4 class="text-dark"> <b>Professional Qualification</b> </h4>
+                                <div class="table-responsive">
+                                    <table id="tblqualification" class="table table-bordered">
+                                        <thead class="thead-danger">
+                                            <tr >
+                                                <th class="align-left wd-11" >Course Name </th>
+                                                <th class="align-left wd-15">Stream</th>
+                                                <th class="align-left wd-20">Board / Institute / University</th>
+                                                <th class="align-left wd-10">Passing Year</th>
+                                                <th class="align-left wd-10">Division / Grade</th>
+                                                <th class="align-left wd-10">% of marks Obtained</th>
+                                                <th class="align-left">
+                                                    Upload Document
+                                                    <i class="fa fa-info-circle" data-rel="tooltip" title="(Only .jpeg, .png, .pdf format and maximum file size is 4 MB is allowed.)"/>
+                                                </th>
+                                                <th class="align-left">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <t t-set="year_options" t-value="request.env['kwonboard_edu_qualification'].sudo().get_year_options()"/>
+
+                                        <tbody id="professional_qualification_block">
+                                            <t t-if="professionalcourse">
+                                                <t t-set="cnt" t-value="0"/>
+                                                <t t-set="len_pcourse" t-value="len(professionalcourse)"/>
+                                                <t t-foreach="professionalcourse" t-as="data">
+                                                    <tr class="likert">
+                                                        <th scope="row" class="align-left">Professional</th>
+                                                        <td class="md-form">
+                                                            <input  type="text" class="form-control likert-field gradeval" maxlength="6" id="ddlStream" t-att-value="data.get('ddlprofStream')" name="ddlStream" placeholder="Stream"/>
+
+                                                        </td>
+                                                        <td class="md-form">
+                                                            <input  type="text" class="form-control likert-field gradeval" maxlength="6" id="ddlBoard" name="ddlBoard" t-att-value="data.get('ddlprofBoard')" placeholder="University"/>
+
+                                                        </td>
+                                                        <td class="md-form">
+                                                            <select title="Please select passing year"  t-att-class="'form-control likert-field'" id="ddlPYear" name="ddlPYear">
+
+                                                                <t t-foreach="year_options" t-as="years">
+                                                                    <option t-att-value="years[0]" t-att-selected="edu"><t t-esc="years[0]"/></option>
+                                                                </t>
+                                                            </select>
+                                                        </td>
+                                                        <td class="md-form">
+                                                            <input title="Please enter division / grade"  type="text" class="form-control likert-field gradeval" maxlength="6" id="txtGrade" name="txtGrade" t-att-value="data.get('txtGrade')" placeholder="Grade"/>
+                                                        </td>
+                                                        <td class="md-form">
+                                                            <input title="Please enter % of marks obtained⁣"  type="text" maxlength="5" class="form-control likert-field percentval" id="txtPercent" name="txtPercent" t-att-value="data.get('txtprofPercent')"  placeholder="%" />
+                                                        </td>
+                                                        <td class="md-form">
+                                                            <div class="file-upload mt-2">
+                                                                <div class="file-select">
+                                                                    <div class="file-select-button" id="fileName">Choose file</div>
+                                                                    <div class="file-select-name" id="noFile">No file chosen... </div>
+                                                                    <input type="file"  accept="image/jpg,image/png,image/jpeg,application/pdf" class="form-control-file clsfrmfile" t-att-id="'prof_file_'+str(cnt)" t-att-name="'prof_file_'+str(cnt)" placeholder="Document File"/>
+                                                                </div>
+                                                            </div>
+                                                            <span t-att-id="'txt_prof_filename_' + str(cnt)" class="col-sm-3 text-success txt-filename">
+                                                                <t t-esc="data.get('proffilename')"/>
+                                                            </span>
+                                                            <input type="hidden" t-att-id="'prof_filename_'+str(cnt)" t-att-name="'prof_filename_'+str(cnt)" class="form-control likert-field" t-att-value="data.get('proffilename')" placeholder="Document File"/>
+                                                        </td>
+                                                        <td>
+                                                            <center>
+                                                                <button type="button" class="btn btn-danger close_row btn_remove_prof anchor btn-sm pr-3 pl-3"><i class="fa fa-trash"/></button>
+                                                            </center>
+                                                        </td>
+                                                    </tr>
+                                                    <t t-set="cnt" t-value="cnt+1"/>
+                                                </t>
+                                            </t>
+                                            <t t-else="">
+                                                <tr class="likert">
+                                                    <th scope="row">Professional</th>
+                                                    <td class="md-form">
+                                                        <input  type="text" class="form-control likert-field gradeval" maxlength="6" id="ddlStream" name="ddlStream" placeholder="Stream"/>
+
+                                                    </td>
+                                                    <td class="md-form">
+                                                        <input  type="text" class="form-control likert-field gradeval" maxlength="6" id="ddlBoard" name="ddlBoard" placeholder="University"/>
+
+                                                    </td>
+                                                    <td class="md-form">
+                                                        <select title="Please select passing year"  t-att-class="'form-control likert-field'" id="ddlPYear" name="ddlPYear">
+
+                                                            <t t-foreach="year_options" t-as="years">
+                                                                <option t-att-value="years[0]" ><t t-esc="years[0]"/></option>
+                                                            </t>
+                                                        </select>
+
+                                                    </td>
+                                                    <td class="md-form">
+                                                        <input title="Please enter division / grade" type="text" class="form-control likert-field gradeval" maxlength="6" id="txtGrade" name="txtGrade" placeholder="Grade"/>
+                                                    </td>
+                                                    <td class="md-form">
+                                                        <input title="Please enter % of marks obtained⁣" type="text" maxlength="5" class="form-control likert-field percentval" id="txtPercent" name="txtPercent" placeholder="%"/>
+                                                    </td>
+                                                    <td class="md-form">
+                                                        <div class="file-upload mt-2">
+                                                            <div class="file-select">
+                                                                <div class="file-select-button" id="fileName">Choose file</div>
+                                                                <div class="file-select-name" id="noFile">No file chosen... </div>
+                                                                <input type="file" class="form-control-file eduupload clsfrmfile" accept="image/jpg,image/png,image/jpeg,application/pdf" id="prof_file_0" name="prof_file_0" placeholder="Document File"/>
+                                                            </div>
+                                                        </div>
+                                                        <span id="txt_prof_filename_0" class="col-sm-3 text-success txt-filename"/>
+                                                        <input type="hidden" id="prof_filename_0" name="prof_filename_0" class="form-control likert-field" placeholder="Document File"/>
+                                                    </td>
+                                                    <td class="md-form">
+                                                        <center>
+                                                            <button type="button" class="btn btn-danger close_row btn_remove_prof anchor btn-sm pr-3 pl-3"><i class="fa fa-trash"/></button>
+                                                        </center>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="8">
+                                                    <button type="button" class="btn btn-success add-row btn_add_prof anchor pull-right btn-sm"> Add More </button>
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                                <!--Professional qualification block end-->
+                                <br />
+                                <br />
+
+
+
+                                <!--certificate block end-->
+                                <div>
+                                    <a href="/personaldetails/">
+                                        <button type="button" class="btn btn-danger btn-md" id="btnSubmitEDBack">Back</button>
+                                    </a>
+                                    <button type="submit" class="btn btn-success btn-md" name="draft" value="draft"  id="btnSubmitED">Save Educational Details</button>
+                                    <!-- <a href="/workexperiencedetails/"> -->
+                                    <button type="submit" class="btn btn-success btn-md"  name="next" value="next" id="btnSubmitEDNext">Save And Next</button>
+
+
+                                    <!--  </a> -->
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <template id="assets_frontend_edu" name="onboarding_edu_assets" inherit_id="kw_onboarding_process.kwonboard_educational_details">
+            <xpath expr="." position="inside">
+                <link href='https://fonts.googleapis.com/css?family=Noto Sans' rel='stylesheet' />
+                <!--                <link href="/kwantify_theme/static/src/mdb/css/mdb.min.css" rel="stylesheet"/>-->
+                <!--                <link rel="stylesheet" href="/kw_onboarding_process/static/src/css/bootstrap-datepicker.min.css"/>-->
+                <link rel="stylesheet" href="/kw_onboarding_process/static/src/css/onboarding.css"/>
+
+                <!--                <script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js"/>-->
+                <script type="text/javascript" src="/kw_onboarding_process/static/src/lib/jquery.validate.min.js"/>
+                <script type="text/javascript" src="/kw_onboarding_process/static/src/lib/additional-methods.js"/>
+                <!-- <script type="text/javascript" src="/kw_onboarding_process/static/src/js/bootstrap-datepicker.min.js"/> -->
+
+                <script type="text/javascript" src="/kw_onboarding_process/static/src/js/kw_onboarding_process_validation.js"/>
+                <script type="text/javascript" src="/kw_onboarding_process/static/src/js/kw_onboard_educational_details.js"/>
+            </xpath>
+        </template>
+    </data>
+</odoo>

@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+<odoo>
+     <record id="action_hr_requisition_tree" model="ir.actions.act_window">
+              <field name="name">Hr Requisition Exception</field>
+              <field name="res_model">exception.rule</field>
+              <field name="view_type">form</field>
+              <field name="view_mode">tree,form</field>
+              <field name="view_id" ref="base_exception_and_approval.view_exception_rule_tree"/>
+              <field name="domain">[('rule_group', '=', 'hr_requisition')]</field>
+              <field name="context">{'active_test': False, 'default_rule_group' : 'hr_requisition'}</field>
+          </record>
+
+        <menuitem
+            id="menu_hr_job_parent"
+            parent="hr_recruitment.menu_hr_recruitment_configuration"
+            sequence="5"
+            name="Exceptions"
+    />
+
+    <menuitem
+            action="action_hr_requisition_tree"
+            id="menu_hr_requisition_test"
+            parent="hr_exception.menu_hr_job_parent"
+    />
+
+    <record id="view_hr_requisition_exp_form" model="ir.ui.view">
+        <field name="name">hr_requisition_view__form</field>
+        <field name="model">hr.requisition</field>
+        <field name="inherit_id" ref="hr_employee_requisition.hr_employee_requisition_form"/>
+        <field name="arch" type="xml">
+           <xpath expr="//field[@name='name']" position="after">
+                <group>
+                <field name="main_exception_id" options='{"no_open": True}'
+                       class="oe_inline" string="Error:"
+                       attrs="{'invisible':[('main_exception_id','=', False)]}"/>
+                </group>
+           </xpath>
+            <xpath expr="//field[@name='pur_order_count']" position="after">
+                <field name="ignore_exception" invisible="1"/>
+            </xpath>
+
+            <!-- commented by sangita by TASK-2020-00056-->
+            
+            <!-- <xpath expr="//notebook" position="inside">
+                <page string="Other Info">
+                     <field name="exception_ids" colspan="2" nolabel="1" readonly="1"/>
+                </page>
+            </xpath> -->
+        </field>
+    </record>
+
+    <record id="view_hr_requisition_exception_filter" model="ir.ui.view">
+        <field name="name">view_hr_requisition_exception_filter</field>
+        <field name="model">hr.requisition</field>
+        <field name="inherit_id" ref="hr_employee_requisition.employee_requsition_search"/>
+        <field name="arch" type="xml">
+            <field name="job_position" position="after">
+                <separator orientation="vertical"/>
+                <filter icon="terp-emblem-important" name="tofix" string="Blocked in draft" domain="[('main_exception_id','!=',False)]"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- <record id="view_hr_requisition_exp_tree" model="ir.ui.view">
+        <field name="name">hr_requisition_view_tree</field>
+        <field name="model">hr.requisition</field>
+        <field name="inherit_id" ref="hr_employee_requisition.employee_requsition_tree"/>
+        <field name="arch" type="xml">
+             <field name="state" position="after">
+                   <field name="main_exception_id"/>
+             </field>
+        </field>
+    </record> -->
+</odoo>

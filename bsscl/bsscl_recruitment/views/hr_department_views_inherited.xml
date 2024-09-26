@@ -1,0 +1,986 @@
+<odoo>
+    <!--Hr Department Inherit Kanban view-->
+    <record id="hr_department_view_kanban" model="ir.ui.view">
+        <field name="name">hr.department.kanban.inherit</field>
+        <field name="model">hr.department</field>
+        <field name="inherit_id" ref="hr.hr_department_view_kanban"/>
+        <field name="groups_id" eval="[(4,ref('hr_recruitment.group_hr_recruitment_user'))]"/>
+        <field name="arch" type="xml">
+            <data>
+                <xpath expr="//templates" position="before">
+                    <field name="new_applicant_count"/>
+                    <field name="new_hired_employee"/>
+                    <field name="expected_employee"/>
+                </xpath>
+
+                <xpath expr="//div[hasclass('o_kanban_primary_right')]" position="inside">
+                    <div t-if="record.new_applicant_count.raw_value > 0" class="row ml16">
+                        <div class="col-9">
+                            <a name="%(hr_recruitment.hr_applicant_action_from_department)d" type="action">
+                                New Applicants
+                            </a>
+                        </div>
+                        <div class="col-3 text-right">
+                            <field name="new_applicant_count"/>
+                        </div>
+                    </div>
+                </xpath>
+
+                <xpath expr="//div[hasclass('o_kanban_manage_reports')]" position="inside">
+                    <a role="menuitem" class="dropdown-item" name="%(hr_recruitment.action_hr_recruitment_report_filtered_department)d" type="action">
+                        Recruitments
+                    </a>
+                </xpath>
+            </data>
+        </field>
+    </record>
+    <!-- Stage Tree View -->
+    <record model="ir.ui.view" id="hr_recruitment_stage_tree_inherited">
+        <field name="name">hr.recruitment.stage.tree</field>
+        <field name="model">hr.recruitment.stage</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_recruitment_stage_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr='//tree' position='replace'>
+                <tree string="Stages / चरणों">
+                    <field name="sequence" widget="handle" string="Sequence / अनुक्रम"/>
+                    <field name="name" string=" Stage Name / चरणों का नाम" />
+                    <field name="fold" string="Folded in Kanban / कंबन में मुड़ा हुआ"/>
+                </tree>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="hr_recruitment_stage_form_inherit">
+        <field name="name">hr.recruitment.stage.form</field>
+        <field name="model">hr.recruitment.stage</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_recruitment_stage_form"/>
+        <field name="arch" type="xml">
+            <xpath expr='//form' position='replace'>
+                <form string="Stages / चरणों">
+                    <sheet>
+                        <group name="stage_definition" string="Stage Definition / चरण परिभाषा">
+                            <group>
+                                <field name="name" string="Stage Name / चरणों का नाम" />
+                                <field name="sequence" groups="base.group_no_one" string="Sequence / अनुक्रम"/>
+                                <field name="template_id"  string="Email Template / ईमेल टेम्पलेट" domain= "[('model_id.model', '=', 'hr.applicant')]"/>
+                            </group>
+                            <group name="stage_details">
+                                <field name="fold" string="Folded in Kanban / कंबन में मुड़ा हुआ"/>
+                                <field name="job_ids" widget="many2many_tags" string='Job Specific / कार्य विशिष्ट'/>
+                            </group>
+                        </group>
+                        <group name="tooltips" string="Tooltips / टूलटिप्स">
+                            <p class="text-muted" colspan="2">
+                                You can define here the labels that will be displayed for the kanban state instead
+                                of the default labels.
+                                / आप यहां उन लेबल को परिभाषित कर सकते हैं जो डिफ़ॉल्ट लेबल के बजाय कानबन स्थिति के लिए प्रदर्शित होंगे
+                            </p>
+                            <label for="legend_normal" string=" " class="o_status"/>
+                            <field name="legend_normal" nolabel="1"/>
+                            <label for="legend_blocked" string=" " class="o_status o_status_red"/>
+                            <field name="legend_blocked" nolabel="1"/>
+                            <label for="legend_done" string=" " class="o_status o_status_green"/>
+                            <field name="legend_done" nolabel="1"/>
+                        </group>
+                        <separator string="Requirements /भर्तियाँ"/>
+                        <field name="requirements" string="Requiremnets / आवश्यकताएं"/>
+                    </sheet>
+                </form>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_recruitment.hr_recruitment_stage_act" model="ir.actions.act_window">
+        <field name="name">Stages / चरणों</field>
+        <field name="res_model">hr.recruitment.stage</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_id" ref="hr_recruitment_stage_tree_inherited"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add a new stage in the recruitment process
+            </p><p>
+            Don't forget to specify the department if your recruitment process
+            is different according to the job position.
+        </p>
+        </field>
+    </record>
+
+    <record model="ir.ui.menu" id="hr_recruitment.menu_hr_recruitment_stage">
+        <field name="name">Stages / चरणों</field>
+    </record>
+    <!-- Tag Form View -->
+    <record id="hr_applicant_category_view_form_inherited" model="ir.ui.view">
+        <field name="name">hr.applicant.category.form</field>
+        <field name="model">hr.applicant.category</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_applicant_category_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr='//form' position='replace'>
+                <form string="Tags / टैग">
+                    <sheet>
+                        <group>
+                            <field name="name" string="Tag Name / टैग नाम"/>
+                            <field name="color" string='Color Index / रंग सूची'/>
+                        </group>
+                    </sheet>
+                </form>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_applicant_category_view_tree_inherited" model="ir.ui.view">
+        <field name="name">hr.applicant.category.tree</field>
+        <field name="model">hr.applicant.category</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_applicant_category_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr='//tree' position='replace'>
+                <tree string="Tags / टैग" editable="bottom">
+                    <field name="name" string="Tag Name / टैग नाम"/>
+                    <field name="color" string='Color Index / रंग सूची' groups="base.group_no_one"/>
+                </tree>
+            </xpath>
+        </field>
+    </record>
+
+
+
+    <!-- Degree Tree View -->
+    <record model="ir.ui.view" id="hr_recruitment_degree_tree_inherited">
+        <field name="name">hr.recruitment.degree.tree</field>
+        <field name="model">hr.recruitment.degree</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_recruitment_degree_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr='//tree' position='replace'>
+                <tree string="Degree / डिग्री" editable="bottom">
+                    <field name="sequence" widget="handle" string="Sequence / अनुक्रम"/>
+                    <field name="name" string="उपाधी का नाम"/>
+                </tree>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Degree Form View -->
+    <record model="ir.ui.view" id="hr_recruitment_degree_form_inherited">
+        <field name="name">hr.recruitment.degree.form</field>
+        <field name="model">hr.recruitment.degree</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_recruitment_degree_form"/>
+        <field name="arch" type="xml">
+            <xpath expr='//form' position='replace'>
+                <form string="Degree / डिग्री">
+                    <sheet>
+                        <group>
+                            <field name="name" string="उपाधी का नाम"/>
+                            <field name="sequence" string="Sequence / अनुक्रम" groups="base.group_no_one"/>
+                        </group>
+                    </sheet>
+                </form>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_applicant_refuse_reason_view_form_inherited" model="ir.ui.view">
+        <field name="name">Applicant refuse reason form</field>
+        <field name="model">hr.applicant.refuse.reason</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_applicant_refuse_reason_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr='//form' position='replace'>
+                <form string="Refuse Reason / मना करने का कारण">
+                    <sheet>
+                        <widget name="web_ribbon" text="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                        <div class="oe_title">
+                            <div class="oe_edit_only">
+                                <label for="name"/>
+                            </div>
+                            <h1>
+                                <field name="name" string="Description / विवरण"/>
+                            </h1>
+                            <field name="active" invisible="1"/>
+                        </div>
+                    </sheet>
+                </form>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_applicant_refuse_reason_view_tree_inherit" model="ir.ui.view">
+        <field name="name">Applicant refuse reason tree</field>
+        <field name="model">hr.applicant.refuse.reason</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_applicant_refuse_reason_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr='//tree' position='replace'>
+                <tree string="Refuse Reason / मना करने का कारण" editable="bottom">
+                    <field name="name" string="Description / विवरण"/>
+                </tree>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="hr_recruitment_source_tree_inherit">
+        <field name="name">hr.recruitment.source.tree</field>
+        <field name="model">hr.recruitment.source</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_recruitment_source_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr='//tree' position='replace'>
+                <tree string="Sources of Applicants / आवेदकों के स्रोत" editable="top" class="o_recruitment_list" sample="1">
+                    <field name="source_id" placeholder="e.g. LinkedIn" decoration-bf="1" attrs="{'readonly': [('id', '!=', False)]}" string="Source / स्रोत"/>
+                    <field name="job_id" attrs="{'readonly': [('id', '!=', False)]}" string="Job / काम"/>
+                    <field name="email" attrs="{'invisible': [('email', '=', False)]}" widget="email" string="Email / ईमेल"/>
+                    <button name="create_alias" string="Generate Email / ईमेल जनरेट करें" class="btn btn-primary" type="object" attrs="{'invisible': [('email', '!=', False)]}"/>
+                </tree>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_hr_job_tree_inherited" model="ir.ui.view">
+        <field name="name">hr.job.tree</field>
+        <field name="model">hr.job</field>
+        <field name="inherit_id" ref="hr.view_hr_job_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr='//tree' position='replace'>
+                <tree string="Job" sample="1">
+                    <field name="name" string="Job Positions / नौकरी के पद"/>
+                    <field name="department_id" string="Department / विभाग"/>
+                    <field name="no_of_employee"  string="Current Number of employees / कर्मचारियों की वर्तमान संख्या"/>
+                    <field name="no_of_recruitment" string="Expected New Employees / अपेक्षित नए कर्मचारी"/>
+                    <field name="expected_employees"  string="Total Forecasted Employee / कुल अनुमानित कर्मचारी"/>
+                    <field name="no_of_hired_employee" string="Hired Employees / नियोजित कर्मचारी"/>
+                    <field name="state" string="Status / स्थति"/>
+                    <field name="message_needaction" invisible="1"/>
+                    <field name="company_id" groups="base.group_multi_company"/>
+                </tree>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_hr_mail_form_inherited" model="ir.ui.view">
+        <field name="name">mail.compose.message.form</field>
+        <field name="model">mail.compose.message</field>
+        <field name="inherit_id" ref="mail.email_compose_message_wizard_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form/group[2]/field[@name='template_id']" position='after'>
+                <!-- <label for="attachment_ids"/> -->
+                    <div>
+                        <p style="color:red;">(Document Size should be less than 2MB of PDF, doc and docx type )</p>
+                    </div>
+            </xpath>
+        </field>
+    </record>
+
+     <record id="view_calendar_event_form_inherited" model="ir.ui.view">
+        <field name="name">view.calendar.event.form</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position='attributes'>
+                <attribute name="duplicate">0</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_hr_job_form_inherited" model="ir.ui.view">
+        <field name="name">hr.job.form</field>
+        <field name="model">hr.job</field>
+        <field name="inherit_id" ref="hr.view_hr_job_form"/>
+        <field name="arch" type="xml">
+            <xpath expr='//form' position='replace'>
+                <form string="Job">
+                    <header>
+                        <button name="set_recruit" string="Start Recruitment / भर्ती प्रारंभ करें" states="open" type="object" class="oe_highlight" groups="base.group_user"/>
+                        <button name="set_open" string="Stop Recruitment / भर्ती बंद करो" states="recruit" type="object" groups="base.group_user"/>
+                        <field name="state" widget="statusbar" statusbar_visible="recruit,open"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box"/>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only" string="Job Positions / नौकरी के पद"/>
+                            <h1><field name="name"  string="Job Position / नौकरी के पद" placeholder="e.g. Sales Manager"/></h1>
+                        </div>
+                        <notebook>
+                            <page string="Job Description / नौकरी का विवरण">
+                                <div attrs="{'invisible': [('state', '!=', 'recruit')]}">
+                                    <label for="description" string="Job Description / नौकरी का विवरण"/>
+                                    <field name="description" string="Job Description / नौकरी का विवरण"/>
+                                </div>
+                            </page>
+                            <page string="Recruitment / भर्ती">
+                                <group>
+                                    <group name="recruitment">
+                                        <field name="company_id" options="{'no_create': True}"  string="Company / कंपनी" groups="base.group_multi_company"/>
+                                        <field name="department_id" string="Department / विभाग"/>
+                                    </group>
+                                    <group>
+                                        <field name="no_of_recruitment" string="Expected New Employees / अपेक्षित नए कर्मचारी"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" options="{'open_attachments': True}"/>
+                    </div>
+                </form>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_job_view_kanban_inherited" model="ir.ui.view">
+        <field name="name">hr.job.kanban</field>
+        <field name="model">hr.job</field>
+        <field name="inherit_id" ref="hr.hr_job_view_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr='//kanban' position='replace'>
+                <kanban class="o_kanban_mobile" sample="1">
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click">
+                                <div>
+                                    <strong><field name="name" string="Job Positions / नौकरी के पद"/></strong>
+                                </div>
+                                <div>
+                                    <span><field name="department_id" string="Department / विभाग"/>&amp;nbsp;</span>
+                                </div>
+                                <div t-if="!selection_mode">
+                                    <span>Vacancies : <field name="expected_employees" string="Expected Employees / अपेक्षित कर्मचारी"/></span>
+                                    <span t-att-class="record.state.raw_value == 'recruit'  and 'float-right badge badge-success' or 'float-right badge badge-danger'">
+                                        <field name="state"  string="Status / स्थति"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </xpath>
+        </field>
+    </record>
+
+
+    <!--  <record id="res_config_settings_view_form" model="ir.ui.view">
+             <field name="name">res.config.settings.view.form.inherit.hr.recruitment</field>
+             <field name="model">res.config.settings</field>
+             <field name="priority" eval="75"/>
+             <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+             <field name="arch" type="xml">
+                 <xpath expr="//div[hasclass('settings')]" position="replace">
+                     <div class="app_settings_block" data-string="Recruitment" string="Recruitment" data-key="hr_recruitment" groups="hr_recruitment.group_hr_recruitment_manager">
+                         <h2>Job Posting / नौकरी की पोस्टिंग</h2>
+                         <div class="row mt16 o_settings_container" name="online_posting_setting_container">
+                             <div class="col-12 col-lg-6 o_setting_box" id="publish_available_jobs_setting">
+                                 <div class="o_setting_left_pane">
+                                     <field name="module_website_hr_recruitment"/>
+                                 </div>
+                                 <div class="o_setting_right_pane">
+                                     <label for="module_website_hr_recruitment" string="Online Posting"/>
+                                     <div class="text-muted">
+                                         Publish available jobs on your website / अपनी वेबसाइट पर उपलब्ध नौकरियों को प्रकाशित करें|
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+                         <h2>Recruitment Process / भर्ती प्रक्रिया</h2>
+                         <div class="row mt16 o_settings_container" name="recruitment_process_div">
+                             <div class="col-12 col-lg-6 o_setting_box"
+                                 id="interview_forms_setting"
+                                 title="Use interview forms tailored to each job position during the recruitment process. Select the form to use in the job position detail form. This relies on the Survey app.">
+                                 <div class="o_setting_left_pane">
+                                     <field name="module_hr_recruitment_survey"/>
+                                 </div>
+                                 <div class="o_setting_right_pane">
+                                     <label for="module_hr_recruitment_survey" string="Interview Forms"/>
+                                     <div class="text-muted">
+                                         Use interview forms during recruitment process / भर्ती प्रक्रिया के दौरान साक्षात्कार प्रपत्रों का उपयोग करें|
+                                     </div>
+                                     <div class="content-group" id="interview_forms"/>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+                 </xpath>
+             </field>
+         </record>
+  -->
+
+    <record id="mail_activity_type_view_tree_inherit" model="ir.ui.view">
+        <field name="name">mail.activity.type.view.tree</field>
+        <field name="model">mail.activity.type</field>
+        <field name="inherit_id" ref="mail.mail_activity_type_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr='//tree' position='replace'>
+                <tree string="Activities / गतिविधियाँ" sample="1">
+                    <field name="sequence" string="Sequence / अनुक्रम" widget="handle"/>
+                    <field name="name" string="Name / नाम"/>
+                    <field name="summary" string="Default Summary / डिफ़ॉल्ट सारांश"/>
+                    <field name="delay_label" string="Planned in / में योजना बनाई" class="text-right"/>
+                    <field name="delay_from" string="Type / प्रकार"/>
+                    <field name="res_model_id" string="Model / नमूना" groups="base.group_no_one"/>
+                    <field name="icon" groups="base.group_no_one" string="Icon / आइकन"/>
+                </tree>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="mail.mail_activity_type_view_form" model="ir.ui.view">
+        <field name="name">mail.activity.type.view.form</field>
+        <field name="model">mail.activity.type</field>
+        <!-- <field name="inherit_id" ref="mail.mail_activity_type_view_form"/> -->
+        <field name="arch" type="xml">
+            <!-- <xpath expr='//from' position='replace'> -->
+            <form string="Activities / गतिविधियाँ">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group name="activity_details">
+                            <field name="active" invisible="1"/>
+                            <field name="category" string="Action to Perform / करने की क्रिया"/>
+                            <field name="default_user_id" string="Default User / डिफॉल्ट उपयोगकर्ता" options="{'no_create': True, 'no_edit': True}" domain="[('share', '=', False)]"/>
+                            <field name="res_model_id" string="Model / नमूना" groups="base.group_no_one"/>
+                            <field name="res_model_change" invisible="1"/>
+                            <field name="initial_res_model_id" invisible="1"/>
+                            <field name="summary" string="Default Summary / डिफ़ॉल्ट सारांश"/>
+                            <field name="icon" groups="base.group_no_one" string="Icon / आइकन"/>
+                            <field name="decoration_type" string="Decoration Type / सजावट का प्रकार" groups="base.group_no_one"/>
+                        </group>
+                        <group name="activity_planning">
+                            <field name="force_next" string="Trigger Next Activity / ट्रिगर अगली गतिविधि"/>
+                            <field name="default_next_type_id" string="Default Next Activity / डिफ़ॉल्ट अगली गतिविधि" attrs="{'required': [('force_next', '=', True)]}" context="{'default_res_model_id': res_model_id}"/>
+                            <field name="next_type_ids" widget="many2many_tags"
+                                   attrs="{'invisible': ['|', ('force_next', '=', True), ('category', '=', 'upload_file')]}" context="{'default_res_model_id': res_model_id}" string="Recommended Next Activities / अनुशंसित अगली गतिविधियाँ"/>
+                            <field name="mail_template_ids" widget="many2many_tags"
+                                   domain="[('model_id', '=', res_model_id)]"
+                                   attrs="{'invisible': [('res_model_id', '=', False)]}"
+                                   context="{'default_model_id': res_model_id}"/>
+                            <label for="delay_count"/>
+                            <div>
+                                <div class="o_row">
+                                    <field name="delay_count" string="Schedule Date / निर्धारित तिथि"/>
+                                    <field name="delay_unit"/>
+                                </div>
+                                <field name="delay_from"/>
+                            </div>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="default_description" string="Default Description / डिफ़ॉल्ट विवरण"/>
+                    </group>
+                    <p class="alert alert-info" role="alert" attrs="{'invisible': [('res_model_change', '=', False)]}">Modifying the model can have an impact on existing activities using this activity type, be careful.</p>
+                </sheet>
+            </form>
+            <!-- </xpath> -->
+        </field>
+    </record>
+
+    <record model="ir.ui.menu" id="hr_recruitment.hr_recruitment_menu_config_activity_type">
+        <field name="name">Activity Type / क्रिया के प्रकार</field>
+    </record>
+
+
+    <record model="ir.actions.act_window" id="hr_recruitment.mail_activity_type_action_config_hr_applicant">
+        <field name="name">Activity Type / क्रिया के प्रकार</field>
+    </record>
+
+
+
+    <record model="ir.ui.menu" id="hr_recruitment.action_hr_recruitment_configuration">
+        <field name="name">Settings / समायोजन</field>
+    </record>
+
+
+    <record model="ir.actions.act_window" id="hr_recruitment.menu_hr_recruitment_global_settings">
+        <field name="name">Settings / समायोजन</field>
+    </record>
+
+    <!--  <record model="ir.ui.menu" id="hr_recruitment.">
+        <field name="name">Job Positions / नौकरी के पद</field>
+    </record>
+     -->
+    <record model="ir.ui.menu" id="hr_recruitment.menu_hr_recruitment_configuration">
+        <field name="name">Configuration / विन्यास</field>
+    </record>
+
+    <record model="ir.ui.menu" id="hr_recruitment.menu_hr_recruitment_source">
+        <field name="name">Sources of Applicants / आवेदकों के स्रोत</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="hr_recruitment.hr_recruitment_source_action">
+        <field name="name">Sources of Applicants / आवेदकों के स्रोत</field>
+    </record>
+
+    <record model="ir.ui.menu" id="hr_recruitment.menu_hr_applicant_refuse_reason">
+        <field name="name">Refuse Reason / मना करने का कारण</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="hr_recruitment.hr_applicant_refuse_reason_action">
+        <field name="name">Refuse Reason / मना करने का कारण</field>
+    </record>
+
+    <record model="ir.ui.menu" id="hr_recruitment.menu_hr_recruitment_degree">
+        <field name="name">Degrees / डिग्री</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="hr_recruitment.hr_recruitment_degree_action">
+        <field name="name">Degrees / डिग्री</field>
+    </record>
+
+    <!-- Tag Action -->
+    <record model="ir.actions.act_window" id="hr_recruitment.hr_applicant_category_action">
+        <field name="name">Tags / टैग</field>
+    </record>
+
+    <record model="ir.ui.menu" id="hr_recruitment.hr_applicant_category_menu">
+        <field name="name">Tags / टैग</field>
+    </record>
+
+    <record model="ir.ui.menu" id="hr_recruitment.action_hr_department">
+        <field name="name">Departments / विभागों</field>
+    </record>
+
+    <record model="ir.ui.menu" id="hr_recruitment.menu_hr_department">
+        <field name="name">Departments / विभागों</field>
+    </record>
+
+    <record model="ir.ui.menu" id="hr_recruitment.menu_hr_recruitment_root">
+        <field name="name">Recruitment / भर्ती</field>
+    </record>
+
+
+    <!-- naresh sir part of code -->
+
+    <record model="ir.ui.view" id="crm_case_tree_view_job_inherit">
+        <field name="name">Jobs - Recruitment Form</field>
+        <field name="model">hr.applicant</field>
+        <field name="inherit_id" ref="hr_recruitment.crm_case_tree_view_job"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="replace">
+                <tree string="Applicants" multi_edit="1" sample="1">
+                    <field name="message_needaction" invisible="1"/>
+                    <field name="last_stage_id" invisible="1"/>
+                    <field name="create_date" readonly="1" widget="date" optional="show" string="Create Date / तिथि बनाएं"/>
+                    <field name="date_last_stage_update" invisible="1"/>
+                    <field name="partner_name" readonly="1" string="Applicant's Name / आवेदक का नाम"/>
+                    <field name="name" readonly="1" string="Subject / Application Name  / विषय/आवेदन का नाम"/>
+                    <field name="partner_mobile" widget="phone" readonly="1" optional="show" string="Mobile / मोबाइल"/>
+                    <field name="partner_phone" widget="phone" readonly="1" optional="hide" string="Phone / फ़ोन"/>
+                    <field name="email_from" readonly="1" optional="hide" string="Email / ईमेल"/>
+                    <field name="job_id" string="Applied Job / नौकरी के लिए आवेदन किया"/>
+                    <field name="categ_ids"  string="Tags / टैग" widget="many2many_tags" options="{'color_field': 'color'}" optional="show"/>
+                    <field name="priority" widget="priority" optional="show" string="Appreciation / प्राथमिकता"/>
+                    <field name="medium_id" optional="hide" string="Medium / मध्यम"/>
+                    <field name="source_id" readonly="1" optional="hide" string="Source / स्रोत"/>
+                    <field name="salary_proposed" optional="hide" string="Proposed Salary / प्रस्तावित वेतन"/>
+                    <field name="type_id" invisible="1"/>
+                    <field name="availability" optional="hide" string="Availability / उपलब्धता"/>
+                    <field name="department_id" invisible="context.get('invisible_department', True)" readonly="1" string="Department / विभाग"/>
+                    <field name="user_id" widget="many2one_avatar_user" optional="show" string="Recruiter / भर्तीकर्ता"/>
+                    <field name="company_id" groups="base.group_multi_company" readonly="1" optional="hide"/>
+                    <field name="stage_id"/>
+                </tree>
+
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="hr_applicant_view_form_inherit">
+        <field name="name">Jobs - Recruitment Form</field>
+        <field name="model">hr.applicant</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="replace">
+                <form string="Jobs - Recruitment Form" class="o_applicant_form">
+                    <header>
+                        <button string="Create Employee / कर्मचारी बनाएँ" name="create_employee_from_applicant" type="object"
+                                class="oe_highlight o_create_employee" attrs="{'invisible': ['|',('emp_id', '!=', False),('active', '=', False)]}"/>
+                        <button string="Refuse / अस्वीकार करना" name="archive_applicant" type="object" attrs="{'invisible': ['|',('active', '=', False),('bool_stage','==',True)]}"/> 
+                        <button string="Restore / पुनर्स्थापित करना" name="toggle_active" type="object" attrs="{'invisible': [('active', '=', True)]}"/>
+                        <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" attrs="{'invisible': [('active', '=', False),('emp_id', '=', False)]}"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_applications_email"
+                                    class="oe_stat_button"
+                                    icon="fa-pencil"
+                                    type="object"
+                                    context="{'active_test': False}"
+                                    attrs="{'invisible': [('application_count', '=', 0)]}">
+                                <field name="application_count" widget="statinfo" string="Other Applications / अन्य अनुप्रयोगों"/>
+                            </button>
+                            <button name="action_makeMeeting" class="oe_stat_button" icon="fa-calendar" type="object"
+                                    help="Schedule interview with this applicant">
+                                <field name="meeting_count" widget="statinfo" string="Meetings / बैठक"/>
+                            </button>
+                        </div>
+                        <widget name="web_ribbon" title="Refused" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                        <field name="kanban_state" widget="kanban_state_selection" invisible="1"/>
+                        <field name="active" invisible="1"/>
+                        <field name="legend_normal" invisible="1"/>
+                        <field name="legend_blocked" invisible="1"/>
+                        <field name="legend_done" invisible="1"/>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only" string="Subject / Application Name / विषय/आवेदन का नाम"/>
+                            <h1><field name="name"/></h1>
+                            <h2 class="o_row">
+                                <div>
+                                    <label for="partner_name" class="oe_edit_only" string="Applicant's Name  / आवेदक का नाम"/>
+                                    <field name="partner_name"/>
+                                </div>
+                            </h2>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="bool_stage" invisible="1"/>
+                                <field name="partner_id" invisible="1" string="Contact / अनुबंध" />
+                                <field name="refuse_reason_id" attrs="{'invisible': [('active', '=', True)]}"/>
+                                <field name="email_from" widget="email" string="Email / ईमेल"/>
+                                <field name="email_cc" string ="Email cc / ईमेल सी.सी" groups="base.group_no_one"/>
+                                <field name="partner_phone" widget="phone" string="Phone / फ़ोन"/>
+                                <field name="partner_mobile" widget="phone" string="Mobile / मोबाइल"/>
+                                <field name="type_id" placeholder="Degree" string="Degree / उपाधी"/>
+                            </group>
+                            <group>
+                                <field name="categ_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" string="Tags / टग"/>
+                                <field name="user_id" domain="[('share', '=', False)]" string="Recruiter / भर्तीकर्ता"/>
+                                <field name="priority" widget="priority" string="Appreciation / प्राथमिकता"/>
+                                <field name="medium_id" string="Medium / मध्यम" groups="base.group_no_one" />
+                                <field name="source_id" string="Source / स्रोत"/>
+                            </group>
+                            <group string="Job / नौकरी">
+                                <field name="job_id" string="Applied Job / नौकरी के लिए आवेदन किया"/>
+                                <field name="department_id" string="Department / विभाग"/>
+                                <field name="company_id" groups="base.group_multi_company" options='{"no_open":True}' />
+                            </group>
+                            <group string="Contract / नुबंध">
+                                <label for="salary_expected" invisible='1'/>
+                                <div class="o_row" invisible='1'>
+                                    <field name="salary_expected" />
+                                    <span attrs="{'invisible':[('salary_expected_extra','=',False)]}"> + </span>
+                                    <field name="salary_expected_extra" placeholder="Extra advantages..."/>
+                                </div>
+                                <label for="salary_proposed" string="Proposed Salary / प्रस्तावित वेतन"/>
+                                <div class="o_row">
+                                    <field name="salary_proposed"/>
+                                    <span attrs="{'invisible':[('salary_proposed_extra','=',False)]}"> + </span>
+                                    <field name="salary_proposed_extra" placeholder="Extra advantages..."/>
+                                </div>
+                                <field name="availability" string="Availability / उपलब्धता"/>
+                                <field name="emp_id" invisible="1"/>
+                            </group>
+                        </group>
+                        <separator string="Application Summary / आवेदन सारांश"/>
+                        <field name="description" placeholder="Feedback of interviews / साक्षात्कारों की प्रतिक्रिया..."/>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids" options="{'open_attachments': True}"/>
+                    </div>
+                </form>
+
+
+            </xpath>
+        </field>
+    </record>
+
+
+    <record model="ir.ui.view" id="hr_job_simple_form_inherit">
+        <field name="name">Jobs</field>
+        <field name="model">hr.job</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_job_simple_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//form" position="replace">
+                <form string="Create a Job Position / नौकरी की स्थिति बनाएँ" class="o_hr_job_simple_form" >
+                    <sheet>
+                        <group>
+                            <field name="name" string="Job position / नौकरी के पद" class="o_job_name oe_inline" placeholder="e.g. Sales Manager"/>
+                            <label for="alias_name" string="Application email" attrs="{'invisible': [('alias_domain', '=', False)]}" help="Define a specific contact address for this job position. If you keep it empty, the default email address will be used which is in human resources settings"/>
+                            <div name="alias_def" attrs="{'invisible': [('alias_domain', '=', False)]}">
+                                <field name="alias_id" class="oe_read_only" string="Email Alias" required="0"/>
+                                <div class="oe_edit_only" name="edit_alias">
+                                    <field name="alias_name" class="oe_inline o_job_alias" placeholder="e.g. sales-manager"/>@<field name="alias_domain" class="oe_inline" readonly="1"/>
+                                </div>
+                                <div class="text-muted" attrs="{'invisible': [('alias_domain', '=', False)]}">Applicants can send resume to this email address,<br/>it will create an application automatically</div>
+                            </div>
+                        </group>
+                        <footer>
+                            <button string="Create" name="close_dialog" type="object" class="btn-primary o_create_job"/>
+                            <button string="Discard" class="btn-secondary" special="cancel"/>
+                        </footer>
+                    </sheet>
+                </form>
+            </xpath>
+        </field>
+    </record>
+
+    <menuitem
+            name="Applications / आवेदन"
+            parent="hr_recruitment.menu_hr_recruitment_root"
+            id="hr_recruitment.menu_crm_case_categ0_act_job" sequence="2"/>
+
+    <menuitem
+            name="All Applications / सभी आवेदन"
+            parent="hr_recruitment.menu_crm_case_categ0_act_job"
+            id="hr_recruitment.menu_crm_case_categ_all_app" action="hr_recruitment.crm_case_categ0_act_job" sequence="2"/>
+    <menuitem name="By Job Positions / नौकरी के पद से" parent="hr_recruitment.menu_crm_case_categ0_act_job" id="hr_recruitment.menu_hr_job_position" action="hr_recruitment.action_hr_job" sequence="1"/>
+    <menuitem name="Reporting / रिपोर्टिंग" id="hr_recruitment.report_hr_recruitment" parent="hr_recruitment.menu_hr_recruitment_root"
+              sequence="99"/>
+    <menuitem name="Recruitment Analysis / भर्ती विश्लेषण" id="hr_recruitment.hr_applicant_report_menu" parent="hr_recruitment.report_hr_recruitment"
+              sequence="50" action="hr_recruitment.hr_applicant_action_analysis"/>
+
+
+    <record model="ir.ui.view" id="hr_job_hindi_view_inherit">
+        <field name="name">hr.jon.view.hindi</field>
+        <field name="model">hr.job</field>
+        <field name="inherit_id" ref="hr.view_hr_job_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='no_of_recruitment']" position="after">
+                <!-- <field name="category_id"/> -->
+                <field name="sc" string="SC/अनुसूचित जाति"/>
+                <field name="st" string="ST/अनुसूचित जनजाति"/>
+                <field name="obc" string="OBC/अन्य पिछड़ा वर्ग"/>
+                <field name="other" string="Other/अन्य"/>
+            </xpath>
+        </field>
+    </record>
+
+    <menuitem parent="hr_recruitment.menu_hr_recruitment_configuration"  name="Job Postions/नौकरी की स्थिति"
+              id="hr_recruitment.menu_hr_job_position_config"
+              action="hr_recruitment.action_hr_job_config" sequence="10"/>
+
+
+    <!--    <record id="jobapplication" model="ir.ui.view">-->
+    <!--        <field name="name">Contact Us</field>-->
+    <!--        <field name="type">qweb</field>-->
+    <!--        <field name="key">bsscl_recruitment.jobapplication</field>-->
+    <!--        <field name="arch" type="xml">-->
+    <!--            <t name="Contact Us" t-name="bsscl_recruitment.jobapplication">-->
+    <!--                <t t-call="website.layout">-->
+    <!--                    <div id="wrap">-->
+    <!--                        <div class="oe_structure">-->
+    <!--                            <section class="s_title parallax s_parallax_is_fixed bg-black-50 pt24 pb24" data-vcss="001" data-snippet="s_title" data-scroll-background-ratio="1">-->
+    <!--                                <div class="o_we_bg_filter bg-black-50"/>-->
+    <!--                                <div class="container">-->
+    <!--                                    <h1>Contact us</h1>-->
+    <!--                                </div>-->
+    <!--                            </section>-->
+    <!--                        </div>-->
+    <!--                        <div class="container mt-4 mb-5">-->
+    <!--                            <div class="row">-->
+    <!--                                <div class="col-lg-7 col-xl-6 mr-lg-auto">-->
+    <!--                                    <div class="oe_structure">-->
+    <!--                                        <section class="s_text_block" data-snippet="s_text_block">-->
+    <!--                                            <div class="container">-->
+    <!--                                                <div class="row">-->
+    <!--                                                    <div class="col-lg-12">-->
+    <!--                                                        <table border="0" cellpadding="5" cellspacing="0">-->
+    <!--                                                            <tr> <td style="width: 50%">-->
+    <!--                                                                <label for="First_Name"><b>First name *</b></label><br />-->
+    <!--                                                                <input name="First_Name" type="text" maxlength="50" style="width:100%;max-width: 260px" />-->
+    <!--                                                            </td> <td style="width: 50%">-->
+    <!--                                                                <label for="Last_Name"><b>Last name *</b></label><br />-->
+    <!--                                                                <input name="Last_Name" type="text" maxlength="50" style="width:100%;max-width: 260px" />-->
+    <!--                                                            </td> </tr> <tr> <td colspan="2">-->
+    <!--                                                            <label for="Email_Address"><b>Email *</b></label><br />-->
+    <!--                                                            <input name="Email_Address" type="text" maxlength="100" style="width:100%;max-width: 535px" />-->
+    <!--                                                        </td> </tr>  <tr> <td colspan="2">-->
+    <!--                                                            <a id='get_post_nomultilang' href="/get_post_nomultilang">get_post_nomultilang</a>-->
+    <!--                                                            <label for="Position"><b>Position you are applying for *</b></label><br />-->
+    <!--                                                            <input name="Position" type="text" maxlength="100" style="width:100%;max-width: 535px" />-->
+    <!--                                                        </td> </tr>  <tr> <td>-->
+    <!--                                                            <label for="Phone"><b>Phone *</b></label><br />-->
+    <!--                                                            <input name="Phone" type="text" maxlength="50" style="width:100%;max-width: 260px" />-->
+    <!--                                                        </td><td>-->
+    <!--                                                            <label for="fileselect">Upload:</label>-->
+    <!--                                                            <input type="file" name="upload"-->
+    <!--                                                                   id="fileselect"/>-->
+    <!--                                                        </td>-->
+    <!--                                                        </tr>-->
+
+    <!--                                                            <tr>-->
+    <!--                                                                <td colspan="2">-->
+    <!--                                                                    <label for="description"><b>Description About *</b></label><br />-->
+    <!--                                                                    <input name="description" type="html" style="width:100%;" />-->
+    <!--                                                                </td>-->
+    <!--                                                            </tr>-->
+    <!--                                                        </table>-->
+    <!--                                                    </div>-->
+    <!--                                                </div>-->
+    <!--                                            </div>-->
+    <!--                                        </section>-->
+    <!--                                    </div>-->
+
+    <!--                                </div>-->
+
+    <!--                            </div>-->
+    <!--                        </div>-->
+    <!--                        <div class="oe_structure mt-2"/>-->
+    <!--                    </div>-->
+    <!--                </t>-->
+    <!--            </t>-->
+    <!--        </field>-->
+    <!--    </record>-->
+
+
+
+
+    <template id="job_application" name="Personal Details">
+        <t t-call="website.layout">
+            <form name="frm_personal_data" id="frm_personal_data" class="form-horizontal" action="/save_data" method="post" autocomplete="off" enctype="multipart/form-data">
+
+                <div class="container mt-2 mb-2">
+                    <div class="card">
+                        <div class="card-body pl-pr-3">
+                            <div class="menu-bar">
+                                <div class="content-header">
+                                    <div class="container-fluid">
+                                        <div id="wrap">
+                                            <div class="oe_structure">
+                                                <section class="s_title parallax s_parallax_is_fixed bg-black-50 pt24 pb24" data-vcss="001" data-snippet="s_title" data-scroll-background-ratio="1">
+                                                    <div class="o_we_bg_filter bg-black-50"/>
+                                                    <div class="container">
+                                                        <h1>Job Application Form</h1>
+                                                    </div>
+                                                </section>
+                                            </div>
+                                            <div class="container mt-4 mb-5">
+                                                <div class="row">
+                                                    <div class="col-lg-7 col-xl-6 mr-lg-auto">
+                                                        <div class="oe_structure">
+                                                            <section class="s_text_block" data-snippet="s_text_block">
+                                                                <div class="container">
+                                                                    <div class="row">
+                                                                        <div class="col-lg-12">
+                                                                            <table border="0" cellpadding="5" cellspacing="0">
+                                                                                <tr> <td style="width: 50%">
+                                                                                    <label for="First_Name"><b>First name *</b></label><br />
+                                                                                    <input name="First_Name" type="text" maxlength="50" style="width:100%;max-width: 260px" />
+                                                                                </td> <td style="width: 50%">
+                                                                                    <label for="Last_Name"><b>Last name *</b></label><br />
+                                                                                    <input name="Last_Name" type="text" maxlength="50" style="width:100%;max-width: 260px" />
+                                                                                </td> </tr> <tr> <td colspan="2">
+                                                                                <label for="Email_Address"><b>Email *</b></label><br />
+                                                                                <input name="Email_Address" type="text" maxlength="100" style="width:100%;max-width: 535px" />
+                                                                            </td> </tr>  <tr> <td colspan="2">
+                                                                                <label for="Position"><b>Position you are applying for *</b></label><br />
+                                                                                <select class="form-control" id="Position" name="Position" placeholder="">
+                                                                                    <option value="0">Position you are applying for</option>
+                                                                                    <t t-foreach="request.env['hr.job'].sudo().search([])" t-as="job">
+                                                                                        <!--                                                 <option value="none"> t-att-selected="country.id==104"></option>-->
+                                                                                        <option t-att-value="job.id" ><t t-esc="job.name"/></option>
+                                                                                    </t>
+                                                                                </select>
+                                                                            </td> </tr>  <tr> <td>
+                                                                                <label for="Phone"><b>Phone *</b></label><br />
+                                                                                <input name="Phone" type="text" maxlength="50" style="width:100%;max-width: 260px" />
+                                                                            </td><td>
+                                                                                <label for="fileselect">Upload:</label>
+                                                                                <input type="file" name="upload"
+                                                                                       id="fileselect"/>
+                                                                            </td>
+                                                                            </tr>
+
+                                                                                <tr>
+                                                                                    <td colspan="2">
+                                                                                        <label for="description"><b>Description About *</b></label><br />
+                                                                                        <input name="description" type="html" style="width:100%;" />
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </section>
+                                                        </div>
+                                                        <div>
+                                                            <button type="submit" id="submitdata" name="draft" value="draft" class="btn btn-success">Submit Application</button>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="oe_structure mt-2"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        </t>
+    </template>
+
+
+
+
+    <template id="job_application_submitted" name="Personal Details">
+        <t t-call="website.layout">
+            <form name="frm_personal_data" id="frm_personal_data" class="form-horizontal" autocomplete="off" enctype="multipart/form-data">
+
+                <div class="container mt-2 mb-2">
+                    <div class="card">
+                        <div class="card-body pl-pr-3">
+                            <div class="menu-bar">
+                                <div class="content-header">
+                                    <div class="container-fluid">
+                                        <div id="wrap">
+                                            <div class="oe_structure">
+                                                <section class="s_title parallax s_parallax_is_fixed bg-black-50 pt24 pb24" data-vcss="001" data-snippet="s_title" data-scroll-background-ratio="1">
+                                                    <div class="o_we_bg_filter bg-black-50"/>
+                                                    <div class="container">
+                                                        <h1>Application Submitted</h1>
+                                                    </div>
+                                                </section>
+                                            </div>
+                                            <div class="container mt-4 mb-5">
+                                                <div class="row">
+                                                    <div class="col-lg-7 col-xl-6 mr-lg-auto">
+                                                        <div class="oe_structure">
+                                                            <section class="s_text_block" data-snippet="s_text_block">
+                                                                <div class="container">
+                                                                    <div class="row">
+                                                                        <p>Thank you for submitting your application sucessfully</p>
+                                                                    </div>
+                                                                </div>
+                                                            </section>
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="oe_structure mt-2"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        </t>
+    </template>
+
+
+
+    <!-- <record id="job_application_form_page" model="website.page">
+        <field name="url">/jobapplication</field>
+        <field name="is_published">True</field>
+        <field name="view_id" ref="jobapplication"/>
+        <field name="cache_time">0</field>
+        <field name="track">True</field>
+    </record> -->
+
+
+    <record id="job_application_page" model="website.menu">
+        <field name="name">Job Application</field>
+        <field name="url">/jobapplication</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence" type="int">20</field>
+    </record>
+
+</odoo>

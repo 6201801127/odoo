@@ -1,0 +1,119 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="kw_adv_claim_settlement_takeaction_account_tree">
+            <field name="name">kw_adv_claim_settlement.tree</field>
+            <field name="model">kw_advance_claim_settlement</field>
+            <field name="arch" type="xml">
+                <tree delete='false' create='false'>
+                    <field name="name" groups="kw_advance_claim.group_kw_advance_claim_account"/>
+                    <field name="petty_cash_id" groups="kw_advance_claim.group_kw_advance_claim_account"/>
+                    <field name="empl_id" groups="kw_advance_claim.group_kw_advance_claim_account"/>
+                    <field name="department_id" groups="kw_advance_claim.group_kw_advance_claim_account"/>
+                    <field name="job_id" groups="kw_advance_claim.group_kw_advance_claim_account"/>
+                    <field name="applied_date" widget="date" groups="kw_advance_claim.group_kw_advance_claim_account"/>
+                    <field name="currency_id" groups="kw_advance_claim.group_kw_advance_claim_account"/>
+                    <field name="net_total" string="Claim Amt." widget="monetary" groups="kw_advance_claim.group_kw_advance_claim_account"/>
+                    <field name="forwarded_by" invisible="1"/>
+                    <field name="pending_status" groups="kw_advance_claim.group_kw_advance_claim_account"/>
+                    <field name="state" groups="kw_advance_claim.group_kw_advance_claim_account"/>
+                    <button name="claim_account_take_action_button" string="Take Action" type="object" attrs="{'invisible': [('state','in',['release','cancel','reject'])]}" help="message" class="oe_highlight" groups="kw_advance_claim.group_kw_advance_claim_account"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_adv_claim_settlement_takeaction_account_form">
+            <field name="name">kw_adv_claim_settlement.form</field>
+            <field name="model">kw_advance_claim_settlement</field>
+            <field name="arch" type="xml">
+                <form delete='false' create='false'>
+                 <script>
+                        $(document).ready(function(){ state=  $("[aria-pressed=true]").text().trim();
+                           console.log(state);
+                            if ((state == 'Rejected')){
+                                $('.o_form_button_edit').hide();
+                            }
+                        });
+                    </script>
+                    <header>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,applied,forward,approve,forward_acc,reject"/>
+                        <button name="%(kw_advance_claim.action_kw_claim_release_remark_wizard_form_view)d" string="Settled" type="action" attrs="{'invisible':[('state', '!=', 'approve')]}"></button>
+                        <button name="%(kw_advance_claim.action_kw_adv_claim_accounts_reject_remark_wizard_form_view)d" string="Reject" type="action" attrs="{'invisible':[('state', 'in', ['reject','grant','draft','applied','forward','release'])]}"></button>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                 <field name="advance_taken" invisible="1"/>
+                                <field name="petty_cash_id" invisible='0' readonly='1'/>
+                                <field name="show_apply_btn" invisible='1'/>
+                                <field name="name" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly='1'/>
+                                <field name="empl_id" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly='1'/>
+                                <field name="department_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+<!--                                <field name="division"  force_save="1" attrs="{'invisible': [('division','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>-->
+<!--                                <field name="section"  force_save="1" attrs="{'invisible': [('section','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>-->
+<!--                                <field name="practise"  force_save="1" attrs="{'invisible': [('practise','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>-->
+                                <field name="job_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="applied_date" widget="date" readonly="1"/>
+                                <field name="currency_id" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1"/>
+                                <field name="advance_amt" widget="monetary" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="petty_cash_type" attrs="{'invisible':True}"/>
+                                <field name="mode_of_payment" attrs="{'readonly': [('state','in', ['grant','release'])]}"/>
+                                <field name="bank_id" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'invisible': [('mode_of_payment','=','cash')],'required':[('mode_of_payment','=','bank')],'readonly': [('state','=', 'release')]}"/>
+                                <field name="payment_date" string="Disbursed Date" attrs="{'invisible': [('state','not in', ['release'])]}" readonly="1"/>
+                                <field name="hide_btn_cancel" invisible='1'/>
+                                <field name="show_ra_button" invisible='1'/>
+                                <field name="show_accounts_button" invisible='1'/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page name="Claim_bill" string="Claim Details">
+
+                                <field name="claim_bill_line_ids" force_save="1">
+                                    <tree editable="bottom">
+                                        <field name="sr_no" invisible="1"/>
+                                        <field name="date" widget="date"/>
+                                        <field name="category_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="claim_type_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="description"/>
+                                        <field name="amount" widget="monetary"/>
+                                        <field name="upload_bill" filename="file_name" widget="FieldBinary"/>
+                                        <field name="file_name" invisible="1"/>
+                                    </tree>
+                                </field>
+
+                            </page>
+                        </notebook>
+                        <group class="oe_subtotal_footer oe_right">
+                            <field name="amount_total" readonly="1" widget="monetary" attrs="{'invisible':[('advance_taken','=', 'no')]}"/>
+                            <field name="expenses" readonly="1" widget="monetary" attrs="{'invisible':[('advance_taken','=', 'no')]}"/>
+                            <field name="net_total" class="oe_subtotal_footer_separator" readonly="1" widget="monetary" string="Payble/Receivable" attrs="{'invisible':[('advance_taken','=', 'no')]}"/>
+                            <field name="total_expenditure" class="oe_subtotal_footer_separator" readonly="1" widget="monetary" string="Total Expenditure" attrs="{'invisible':[('advance_taken','=', 'yes')]}"/>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_adv_claim_settlement_takeaction_account">
+            <field name="name">Claim Settlement</field>
+            <field name="res_model">kw_advance_claim_settlement</field>
+            <field name="binding_view_types">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','in',['approve','grant','hold','forward_acc'])]</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+		(0, 0, {'view_mode': 'tree', 'view_id': ref('kw_adv_claim_settlement_takeaction_account_tree')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+						No records to show...
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

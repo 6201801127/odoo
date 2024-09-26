@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <!-- explicit tree view of kw handbook Opening -->
+        <record model="ir.ui.view" id="kw_handbook_tree_view">
+            <field name="name">Kw handbook tree view</field>
+            <field name="model">kw_onboarding_handbook</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="icon" string="Icon" widget="image"
+                           options="{'preview_image': 'image_small', 'size': [60, 60]}"/>
+                    <field name="title"/>
+                    <field name="description"/>
+                    <field name="attachment" widget="download_link" filename="title"/>
+                    <!-- <field name="expires_on" groups="kw_handbook.group_kw_handbook_manager" string="Valid Through"/> -->
+                    <field name="posted_on"/>
+                    <field name="revised_on" invisible="1"/>
+                    <button name="get_stock_file" string="Preview" type="object"
+                            class="btn btn-success o_select_file_button"/>
+                    <field name="active" widget="boolean_toggle" groups="kw_handbook.group_kw_handbook_manager"/>
+                </tree>
+            </field>
+        </record>
+        <!-- explicit tree view of kw handbook Ending -->
+
+        <!-- explicit Kanban view of kw handbook Starting -->
+        <record id="kw_office_view_kanban" model="ir.ui.view">
+            <field name="name">Handbook Kanban View</field>
+            <field name="model">kw_onboarding_handbook</field>
+            <field name="arch" type="xml">
+                <kanban id="kanban" class="employee-handbook">
+                    <field name="icon"/>
+                    <field name="id"/>
+                    <field name="title"/>
+                    <field name="description"/>
+                    <field name="category"/>
+                    <field name="handbook_type_id" />
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_global_click ">
+                                <div class="row">
+                                    <div class="col-sm-2">
+                                        <div class="o_kanban_image">
+                                            <img t-att-src="kanban_image('kw_onboarding_handbook','icon',record.id.raw_value)"
+                                                 alt="Image"/>
+                                        </div>
+                                    </div>
+                                    <div class="o_dropdown_kanban dropdown"/>
+                                    <div class="col-sm-10">
+                                        <div class="oe_kanban_body handbook_body ml-5">
+                                            <div align="left">
+                                                <big>
+                                                    <a type="open"
+                                                       style="color: #000; font-size: 14px; font-weight:700;">
+                                                        <field name="title"/>
+                                                    </a>
+                                                </big>
+                                            </div>
+                                            <div class="oe_kanban_details handbook1">
+                                                <p>
+                                                    <field name="display_description"/>
+                                                </p>
+                                                <button name="get_stock_file" string="Preview" type="object"
+                                                        class="btn btn-primary o_select_file_button pull-right">Preview
+                                                </button>
+                                                <div class="pull-right mt-2"
+                                                     groups="kw_handbook.group_kw_handbook_manager">
+                                                    <field name="active" widget="boolean_toggle"/>
+                                                </div>
+                                                <!-- <t t-if="record.expires_on.raw_value">
+                                                    <div class="pull-left mt-2" groups="kw_handbook.group_kw_handbook_manager">
+                                                        <lable><i class="fa fa-calendar" title="Valid Trough" aria-label="Valid Through"/></lable>
+                                                        <field name="expires_on" />
+                                                    </div>
+                                                </t> -->
+                                                <t t-if="record.posted_on.raw_value">
+                                                    <div class="pull-left mt-2">
+                                                        <lable>
+                                                            <i class="fa fa-calendar" title="Valid Trough"
+                                                               aria-label="Valid Through"/>
+                                                        </lable>
+                                                        <field name="posted_on"/>
+                                                    </div>
+                                                </t>
+                                            </div>
+                                        </div>
+
+                                        <!-- <div class = "oe_kanban_footer pull-right">
+                                            <button name="get_stock_file" type="object" class="btn btn-primary o_select_file_button"> Preview </button>
+                                            <div class= "oe_kanban_footer_left"></div>
+                                        </div> -->
+                                    </div>
+                                    <div class="oe_clear"/>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="view_employee_handbook_search" model="ir.ui.view">
+            <field name="name">employee.handbook.search</field>
+            <field name="model">kw_onboarding_handbook</field>
+            <field name="arch" type="xml">
+                <search string="Search Handbook">
+                    <field name="title"/>
+                    <filter string="Active" name="active" domain="[('active','=',True)]"/>
+                    <filter string="Archived" name="archived" domain="[('active','=',False)]"/>
+                </search>
+            </field>
+        </record>
+
+        <!-- kw handbook actions views Opening-->
+        <record model="ir.actions.act_window" id="kw_handbook_actions_window">
+            <field name="name">HR Processes</field>
+            <field name="res_model">kw_onboarding_handbook</field>
+            <field name="view_mode">kanban,tree,form</field>
+            
+            <field name="domain">[('handbook_type_id.code','=','HR')]</field>
+            <field name="context">{'default_handbook_type_id':'HR'}</field>
+            <field name="view_ids" eval="[(5, 0, 0), 
+                (0, 0, {'view_mode': 'kanban', 'view_id': ref('kw_office_view_kanban')})]"/>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_handbook_login_actions_window">
+            <field name="name">Employee Handbook</field>
+            <field name="res_model">kw_onboarding_handbook</field>
+            <field name="view_mode">kanban</field>
+            
+            <field name="domain">[('user_ids', 'not in', uid), ('auth_login', '=', True)]</field>
+            <field name="context">{'create': False, 'edit': False, 'import': False}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'kanban', 'view_id': ref('kw_handbook_kanban_view')})]"/>
+        </record>
+
+    </data>
+</odoo>

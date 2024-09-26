@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="view_employee_vrs_tree">
+            <field name="name">view.employee.vrs.tree</field>
+            <field name="model">bsscl.vrs</field>
+            <field name="arch" type="xml">
+                <tree >
+                    <!-- <field name="employee_id" invisible="1" />
+                    <field name="relative_type" invisible="1" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}"/>
+                    <field name="name" placeholder="Enter Name" invisible="1"/>
+                    <field name="salutation" required="True"/> -->
+                    <field name="employee_id"/>
+                    <field name="job_id"/>
+                    <field name="department_id"/>
+                    <field name="joining_date"/>
+                    <field name="vrs_date"/>
+                    <field name="description"/>
+                    <field name="applied_on"/>
+                    <field name="status"/>
+                    <field name="check_user" invisible="1" />
+                    <!-- <field name="check_dc" invisible="1" /> -->
+                    <!-- <field name="check_cc" invisible="1" /> -->
+
+
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_employee_vrs_form">
+            <field name="name">view.employee.vrs.form</field>
+            <field name="model">bsscl.vrs</field>
+            <field name="arch" type="xml">
+                <form string="VRS" version="9.0">
+                    <header>
+						<button name="apply_vrs" string="Apply" type="object" class="oe_highlight" attrs="{'invisible':[('status','not in','draft')]}" />
+                        <!-- <button name="approve_vrs" string="Approve" type="object" class="oe_highlight" groups="bsscl_employee.deputy_com_id" attrs="{'invisible':[('status','not in','applied')]}" /> -->
+						<button name="confirm_vrs" string="Approve" type="object" class="oe_highlight" attrs="{'invisible':['|',('check_user','!=',False),('status','in',['draft','confirm','reject'])]}" />
+						<button name="reject_vrs" string="Reject" type="object" class="oe_highlight" attrs="{'invisible':['|',('check_user','!=',False),('status','in',['draft','confirm','reject'])]}" />
+
+
+
+						<field name="status" widget="statusbar" statusbar_visible="draft,applied,confirm,reject" />
+
+					</header>
+                    <sheet>
+                        <style>
+							.o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 180px !important;}
+						</style>
+						<div class="oe-tittle">
+							<h1 style="color:#3aadaa">
+							Applicant Information
+                         </h1>
+						</div>
+						<div class="oe-tittle">
+							<h3>
+								<field name="employee_id" readonly='1' class="oe_inline" />
+							</h3>
+						</div>
+                        <group>
+                            <group>
+                                
+                                <field name="employee_id"/>
+                                <field name="job_id"/>
+                                <field name="department_id"/>
+                                <field name="check_user" invisible="1" />
+                                <!-- <field name="check_dc" invisible="1" />
+                                <field name="check_cc" invisible="1" /> -->
+
+                            </group>
+                            <group>
+                                <field name="joining_date" required="1" attrs="{'readonly':[('status','not in','draft')]}"/>
+
+                                <field name="vrs_date" required="1" attrs="{'readonly':[('status','not in','draft')]}"/>
+                                <label for="description" required="1"/>
+                            <div>
+                                <field name="description" required='1' attrs="{'readonly':[('status','not in','draft')]}"  />
+                                <p style="color:red;">(Description must not exceed 500 characters)</p>
+                            </div>
+                                <!-- <field name="dcc_comment"  attrs="{'readonly': [('check_dc','!=',True)],'invisible':[('status','==','draft')]}"/> -->
+                                <field name="cc_comment"   attrs="{'readonly': [('status','=','confirm')],'invisible': ['|',('status','=','draft'),('check_user','!=',False)]}"/>
+                                <field name="cc_reject_remark"   attrs="{'readonly': [('status','=','confirm')],'invisible': ['|',('status','=','draft'),('check_user','!=',False)]}"/>
+
+                                <field name="applied_on"/>
+
+                            </group>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+						<field name="message_follower_ids" widget="mail_followers" />
+						<field name="activity_ids" widget="mail_activity" />
+						<field name="message_ids" widget="mail_thread" />
+					</div>
+                </form>
+            </field>
+        </record>
+        <record id="action_emp_vrs_action" model="ir.actions.act_window">
+            <field name="name">VRS</field>
+            <field name="res_model">bsscl.vrs</field>
+            <field name="view_mode">tree,form</field>
+            <!-- <field name="domain">['|','|',('create_uid','=',uid),('employee_id.parent_id.user_id','=',uid),('employee_id.parent_id.parent_id.user_id','=',uid)]</field> -->
+            <field name="domain">[('employee_id.id', '=', active_id)]</field>
+            <field name="context">{'create':True,'edit':True,'delete':True}</field>
+        </record>
+
+        <record id="action_emp_vrs_action_bydepcom" model="ir.actions.act_window">
+            <field name="name">VRS</field>
+            <field name="res_model">bsscl.vrs</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('status', '=', 'applied'),('employee_id.parent_id.user_id','=',uid)]</field>
+            <!-- <field name="domain">[('status', '=', 'applied')]</field> -->
+            <field name="context">{'create':True,'edit':True,'delete':True}</field>
+        </record>
+
+        <!-- <record id="action_emp_vrs_action_bycom" model="ir.actions.act_window">
+            <field name="name">VRS</field>
+            <field name="res_model">bsscl.vrs</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('status', '=', 'approved')]</field>
+            <field name="context">{'create':True,'edit':True,'delete':True}</field>
+        </record> -->
+
+        <!-- <menuitem id="vrs_action" name="VRS Actions" parent="bsscl_employee.admin_activity" groups="bsscl_employee.group_hr_ra" sequence="23"/> -->
+        <menuitem id="vrs_action" name="VRS Actions" parent="bsscl_employee.admin_activity" groups="bsscl_employee.group_hr_ra"  sequence="1"/>
+
+        <menuitem id="vrs_action_depcom" action="action_emp_vrs_action_bydepcom"  name="VRS Take Action" groups="bsscl_employee.group_hr_ra" parent="vrs_action"
+                  sequence="1"/>
+        <!-- <menuitem id="vrs_action_com" action="action_emp_vrs_action_bycom"  groups="bsscl_employee.commissioner_id" name="VRS Action By Commissioner" parent="vrs_action"
+        sequence="3"/> -->
+
+       
+
+    </data>
+</odoo>

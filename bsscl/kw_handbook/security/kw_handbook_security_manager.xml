@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate='0'>
+
+        <record model="ir.module.category" id="module_category_kw_handbook">
+            <field name="name">Employee Handbook</field>
+            <field name="description">User access level for this module</field>
+            <field name="sequence">4</field>
+        </record>
+
+        <record id="office_users_groups" model="res.groups">
+            <field name="name">User</field>
+            <field name="category_id" ref="kw_handbook.module_category_kw_handbook"/>
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
+        </record>
+    
+        <record id="hr.group_hr_user" model="res.groups">
+            <field name="implied_ids" eval="[(4, ref('kw_handbook.office_users_groups'))]"/>
+        </record>
+
+
+
+        <record id="group_kw_handbook_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="category_id" ref="kw_handbook.module_category_kw_handbook"/>
+            <field name="implied_ids" eval="[(4, ref('kw_handbook.office_users_groups'))]"/>
+            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        </record>
+
+        <record model="ir.rule" id="kw_handbook_user_view_expiry_rule">
+            <field name="name">Employee Handbook view valid handbooks</field>
+            <field name="model_id" ref="model_kw_onboarding_handbook"/>
+            <field name="domain_force">['&amp;', '&amp;', ('active','=',True),
+                                        '|', ('expires_on','>=','now'), ('expires_on','=',None),
+                                        '|', ('view_access', '=', 'All'),
+                                        '&amp;', ('view_access', '=', 'Specific'),
+                                        ('employee_ids', '=', user.employee_ids.id)]</field>
+            <!--            <field name="perm_create" eval="True"/>-->
+            <!--            <field name="perm_write" eval="True"/>-->
+            <!--            <field name="perm_unlink" eval="False"/>-->
+            <field name="groups" eval="[(4, ref('office_users_groups'))]"/>
+        </record>
+
+        <record model="ir.rule" id="kw_handbook_manager_view_expiry_rule">
+            <field name="name">Employee Handbook view all handbooks</field>
+            <field name="model_id" ref="model_kw_onboarding_handbook"/>
+            <field name="domain_force">[(1,'=',1)]</field>
+<!--            , '|',('active','=',True),('active','=',False)-->
+            <field name="groups" eval="[(4, ref('group_kw_handbook_manager'))]"/>
+        </record>
+
+    </data>
+</odoo>

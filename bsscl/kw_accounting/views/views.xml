@@ -1,0 +1,544 @@
+<odoo>
+  <data>
+
+    <!-- Analytic Account Form View -->
+    <record id="analytic_account_view_form" model="ir.ui.view">
+      <field name="name">analytic.account.view.form.inherit.accountant</field>
+      <field name="model">account.analytic.account</field>
+      <field name="inherit_id" ref="analytic.view_account_analytic_account_form" />
+      <field name="arch" type="xml">
+        <field name="partner_id" position="attributes">
+          <attribute name="invisible">not context.get('non_treasury_budget', True)</attribute>
+          <attribute name="required">context.get('non_treasury_budget', True)</attribute>
+        </field>
+        <field name="code" position="attributes">
+          <attribute name="invisible">not context.get('non_treasury_budget', True)</attribute>
+          <attribute name="required">context.get('non_treasury_budget', True)</attribute>
+        </field>
+        <field name="partner_id" position="after">
+          <field name="project_id" options='{"no_open": True, "no_create": True}'
+            invisible="not context.get('non_treasury_budget', True)" />
+          <field name="budget_type" />
+<!--          <field name="department_id" options='{"no_open": True, "no_create": True}'-->
+<!--            invisible="context.get('non_treasury_budget', True)" />-->
+
+
+        </field>
+<!--        <field name="company_id" position="after">-->
+<!--          <field name="branch_id" options='{"no_open": True, "no_create": True}'-->
+<!--            domain="[('company_id', '=', company_id)]" />-->
+<!--        </field>-->
+        <xpath expr="//form/sheet/div/button[@name='%(analytic.account_analytic_line_action)d']"
+          position="attributes">
+          <attribute name="invisible">1</attribute>
+        </xpath>
+        <xpath expr="//form/sheet/div[@name='button_box']" position="inside">
+          <button class="oe_stat_button" type="object" name="cost_account_analytic_line_action"
+            icon="fa-usd" string="Cost" widget="statinfo" />
+          <button class="oe_stat_button" type="object" name="revenue_account_analytic_line_action"
+            icon="fa-usd" string="Revenue" widget="statinfo" />
+          <button class="oe_stat_button" type="action"
+            name="%(analytic.account_analytic_line_action)d"
+            icon="fa-usd" string="Margin" widget="statinfo" />
+        </xpath>
+      </field>
+    </record>
+
+    <record id="account_analytic_account_inherit_budget_view_form" model="ir.ui.view">
+      <field name="name">analytic.account.view.form.inherit.accountant</field>
+      <field name="model">account.analytic.account</field>
+      <field name="inherit_id"
+        ref="bsscl_budget_management.view_account_analytic_account_form_inherit_budget" />
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='crossovered_budget_line']/tree/field[@name='general_budget_id']"
+          position="after">
+          <field name="apr_budget" invisible="context.get('non_treasury_budget', True)" />
+          <field name="may_budget" invisible="context.get('non_treasury_budget', True)" />
+          <field name="jun_budget" invisible="context.get('non_treasury_budget', True)" />
+          <field name="jul_budget" invisible="context.get('non_treasury_budget', True)" />
+          <field name="aug_budget" invisible="context.get('non_treasury_budget', True)" />
+          <field name="sep_budget" invisible="context.get('non_treasury_budget', True)" />
+          <field name="oct_budget" invisible="context.get('non_treasury_budget', True)" />
+          <field name="nov_budget" invisible="context.get('non_treasury_budget', True)" />
+          <field name="dec_budget" invisible="context.get('non_treasury_budget', True)" />
+          <field name="jan_budget" invisible="context.get('non_treasury_budget', True)" />
+          <field name="feb_budget" invisible="context.get('non_treasury_budget', True)" />
+          <field name="mar_budget" invisible="context.get('non_treasury_budget', True)" />
+        </xpath>
+        <xpath
+          expr="//field[@name='crossovered_budget_line']/tree/field[@name='theoritical_amount']"
+          position="attributes">
+          <attribute name="invisible">1</attribute>
+        </xpath>
+        <xpath expr="//field[@name='crossovered_budget_line']/tree/field[@name='percentage']"
+          position="attributes">
+          <attribute name="invisible">1</attribute>
+        </xpath>
+        <!-- <xpath expr="//field[@name='crossovered_budget_line']/tree/field[@name='date_from']"
+        position="attributes">
+            <attribute name="invisible">not context.get('non_treasury_budget', True)</attribute>
+          </xpath>
+          <xpath expr="//field[@name='crossovered_budget_line']/tree/field[@name='date_to']"
+        position="attributes">
+            <attribute name="invisible">not context.get('non_treasury_budget', True)</attribute>
+          </xpath> -->
+        <xpath expr="//field[@name='crossovered_budget_line']/tree/field[@name='paid_date']"
+          position="attributes">
+          <attribute name="invisible">not context.get('non_treasury_budget', True)</attribute>
+        </xpath>
+        <xpath expr="//field[@name='crossovered_budget_line']/tree/field[@name='planned_amount']"
+          position="attributes">
+          <attribute name="readonly">not context.get('non_treasury_budget', True)</attribute>
+          <attribute name="force_save">True</attribute>
+        </xpath>
+        <xpath expr="//field[@name='crossovered_budget_line']/tree/field[@name='practical_amount']"
+          position="after">
+          <field name="balance_amount" sum="Balance Amount" widget="monetary" />
+        </xpath>
+        <field name="code" position="before">
+          <field name="compute_balance" invisible="1" />
+        </field>
+      </field>
+    </record>
+
+    <!-- Analytic Account Action -->
+    <record id="analytic.action_account_analytic_account_form" model="ir.actions.act_window">
+      <field name="name">Project Budget</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">account.analytic.account</field>
+      <field name="search_view_id" ref="analytic.view_account_analytic_account_search" />
+      <field name="context">{'search_default_active':1}</field>
+      <field name="domain">[('budget_type', '=', 'project')]</field>
+<!--      <field name="view_type">form</field>-->
+      <field name="view_mode">tree,kanban,form</field>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+          Add a new analytic account
+        </p>
+      </field>
+    </record>
+
+    <!-- Treasury Budget Action -->
+    <record id="action_treasury_analytic_account" model="ir.actions.act_window">
+      <field name="name">Treasury Budget</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">account.analytic.account</field>
+      <field name="search_view_id" ref="analytic.view_account_analytic_account_search" />
+      <field name="context">{'search_default_active':1, 'non_treasury_budget': False, 'treasury':
+        True}</field>
+      <field name="domain">[('budget_type', '=', 'treasury')]</field>
+<!--      <field name="view_type">form</field>-->
+      <field name="view_mode">tree,kanban,form</field>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+          Add a new analytic account
+        </p>
+      </field>
+    </record>
+
+    <!-- Analytic Account List View -->
+    <record id="analytic_account_view_tree" model="ir.ui.view">
+      <field name="name">analytic.account.view.tree.inherit.accountant</field>
+      <field name="model">account.analytic.account</field>
+      <field name="inherit_id" ref="analytic.view_account_analytic_account_list" />
+      <field name="arch" type="xml">
+<!--        <field name="company_id" position="after">-->
+<!--          <field name="department_id" invisible="context.get('non_treasury_budget', True)" />-->
+<!--          <field name="branch_id" />-->
+<!--        </field>-->
+        <field name="code" position="attributes">
+          <attribute name="invisible">not context.get('non_treasury_budget', True)</attribute>
+        </field>
+        <field name="partner_id" position="attributes">
+          <attribute name="invisible">not context.get('non_treasury_budget', True)</attribute>
+        </field>
+        <field name="debit" position="attributes">
+          <attribute name="invisible">1</attribute>
+        </field>
+        <field name="credit" position="attributes">
+          <attribute name="invisible">1</attribute>
+        </field>
+      </field>
+    </record>
+
+   
+
+    
+
+    <!-- Journal Entries Form View -->
+    <record id="account_move_view_form" model="ir.ui.view">
+      <field name="name">account.move.view.form.inherit</field>
+      <field name="model">account.move</field>
+      <field name="inherit_id" ref="account.view_move_form" />
+      <field name="arch" type="xml">
+        <field name="date" position="before">
+          <field name="move_type" string="Entry Type"/>
+        </field>
+        <xpath expr="//form/header/button[@name='action_post']" position="attributes">
+          <attribute name="states">to_approve</attribute>
+        </xpath>
+<!--        <xpath expr="//form/header/button[@name='action_post']" position="before">-->
+<!--          <button name="apply_journal" type="object" states="draft" string="Send for Approval"-->
+<!--            class="btn btn-success" />-->
+<!--          <button name="action_draft" type="object" states="posted" string="Set to Draft"-->
+<!--          class="btn btn-success" />-->
+<!--        </xpath>-->
+<!--        <field name="journal_id" position="after">-->
+<!--          <field name="branch_id" options='{"no_open": True, "no_create": True}'-->
+<!--            domain="[('company_id', '=', company_id)]" />-->
+<!--        </field>-->
+        <field name="partner_id" position="after">
+<!--          <field name="invoice_id" options='{"no_open": False, "no_create": True}'-->
+<!--            attrs="{'column_invisible': [('parent.is_payment_receipt', '=', False)]}"-->
+<!--            domain="[('partner_id','=', partner_id),('state','=', 'open')]" />-->
+<!--          <field name="department_id" options='{"no_open": True, "no_create": True}' />-->
+        </field>
+        <field name="currency_id" position="attributes">
+          <attribute name="invisible">0</attribute>
+          <attribute name="readonly">0</attribute>
+          <attribute name="options">{"no_open": True, "no_create": True}</attribute>
+          <attribute name="groups">base.group_multi_currency</attribute>
+        </field>
+        <field name="currency_id" position="after">
+          <field name="is_foreign_currency" invisible="1" />
+<!--          <field name="is_payment_receipt" invisible="1" />-->
+          <field name="company_currency_id" invisible="1" />
+<!--          <field name="csm_acc_conf" invisible="1" />-->
+          <field name="exchange_rate" attrs="{'invisible': [('is_foreign_currency', '=', False)]}" />
+        </field>
+        <field name="analytic_account_id" position="attributes">
+          <attribute name="domain">[('partner_id', '=', partner_id)]</attribute>
+        </field>
+        <xpath expr="//field[@name='line_ids']/tree/field[@name='currency_id']"
+          position="attributes">
+          <attribute name="invisible">1</attribute>
+        </xpath>
+<!--        <xpath expr="//field[@name='line_ids']/tree/field[@name='analytic_account_id']"-->
+<!--          position="attributes">-->
+<!--          <attribute name="attrs">{'required': [('is_payment_receipt', '=', True),-->
+<!--            ('is_budget_mandatory', '=', True)]}</attribute>-->
+<!--        </xpath>-->
+        <!-- <xpath expr="//field[@name='line_ids']/form/group/field[@name='currency_id']"
+        position="attributes">
+          <attribute name="invisible">1</attribute>
+        </xpath> -->
+        <xpath expr="//field[@name='line_ids']/tree/field[@name='account_id']" position="before">
+<!--          <field name="is_payment_receipt" invisible="1" />-->
+          <field name="is_budget_mandatory" invisible="1" />
+<!--          <field name="group_id" options='{"no_open": True, "no_create": True}'-->
+<!--            attrs="{'column_invisible': [('parent.csm_acc_conf', '=', False)]}" />-->
+<!--          <field name="account_head_id" options='{"no_open": True, "no_create": True}'-->
+<!--            domain="[('parent_id', '=', group_id)]"-->
+<!--            attrs="{'readonly': [('group_id', '=', False)], 'column_invisible': [('parent.csm_acc_conf', '=', False)]}" />-->
+<!--          <field name="account_subhead_id" options='{"no_open": True, "no_create": True}'-->
+<!--            domain="[('parent_id', '=', account_head_id)]"-->
+<!--            attrs="{'readonly': [('account_head_id', '=', False)], 'column_invisible': [('parent.csm_acc_conf', '=', False)]}" />-->
+        </xpath>
+      </field>
+    </record>
+
+    <!-- Budget Form View -->
+    <record id="account_budget_view_form" model="ir.ui.view">
+      <field name="name">account.budget.view.form.inherit</field>
+      <field name="model">crossovered.budget</field>
+      <field name="inherit_id" ref="bsscl_budget_management.crossovered_budget_view_form" />
+      <field name="arch" type="xml">
+        <xpath expr="//form/header/button[@name='action_budget_confirm']" position="attributes">
+          <attribute name="states">to_approve</attribute>
+        </xpath>
+        <xpath expr="//form/header/button[@name='action_budget_confirm']" position="before">
+          <button name="apply_budget" type="object" states="draft" string="Send for Approval"
+            class="btn btn-success" />
+        </xpath>
+<!--        <field name="user_id" position="after">-->
+<!--          <field name="branch_id" options='{"no_open": True, "no_create": True}'-->
+<!--            domain="[('company_id', '=', company_id)]" />-->
+<!--          <field name="department_id" options='{"no_open": True, "no_create": True}' />-->
+<!--        </field>-->
+        <xpath
+          expr="//field[@name='crossovered_budget_line']/tree/field[@name='theoritical_amount']"
+          position="attributes">
+          <attribute name="invisible">1</attribute>
+        </xpath>
+        <xpath expr="//field[@name='crossovered_budget_line']/tree/field[@name='percentage']"
+          position="attributes">
+          <attribute name="invisible">1</attribute>
+        </xpath>
+      </field>
+    </record>
+
+
+    <!-- Tax List View -->
+<!--    <record id="tax_view_tree" model="ir.ui.view">-->
+<!--      <field name="name">tax.view.tree.inherit</field>-->
+<!--      <field name="model">account.tax</field>-->
+<!--      <field name="inherit_id" ref="account.view_tax_tree" />-->
+<!--      <field name="arch" type="xml">-->
+<!--        <field name="company_id" position="after">-->
+<!--          <field name="branch_id" options='{"no_open": True, "no_create": True}'-->
+<!--            domain="[('company_id', '=', company_id)]" />-->
+<!--        </field>-->
+<!--      </field>-->
+<!--    </record>-->
+
+    <!-- Tax Form View -->
+<!--    <record id="tax_view_form" model="ir.ui.view">-->
+<!--      <field name="name">tax.view.form.inherit</field>-->
+<!--      <field name="model">account.tax</field>-->
+<!--      <field name="inherit_id" ref="account.view_tax_form" />-->
+<!--      <field name="arch" type="xml">-->
+<!--        <field name="company_id" position="after">-->
+<!--          <field name="branch_id" options='{"no_open": True, "no_create": True}'-->
+<!--            domain="[('company_id', '=', company_id)]" />-->
+<!--        </field>-->
+<!--      </field>-->
+<!--    </record>-->
+
+<!--    &lt;!&ndash; Fiscal Position List View &ndash;&gt;-->
+<!--    <record id="account_position_view_tree" model="ir.ui.view">-->
+<!--      <field name="name">account.position.view.tree.inherit</field>-->
+<!--      <field name="model">account.fiscal.position</field>-->
+<!--      <field name="inherit_id" ref="account.view_account_position_tree" />-->
+<!--      <field name="arch" type="xml">-->
+<!--        <field name="company_id" position="after">-->
+<!--          <field name="branch_id" options='{"no_open": True, "no_create": True}'-->
+<!--            domain="[('company_id', '=', company_id)]" />-->
+<!--        </field>-->
+<!--      </field>-->
+<!--    </record>-->
+
+<!--    &lt;!&ndash; Fiscal Position Form View &ndash;&gt;-->
+<!--    <record id="account_position_view_form" model="ir.ui.view">-->
+<!--      <field name="name">account.position.view.form.inherit</field>-->
+<!--      <field name="model">account.fiscal.position</field>-->
+<!--      <field name="inherit_id" ref="account.view_account_position_form" />-->
+<!--      <field name="arch" type="xml">-->
+<!--        <field name="company_id" position="after">-->
+<!--          <field name="branch_id" options='{"no_open": True, "no_create": True}'-->
+<!--            domain="[('company_id', '=', company_id)]" />-->
+<!--        </field>-->
+<!--      </field>-->
+<!--    </record>-->
+
+<!--    &lt;!&ndash; Bank Journal List View &ndash;&gt;-->
+<!--    <record id="account_bank_journal_view_tree" model="ir.ui.view">-->
+<!--      <field name="name">account.bank.journal.view.tree.inherit</field>-->
+<!--      <field name="model">account.journal</field>-->
+<!--      <field name="inherit_id" ref="account.view_account_bank_journal_tree" />-->
+<!--      <field name="arch" type="xml">-->
+<!--        <field name="company_id" position="after">-->
+<!--          <field name="branch_id" options='{"no_open": True, "no_create": True}'-->
+<!--            domain="[('company_id', '=', company_id)]" />-->
+<!--        </field>-->
+<!--      </field>-->
+<!--    </record>-->
+
+    <!-- Bank Journal Form View -->
+<!--    <record id="account_bank_journal_view_form" model="ir.ui.view">-->
+<!--      <field name="name">account.bank.journal.view.form.inherit</field>-->
+<!--      <field name="model">account.journal</field>-->
+<!--      <field name="inherit_id" ref="account.view_account_bank_journal_form" />-->
+<!--      <field name="arch" type="xml">-->
+<!--        <field name="company_id" position="after">-->
+<!--          <field name="branch_id" options='{"no_open": True, "no_create": True}'-->
+<!--            domain="[('company_id', '=', company_id)]" />-->
+<!--        </field>-->
+<!--      </field>-->
+<!--    </record>-->
+
+    <!-- Account Journal List View -->
+<!--    <record id="account_journal_view_tree" model="ir.ui.view">-->
+<!--      <field name="name">account.journal.view.tree.inherit</field>-->
+<!--      <field name="model">account.journal</field>-->
+<!--      <field name="inherit_id" ref="account.view_account_journal_tree" />-->
+<!--      <field name="arch" type="xml">-->
+<!--        <field name="company_id" position="after">-->
+<!--          <field name="branch_id" options='{"no_open": True, "no_create": True}'-->
+<!--            domain="[('company_id', '=', company_id)]" />-->
+<!--        </field>-->
+<!--      </field>-->
+<!--    </record>-->
+
+<!--    &lt;!&ndash; Account Journal Form View &ndash;&gt;-->
+<!--    <record id="account_journal_view_form" model="ir.ui.view">-->
+<!--      <field name="name">account.journal.view.form.inherit</field>-->
+<!--      <field name="model">account.journal</field>-->
+<!--      <field name="inherit_id" ref="account.view_account_journal_form" />-->
+<!--      <field name="arch" type="xml">-->
+<!--        <field name="company_id" position="after">-->
+<!--          <field name="branch_id" options='{"no_open": True, "no_create": True}'-->
+<!--            domain="[('company_id', '=', company_id)]" />-->
+<!--        </field>-->
+<!--      </field>-->
+<!--    </record>-->
+
+    <!-- Account Group Form View -->
+<!--    <record id="account_group_view_form" model="ir.ui.view">-->
+<!--      <field name="name">account.group.view.form.inherit</field>-->
+<!--      <field name="model">account.group</field>-->
+<!--      <field name="inherit_id" ref="account.view_account_group_form" />-->
+<!--      <field name="arch" type="xml">-->
+<!--        <field name="parent_id" position="after">-->
+<!--          &lt;!&ndash; <field name="account_type_id" options='{"no_open": True, "no_create": True}'/> &ndash;&gt;-->
+<!--          <field name="parent_id" />-->
+<!--          <field name="budget_type" />-->
+<!--        </field>-->
+<!--      </field>-->
+<!--    </record>-->
+
+    <!-- <record id="accounting_branch_unit_view_tree" model="ir.ui.view">
+      <field name="name">accounting.branch.unit.view.tree</field>
+      <field name="model">accounting.branch.unit</field>
+      <field name="type">tree</field>
+      <field name="arch" type="xml">
+        <tree string="Accounting Branch Unit" editable="top">
+          <field name="name" required='1'/>
+          <field name="code" required='1'/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="accounting_branch_unit_configuration_action_window" model="ir.actions.act_window">
+        <field name="name">Branch Unit</field>
+        <field name="res_model">accounting.branch.unit</field>
+        <field name="view_mode">tree</field>
+    </record> -->
+
+    <!-- <record id="account_type_view_tree" model="ir.ui.view">
+      <field name="name">account.type.view.tree</field>
+      <field name="model">kw_account_type</field>
+      <field name="type">tree</field>
+      <field name="arch" type="xml">
+        <tree string="Group Type" editable="top">
+          <field name="name" required='1'/>
+          <field name="code" required='1'/>
+        </tree>
+      </field>
+    </record> -->
+
+    <!-- <record id="account_type_configuration_action_window" model="ir.actions.act_window">
+        <field name="name">Group Type</field>
+        <field name="res_model">kw_account_type</field>
+        <field name="view_mode">tree</field>
+    </record> -->
+
+<!--    <record id="account_res_config_settings_view_form" model="ir.ui.view">-->
+<!--      <field name="name">res.config.settings.view.form.inherit.accounts</field>-->
+<!--      <field name="model">res.config.settings</field>-->
+<!--      <field name="inherit_id" ref="account.res_config_settings_view_form" />-->
+<!--      <field name="arch" type="xml">-->
+<!--        <div id="setup" position="after">-->
+<!--          <div class="row mt16 o_settings_container" id="csm_account_conf">-->
+<!--            <div class="col-12 col-lg-6 o_setting_box" title="Enable CSM Accounting">-->
+<!--              <div class="o_setting_right_pane">-->
+<!--                <label for="enable_csm_account_conf" />-->
+<!--                <div class="text-muted">-->
+<!--                  Check this box to see group, account head, account sub-head in invoices-->
+<!--                </div>-->
+<!--              </div>-->
+<!--              <div class="o_setting_right_pane">-->
+<!--                <field name="enable_csm_account_conf" />-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </field>-->
+<!--    </record>-->
+
+    <record id="view_account_move_inherited_filter" model="ir.ui.view">
+      <field name="name">view_account_move_inherited_filter</field>
+      <field name="model">account.move</field>
+      <field name="inherit_id" ref="account.view_account_move_filter" />
+      <field name="arch" type="xml">
+        <filter name="sales" position="after">
+          <filter string="Receipt Journal" name="receipt_filter"
+            domain="[('move_type','=','receipt')]" />
+          <filter string="Payment Journal" name="payment_filter"
+            domain="[('move_type','=','payment')]" />
+          <filter string="General Journal" name="general_journal_filter"
+            domain="[('move_type','=','general')]" />
+          <filter string="Contra Journal" name="contra_filter"
+            domain="[('move_type','=','contra')]" />
+        </filter>
+      </field>
+    </record>
+
+    <record id="action_receipt_move_journal_line" model="ir.actions.act_window">
+      <field name="name">Receipt Journal</field>
+      <field name="res_model">account.move</field>
+<!--      <field name="view_type">form</field>-->
+      <field name="view_mode">tree,kanban,form</field>
+      <field name="view_id" ref="account.view_move_tree" />
+      <field name="search_view_id" ref="account.view_account_move_filter" />
+      <field name="context">{'search_default_receipt_filter':1,'default_move_type':'receipt'}</field>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+          Create a receipt journal entry
+        </p>
+        <p>
+          A journal entry consists of several journal items, each of
+          which is either a debit or a credit transaction.
+        </p>
+      </field>
+    </record>
+
+    <record id="action_payment_move_journal_line" model="ir.actions.act_window">
+      <field name="name">Payment Journal</field>
+      <field name="res_model">account.move</field>
+<!--      <field name="view_type">form</field>-->
+      <field name="view_mode">tree,kanban,form</field>
+      <field name="view_id" ref="account.view_move_tree" />
+      <field name="search_view_id" ref="account.view_account_move_filter" />
+      <field name="context">{'search_default_payment_filter':1,'default_move_type':'payment'}</field>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+          Create a payment journal entry
+        </p>
+        <p>
+          A journal entry consists of several journal items, each of
+          which is either a debit or a credit transaction.
+        </p>
+      </field>
+    </record>
+
+    <record id="action_general_journal_move_journal_line" model="ir.actions.act_window">
+      <field name="name">General Journal</field>
+      <field name="res_model">account.move</field>
+<!--      <field name="view_type">form</field>-->
+      <field name="view_mode">tree,kanban,form</field>
+      <field name="view_id" ref="account.view_move_tree" />
+      <field name="search_view_id" ref="account.view_account_move_filter" />
+      <field name="context">{'search_default_general_journal_filter':1,'default_move_type':'general'}</field>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+          Create a jurnal journal entry
+        </p>
+        <p>
+          A journal entry consists of several journal items, each of
+          which is either a debit or a credit transaction.
+        </p>
+      </field>
+    </record>
+
+    <record id="action_contra_move_journal_line" model="ir.actions.act_window">
+      <field name="name">Contra Journal</field>
+      <field name="res_model">account.move</field>
+<!--      <field name="view_type">form</field>-->
+      <field name="view_mode">tree,kanban,form</field>
+      <field name="view_id" ref="account.view_move_tree" />
+      <field name="search_view_id" ref="account.view_account_move_filter" />
+      <field name="context">{'search_default_contra_filter':1,'default_move_type':'contra'}</field>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+          Create a contra journal entry
+        </p>
+        <p>
+          A journal entry consists of several journal items, each of
+          which is either a debit or a credit transaction.
+        </p>
+      </field>
+    </record>
+
+
+  </data>
+</odoo>

@@ -1,0 +1,67 @@
+<?xml version="1.0" ?>
+<odoo>
+    <record id="action_reimbursement_test_tree" model="ir.actions.act_window">
+                  <field name="name">Reimbursement Rules</field>
+                  <field name="res_model">exception.rule</field>
+                  <field name="view_type">form</field>
+                  <field name="view_mode">tree,form</field>
+                  <field name="view_id" ref="base_exception_and_approval.view_exception_rule_tree"/>
+                  <field name="domain">[('rule_group', '=', 'reimbursement')]</field>
+                  <field name="context">{'active_test': False, 'default_rule_group' : 'reimbursement'}</field>
+              </record>
+        <menuitem
+                id="menu_hr_reimbursement_parent"
+                parent="reimbursement_stpi.reimbursement_configuration_menu_id"
+                sequence="20"
+                name="Exceptions"
+        />
+        <menuitem
+                action="action_reimbursement_test_tree"
+                id="menu_reimbursement_test"
+                parent="menu_hr_reimbursement_parent"
+        />
+
+        <record id="view_reimbursement_exp_form" model="ir.ui.view">
+                <field name="name">view_reimbursement_exp_form</field>
+                <field name="model">reimbursement</field>
+                <field name="inherit_id" ref="reimbursement_stpi.reimbursement_form_view"/>
+                <field name="arch" type="xml">
+                   <xpath expr="//field[@name='employee_id']" position="before">
+                        <field name="main_exception_id" options='{"no_open": True}' string="Error:" attrs="{'invisible':[('main_exception_id','=', False)]}"/>
+                        <field name="ignore_exception" invisible="1"/>
+                    </xpath>
+<!--                    <xpath expr="//notebook" position="inside">-->
+<!--                        <page string="Other Info" groups="base.group_no_one">-->
+<!--                            <field name="exception_ids" colspan="2" nolabel="1" readonly="1"/>-->
+<!--                        </page>-->
+<!--                    </xpath>-->
+                </field>
+        </record>
+
+        <record id="view_reimbursement_exp_tree" model="ir.ui.view">
+            <field name="name">view_reimbursement_exp_tree</field>
+            <field name="model">reimbursement</field>
+            <field name="inherit_id" ref="reimbursement_stpi.reimbursement_tree_view"/>
+            <field name="arch" type="xml">
+                 <field name="state" position="before">
+                       <field name="main_exception_id"/>
+                 </field>
+            </field>
+        </record>
+
+        <record id="view_reimbursement_exp_filter" model="ir.ui.view">
+            <field name="name">view_reimbursement_exp_filter_s</field>
+            <field name="model">reimbursement</field>
+            <field name="inherit_id" ref="reimbursement_stpi.reimbursement_search_view"/>
+            <field name="arch" type="xml">
+                <filter name="status" position="after">
+                    <separator orientation="vertical"/>
+                    <filter icon="terp-emblem-important" name="tofix" string="Blocked in draft" domain="[('main_exception_id','!=',False)]"/>
+                </filter>
+            </field>
+        </record>
+
+
+
+</odoo>
+

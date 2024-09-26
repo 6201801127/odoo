@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="bank_reconciliation_wizard_form" model="ir.ui.view">
+            <field name="name">Bank Reconciliation Wizard Form</field>
+            <field name="model">bank.reconciliation.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                        $(document).ready(function(){ 
+                            
+                            $('.o_form_button_create').hide();
+
+                        });
+                    </script>
+                    <div>
+                        <group>
+                            <field name="filter_by" widget="radio" options="{'horizontal': True}"/>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="financial_year_id" attrs="{'required':[('filter_by','=','fiscal_year')], 'invisible': [('filter_by','in',('current_date','date_range'))]}"/>
+                                <field name="date_from" required="1"/>
+                                <field name="date_to" required="1"/>
+                            </group>
+                            <group>
+
+                                <field name="bank_account_id" required="1"/>
+                            </group>
+                        </group>
+                    </div>
+                    <footer>
+                        <button string='Submit' name="get_bank_reconciliation" type="object" class="btn mr-4 font-weight-bold text-white btn-success"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="bank_reconciliation_wizard_actions" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Bank Reconciliation</field>
+            <field name="res_model">bank.reconciliation.wizard</field>
+            <field name="view_mode">form</field>
+<!--            <field name="view_type">form</field>-->
+            <field name="target">current</field>
+        </record>
+
+        <record id="bank_reconcile_entries_wizard_form_view" model="ir.ui.view">
+            <field name="name">Bank Reconciliation Entries Wizard</field>
+            <field name="model">bank_reconcile_entries_wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+	        			$(document).ready(function(){
+	                        $(".modal-dialog").addClass('modal-md').removeClass('modal-lg');
+	                    });
+	        		</script>
+                    <div class="row">
+                        <div class="col-sm-12 mx-auto">
+                            <b><h6 class="text-left mb-3">Are you sure you want to reconcile?</h6></b>
+                            <footer>
+                                <button name="action_menu_bank_reconcile" type="object" class="btn-success mr-2">Clear</button>
+                                <button string="Cancel" class="btn-danger" special="cancel"/>
+
+                            </footer>
+                        </div>
+                    </div>
+                </form>
+            </field>
+        </record>
+		<act_window id="action_menu_bank_reconcile" name="Reconcile" src_model="account.move.line" res_model="bank_reconcile_entries_wizard" view_type="form" view_mode="form" key2="client_action_multi" target="new" />
+
+        <template id="bank_reconcile_bank_balance" name="Bank Balance">
+            <div class="container-fluid my-4">
+                <div class="row">
+                    <div class="col-md-4 mr-auto">
+                       <table class="table table-sm table-bordered table-striped mb-0">
+                            <tr>
+                                <td class="h5">Bank:</td>
+                                <td style="background:#fff;" class="h5"><span class="text-danger" t-esc="vals['bank']"/></td>
+                            </tr>
+                            <tr>
+                                <td class="h5">From Date:</td>
+                                <td style="background:#fff;" class="h5"><span t-esc="vals['date_from']"/></td>
+                            </tr>
+                            <tr>
+                                <td class="h5">To Date:</td>
+                                <td style="background:#fff;" class="h5"><span t-esc="vals['date_to']"/></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-4">
+                        <t t-set="company_balance" t-value="'%.2f' % vals['company_balance']" />
+                        <t t-set="bank_balance" t-value="vals['bank_balance']" />
+                        <table class="table table-bordered table-sm table-striped mb-0">
+                            <tr>
+                                <td style="" class="h5">Balance as per company books:</td>
+                                <td style="background: #fff; color: #000;" class="h5 text-right"><t t-esc="company_balance"  /></td>
+                                <td style="background: #fff; color: #000;" class="h5 text-right"></td>
+                            </tr>
+                            <tr>
+                                <td style="" class="h5">Amounts not reflected in bank:</td>
+                                <td style="background: #fff; color: #000;" class="h5 text-right"><t t-esc="vals['bank_unreconciled_debit_balance']" /></td>
+                                <td style="background: #fff; color: #000;" class="h5 text-right"><t t-esc="vals['bank_unreconciled_credit_balance']" /></td>
+                            </tr>
+                            <tr>
+                                <td style="" class="h5">Balance as per bank:</td>
+                                <td style="background: #fff; color: #000;" class="h5 text-right"><t t-esc="bank_balance" /></td>
+                                <td style="background: #fff; color: #000;" class="h5 text-right"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </data>
+</odoo>

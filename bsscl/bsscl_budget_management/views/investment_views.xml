@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="investment_form" model='ir.ui.view'>
+        <field name="name">investment.details.form</field>
+        <field name="model">investment.details</field>
+        <field name="arch" type="xml">
+            <form string="">
+                <header>
+                    <button name="action_send_approval" type="object" string="Send For Approval" class="oe_highlight" states="draft"/>
+                    <button name="action_approve"  type="object" string="Approve" class="oe_highlight" states="wip"/>
+
+                    <button name="action_confirm" type="object" string="Submit" class="oe_highlight" states="approved"/>
+                    <button name="action_cancel" type="object" string="Close" confirm="Do you really want to Investment Close..?" class="oe_highlight" states="confirm"/>
+                    <button name="action_set_draft"   type="object" string="Set To Draft" class="oe_highlight" states="cancel"/>
+                    <field name="state" widget="statusbar" invisible="0" statusbar_visible="draft,wip,confirm,cancel"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" string="Budget" name="action_budget_button"
+                                icon="fa-money"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="number" string="Reference"/>
+                        <h1>
+                            <field name="number"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_view_type" required="1"/>
+<!--                            <field name="investor_partner_id" required="1"-->
+<!--                                   options="{'no_open': True, 'no_create': True, 'no_edit': True}"-->
+<!--                                   domain="[('partner_view_type', '=', partner_view_type)]"/>-->
+<!--                            <field name="partner_type_new" invisible="1"/>-->
+                        </group>
+                        <group>
+                            <field name="budgetary_id" invisible="1" required="0"/>
+                            <field name="name" required="1" attrs="{'readonly': [('state', '=', 'cancel')]}"/>
+                        </group>
+                    </group>
+                    <group string="Bsscl Center Details" name="bsscl_detials">
+<!--                        <group>-->
+<!--                            <field name="coe_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>-->
+<!--                        </group>-->
+                        <group>
+                            <field name="bsscl_center_id" readonly="0" force_save="1"
+                                   options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                        </group>
+                    </group>
+                    <group string="Funding Details">
+                        <group>
+                            <!--<field name="fund_rev"/>-->
+                            <field name="company_id" invisible="1"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="total_investment" required="1" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"
+                                   attrs="{'readonly': [('state', '=', 'cancel')]}"/>
+                            <field name="total_rev" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        </group>
+                        <group>
+                            <!--<field name="date_funding" required="1"/>-->
+                            <!--<field name="next_date_funding"/>-->
+                        </group>
+                        <group>
+                            <field name="percent_rev"/>
+                        </group>
+
+                        <group>
+                            <field name="upload" filename="fname" attrs="{'readonly': [('state', '=', 'cancel')]}"/>
+                            <field name="fname" invisible="1"/>
+                            <field name="upload_dec" attrs="{'readonly': [('state', '=', 'cancel')]}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string='Funding History' invisible="1">
+                            <field name="history_ids" attrs="{'readonly': [('state', '=','cancel')]}" context="{'default_budgetary_id': budgetary_id}">
+                                <tree editable="top">
+                                    <field name="name"/>
+                                    <field name="budgetary_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                                    <field name="account_ids" options="{'no_open': True, 'no_create': True, 'no_edit': True}"
+                                           attrs="{'readonly' :[('budgetary_id','=',False)]}"
+                                           domain="[('internal_group','=', 'expense')]" widget="many2many_tags"/>
+                                    <field name="date"/>
+                                    <field name="amount"/>
+                                    <field name="state" readonly="1"/>
+                                    <button name="approve_investment" states="draft" string="Approve" type="object"
+                                            icon="fa-check-circle"
+                                            help="You Can Approve from this Button"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Planned Investment">
+                             <field name="planned_amount_compute" invisible="1"/>
+                            <field name="planned_investment_ids" attrs="{'readonly': [('state', '=','cancel')]}">
+                                <tree editable="top">
+                                    <field name="planned_investment_code" readonly="1"/>
+                                    <field name="company_id" invisible="1"/>
+                                    <field name="currency_id" invisible="1"/>
+                                    <field name="planned_amount" sum="Planned Amount" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}"/>
+                                    <field name="total_amount" sum="Total"/>
+                                    <field name="budgetary_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                                    <field name="account_ids" options="{'no_open': True, 'no_create': True, 'no_edit': True}"
+                                           attrs="{'readonly' :[('budgetary_id','=',False)]}"
+                                           domain="[('internal_group','=', 'expense')]" widget="many2many_tags"/>
+                                    <field name="planned_date"/>
+                                    <field name="intended_utilization"/>
+                                </tree>
+                                <form>
+                                    <group>
+                                        <group>
+                                            <field name="planned_investment_code" readonly="1"/>
+                                            <field name="planned_amount" readonly="1"/>
+                                            <field name="total_amount" readonly="1"/>
+                                            <field name="budgetary_id" readonly="1"/>
+                                        </group>
+                                        <group>
+                                            <field name="account_ids" widget="many2many_tags" readonly="1"/>
+                                            <field name="planned_date" readonly="1"/>
+                                            <field name="intended_utilization" readonly="1"/>
+                                        </group>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Actual Investment Received"  attrs="{'invisible': [('state', '!=', 'confirm')]}">
+                            <field name="actual_investment_ids">
+                                <tree editable="top">
+                                    <field name="investment_code" readonly="1"/>
+                                     <field name="planned_investment_code_id"
+                                            options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                                    <field name="budgetary_id" force_save="1"  readonly="1"
+                                           options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                                    <field name="account_ids" force_save="1" readonly="1" widget="many2many_tags"/>
+                                    <field name="planned_amount" sum="Planned Amount" force_save="1" readonly="1"/>
+                                    <field name="total_amount" sum="Total" force_save="1" readonly="1"/>
+                                    <field name="actual_amount_received" sum="Amount Received"/>
+                                    <field name="actual_amount" sum="Actual Amount"/>
+                                    <field name="planned_date" force_save="1" readonly="1"/>
+                                    <field name="actual_date"/>
+                                    <field name="time_deviation" invisible="1"/>
+                                    <field name="utilization_amount" sum="Utilization" invisible="1"/>
+                                    <field name="state" invisible="1"/>
+                                    <field name="upload_utilization" invisible="1"/>
+                                    <button name="approve_investment" states="draft" string="Approve" type="object" icon="fa-check-circle"
+                                            help="You Can Approve from this Button"/>
+                                </tree>
+                                <form>
+                                    <group>
+                                        <group>
+                                            <field name="investment_code" readonly="1"/>
+                                            <field name="budgetary_id" readonly="1"/>
+                                            <field name="account_ids" options='{"no_create": 1, "no_create_edit": 1}'
+                                           attrs="{'readonly' :[('budgetary_id','=',False)]}"
+                                           domain="[('internal_group','=', 'expense')]" widget="many2many_tags"/>
+                                            <field name="planned_investment_code_id" readonly="1"/>
+                                            <field name="planned_amount" readonly="1"/>
+                                            <field name="total_amount" readonly="1"/>
+                                            <field name="actual_amount_received" readonly="1"/>
+                                        </group>
+                                        <group>
+                                            <field name="actual_amount" readonly="1"/>
+                                            <field name="planned_date" readonly="1"/>
+                                            <field name="actual_date" readonly="1"/>
+                                            <field name="time_deviation" readonly="1" invisible="1"/>
+                                            <field name="utilization_amount" readonly="1" invisible="1"/>
+                                            <field name="state" readonly="1" invisible="1"/>
+                                            <field name="upload_utilization" readonly="1" invisible="1"/>
+                                        </group>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!--This is investment tree view -->
+    <record id="investment_tree11" model='ir.ui.view'>
+        <field name="name">investment.details.tree</field>
+        <field name="model">investment.details</field>
+        <field name="arch" type="xml">
+            <tree>
+                <!-- <field name="number"/> -->
+                <field name="partner_view_type"/>
+<!--                <field name="investor_partner_id"-->
+<!--                       domain="[('partner_view_type', '=', partner_view_type)]"/>-->
+<!--                <field name="budgetary_id"/>-->
+<!--                <field name="coe_id" required="1"/>-->
+                <field name="company_id" invisible="1"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="total_investment" widget="monetary" sum="total_investment"
+                       options="{'currency_field': 'currency_id'}"/>
+                <field name="total_rev" widget="monetary" sum="total_rev"
+                       options="{'currency_field': 'currency_id'}"/>
+                <field name="percent_rev"/>
+                <field name="upload" filename="fname"/>
+                <field name="fname" invisible="1"/>
+                <field name="upload_dec"/>
+                <field name="state" invisible="1"/>
+                <!--                <button name="action_confirm" type="object" string="Confirm"  icon="fa-check-circle" help="You Can Confirm from this Button" states="draft"/>-->
+                <!--                <button name="action_cancel" type="object" string="Cancel" icon="fa-ban" help="You Can Cancel from this Button" states="draft,confirm"/>-->
+            </tree>
+        </field>
+    </record>
+
+    <record id="investment_search_view_id" model="ir.ui.view">
+        <field name="name">>investment.details.search</field>
+        <field name="model">investment.details</field>
+        <field name="arch" type="xml">
+            <search string="Investment Details">
+                <field name="number"/>
+                <field name="name"/>
+                <field name="partner_view_type"/>
+<!--                <field name="investor_partner_id"/>-->
+                <field name="budgetary_id"/>
+<!--                <field name="coe_id"/>-->
+<!--                <field name="stpi_loc" readonly="1"/>-->
+                <separator/>
+                <field name="date_funding"/>
+                <field name="next_date_funding"/>
+                <group expand="1" string="Group By">
+                    <filter string="Ref#" name="number" context="{'group_by':'number'}"/>
+                    <separator/>
+                    <filter string="Name" name="name" context="{'group_by':'name'}"/>
+<!--                    <filter string="COE" name="coe_id" context="{'group_by':'coe_id'}"/>-->
+                    <separator/>
+                    <filter string="Partner Type" name="partner_view_type" context="{'group_by':'partner_view_type'}"/>
+<!--                    <filter string="Funding Partner" name="investor_partner_id"-->
+<!--                            context="{'group_by':'investor_partner_id'}"/>-->
+                    <filter string="Budgetary" name="budgetary_id" context="{'group_by':'budgetary_id'}"/>
+                    <separator/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!--creating new menu and actions-->
+    <record id="action_investment" model="ir.actions.act_window">
+        <field name="name">Actual Investment</field>
+        <field name="res_model">investment.details</field>
+        <field name="binding_view_types">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                create first investment record!
+            </p>
+        </field>
+    </record>
+
+
+
+     <record id="actual_investment_form" model='ir.ui.view'>
+        <field name="name">actual.investment.received.form</field>
+        <field name="model">actual.investment.received.line</field>
+        <field name="arch" type="xml">
+            <form string="">
+                <sheet>
+                    <group>
+                        <group>
+<!--                            <field name="coe_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>-->
+<!--                            <field name="partner_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>-->
+                            <field name="investment_code"/>
+                            <field name="planned_investment_code_id"
+                                   options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                        </group>
+                        <group>
+                            <field name="account_ids" widget="many2many_tags"
+                                   options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                            <field name="declaration_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="planned_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="total_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        </group>
+                        <group>
+                             <field name="actual_amount_received" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="actual_amount"/>
+                            <field name="planned_date"  />
+                            <field name="actual_date"/>
+                        </group>
+                        <group>
+                            <field name="time_deviation"/>
+                            <field name="utilization_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="state"/>
+                            <field name="upload_utilization"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="actual_investment_tree_id" model='ir.ui.view'>
+        <field name="name">actual.investment.tree</field>
+        <field name="model">actual.investment.received.line</field>
+        <field name="arch" type="xml">
+            <tree>
+<!--                <field name="coe_id"/>-->
+                <field name="investment_code"/>
+                <field name="partner_id"/>
+                <field name="planned_investment_code_id"/>
+                <field name="budgetary_id" />
+                <field name="account_ids" widget="many2many_tags"/>
+                <field name="declaration_amount"/>
+                <field name="planned_amount" />
+                <field name="total_amount" />
+                <field name="actual_amount_received"/>
+                <field name="actual_amount"/>
+                <field name="planned_date"  />
+                <field name="actual_date"/>
+                <field name="time_deviation"/>
+                <field name="utilization_amount"/>
+                <field name="state"/>
+                <field name="upload_utilization"/>
+                <button name="approve_investment" states="draft" string="Approve" type="object" icon="fa-check-circle"
+                        help="You Can Approve from this Button"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="actual_investment_search_id" model="ir.ui.view">
+        <field name="name">investment.details.search</field>
+        <field name="model">actual.investment.received.line</field>
+        <field name="arch" type="xml">
+            <search string="Investment Details">
+<!--                    <field name="coe_id"/>-->
+<!--                     <field name="partner_id"/>-->
+                    <field name="investment_code"/>
+                    <field name="planned_investment_code_id"/>
+                    <field name="budgetary_id"/>
+                <separator/>
+                    <field name="planned_date" />
+                    <field name="actual_date"/>
+                <separator/>
+                     <field name="state"/>
+                <group expand="1" string="Group By">
+                    <filter string="Investment Code#" name="investment_code" context="{'group_by':'investment_code'}"/>
+                    <filter string="Planned Investment Code#" name="planned_investment_code_id" context="{'group_by':'planned_investment_code_id'}"/>
+                    <separator/>
+<!--                    <filter string="Partner" name="partner_id" context="{'group_by':'partner_id'}"/>-->
+<!--                    <filter string="COE" name="coe_id" context="{'group_by':'coe_id'}"/>-->
+                    <separator/>
+                    <filter string="Budgetary" name="budgetary_id" context="{'group_by':'budgetary_id'}"/>
+                    <separator/>
+                    <filter string="Status" name="state" context="{'group_by':'state'}"/>
+                    <separator/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_actual_investment_id" model="ir.actions.act_window">
+        <field name="name">Investment Details</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">actual.investment.received.line</field>
+        <field name="binding_view_types">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'create': False, 'edit':False, 'delete': False}</field>
+    </record>
+
+
+
+</odoo>

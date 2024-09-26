@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <data>
+    
+        <record id="court_case_management_view_tree" model="ir.ui.view">
+            <field name="name">court.case.management.view.tree</field>
+            <field name="model">court.case.management</field>
+            <field name="arch" type="xml">
+                <tree string="" create='0' edit='0'>
+                    <field name="job_id"/>
+                    <field name="case_type"/>
+                    <field name="case_no"/>
+                    <field name="case_subject"/>
+                    <field name="case_description"/>
+                    <field name="arising_case"/>
+                    <field name="case_copy"/>
+                    <field name="filed_on"/>
+                    <field name="petitioner_name"/>
+                    <field name="court_location_id"/>
+                    <field name="emp_id"/>
+                    <field name="case_sub_type"/>
+                    <field name="case_file_no"/>
+                    <field name="respondent_name_id"/>
+                    <field name="address"/>
+
+                </tree>
+            </field>
+        </record>
+        <record id="court_case_management_view_form" model="ir.ui.view">
+            <field name="name">court.case.management.form</field>
+            <field name="model">court.case.management</field>
+            <field name="arch" type="xml">
+                <form duplicate="0" create='0' edit='0'>
+                    <header>
+                        <!-- <button name="approve_btn" string="Approve / मंज़ूरी" type="object" class="oe_highlight" groups="bsscl_employee.deputy_com_id" attrs="{'invisible':[('status','not in','applied')]}" /> -->
+                        <button name="approve_btn" string="Approve / मंज़ूरी" type="object" class="oe_highlight" attrs="{'invisible':[('status','not in','applied')]}" />
+						<!-- <button name="confirm_btn" string="Confirm / पुष्टि" type="object" class="oe_highlight" groups="bsscl_employee.commissioner_id" attrs="{'invisible':[('status','not in','approved')]}" /> -->
+						<!-- <button name="reject_btn" string="Reject / अस्वीकार" type="object" class="oe_highlight" groups="bsscl_employee.deputy_com_id " attrs="{'invisible':[('status','not in','applied')]}" /> -->
+						<button name="reject_btn" string="Reject / अस्वीकार" type="object" class="oe_highlight" attrs="{'invisible':[('status','not in','applied')]}" />
+						<!-- <button name="reject_btn" string="Reject / अस्वीकार" type="object" class="oe_highlight" groups="bsscl_employee.commissioner_id" attrs="{'invisible':[('status','not in','approved')]}" /> -->
+                        <!-- <field name="status" widget="statusbar" statusbar_visible="draft,applied,approved,reject,confirm" /> -->
+                        <field name="status" widget="statusbar" statusbar_visible="draft,applied,approved,reject" />
+                    </header>
+                    <sheet>
+                        
+                        <group>
+                            <group >
+                                <field name="job_id" options="{'no_open': True,'no_create':True,'no_edit':True,'no_delete':True}"/>
+                                <field name="case_type" options="{'no_open': True,'no_create':True,'no_edit':True,'no_delete':True}"/>
+                                <field name="case_no"/>
+                                <field name="case_subject"/>
+                                <field name="case_description"/>
+                                <field name="arising_case"/>
+                                <field name="case_copy"/>
+                                <field name="filed_on"/>
+                            </group>
+                            <group>
+                                <field name="petitioner_name" options="{'no_open': True,'no_create':True,'no_edit':True,'no_delete':True}" required='1'/>
+                                <field name="court_location_id" options="{'no_open': True,'no_create':True,'no_edit':True,'no_delete':True}"/>
+                                <field name="emp_id" options="{'no_open': True,'no_create':True,'no_edit':True,'no_delete':True}"/>
+                                <field name="case_sub_type" options="{'no_open': True,'no_create':True,'no_edit':True,'no_delete':True}"/>
+                                <field name="case_file_no"/>
+                                <field name="respondent_name_id" options="{'no_open': True,'no_create':True,'no_edit':True,'no_delete':True}"/>
+                                <field name="address"/>
+                            </group>
+                            
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        
+        <!-- (wagisha) only approval by RA -->
+        <record id="court_case_management_action" model="ir.actions.act_window">
+            <field name="name"> Manage Court Case / कोर्ट केस मैनेज करें</field>
+            <field name="res_model">court.case.management</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('petitioner_name.parent_id.user_id','=',uid),('status','=','applied')]</field>
+            <field name="view_ids" eval="[(5,0,0),
+                    (0,0,{'view_mode':'tree','view_id': ref('court_case_management_view_tree')}),
+                    (0,0,{'view_mode':'form', 'view_id': ref('court_case_management_view_form')}),
+                    ]"
+        />
+        </record>
+
+
+        <menuitem id="bsscl_court_case_manage_main_menu"
+        name="Manage Court Case / कोर्ट केस मैनेज करें"
+        parent="bsscl_court_case.bsscl_court_case_root_menu"
+        sequence="2"
+        />
+
+        <menuitem
+        id="model_manage_court_case_menu"
+        name="Manage Court Case / कोर्ट केस मैनेज करें"
+        parent="bsscl_court_case.bsscl_court_case_manage_main_menu"
+        action="bsscl_court_case.court_case_management_action"
+        sequence="1"
+        />
+        <!-- groups="bsscl_employee.deputy_com_id" -->
+
+<!-- (wagisha) second level approval commented -->
+
+        <!-- <record id="court_case_management_comm_action" model="ir.actions.act_window">
+            <field name="name"> Manage Court Case / कोर्ट केस मैनेज करें</field>
+            <field name="res_model">court.case.management</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('status','=','approved')]</field>
+            <field name="view_ids" eval="[(5,0,0),
+                    (0,0,{'view_mode':'tree','view_id': ref('court_case_management_view_tree')}),
+                    (0,0,{'view_mode':'form', 'view_id': ref('court_case_management_view_form')}),
+                    ]"
+        />
+        </record>
+        <menuitem
+        id="model_manage_court_comm_case_menu"
+        name="Manage Court Case / कोर्ट केस मैनेज करें"
+        parent="bsscl_court_case.bsscl_court_case_manage_main_menu"
+        action="bsscl_court_case.court_case_management_comm_action"
+        groups="bsscl_employee.commissioner_id"
+        sequence="2"
+        /> -->
+
+        <record id="court_case_view_record_action" model="ir.actions.act_window">
+            <field name="name"> View Court Case / कोर्ट केस देखें</field>
+            <field name="res_model">court.case.management</field>
+            <field name="view_mode">tree,form</field>
+            <!-- <field name="domain">[('status','=','confirm')]</field> -->
+            <field name="domain">[('status','=','approved')]</field>
+            <field name="view_ids" eval="[(5,0,0),
+                    (0,0,{'view_mode':'tree','view_id': ref('court_case_management_view_tree')}),
+                    (0,0,{'view_mode':'form', 'view_id': ref('court_case_management_view_form')}),
+                    ]"
+        />
+        </record>
+        <menuitem
+        id="model_manage_court_view_case_menu"
+        name="View Court Case / कोर्ट केस देखें"
+        parent="bsscl_court_case.bsscl_court_case_main_menu"
+        action="bsscl_court_case.court_case_view_record_action"
+        sequence="2"
+        />
+        
+    
+    </data>
+    
+
+</odoo>

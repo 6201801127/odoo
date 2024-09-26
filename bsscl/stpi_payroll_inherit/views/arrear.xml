@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_arrear_tree" model="ir.ui.view">
+        <field name="name">arrear.arrear.tree</field>
+        <field name="model">arrear.arrear</field>
+        <field name="arch" type="xml">
+            <tree string="DR Arrear">
+                <field name="employee_id"/>
+                <field name="centre_id"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_arrear_form" model="ir.ui.view">
+        <field name="name">arrear.arrear.form</field>
+        <field name="model">arrear.arrear</field>
+        <field name="arch" type="xml">
+            <form string="DR Arrear">
+                <header>
+                    <button name="compute_arrear" string="Compute Arrear" type="object" 
+                            class="oe_highlight" attrs="{'invisible': ['|', ('state','!=','draft'), ('arrear_type', 'in', ('dr', 'promotion'))]}"/>
+                    <button name="confirm_arrear" string="Confirm Arrear" type="object" 
+                            class="oe_highlight" attrs="{'invisible': [('state','!=','draft')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirm"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date_from" attrs="{'readonly':[('state','!=','draft')]}" required="True"/>
+                            <field name="arrear_type" attrs="{'readonly':[('state','!=','draft')]}" required="True"/>
+                            <field name="employee_id" attrs="{'readonly':[('state','!=','draft')]}"
+                                    options="{'no_create_edit': True,'no_open': True}" required="True"/>
+                        </group>
+                        <group>
+                            <field name="date_to" attrs="{'readonly':[('state','!=','draft')]}" required="True"/>
+                            <field name="centre_id" options="{'no_create_edit': True,'no_open': True}"
+                                                    readonly="True" force_save="True"/>
+                            <field name="confirm_date" attrs="{'readonly': [('state','!=','draft')],
+                                                                'invisible': [('arrear_type', 'in', ('dr', 'promotion'))],
+                                                                'required': [('arrear_type', 'not in', ('dr', 'promotion'))]}"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="arrear_due_ids" readonly="1" force_save="1">
+                            <tree editable="top">
+                                <field name="contract_id" 
+                                        domain="[('employee_id', '=', parent.employee_id)]"
+                                        options="{'no_create_edit': True,'no_open': True}"
+                                        attrs="{'required': [('parent.arrear_type', 'in', ('dr', 'promotion'))],
+                                                'column_invisible': [('parent.arrear_type', 'not in', ('dr', 'promotion'))]}"/>
+                                <field name="date_from"/>
+                                <field name="date_to"/>
+                                <field name="basic_amount" sum="Total"/>
+                                <field name="da_amount" sum="Total"/>
+                                <field name="hra_amount" sum="Total"/>
+                                <field name="ta_amount" sum="Total"/>
+                                <field name="gross_amount" sum="Total"/>
+                                <field name="mpf_amount" sum="Total"/>
+                                <field name="eps_amount" sum="Total" invisible="1"/>
+                                <field name="epf_amount" sum="Total"/>
+                            </tree>
+                        </field>
+                    </group>
+                    <group>
+                        <!-- <field name="payslip_id" 
+                                domain="[('employee_id', '=', employee_id), ('state', '=', 'done')]"
+                                options="{'no_create_edit': True,'no_open': True}"
+                                attrs="{'invisible': [('arrear_type', 'not in', ('dr', 'promotion'))],
+                                        'required': [('arrear_type', 'in', ('dr', 'promotion'))],
+                                        'readonly':[('state','!=','draft')]}"/> -->
+                        <field name="arrear_drawn_ids" readonly="1" force_save="1"
+                                    attrs="{'invisible': [('arrear_type', 'in', ('dr', 'promotion'))]}">
+                            <tree editable="top">
+                                <field name="contract_id" 
+                                        domain="[('employee_id', '=', parent.employee_id)]"
+                                        options="{'no_create_edit': True,'no_open': True}" invisible="True"/>
+                                <field name="payslip_id" string='Payslip' domain="[('employee_id', '=', parent.employee_id)]"
+                                    attrs="{'column_invisible': [('parent.arrear_type', 'in', ('dr', 'promotion'))],
+                                            'required': [('parent.arrear_type', 'not in', ('dr', 'promotion'))]}"
+                                    options="{'no_create_edit': True,'no_open': True}"/>
+                                <field name="date_from"/>
+                                <field name="date_to"/>
+                                <field name="basic_amount"/>
+                                <field name="da_amount"/>
+                                <field name="hra_amount"/>
+                                <field name="ta_amount"/>
+                                <field name="gross_amount"/>
+                                <field name="mpf_amount"/>
+                                <field name="epf_amount"/>
+                            </tree>
+                        </field>
+                    </group>
+                    <group>
+                        <field name="arrear_payable_ids" readonly="1" force_save="1"
+                                attrs="{'invisible': [('arrear_type', 'in', ('dr', 'promotion'))]}">
+                            <tree>
+                                <field name="date_from"/>
+                                <field name="date_to"/>
+                                <field name="diff_basic_amount"/>
+                                <field name="diff_da_amount"/>
+                                <field name="diff_hra_amount"/>
+                                <field name="diff_ta_amount"/>
+                                <field name="diff_total_arrear_amount"/>
+                                <field name="diff_mpf_amount"/>
+                                <field name="diff_epf_amount"/>
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_employee_arrear" model="ir.actions.act_window">
+        <field name="name">Employee Arrear</field>
+        <field name="res_model">arrear.arrear</field>
+        <field name="binding_view_types">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_arrear"
+        parent="bsscl_hr_payroll.menu_hr_payroll_root"
+        name="Arrear"
+        sequence="10"/>
+
+    <menuitem id="menu_employee_arrear"
+        parent="menu_arrear"
+        action="action_employee_arrear"
+        sequence="1"/>
+
+</odoo>

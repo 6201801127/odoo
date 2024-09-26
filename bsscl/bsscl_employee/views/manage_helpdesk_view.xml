@@ -1,0 +1,121 @@
+<odoo>
+    <data>
+        <record id="hr_employee_manage_helpdesk_tree" model="ir.ui.view">
+            <field name="name">hr_employee_helpdesk_manage.tree</field>
+            <field name="model">helpdesk.ticket</field>
+            <field name="arch" type="xml">
+                <tree string="Manage Employee Helpdesk Tree" create='0'>
+                    <!-- <field name="number"/> -->
+                    <field name="name" />
+                    <field name="request" />
+                    <field name="call_type_id" />
+                    <field name="category_id" />
+                    <field name="sub_category" />
+                    <field name="file_name" invisible='1'/>
+                    <field name="attachment"  filename="file_name" widget="binary"/>
+                    <field name="description" />
+                    <field name="users_email" />
+                    <field name="employee_id" />
+                </tree>
+            </field>
+        </record>
+        <record id="hr_employee_manage_helpdesk_form" model="ir.ui.view">
+            <field name="name">hr_employee_manage_helpdesk_details.form</field>
+            <field name="model">helpdesk.ticket</field>
+            <field name="arch" type="xml">
+                <form string="Manage Employee Helpdesk Form" create='0'>
+                    <header>
+                        <!-- <button name="approve_btn" string="Approve / मंज़ूरी" type="object" class="oe_highlight" groups="bsscl_employee.deputy_com_id" attrs="{'invisible':[('status','not in','applied')]}" /> -->
+                        <button name="approve_btn" string="Approve / मंज़ूरी" type="object" class="oe_highlight" attrs="{'invisible':[('status','not in','applied')]}" />
+						<!-- <button name="confirm_btn" string="Confirm / पुष्टि" type="object" class="oe_highlight" groups="bsscl_employee.commissioner_id" attrs="{'invisible':[('status','not in','approved')]}" /> -->
+						<!-- <button name="reject_btn" string="Reject / अस्वीकार" type="object" class="oe_highlight" groups="bsscl_employee.deputy_com_id " attrs="{'invisible':[('status','not in','applied')]}" /> -->
+						<button name="reject_btn" string="Reject / अस्वीकार" type="object" class="oe_highlight" attrs="{'invisible':[('status','not in','applied')]}" />
+						<!-- <button name="reject_btn" string="Reject / अस्वीकार" type="object" class="oe_highlight" groups="bsscl_employee.commissioner_id" attrs="{'invisible':[('status','not in','approved')]}" /> -->
+                        <!-- <field name="status" widget="statusbar" statusbar_visible="draft,applied,approved,reject,confirm" /> -->
+                        <field name="status" widget="statusbar" statusbar_visible="draft,applied,approved,reject" />
+                    </header>
+                    <sheet>
+                    <group>
+                        <!-- <field name="number"/> -->
+                        <group>
+                            <field name="name" />
+                            <field name="request" widget="radio"/>
+                            <field name="priority" widget="priority"/>
+                            <field name="call_type_id" options="{'no_open': True,'no_create':True,'no_edit':True,'no_delete':True}"/>
+                            <field name="reason" />
+                        </group>
+                        <group>
+                            <field name="employee_id" attrs="{'readonly': [('request','=','self')]}" options="{'no_open': True,'no_create':True,'no_edit':True,'no_delete':True}"/>
+                            <field name="users_email" />
+                            <field name="category_id" options="{'no_create':True,'no_delete':True,'no_update':True,'no_open':True}"/>
+                            <field name="sub_category" options="{'no_create':True,'no_delete':True,'no_update':True,'no_open':True}"/>
+                            <label for="attachment"/>
+                                <div>
+                                    <field name="file_name" invisible='1'/>
+                                    <field name="attachment"  filename="file_name" widget="binary" attrs="{'readonly':[('status','in',['applied','approved','cancel','reject','confirm'])]}"/>
+                                    <p style="color:red;">(Document Size should be less than 2MB of PDF, doc and docx type )</p>
+                                </div>
+                        </group>
+                        
+                    </group>
+                    <group>
+                        <notebook>
+                            <page string="Description / विवरण" name="description">
+                                <field name="description" widget="html"/>
+                            </page>
+                        </notebook>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+                </form>
+            </field>
+        </record>
+        <!-- (wagisha) only approval by RA -->
+        <record id="hr_employee_manage_helpdesk_action" model="ir.actions.act_window">
+            <field name="name">Employee Helpdesk / कर्मचारी हेल्पडेस्क</field>
+            <field name="res_model">helpdesk.ticket</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('employee_id.parent_id.user_id','=',uid),('status','=','applied')]</field>
+            <field name="view_ids" eval="[(5,0,0),
+                    (0,0,{'view_mode':'tree','view_id': ref('hr_employee_manage_helpdesk_tree')}),
+                    (0,0,{'view_mode':'form', 'view_id': ref('hr_employee_manage_helpdesk_form')}),
+                    ]"
+        />
+        </record>
+        <menuitem
+            id="menu_employee_manage_helpdesk_menu"
+            name="Manage Helpdesk / हेल्पडेस्क प्रबंधित करें"
+            parent="menu_employee_helpdesk_menu"
+            action="hr_employee_manage_helpdesk_action"
+            sequence="2"
+            />
+            <!-- groups="bsscl_employee.deputy_com_id" -->
+
+<!-- (wagisha) second level approval commented -->
+
+        <!-- <record id="hr_employee_manage_helpdesk_comm_action" model="ir.actions.act_window">
+            <field name="name">Employee Helpdesk / कर्मचारी हेल्पडेस्क</field>
+            <field name="res_model">helpdesk.ticket</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('employee_id.parent_id.parent_id.user_id','=',uid),('status','=','approved')]</field>
+            <field name="view_ids" eval="[(5,0,0),
+                    (0,0,{'view_mode':'tree','view_id': ref('hr_employee_manage_helpdesk_tree')}),
+                    (0,0,{'view_mode':'form', 'view_id': ref('hr_employee_manage_helpdesk_form')}),
+                    ]"
+        />
+        </record>
+        <menuitem
+            id="menu_employee_manage_comm_helpdesk_menu"
+            name="Manage Helpdesk / हेल्पडेस्क प्रबंधित करें"
+            parent="menu_employee_helpdesk_menu"
+            groups="bsscl_employee.commissioner_id"
+            action="hr_employee_manage_helpdesk_comm_action"
+            sequence="3"
+            /> -->
+
+    </data>
+</odoo>

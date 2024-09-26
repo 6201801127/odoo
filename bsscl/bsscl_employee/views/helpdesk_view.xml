@@ -1,0 +1,102 @@
+<odoo>
+    <data>
+        <record id="hr_employee_helpdesk_tree" model="ir.ui.view">
+            <field name="name">hr_employee_helpdesk_details.tree</field>
+            <field name="model">helpdesk.ticket</field>
+            <field name="arch" type="xml">
+                <tree string="Employee Helpdesk Tree" >
+                    <field name="number"/>
+                    <field name="name" />
+                    <field name="request" />
+                    <field name="call_type_id" />
+                    <field name="category_id" />
+                    <field name="sub_category" />
+                    <field name="description" />
+                    <field name="users_email" />
+                    <field name="employee_id"/>
+                    <field name="file_name" invisible='1'/>
+                    <field name="attachment"  filename="file_name" widget="binary"/>
+                </tree>
+            </field>
+        </record>
+        <record id="hr_employee_helpdesk_form" model="ir.ui.view">
+            <field name="name">hr_employee_helpdesk_details.form</field>
+            <field name="model">helpdesk.ticket</field>
+            <field name="arch" type="xml">
+                <form string="Employee Helpdesk Form">
+                    <header>
+                        <button name="apply_btn" string="Apply / आवेदन" type="object" class="oe_highlight" attrs="{'invisible':[('status','not in','draft')]}" />
+                        <button name="cancel_btn" string="Cancel / रद्द" type="object" class="oe_highlight" attrs="{'invisible':[('status','not in','draft')]}" />
+                        <!-- <field name="status" widget="statusbar" statusbar_visible="draft,applied,approved,confirm,cancel,reject" /> -->
+                        <field name="status" widget="statusbar" statusbar_visible="draft,applied,approved,cancel,reject" />
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1 class="oe_title">
+                                <field name="number"/>
+                            </h1>
+
+                        </div>
+                        
+                        <group>
+                            <group>
+                                <field name="name" attrs="{'readonly':[('status','in',['applied','approved','cancel','reject','confirm'])]}"/>
+                                <field name="request" widget="radio" attrs="{'readonly':[('status','in',['applied','approved','cancel','reject','confirm'])]}"/>
+                                <field name="priority" widget="priority" attrs="{'readonly':[('status','in',['applied','approved','cancel','reject','confirm'])]}"/>
+                                <field name="call_type_id" options="{'no_open': True,'no_create':True,'no_edit':True,'no_delete':True}" attrs="{'readonly':[('status','in',['applied','approved','cancel','reject','confirm'])]}"/>
+                                <field name="reason" readonly='1' attrs="{'invisible':[('status','not in','reject')]}"/>
+                            </group>
+                            <group>
+                                <field name="employee_id" options="{'no_open': True,'no_create':True,'no_edit':True,'no_delete':True}" attrs="{'readonly':[('status','in',['applied','approved','cancel','reject','confirm'])]}"/>
+                                <field name="users_email" attrs="{'readonly':[('status','not in','draft')]}"/>
+                                <field name="category_id" options="{'no_create':True,'no_delete':True,'no_update':True,'no_open':True}" attrs="{'readonly':[('status','in',['applied','approved','cancel','reject','confirm'])]}"/>
+                                <field name="sub_category" options="{'no_create':True,'no_delete':True,'no_update':True,'no_open':True}" attrs="{'readonly':[('status','in',['applied','approved','cancel','reject','confirm'])]}"/>
+
+                                <label for="attachment"/>
+                                <div>
+                                    <field name="file_name" invisible='1'/>
+                                    <field name="attachment"  filename="file_name" widget="binary" attrs="{'readonly':[('status','in',['applied','approved','cancel','reject','confirm'])]}"/>
+                                    <p style="color:red;">(Document Size should be less than 2MB of PDF, doc and docx type )</p>
+                                </div>
+                            </group>
+                            
+                        </group>
+                        <group>
+                            <notebook>
+                                <page string="Description / विवरण" name="description">
+                                    <!-- <field name="description" widget="html" attrs="{'readonly':[('status','in',['applied','approved','cancel','reject','confirm'])]}"/> -->
+                                    <field name="description" attrs="{'readonly':[('status','in',['applied','approved','cancel','reject','confirm'])]}"/>
+                                </page>
+                            </notebook>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+        <record id="hr_employee_helpdesk_action" model="ir.actions.act_window">
+            <field name="name">Employee Helpdesk / कर्मचारी हेल्पडेस्क</field>
+            <field name="res_model">helpdesk.ticket</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">['|',('create_uid','=',uid),('employee_id.user_id','=',uid)]</field>
+        </record>
+        <menuitem
+            id="menu_employee_helpdesk_menu"
+            name="Employee Helpdesk / कर्मचारी हेल्पडेस्क"
+            parent="hr.menu_hr_root"
+            sequence="44"
+            />
+        <menuitem
+            id="menu_employee_create_helpdesk_menu"
+            name="Create Helpdesk / हेल्पडेस्क बनाएं"
+            parent="menu_employee_helpdesk_menu"
+            action="hr_employee_helpdesk_action"
+            sequence="1"
+            />
+
+    </data>
+</odoo>

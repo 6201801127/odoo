@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <odoo>
+        <data>
+            <record id='view_product_container_form' model='ir.ui.view'>
+            <field name="name">product.product.container.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_normal_form_view" />
+            <field name="arch" type="xml">
+                <!-- <field name="whole_sale_product" attrs="{'invisible':[('is_asset','=',False)]}"/> -->
+                
+                <div name="options" position="inside">
+                    <div>
+                        <field name="is_asset"/>
+                        <label for="is_asset"/>
+                    </div>
+                </div>
+                <page name="sales" position="after">
+                     <page name="Assets" string="Assets" attrs="{'invisible':[('is_asset','=',False)]}">
+                        <form string="Sales Order Lines">
+                            <group name="Assets">
+                                <group>
+                                    <field name="asset_type"
+                                        widget="selection"
+                                        options="{'no_create': True}"
+                                        attrs="{'required':[('is_asset','=',True)],
+                                                'invisible':[('is_asset','=',False)]}"/>
+                                    <field name="brand" invisible="1"/>
+                                    <field name="model" invisible="1"/>
+                                    <field name="brands"
+                                        options="{'no_create': True}"
+                                        attrs="{'required':[('brand','=',True)],
+                                                'invisible':[('is_asset','=',False)]}"/>
+                                    <field name="model_no"
+                                        options="{'no_create': True}"
+                                        attrs="{'required':[('model','=',True)],
+                                                'invisible':[('is_asset','=',False)]}"/>
+                                </group>
+                            </group>
+                        </form>
+                    </page>
+                </page>
+            </field>
+            </record>
+            <record id="product_asset_view" model="ir.ui.view">
+                <field name="name">product.template.asset</field>
+                <field name="model">product.template</field>
+                <field name="inherit_id" ref="product.product_template_only_form_view"/>
+                <field name="priority" eval="20"/>
+                <field name="arch" type="xml">
+                    <div name="options" position="inside">
+                        <div>
+                            <field name="is_asset"/>
+                            <label for="is_asset"/>
+                        </div>
+                    </div>
+                    <page name="sales" position="after">
+                        <page name="Assets" string="Assets" attrs="{'invisible':[('is_asset','=',False)]}">
+                            <form string="Sales Order Lines">
+                                <group name="Assets">
+                                    <group>
+                                        <field name="asset_type"
+                                            widget="selection"
+                                            options="{'no_create': True}"
+                                            attrs="{'required':[('is_asset','=',True)]}"/>
+                                        <field name="brand" invisible="1"/>
+                                        <field name="model" invisible="1"/>
+                                        <field name="brands"
+                                            options="{'no_create': True}"
+                                            attrs="{'required':['|',('asset_type','=',True),('is_asset','=',True)]}"/>
+                                        <field name="model_no"
+                                            options="{'no_create': True}"
+                                            attrs="{'required':['|',('asset_type','=',True),('is_asset','=',True)]}"/>
+                                    </group>
+                                </group>
+                            </form>
+                    </page>
+                    </page>
+                </field>
+            </record>
+            <record id="product_asset_search_view" model="ir.ui.view">
+                <field name="name">product.template.search.asset</field>
+                <field name="model">product.template</field>
+                <field name="inherit_id" ref="product.product_template_search_view"/>
+                <field name="arch" type="xml">
+                    <search string="Product">
+                        <filter string="Asset" name="filter_to_asset" icon="terp-accessories-archiver-minus" domain="[('is_asset','=',1)]"/>
+                    </search>
+                </field>
+            </record>
+            <record id="product_asset_action_puchased" model="ir.actions.act_window">
+                <field name="name">Products</field>
+                <field name="type">ir.actions.act_window</field>
+                <field name="res_model">product.template</field>
+              
+                <field name="view_mode">kanban,tree,form</field>
+                <field name="domain">[('is_asset','=',True)]</field>
+                <field name="context">{"search_default_filter_is_asset":1}</field>
+                <field name="search_view_id" eval="False"/> <!-- Force empty -->
+                <field name="view_id" eval="False"/> <!-- Force empty -->
+                <field name="help" type="html">
+                  <p class="oe_view_nocontent_create">
+                    Click to define a new product.
+                  </p><p>
+                    You must define a product for everything you purchase, whether
+                    it's a physical product, a consumable or services you buy to
+                    subcontractants.
+                  </p><p>
+                    The product form contains detailed information to improve the
+                    purchase process: prices, procurement logistics, accounting data,
+                    available suppliers, etc.
+                  </p>
+                </field>
+            </record>
+            <menuitem id="menu_procurement_asset_product" name="Products (Asset)"
+                    parent="purchase.menu_purchase_root" sequence="8" groups="purchase.group_purchase_manager" />
+            <menuitem name="Products (Assets)" id="menu_procurement_assert_form" action="product_asset_action_puchased"
+                    parent="menu_procurement_asset_product"/>
+        </data>
+    </odoo>

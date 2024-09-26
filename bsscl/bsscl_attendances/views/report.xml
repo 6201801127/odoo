@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<record id="report_view_attendance_tree" model="ir.ui.view">
+        <field name="name">hr.attendance.tree</field>
+        <field name="model">hr.attendance</field>
+        <field name="arch" type="xml">
+            <tree create="false" delete="false" edit="false">
+                <field name="employee_id"/>
+                <field name="check_in"/>
+                <field name="check_out"/>
+                <field name="worked_hours" string="Work Hours" widget="float_time"/>
+            </tree>
+        </field>
+</record>
+<record id="report_attendance_search_view" model="ir.ui.view">
+            <field name="name">report.attendance.search</field>
+            <field name="model">hr.attendance</field>
+            <field name="arch" type="xml">
+                <search string="">
+                    <filter string="My Report" domain="[('employee_id.user_id','=',uid)]" name="my_attendance"/>
+                    <separator/>
+					<filter string="Sub-ordinate Report" domain="[('employee_id.parent_id.user_id','=',uid)]" name="my_subordinate_attendance"/>
+                </search>
+            </field>
+        </record>
+
+<record id="report_attendance_action" model="ir.actions.act_window">
+        <field name="name">Attendance Status</field>
+        <field name="res_model">hr.attendance</field>
+        <field name="view_mode">tree</field>
+        <field name="search_view_id" ref="report_attendance_search_view"/>
+		<field name="context">{'search_default_my_attendance':1}</field>
+         <field name="view_ids" eval="[(5,0,0),
+                    (0,0,{'view_mode':'tree','view_id': ref('report_view_attendance_tree')})]" />
+        <field name="domain">['|',('employee_id.user_id','=',uid),('employee_id.parent_id.user_id', '=', uid)]</field>        
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                No attendance records found
+            </p><p>
+                The attendance records of your employees will be displayed here.
+            </p>
+        </field>
+</record>
+
+<menuitem id="menu_manage_attendances" name="Manage Attendance" parent="hr_attendance.menu_hr_attendance_root" sequence="2" />
+<menuitem id="menu_report_my_attendances" name="Attendance Report" parent="bsscl_attendances.menu_manage_attendances" sequence="5" action="bsscl_attendances.report_attendance_action"/>
+
+</odoo>
+ 
+ 
+ 

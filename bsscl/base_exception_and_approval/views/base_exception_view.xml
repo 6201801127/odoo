@@ -1,0 +1,127 @@
+<?xml version="1.0" ?>
+<odoo>
+    <data>
+
+
+        <record model="ir.actions.act_window" id="action_approval_list">
+            <field name="name">Approval List</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">approvals.list</field>
+            <!-- <field name="view_type">form</field> -->
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('rule_id.id', '=', active_id)]</field>
+        </record>
+
+
+        <record id="view_exception_rule_tree" model="ir.ui.view">
+            <field name="name">exception.rule.tree</field>
+            <field name="model">exception.rule</field>
+            <field name="arch" type="xml">
+                <tree string="Approval Matrix">
+                    <field name="active" string="Active / सक्रिय"/>
+                    <field name="name" string="Name / नाम"/>
+                    <field name="description" string="Description / विवरण"/>
+                    <field name="rule_group" string="Rule Group / नियम समूह"/>
+                    <field name="model" string="Apply on / पर आवेदन"/>
+                    <field name="sequence" string="Sequence / क्रम"/>
+                </tree>
+            </field>
+        </record>
+        <record id="group_and_approval_tree" model="ir.ui.view">
+            <field name="name">group.and.approval.tree</field>
+            <field name="model">group.and.approval</field>
+            <field name="arch" type="xml">
+                <tree string="Approval Matrix">
+                    <field name="sequence" string="Sequence / क्रम"/>
+                    <field name="group" string="Group / समूह"/>
+                    <field name="minimum_approval" string="Minimum Approval / न्यूनतम स्वीकृति"/>
+                    <field name="minimum_rejection" string="Minimum Rejection / न्यूनतम अस्वीकृति"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_exception_rule_form" model="ir.ui.view">
+            <field name="name">exception.rule.form</field>
+            <field name="model">exception.rule</field>
+            <field name="priority" eval="1"/>
+            <field name="arch" type="xml">
+                <form string="Exception Rule Setup" name="exception_rule">
+                    <style>
+                        .o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 200px !important;}
+                      </style>
+
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+                        </button>
+
+                        <button name="%(action_approval_list)d" type="action" string="Approval List / अनुमति सूची" class="oe_stat_button" icon="fa-arrows-v" />
+
+                    </div>
+
+                    <group>
+                        <group colspan="4">
+                            <div class="oe-tittle" >
+                             <h1>
+                                 <field name="name" class="oe_inline" placeholder="Name" required="1"/>
+                             </h1>
+                             <h2>
+                                 <field name="description" placeholder="Description" required="1"/>
+                             </h2>
+                            </div>
+                        </group>
+
+                        <group groups="base.group_system">
+                            <field name="rule_group" required="1" string="Rule Group / नियम समूह"/>
+                            <field name="model" required="1" string="Apply on / पर आवेदन"/>
+                            <field name="action_type" widget="radio" string="Action Type / प्रक्रिया का प्रकार"/>
+                        </group>
+                        <group >
+                            <!--<field name="active"/>-->
+                            <field name="day_approval" string="Days To Approve / स्वीकृत करने के लिए दिन"/>
+                            <field name="sequence" string="Sequence / अनुक्रम"/>
+                        </group>
+
+                    </group>
+                    <notebook>
+                        <page string="Approval Condition / अनुमति शर्त ">
+                            <field name="filter_domain" widget="domain" options="{'model': 'model', 'in_dialog': True}" attrs="{'invisible':[('action_type','=','code')]}"/>
+                            <field name="code" attrs="{'invisible':[('action_type','=','domain')]}"/>
+                        </page>
+                         <page string="Approval Matrix / अनुमति मैट्रिक्स">
+                            <field name="group_approval_ids" options="{'reload_on_button': True}">
+                                <tree editable="bottom">
+                                    <field name="sequence" string="Seq No. / क्रम संख्या"/>                                    
+                                    <field name="group" string="Group / समूह" required="1"/>
+                                    <field name="minimum_approval" string="Minimum Approval / न्यूनतम अनुमति"/>
+                                    <field name="minimum_rejection" string="Minimum Rejection / न्यूनतम अस्वीकार"/>
+                                </tree>
+                            </field>
+                              <!--<field name="check_len_group" invisible="1"/>-->
+                         </page>
+                    </notebook>
+
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+
+            </field>
+        </record>
+
+        <record id="action_exception_rule_tree" model="ir.actions.act_window">
+                  <field name="name">Approval Matrix / अनुमति मैट्रिक्स</field>
+                  <field name="res_model">exception.rule</field>
+                  <!-- <field name="view_type">form</field> -->
+                  <field name="view_mode">tree,form</field>
+                  <field name="view_id" ref="view_exception_rule_tree"/>
+                  <field name="context">{'active_test': False}</field>
+              </record>
+
+        <menuitem action="action_exception_rule_tree" id="menu_action_exception" parent="base.menu_custom" sequence="90" />
+    </data>
+</odoo>

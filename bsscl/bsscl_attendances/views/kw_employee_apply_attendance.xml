@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="bsscl_employee_apply_attendance_view_form" model="ir.ui.view">
+            <field name="name">Employee Attendance Request Form View</field>
+            <field name="model">bsscl_employee_apply_attendance</field>
+            <field name="arch" type="xml">
+                <form string="Apply Attendance" duplicate='0'>
+                    <!-- <script>
+                        $(document).ready(function(){ 
+                            status=  $("[aria-pressed=true]").text().trim();
+                            
+                            if (status == 'Approved'){
+                                $('.o_form_button_edit').hide();
+                            }
+                            if (status == 'Rejected'){
+                                $('.o_form_button_edit').hide();
+                            }
+                        });
+                    </script> -->
+                    <header>
+                    <field name="state" widget="statusbar" statusbar_visible="1,2,3" />
+
+                     <button string='Apply'  class="btn font-weight-bold text-white" style="background-color: #108fbb;" attrs="{'invisible':[('state','!=','1')]}"  name="apply_request"  type="object" />
+
+                        <button string='Approve'  class="btn font-weight-bold text-white" style="background-color: #108fbb;" attrs="{'invisible':[('btn_visibility_status','=',False)]}"  name="%(bsscl_attendances.approve_change_request)d"  type="action" />
+                        
+                        <button string='Reject'  class="btn font-weight-bold text-white" style="background-color: #d83d2b;"  attrs="{'invisible':[('btn_visibility_status','=',False)]}" name="%(bsscl_attendances.reject_change_request)d"  type="action" />
+
+                        <button string='Cancel'  class="btn font-weight-bold text-white" style="background-color: #d83d2b;"  attrs="{'invisible':['|',('state','in',['1','3','5','6']),('check_user','=',False)]}" name="%(bsscl_attendances.cancel_change_request)d" type="action"/>
+                       
+                        <field name="btn_visibility_status" invisible="1" />  
+                        <field name="check_user" invisible="1" />  
+					</header>
+                <sheet>
+                        <group>
+                            <group> 
+                                <field name="applied_for" widget="radio" options="{'horizontal': true}" attrs="{'readonly':[('state','in',['2','3','5','6'])]}" />  
+                                <field name="employee_id" options="{'no_create_edit': True, 'no_create': True, 'no_open': True}" attrs="{'readonly':[('state','in',['2','3','5','6'])]}"/>  
+                                <field name="department_id" options="{'no_create_edit': True, 'no_create': True, 'no_open': True}" attrs="{'readonly':1}"/>  
+                                <field name="designation_id" options="{'no_create_edit': True, 'no_create': True, 'no_open': True}" attrs="{'readonly':1}"/>  
+                            </group>
+                            <group>
+                                <field name="check_in_datetime" autocomplete="off" options="{'datepicker':{'warn_future': true}}" attrs="{'readonly':[('state','in',['2','3','5','6'])]}" />  
+                                <field name="check_out_datetime" autocomplete="off" options="{'datepicker':{'warn_future': true}}" attrs="{'readonly':[('state','in',['2','3','5','6'])]}"/>  
+                                <field name="reason" attrs="{'readonly':[('state','in',['2','3','5','6'])]}"/> 
+                                <span class=""><i>(maximum 100 character's.)</i></span>
+                            </group>
+                            <separator/>
+                            <!-- <group  attrs="{'invisible':[('state','not in',['2','3','5','6'])]}" > -->
+                            <group >
+
+                            <field name="authority_remark" string="Remark"  attrs="{'readonly':1, 'invisible':[('state','not in',['3','5','6'])]}"/>
+                            </group>
+                        </group>
+                            <span class=""><i>** The Office-in Date &amp; Time and Office-out Date &amp; Time should not be earlier than current  Date &amp; Time </i></span>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+    
+        <record id="view_bsscl_employee_apply_attendance_tree" model="ir.ui.view">
+            <field name="name">Employee Attendance Request List View</field>
+            <field name="model">bsscl_employee_apply_attendance</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">            
+                <tree string="Attendance Request" delete="false" import="false"  default_order="create_date asc" >
+                    <field name="employee_id" />  
+                    <field name="designation_id" optional="hidden"/>  
+                    <field name="department_id" optional="hidden"/>  
+                    <field name="check_in_datetime" />  
+                    <field name="check_out_datetime" />  
+                    <field name="create_date" widget="date" string="Applied On" optional="hidden"/>
+                    <field name="pending_at" string="Pending At" attrs="{'invisible':[('state','not in',['2'])]}" />
+                    <field name="action_taken_by" string="Action Taken By" attrs="{'invisible':[('state','not in',['3','5','6'])]}" optional="hidden"/>  
+                    <field name="state" /> 
+                </tree>                
+            </field>
+        </record> 
+
+        <record id="action_bsscl_employee_apply_attendance_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Attendance Request- Apply</field>
+            <field name="res_model">bsscl_employee_apply_attendance</field>
+            <field name="view_mode">tree,form</field>
+            <field name="target">current</field>          
+            <field name="domain">['|',('create_uid','=',uid),('employee_id.user_id','=',uid)]</field>   
+            <field name="context">{"import": False}</field>     
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No record found
+                </p>
+            </field>
+        </record> 
+
+      
+        <menuitem id="menu_attendance_request" name="Attendance Request" parent="bsscl_attendances.menu_manage_attendances" sequence="1" />
+        <menuitem id="menu_attendance_apply" name="Apply" parent="bsscl_attendances.menu_manage_attendances" sequence="1" action="bsscl_attendances.action_bsscl_employee_apply_attendance_window"/>
+
+
+        <record id="action_bsscl_employee_take_action_attendance_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Attendance Request- Take Action</field>
+            <field name="res_model">bsscl_employee_apply_attendance</field>
+            <field name="view_mode">tree,form</field>
+            <field name="target">current</field>          
+            <field name="domain">[('employee_id.parent_id.user_id','=',uid),('state','=','2')]</field>   
+            <field name="context">{"create": False,"edit": False,"import": False}</field>     
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No record found
+                </p>
+            </field>
+        </record> 
+        <menuitem id="menu_attendance_take_action" name="Take Action" parent="bsscl_attendances.menu_manage_attendances" sequence="2" action="bsscl_attendances.action_bsscl_employee_take_action_attendance_window"/>
+
+        <record model="ir.ui.menu" id="hr_attendance.menu_hr_attendance_kiosk_no_user_mode">
+            <field name="action" eval="False"/>
+        </record>
+
+
+     </data>
+</odoo>

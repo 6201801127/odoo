@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="employee_training_view_leads" model="ir.ui.view">
+            <field name="name">employee.training.lead</field>
+            <field name="model">employee.training</field>
+            <field name="priority" eval="2"/>
+            <field name="arch" type="xml">
+                <calendar string="Employee Training"  mode="month" date_start="date_from" color="user_id" hide_time="true" event_limit="5">
+                   <field name="program_name"/>
+                    <field name="program_department"/>
+                    <field name="program_convener" domain="[('department_id.name', '=', 'program_department.name')]"/>
+                    <field name="state"/>
+                </calendar>
+            </field>
+        </record>
+
+        <record id="view_employee_training_tree" model="ir.ui.view">
+            <field name="name">employee.training.tree</field>
+            <field name="model">employee.training</field>
+            <field name="arch" type="xml">
+                <tree string="Employee Training Program">
+                    <field name="program_name"/>
+                    <field name="program_department"/>
+                    <field name="program_convener" domain="[('department_id.name', '=', 'program_department.name')]"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        <record id="view_employee_training_form" model="ir.ui.view">
+            <field name="name">employee.training.form</field>
+            <field name="model">employee.training</field>
+            <field name="arch" type="xml">
+                <form string="Employee Training Program">
+                    <header>
+                        <button name="confirm_send_mail" string="Send by Email /ईमेल से भेजें" type="object" class="oe_highlight" states="confirm" groups="employee_orientation.group_training_manager"/>
+                        <button name="confirm_event" string="Confirm Event /घटना की पुष्टि करें" type="object" states="new" class="btn-primary" groups="employee_orientation.group_training_manager"/>
+                        <button name="complete_event" string="Event Complete /घटना पूर्ण" type="object" states="confirm"  class="btn-primary" groups="employee_orientation.group_training_manager"/>
+                        <button name="cancel_event" string="Cancel Event /इवेंट रद्द करें" type="object" states="confirm" groups="employee_orientation.group_training_manager"/>
+                        <button name="print_event" string="Print Certificates /प्रिंट प्रमाण पत्र"  type="object"  class="oe_highlight" attrs="{'invisible': [('state', 'not in', 'complete')]}" groups="employee_orientation.group_training_manager"/>
+                        <field name="state" widget="statusbar" statusbar_visible="new,confirm,complete"/>
+                    </header>
+                    <sheet>
+                        <group colspan="1" col="4" name="main" >
+                            <!-- <field name="program_name" /> -->
+                            <label for="program_name" />
+                            <div>
+                                <field name="program_name" required='1' attrs="{'readonly': [('state', 'in', ('confirm','complete','cancel'))]}"/>
+                                <p style="color:red;">(Training Program  must not exceed 50 characters)</p>
+                            </div>
+                            <field name="program_department" attrs="{'readonly': [('state', 'in', ('confirm','complete','cancel'))]}"/>
+                            <label for="date_from" string="Time Period /समय सीमा"/>
+                            <div><field name="date_from" class="oe_inline" required='1' attrs="{'readonly': [('state', 'in', ('confirm','complete','cancel'))]}"/> to /को <field name="date_to" class="oe_inline" required='1' attrs="{'readonly': [('state', 'in', ('confirm','complete','cancel'))]}"/></div>
+                            <field name="program_convener" attrs="{'readonly': [('state', 'in', ('confirm','complete','cancel'))]}"/>
+                        </group>
+                        <notebook colspan="4" >
+                            <page name="checklist_lines" string="Employee Details /कर्मचारी विवरण">
+                                <field name="training_ids" attrs="{'readonly': [('state', 'in', ('confirm','complete','cancel'))]}">
+                                    <tree editable="top">
+                                        <field name="employee_id" string="Name /नाम" />
+                                        <field name="job_id" string="Post /डाक" />
+                                        <!-- <field name="company_id" invisible="1" /> -->
+                                        <field name="parent_id" string="Manager /प्रबंधक" />
+                                        <field name="attendent"/>
+                                        <field name="certificates" attrs="{'invisible': [('attendent', '=',False)]}"/>
+                                        <field name="feedback"/>
+                                    </tree>
+<!--                                    <field name="product_updatable" invisible="1"/>-->
+                                </field>
+                            </page>
+                            <page name="note_book"
+                                string="Notes /टिप्पणियाँ">
+                                <field name="note_id" colspan="4" nolabel="1" attrs="{'readonly': [('state', 'in', ('confirm','complete','cancel'))]}"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+        <record id="view_employee_training_search" model="ir.ui.view">
+            <field name="name">employee.training.search</field>
+            <field name="model">employee.training</field>
+            <field name="arch" type="xml">
+                <search string="Employee Training Program">
+                    <field name="program_name"/>
+                    <newline/>
+                </search>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_employee_training">
+            <field name="name">Employee Training Program /कर्मचारी प्रशिक्षण कार्यक्रम</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">employee.training</field>
+            <field name="view_mode">calendar,tree,form</field>
+            <field name="search_view_id" ref="view_employee_training_search" />
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+             <field name="help" type="html">
+                <field class="oe_view_nocontent_create">
+                    Create Employee Training Program.
+                </field>
+             </field>
+        </record>
+        <menuitem
+            id="menu_employee_training_main_id"
+            name="Training Programs /प्रशिक्षण कार्यक्रम"
+            web_icon="employee_orientation,static/description/icon.png"
+            sequence="91"
+            />
+        <menuitem
+            id="menu_employee_training_child"
+            name="Training Program /प्रशिक्षण कार्यक्रम"
+            parent="menu_employee_training_main_id"
+            action="action_employee_training"
+            sequence="91"
+            />
+       <record id="hr_employee_view_for" model="ir.ui.view">
+            <field name="name">hr.employee.inherit.form</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form" />
+            <field name="priority">30</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='parent_id']" position="after">
+                    <field name="certificates" editable="true" invisible="1" />
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

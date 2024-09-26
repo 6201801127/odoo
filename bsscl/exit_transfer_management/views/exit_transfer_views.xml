@@ -1,0 +1,233 @@
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="exit_transfer_management_list">
+            <field name="name">Exit Transfer Management list</field>
+            <field name="model">exit.transfer.management</field>
+            <field name="arch" type="xml">
+                <tree string ="Exit/Transfer Management">
+                    <field name="name" string="Record No / रिकॉर्ड संख्या"/>
+                    <field name="employee_id" required="1"/>
+                    <field name="job_id"/>
+                    <field name="department_id"/>
+                    <field name="branch_id"/>
+                    <field name="exit_type"/>
+                    <field name="state" required="1"/>
+                </tree>
+            </field>
+        </record>
+        <record id="seq_exit_management" model="ir.sequence">
+            <field name="name">Exit Management sequence</field>
+            <field name="code">exit.transfer.management</field>
+            <field name="padding">3</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        
+        <record model="ir.ui.view" id="exit_transfer_management_from">
+            <field name="name">Exit Transfer Management from</field>
+            <field name="model">exit.transfer.management</field>
+            <field name="arch" type="xml">
+                <form string="Exit/Transfer Management">
+                    <header>
+                        <button name="button_verify" string="Send for Verify" class="oe_highlight" type="object" 
+                                attrs="{'invisible':['|',('check_user','=',False),('state','!=','draft')]}"/>
+                        <!-- <button name="button_move_to_draft" string="Move to Draft" class="oe_highlight" type="object" 
+                                attrs="{'invisible':['|',('check_manager','=',False),('state','in',['draft','complete'])]}"/> -->
+                        <!-- <button name="button_send_for_approval" string="Send for Approval" class="oe_highlight" type="object"
+                                states="verify" groups="bsscl_employee.deputy_com_id"/> -->
+                        <button name="button_complete" string="Confirm" class="oe_highlight" type="object"
+                                attrs="{'invisible':['|',('check_manager','=',False),('state','!=','send_for_approval')]}" />
+                        <button name="button_complete1" string="Confirm" class="oe_highlight" type="object"
+                                groups = 'bsscl_employee.group_hr_ra' attrs="{'invisible':['|',('state','not in',['draft']),('check_user','=',True)]}" />
+
+
+                                
+                        <button name="button_cancel" string="Cancel" class="oe_highlight" type="object"
+                                confirm="Are you sure you want to Cancel ? / क्या आप वाकई रद्द करना चाहते हैं ?"
+                                attrs="{'invisible':['|',('state','not in',['send_for_approval']),('check_valid_user','=',False)]}"/>
+                        <button name="%(exit_transfer_management.noc_exit_id)d" string="Download NOC" type="action" class="oe_highlight btn-success"
+                                attrs="{'invisible':['|',('state','!=','complete'),('check_valid_user','=',False)]}"/>
+                       
+                        <field name="state" widget="statusbar" statusbar_visible="draft,complete"/>
+                    </header>
+                    <sheet>
+                        <div class="oe-tittle">
+                            <h1>
+                                <field name="name" readonly="1" class="oe_inline"/>
+                            </h1>
+                        </div>
+                        <group>
+                         
+                            <group>
+                                <field name="exit_type" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}" options="{'no_create': True,'no_open': True}"/>
+                                <!-- <field name="reg_type" attrs="{'invisible': [('exit_type', '!=', 'technical resignation')],
+                                                    'readonly': [('state', '!=', 'draft')],
+                                                    'required': [('exit_type', '=', 'technical resignation')]}"/>
+                                <field name="transferred_req" attrs="{'invisible': [('exit_type', '!=', 'Suspended')],
+                                                    'readonly': [('state', '!=', 'draft')],
+                                                    'required': [('exit_type', '=', 'Suspended')]}"/>
+                                <field name="to_branch_id" options="{'no_create': True,'no_open': True}" attrs="{'invisible': [('exit_type', '!=', 'Transferred'),('transferred_req', '!=', 'yes')],
+                                                    'readonly': [('state', '!=', 'draft')],
+                                                    'required': ['|',('exit_type', '=', 'Transferred'),('transferred_req', '=', 'yes')]}"/>
+                                <field name="transfer_allowance" attrs="{'invisible': [('exit_type', '!=', 'Transferred')],
+                                                    'readonly': [('state', '!=', 'draft')],
+                                                    'required': [('exit_type', '=', 'Transferred')]}"/> -->
+                              
+                                <field name="exit_reason" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <field name="exit_date" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <field name="attachment_ids" widget="many2many_binary" class="oe_inline" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <span style="color: red">(Only .jpeg, .jpg, .png, .pdf, .doc, .docx format are allowed.Maximum file size is 2 MB) / केवल .jpeg, .jpg, .png, .pdf, .doc, .docx प्रारूप की अनुमति है। अधिकतम फ़ाइल आकार 2 एमबी है </span>
+
+                            </group>
+                            <group>
+                                <field name ="employee_id" required="1" options="{'no_create': True,'no_open': True}" attrs="{'readonly':[('state','not in',['draft'])]}"/>
+                                <field name ="department_id" options="{'no_create': True,'no_open': True}"/>
+                                <field name ="job_id" options="{'no_create': True,'no_open': True}"/>
+                                <field name ="branch_id" options="{'no_create': True,'no_open': True}"/>
+                                <field name="date" readonly='1' />
+                                <!-- <field name="hide_dcom_cancel" invisible='1' />
+                                <field name="hide_ccom_cancel" invisible='1' /> -->
+                                <field name="check_valid_user" invisible='1' />
+                                <field name="check_manager" invisible='1' />
+                                <field name="check_user" invisible='1' />
+                            </group>
+                        </group>
+                        <notebook>
+                        						
+							<page string="Manager Remark / प्रबंधक टिप्पणी" attrs="{'invisible':[('state','in',['draft','cancel'])]}" name="third_level">
+								<group col='2'>
+									<group>
+										<!-- <field name="show_approve_option" invisible='1' /> -->
+										<!-- <field name="check_cmd_user" invisible='1' /> -->
+										<field name="commandant_remark" string="Manager Remark / प्रबंधक टिप्पणी" force_save="1" attrs="{'readonly':['|',('check_manager','=',False),('state','not in',['draft','send_for_approval','cancel'])]}"/>
+										<field name="cmd_action_taken_by" readonly='1' attrs="{'invisible':[('state','in',['draft','verify','send_for_approval','cancel'])]}" string="Action Taken By/द्वारा कार्यवाही की गई" options='{"no_open": True, "no_create": True, "no_edit": True}' />
+										<field name="cmd_action_taken_on" readonly='1' attrs="{'invisible':[('state','in',['draft','verify','send_for_approval','cancel'])]}" string='Action Taken On/कार्रवाई की गई' />
+									</group>
+								</group>
+							</page>
+                           
+                        </notebook>
+                       
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="exit_transfer_management_action_window">
+            <field name="name">Exit/Transfer Management / निकास/स्थानांतरण प्रबंधन</field>
+            <field name="res_model">exit.transfer.management</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('employee_id.user_id', '=', uid)]</field>
+
+        </record>
+        <menuitem id = "exit_transfer_management_menu_1_list"
+                  name = "Exit Management / निकास प्रबंधन"
+                  web_icon="exit_transfer_management,static/description/icon.png" 
+                  sequence="11"
+                  />
+        <menuitem id = "exit_transfer_management_create_list"
+                  name = "Exit Management / निकास प्रबंधन"
+                  action="exit_transfer_management_action_window"
+                  parent="exit_transfer_management_menu_1_list"
+                  />
+       
+        <!--============Initiate============-->
+        <record id="exit_initiate_action" model="ir.actions.act_window">
+            <field name="name">Initiate / आरंभ करना</field>
+            <field name="res_model">exit.transfer.management</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','=','draft'),('employee_id.user_id', '=', uid)]</field>
+        </record>
+        <menuitem id = "exit_transfer_management_initiate"
+                  name = "Initiate / आरंभ करना"
+                  action="exit_initiate_action"
+                  parent="exit_transfer_management_create_list"
+                  />
+
+        <!--============Verify============-->
+        <record id="exit_verify_action" model="ir.actions.act_window">
+            <field name="name">Verify / जांच करना</field>
+            <field name="res_model">exit.transfer.management</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'create':0}</field>
+            <field name="domain">[('state','=','verify')]</field>
+        </record>
+        <!-- <menuitem id = "exit_transfer_management_verify"
+                  name = "Verify / जांच करना"
+                  action="exit_verify_action"
+                  parent="exit_transfer_management_create_list"
+                  /> -->
+
+        <!--============To Approve============-->
+        <record id="exit_to_approve_action" model="ir.actions.act_window">
+            <field name="name">To Approve / अनुमोदन करना</field>
+            <field name="res_model">exit.transfer.management</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'create':0}</field>
+            <field name="domain">[('state','=','send_for_approval')]</field>
+        </record>
+        <menuitem id = "exit_transfer_management_to_approve"
+                  name = "To Approve / अनुमोदन करना"
+                  action="exit_to_approve_action"
+                  parent="exit_transfer_management_create_list"
+                  />
+
+        <!--============Complete============-->
+        <record id="exit_complete_action" model="ir.actions.act_window">
+            <field name="name">Complete / सम्पूर्ण</field>
+            <field name="res_model">exit.transfer.management</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'create':0}</field>
+            <field name="domain">[('state','=','complete')]</field>
+        </record>
+        <menuitem id = "exit_transfer_management_complete"
+                  name = "Complete / सम्पूर्ण"
+                  action="exit_complete_action"
+                  parent="exit_transfer_management_create_list"
+                  />
+
+        <!--============All============-->
+        <record id="exit_all_action" model="ir.actions.act_window">
+            <field name="name">All / सभी</field>
+            <field name="res_model">exit.transfer.management</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'create':0, 'delete':0}</field>
+        </record>
+        <menuitem id = "exit_transfer_management_all"
+                  name = "All / सभी"
+                  action="exit_all_action"
+                  parent="exit_transfer_management_create_list"
+                  />
+
+
+<!-- ========================TYPE OF EXIT======================================== -->
+
+        <record model="ir.ui.view" id="exit_master_list">
+            <field name="name">Exit Master</field>
+            <field name="model">exit.master</field>
+            <field name="arch" type="xml">
+                <tree editable='bottom'>
+                    <field name="name" required ='1' />
+                    <field name="user_type" required ='1'/>
+                    <!-- <field name="group_id" attrs="{'required':[('user_type','=','hr')], 'readonly':[('user_type', '=', 'user')]}"/> -->
+                </tree>
+            </field>
+        </record>
+        <record id="type_of_exit_all_action" model="ir.actions.act_window">
+                <field name="name">Type of Exit / निकास का प्रकार</field>
+                <field name="res_model">exit.master</field>
+                <field name="view_mode">tree</field>
+                <field name="context">{'copy':0}</field>
+            </record>
+        <menuitem id = "type_of_exit_all"
+                  name = "Type of Exit / निकास का प्रकार"
+                  action="type_of_exit_all_action"
+                  parent="exit_transfer_management_create_list"
+                  groups="bsscl_employee.group_hr_ra"
+                  />
+    </data>
+</odoo>

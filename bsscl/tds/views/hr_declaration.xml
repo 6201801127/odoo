@@ -1,0 +1,1261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <!--=======Tree view of HR Declaration shows in New Creation=======-->
+    <record id="hr_declaration_tree_view" model="ir.ui.view">
+        <field name="name">hr.declaration.tree</field>
+        <field name="model">hr.declaration</field>
+        <field name="arch" type="xml">
+            <tree string="HR Declarations" delete='0'>
+                <field name="employee_id"/>
+                <field name="job_name"/>
+                <field name="department_name"/>
+                <field name="pan_number"/>
+                <field name="date_range"/>
+                <field name="tax_regime"/>
+                <field name="state"/>
+                <field name="test_css" invisible='1'/>
+            </tree>
+        </field>
+    </record>
+
+    <!--=======Form view of HR Declaration shows in New Creation =======-->
+    <!-- <record id="hr_declaration_form_view" model="ir.ui.view">
+        <field name="name">hr.declaration.form</field>
+        <field name="model">hr.declaration</field>
+        <field name="priority">2</field>
+        <field name="arch" type="xml">
+            <form string="HR Declarations" delete='0' duplicate='0'>
+                <style>
+                    div.o_horizontal_separator{ color: #108fbb !important; text-decoration:underline;}
+                    .o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 250px !important;}
+                    .table-responsive .o_list_view tfoot tr:nth-child(1) td {
+                    background-color: #108fbb;
+                    color: #fff;
+                </style>
+                <script>
+                        $(document).ready(function(){ state=  $("[aria-pressed=true]").text().trim();
+                        console.log(state);
+                        if((state == 'Approved')){
+                            $('.o_form_button_edit').hide();
+                            $('.o_form_button_create').hide();
+                        }
+                    });
+                </script>
+                <header>
+                    <button name="button_compute_tax" string="Compute Tax" class="oe_highlight" type="object"  attrs="{'invisible':[('test_css','!=',False)]}"/>
+
+                    <button name="button_to_approve" string="Send for Approval" class="oe_highlight" type="object" states="draft" invisible='1'/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,approved" />
+                </header>
+                <sheet>
+                    <p style='text-align:right;color:red;font-weight:bold; margin-bottom:0'>**Please filled the amount of All investment excluding of GST</p>
+                    <div id="o_employee_container"><div id="o_employee_main">
+                        <div class="oe_title">
+                            <h2>
+                                <label for="tax_regime" class="oe_edit_only" string-='Tax regime'/>
+
+                                <field name="tax_regime" placeholder="Tax Regime" required="True"  attrs="{'readonly':[('tax_recovered','!=',0)]}"/><br/>
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+
+
+                    <group>
+                        <group>
+                            <field name="employee_id" options="{'no_edit': True, 'no_create': True,'no_open':True}" readonly='1'/>
+                            <field name="test_css" invisible='1'/>
+                            <field name="check_month" invisible='1'/>
+                            <field name="pan_number"/>
+                            <field name="mobile_phone"/>
+                            <field name="tax_recovered" invisible='1'/>
+                        </group>
+                        <group>
+                            <field name="emp_code"/>
+                            <field name="date_of_joining"/>
+                            <field name="date_range" options="{'no_edit': True, 'no_create': True,'no_open':True}" readonly='1' />
+                            <field name="emp_age" groups='tds.group_manager_hr_declaration'/>
+                        </group>
+                    </group>
+
+                    <group>
+
+                        <group string="Income From Previous Employer" attrs="{'invisible': [('check_previous_emp_income','=',False)]}">
+                            <field name="previous_employer_income" class="oe_subtotal_footer_separator oe_left " attrs="{'readonly': [('state','!=','draft')],'invisible':[('check_previous_emp_income','=',False)]}" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="check_previous_emp_income" invisible='1'/>
+                            <field name="income_from_pre_employer_doc" attrs="{'required':[('check_month','=',True),('previous_employer_income','>',0)],'invisible': [('check_previous_emp_income','=',False)],'readonly': [('state','!=','draft')]}" class="oe_subtotal_footer_separator oe_left " filename='doc_file_name_pre_emp'/>
+                            <field name="doc_file_name_pre_emp" invisible='1'/>
+                            <field name="tds_previous_employer" attrs="{'invisible': [('check_previous_emp_income','=',False)],'readonly': [('previous_employer_income','&lt;=',0)]}" class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px" force_save='1'/>
+                            <field name="tds_doc" attrs="{'required':[('check_month','=',True),('tds_previous_employer','>',0)],'invisible': [('tds_previous_employer','&lt;=',0),('check_month','=',False)],'readonly':[('state','=','approved')]}" class="oe_subtotal_footer_separator oe_left " widget="binary" filename='tds_doc_name'/>
+                            <field name="tds_doc_name" invisible='1'/>
+                            <field name="professional_tax_pad" attrs="{'invisible': [('check_previous_emp_income','=',False)],'readonly': [('previous_employer_income','&lt;=',0)]}" class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                        </group>
+                        <group string="Actual House rent paid/to be paid to house owner" attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                            <field name="house_rent_paid" class="oe_subtotal_footer_separator oe_left " attrs="{'readonly': [('state','!=','draft')]}" style="color:#4c4c4c;font-weight:bold;font-size:15px" force_save='1'/>
+                            <field name="actual_house_rent_paid" attrs="{'required':[('check_month','=',True)],'invisible': [('invisible','=',False)],'readonly': [('state','!=','draft'),('house_rent_paid','=',0)]}" class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="pan_of_landlord" class="oe_subtotal_footer_separator oe_left " attrs="{'required':[('actual_house_rent_paid','&gt;=',100000),('check_month','=',True)],'invisible': [('actual_house_rent_paid','&lt;',100000)],'readonly': [('state','!=','draft')]}"/>
+                            <field name="pan_landlord" attrs="{'required':[('actual_house_rent_paid','>',0),('check_month','=',True)],'invisible':[('actual_house_rent_paid','=',0)],'readonly': [('state','!=','draft')]}" class="oe_subtotal_footer_separator oe_left " filename='pan_landlord_file_name' widget="binary"/>
+                            <field name="pan_landlord_file_name" invisible='1'/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Income/Loss From House Property">
+                            <field name="gross_annual_value" class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px" force_save='1'/>
+                            <field name="municipal_taxes" class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'readonly': [('gross_annual_value','&lt;=',0)]}" force_save='1'/>
+                            <field name="temp_interest_payment" string="Less: Interest on House Loan" class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px"  attrs="{'invisible': [('tax_regime','=','new_regime')]}"  force_save='1'/>
+
+                            <field name="actual_interest_payment" string="Actual Less: Interest on House Loan" class="oe_subtotal_footer_separator oe_left"  style="color:#4c4c4c;font-weight:bold;font-size:15px"  attrs="{'invisible': ['|',('tax_regime','=','new_regime'),('invisible','=',False)],'required':[('check_month','=',True),('temp_interest_payment','>',0)],'readonly':[('state','=','approved')]}"  force_save='1'/>
+
+                            <field name="house_loan_doc" attrs="{'required':[('temp_interest_payment','>',0),('check_month','=',True)],'readonly': [('state','!=','draft')]}" class="oe_subtotal_footer_separator oe_left " filename='house_loan_doc_file_name'/>
+                            <field name="house_loan_doc_file_name" invisible='1'/>
+                            <field name="invisible" invisible='1'/>
+                        </group>
+                        <group string="Income from Other Sources">
+                            <field name="income_from_other_sources"  attrs="{'readonly': [('state','!=','draft')]}" style="color:#4c4c4c;font-weight:bold;font-size:15px" force_save='1' class="oe_subtotal_footer_separator oe_left "/>
+                            <field name="actual_income_from_other_sources"   attrs="{'invisible': [('invisible','=',False)],'required':[('check_month','=',True),('income_from_other_sources','>',0)],'readonly':[('state','=','approved'),('income_from_other_sources','=',0)]}"  style="color:#4c4c4c;font-weight:bold;font-size:15px" force_save='1' class="oe_subtotal_footer_separator oe_left "/>
+                            <field name="income_from_other_sources_doc" filename='other_source_income_file_name' widget="binary" attrs="{'required':[('actual_income_from_other_sources','>',0),('check_month','=',True)],'readonly': [('state','!=','draft')],'invisible': [('actual_income_from_other_sources','=',0),('check_month','=',False)]}" class="oe_subtotal_footer_separator oe_left "/>
+                            <field name="other_source_income_file_name" invisible='1'/>
+                        </group>
+                    </group>
+                    <group string="Investments"  attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_ids" attrs="{'readonly':[('state','=','approve')],'invisible': [('tax_regime','=','new_regime')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'readonly':[('parent.check_month','=',True)]}"/>
+                                <field name="actual_amt" sum="Total" attrs="{'column_invisible':[('parent.invisible','=',False)]}" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="document" attrs="{'column_invisible':[('parent.invisible','=',False)]}" widget="binary" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" string='Amount'/>
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_80c_limit" class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                    </group>
+                    <group string=" ">
+                        <field name="slab_ccd_ids" attrs="{'readonly':[('state','=','approve')],'invisible': [('tax_regime','=','new_regime')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_ccd_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'readonly':[('parent.check_month','=',True)]}"/>
+                                <field name="actual_amt" sum="Total" attrs="{'column_invisible':[('parent.invisible','=',False)]}" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="document" attrs="{'column_invisible':[('parent.invisible','=',False)]}" widget="binary" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" string='Amount'/>
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group>
+                        <field name="slab_80ccd_limit" class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'invisible': [('tax_regime','=','new_regime')]}"/>
+                    </group>
+                    <group string=" " attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_80d_ids" attrs="{'readonly':[('state','=','approve')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_80d_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'readonly':[('parent.check_month','=',True)]}"/>
+                                <field name="actual_amt" sum="Total" attrs="{'column_invisible':[('parent.invisible','=',False)]}" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="document" attrs="{'column_invisible':[('parent.invisible','=',False)]}" widget="binary" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" string='Amount'/>
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_80d_limit" class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                    </group>
+                    <group string=" " attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_80dd_ids" attrs="{'readonly':[('state','=','approve')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_80dd_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="handicapped_percent" required='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" readonly='1' force_save='1'/>
+                                <field name="document" attrs="{'column_invisible':[('parent.invisible','=',False)]}" widget="binary" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" string='Amount'/>
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_80dd_limit" class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                    </group>
+                    <group string=" " attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_80ddb_ids" attrs="{'readonly':[('state','=','approve')]}">
+                            <tree string="Slab - 80 DDB Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_80ddb_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'readonly':['|',('parent.check_month','=',True)]}" />
+                                <field name="actual_amt" sum="Total" attrs="{'column_invisible':[('parent.invisible','=',False)]}" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="document" attrs="{'column_invisible':[('parent.invisible','=',False)]}" widget="binary" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" string='Amount'/>
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_80ddb_limit" class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                    </group>
+                    <group string=" " attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_80e_ids" attrs="{'readonly':[('state','=','approve')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_80e_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'readonly':[('parent.check_month','=',True)]}"/>
+                                <field name="actual_amt" sum="Total" attrs="{'column_invisible':[('parent.invisible','=',False)]}" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="document" attrs="{'column_invisible':[('parent.invisible','=',False)]}" widget="binary" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" string='Amount'/>
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_80e_limit" class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                    </group>
+                    <group string=" " attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_80g_ids" attrs="{'readonly':[('state','=','approve')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_80g_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'readonly':[('parent.check_month','=',True)]}"/>
+                                <field name="actual_amt" sum="Total" attrs="{'column_invisible':[('parent.invisible','=',False)]}" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="document" attrs="{'column_invisible':[('parent.invisible','=',False)]}" widget="binary" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" string='Amount'/>
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_80g_limit" class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter" groups="tds.group_manager_hr_declaration">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record> -->
+
+    <!--=======Tree view of HR Declaration=======-->
+    <record id="hr_savings_type_tree_view" model="ir.ui.view">
+        <field name="name">saving.master.tree</field>
+        <field name="model">saving.master</field>
+        <field name="arch" type="xml">
+            <tree string="Savings Type" editable="bottom" delete="false">
+                <!--                  <field name="deduction_id"/>-->
+                <field name="it_rule" required="1" options='{"no_open": True, "no_create": True,"no_edit": True}' groups='tds.group_manager_hr_declaration'/>
+                <field name="saving_type" required="1" groups='tds.group_manager_hr_declaration'/>
+                <field name="description" groups='tds.group_manager_hr_declaration'/>
+                <field name="rebate" groups='tds.group_manager_hr_declaration'/>
+                <field name="code" groups='tds.group_manager_hr_declaration'/>
+            </tree>
+        </field>
+    </record>
+    <!-- saving.master search view -->
+    <record id="saving_master_view_search" model="ir.ui.view">
+        <field name="name">saving.master.view.search</field>
+        <field name="model">saving.master</field>
+        <field name="arch" type="xml">
+            <search string="Search Description">
+                <!-- Add your fields here -->
+                <field name="saving_type"/>
+                <field name="it_rule"/>
+                <field name="code"/>
+                <group expand="0" string="Group By">
+                    <filter name="it_rule" string="IT Rule" domain="" context="{'group_by':'it_rule'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!--=======Tree view of HR Declaration=======-->
+    <record id="hr_it_rule_tree_view" model="ir.ui.view">
+        <field name="name">hr.itrule.tree</field>
+        <field name="model">hr.itrule</field>
+        <field name="arch" type="xml">
+            <tree string="IT Rule" editable="bottom" delete="false">
+                <field name="deduction_id" groups='tds.group_manager_hr_declaration'/>
+                <field name="code" required="1" groups='tds.group_manager_hr_declaration'/>
+                <field name="name" required="1" groups='tds.group_manager_hr_declaration'/>
+                <field name="rebate" required="1" groups='tds.group_manager_hr_declaration'/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- hr.itrule search view -->
+    <record id="model_name_view_search" model="ir.ui.view">
+        <field name="name">hr.itrule.view.search</field>
+        <field name="model">hr.itrule</field>
+        <field name="arch" type="xml">
+            <search string="Search Description">
+                <!-- Add your fields here -->
+                <field name="deduction_id"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="rebate"/>
+            </search>
+        </field>
+    </record>
+
+    <!--IT Declaration search view-->
+    <record id="view_hr_declaration_request_search_form" model="ir.ui.view">
+        <field name="name">hr.declaration.search.form</field>
+        <field name="model">hr.declaration</field>
+        <field name="arch" type="xml">
+            <search string="IT Declaration">
+                <filter string="My Declarations" name="mydeclaration" domain="[('employee_id.user_id.id', '=', uid)]" />
+                <field name="employee_id" string="Employee"/>
+                <filter string="Employee" name="employee_id" context="{'group_by':'employee_id'}"/>
+                <filter string="Status" name="status" context="{'group_by':'state'}"/>
+                <filter string="Fiscal Year" name="fiscal_year" context="{'group_by':'date_range'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="deduction_tds_view_tree" model="ir.ui.view">
+        <field name="name">hr.declaration.view.tree</field>
+        <field name="model">hr.declaration</field>
+        <field name="arch" type="xml">
+            <tree editable='top'>
+                <field name="employee_id" invisible='1'  readonly='1'/>
+                <field name="date_range" readonly='1'/>
+                <field name="tax_regime"  readonly='1'/>
+                <field name="emp_name" readonly='1'/>
+<!--                <field name="emp_code" readonly='1'/>-->
+                <field name="pan_number" string="PAN of the Employee" readonly='1'/>
+                <field name="bank_account" readonly='1'/>
+                <field name="date_of_joining" string="Date to which Employed with Current Employer" readonly='1'/>
+<!--                <field name="last_working_day" readonly='1'/>-->
+                <field name="basic_salary"  readonly='1'/>
+                <field name="hra" readonly='1'/>
+                <field name="other_income" readonly='1'/>
+                <field name="previous_employer_income_final" string="Income from Previous Employer" readonly='1'/>
+                <field name="total" string="Gross Salary" readonly='1'/>
+                <field name="hra_exemption" string="HRA Exemption U/s - 10C (13A)" readonly='1'/>
+                <field name="professional_tax" string="Professional Tax Deduction U/s 16" readonly='1'/>
+                <field name="standard_deduction" string="Standard Deduction U/s 16" readonly='1'/>
+                <field name="income_from_salary" string="Income From Salary" readonly='1'/>
+                <field name="calculate_interest_payment" string="Income From House Property" readonly='1'/>
+                <field name="gross_total_income" string="Gross Total Income" readonly='1'/>
+                <field name="allowed_rebate_under_80c" string="Deduction U/s 80C" readonly='1'/>
+                <field name="allowed_rebate_under_80ccd" string="Deduction U/s 80CCD" readonly='1'/>
+                <field name="allowed_rebate_under_80d" string="Deduction U/s 80D" readonly='1'/>
+                <field name="allowed_rebate_under_80dd" string="Deduction U/s 80DD" readonly='1'/>
+                <field name="allowed_rebate_under_80e" string="Deduction U/s 80E" readonly='1'/>
+                <field name="allowed_rebate_under_80g" string="Deduction U/s 80G" readonly='1'/>
+                <field name="final_amount" readonly='1'/>
+                <field name="taxable_income" string="Total Taxable Income" readonly='1'/>
+                <field name="tax_payable" readonly='1'/>
+                <field name="rebate" string="Rebate U/s 87A" readonly='1'/>
+                <field name="net_tax_payable" readonly='1'/>
+                <field name="additional_sub_chrg" string="Surcharge" readonly='1'/>
+                <field name="additional_edu_cess" string="Education Cess" readonly='1'/>
+                <field name="total_tax_payable" readonly='1'/>
+                <field name="tds_by_company" string="TDS Deducted by Current employer" readonly='1'/>
+                <field name="tds_previous_employer" string="TDS Deducted by Previous Employer" readonly='1'/>
+                <field name="tax_recovered" string="Total TDS Deducted" readonly='1'/>
+                <field name="balance_tax_payable" readonly='1'/>
+                <field name="housing_loan_institute"/>
+                <field name="housing_loan_institute_pan"/>
+                <field name="name_of_landlord"/>
+                <field name="pan_of_landlord" string="PAN of Landlord" readonly='1'/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="hr_declaration_deduction_action" model="ir.actions.act_window">
+        <field name="name">Deduction Report</field>
+        <field name="res_model">hr.declaration</field>
+        <field name="binding_view_types">form</field>
+        <field name="view_mode">tree</field>
+        <field name="context">{'deduct_report': 1,'create':False,'edit':False,'delete':False,'import':False,'duplicate':False}</field>
+        <field name="search_view_id" ref="view_hr_declaration_request_search_form"/>
+        <field name="groups_id" eval="[(6,0,[ref('tds.group_report_manager_declaration')])]"/>
+        <field name="domain">[]</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('deduction_tds_view_tree')})]"/>
+    </record>
+
+
+    <!--============Action view of hr.declaration Waiting============-->
+    <!-- hr.declaration tree view -->
+    <record id="declaration_view_tree" model="ir.ui.view">
+        <field name="name">hr.declaration.view.tree</field>
+        <field name="model">hr.declaration</field>
+        <field name="arch" type="xml">
+            <tree create='0' edit='0' delete='0'>
+                <!-- Add your fields here -->
+                <field name="employee_id"/>
+                <field name="job_name"/>
+                <field name="department_name"/>
+                <field name="pan_number"/>
+                <field name="date_range"/>
+                <field name="tax_regime"/>
+<!--                <button name="btn_take_action_from_tree" type="object" string="Take Action" class="oe_highlight" groups='tds.group_manager_hr_declaration' context="{'hide_edit':1}"/>-->
+            </tree>
+        </field>
+    </record>
+    <!-- My tax kanban view -->
+    <record id="hr_declaration_kanban_view" model="ir.ui.view">
+        <field name="name">hr.declaration.kanban</field>
+        <field name="model">hr.declaration</field>
+        <field name="arch" type="xml">
+            <kanban class="o_hr_declaration_kanban" create='false' import='false'>
+                <field name="id"/>
+                <field name="employee_id"/>
+                <field name="job_name"/>
+                <field name="department_name"/>
+                <field name="date_range"/>
+                <field name="pan_number"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click" style="background: #108fbb; border-left: 7px solid #ffc107; border-radius:10px" t-attf-style="">
+                            <div class="o_kanban_record_top " >
+                                <div class="container p-0 m-0">
+                                    <div class="row align-items-center">
+                                        <div class="col-8">
+                                            <p><h1>
+                                                <span class='text-white'>FY </span> <span class="text-muted"> -</span>
+                                                <span class="text-white">
+                                                    <field name="date_range" string=''/>
+                                                </span>
+                                                <span style="margin-left:60px;"></span>
+                                            </h1></p>
+                                            <p>
+                                                <h4 class='text-white'>
+                                                    <field name="employee_id"/>
+                                                </h4>
+                                            </p>
+                                            <p>
+                                                <h6 class='text-uppercase' style="color: #f1f1f1; font-size: 1.2rem; ">
+                                                    <field name="job_name"/>,
+                                                    <field name="department_name"/>
+                                                </h6>
+                                            </p>
+                                        </div>
+                                        <div class="col-4">
+                                            <button class="btn btn-warning" title="View Details">View Details
+                                                </button>
+                                        </div>
+
+                                        <!-- <div class="text-center">
+                                            <h6 class='text-danger'>FY</h6>
+                                            <p class="h3 text-danger">
+                                                <field name="date_range" string=' '/>
+                                            </p>
+                                        </div> -->
+                                    </div>
+                                    <!-- <div class="d-flex justify-content-center mt-4">
+                                        <button class="btn btn-primary" title="View Details" name='button_take_action' type="object">View Details
+                                        </button>
+                                    </div> -->
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <record id="view_declarations_tree" model="ir.ui.view">
+        <field name="name">view.declarations.tree</field>
+        <field name="model">hr.declaration</field>
+        <field name="arch" type="xml">
+            <tree create='0' edit='0'>
+                <!-- Add your fields here -->
+                <field name="employee_id"/>
+                <field name="job_name"/>
+                <field name="department_name"/>
+                <field name="pan_number"/>
+                <field name="date_range"/>
+                <!-- <field name="state"/> -->
+                <!-- <button name="btn_take_action_from_tree" type="object" string="View Declaration" class="oe_highlight"/> -->
+            </tree>
+        </field>
+    </record>
+    <!-- hr.declaration form view finance screen-->
+    <!-- <record id="finance_declaration_view_form" model="ir.ui.view">
+        <field name="name">hr.declaration.view.form</field>
+        <field name="model">hr.declaration</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <form string="" delete='0' duplicate='0'>
+                <style>
+                div.o_horizontal_separator{ color: #108fbb !important; text-decoration:underline;}
+                    .o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 250px !important;}
+                    .table-responsive .o_list_view tfoot tr:nth-child(1) td {
+                    background-color: #108fbb;
+                    color: #fff;}
+                </style>
+                <script>
+                        $('.o_form_button_create').hide();
+                        $(document).ready(function(){ state=  $("[aria-pressed=true]").text().trim();
+                           console.log(state);
+                            if((state == 'Approved')){
+                                $('.o_form_button_edit').hide();
+
+                            }
+                        });
+                </script>
+                <header>
+                    <field name="check_month" invisible='1'/>
+                    <button name="button_compute_tax" string="Compute Tax" class="oe_highlight compute_tax" type="object" attrs="{'invisible':[('test_css','!=',False)]}" groups="tds.group_manager_hr_declaration"/>
+                    <button name="button_approved" string="Approve" class="oe_highlight" type="object" groups="tds.group_manager_hr_declaration" confirm="Are you sure you want to do?" states='draft' invisible="context.get('hide_button', False)"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,approved" />
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="test_css" invisible='1'/>
+                            <field name="emp_code"/>
+                            <field name="date_range" options="{'no_edit': True, 'no_create': True,'no_open':True}" readonly='1' string='Financial Year'/>
+                            <field name="date_of_joining"/>
+                            <field name="last_working_day" attrs="{'invisible':[('last_working_day','=',False)]}" style="color:red;font-weight:bold;font-size:15px" string='Last Working Day'/>
+                            <field name="tax_regime" attrs="{'readonly':[('tax_recovered','!=',0)]}"/>
+                        </group>
+                        <group>
+                            <field name="employee_id" options="{'no_edit': True, 'no_create': True,'no_open':True}" readonly='1'/>
+                            <field name="comming_fy" options="{'no_edit': True, 'no_create': True,'no_open':True}" readonly='1' string='Accessment Year'/>
+                            <field name="pan_number"/>
+                            <field name="invisible" invisible='1'/>
+                            <field name="emp_age" groups='tds.group_manager_hr_declaration'/>
+                        </group>
+                    </group>
+
+                    <group >
+                        <group string='1A. Income From Salary'>
+                            <field name="basic_salary" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="hra" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="other_income" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="sub_total" string="1. Sub Total (A)" class="oe_subtotal_footer_separator oe_left" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                        </group>
+                        <group string='HRA Computation'>
+                            <field name="house_rent_paid" class="oe_subtotal_footer_separator oe_left " attrs="{'readonly': [('state','!=','draft')],'invisible': [('tax_regime','=','new_regime')]}" style="color:#4c4c4c;font-weight:bold;font-size:15px" force_save='1' groups="tds.group_manager_hr_declaration"/>
+                            <field name="actual_house_rent_paid" attrs="{'required':[('check_month','=',True)],'invisible': ['|',('tax_regime','=','new_regime'),('invisible','=',False)],'readonly': [('state','!=','draft')]}" class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px" groups="tds.group_manager_hr_declaration"/>
+                            <field name="hra_by_employee" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"  force_save='1'/>
+                            <field name="pan_of_landlord" class="oe_subtotal_footer_separator oe_left "  attrs="{'invisible': [('actual_house_rent_paid','&lt;',100000)],'readonly': [('state','!=','draft')]}" style="font-weight:bold;font-size:15px"/>
+                            <field name="pan_landlord" class="oe_subtotal_footer_separator oe_left "  attrs="{'invisible':[('actual_house_rent_paid','=',0)],'readonly': [('state','!=','draft')]}"/>
+                            <field name="excess_10_percent" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" force_save='1'/>
+                            <field name="actual_hra" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="basic_40_percent" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" />
+                            <field name="lowest_hra" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" />
+                        </group>
+                        <group>
+                            <field name="check_previous_emp_income" invisible='1'/>
+                            <label for="previous_employer_income" string="2. Income from Previous Employer (B)" attrs="{'readonly': ['|',('check_previous_emp_income','=',False),('state','!=','draft')]}" />
+                            <div attrs="{'readonly': [('state','!=','draft')]}" >
+                                <field name="previous_employer_income" class="oe_inline" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'readonly': ['|',('check_previous_emp_income','=',False),('state','!=','draft')]}"/>
+                                 <field name="income_from_pre_employer_doc" attrs="{'invisible': [('check_previous_emp_income','=',False)],'readonly': [('state','!=','draft')],'required':[('check_month','=',True),('previous_employer_income','>',0)]}" class="oe_inline" style='margin-left:10px;color:#4c4c4c;font-weight:bold;font-size:15px' filename="doc_file_name_pre_emp"/>
+                            <field name="doc_file_name_pre_emp" invisible='1'/>
+                            </div>
+
+                            <label for="tds_previous_employer" string="TDS Paid" attrs="{'invisible': [('check_previous_emp_income','=',False)],'readonly': [('previous_employer_income','&lt;=',0)]}"/>
+                            <div attrs="{'invisible': [('check_previous_emp_income','=',False)],'readonly': [('previous_employer_income','&lt;=',0)]}" >
+                                <field name="tds_previous_employer" class="oe_inline" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="tds_doc" class="oe_inline"  attrs="{'invisible': [('tds_previous_employer','&lt;=',0),('check_month','=',False)],'readonly':[('state','=','approved')],'required':[('check_month','=',True),('tds_previous_employer','>',0)],}" style='margin-left:10px;color:#4c4c4c;font-weight:bold;font-size:15px'/>
+                            </div>
+                            <field name="lwop" string="3. LWOP (C)" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="total" class="oe_subtotal_footer_separator oe_left" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" string='4. Total (A+B-C)'/>
+                        </group>
+                        <group string='Income/Loss From House Property' >
+                            <field name="gross_annual_value"  style="color:#4c4c4c;font-weight:bold;font-size:15px" force_save='1'  class="oe_subtotal_footer_separator oe_left "/>
+                            <field name="municipal_taxes"  style="color:#4c4c4c;font-weight:bold;font-size:15px" force_save='1' attrs="{'readonly': [('gross_annual_value','&lt;=',0)]}"  class="oe_subtotal_footer_separator oe_left "/>
+                            <field name="net_annual_value" class="oe_subtotal_footer_separator oe_left" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="standard_30_deduction" class="oe_subtotal_footer_separator oe_left" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="temp_interest_payment" string="Declaration Paid on House Loan Interest" class="oe_subtotal_footer_separator oe_left"  style="color:#4c4c4c;font-weight:bold;font-size:15px"  attrs="{'invisible': [('tax_regime','=','new_regime')]}"  force_save='1'/>
+                            <field name="actual_interest_payment" string="Actual Paid on House Loan Interest" class="oe_subtotal_footer_separator oe_left"  style="color:#4c4c4c;font-weight:bold;font-size:15px"  attrs="{'invisible': ['|',('tax_regime','=','new_regime'),('invisible','=',False)],'required':[('check_month','=',True),('temp_interest_payment','>',0)],'readonly':[('state','=','approved')]}"  force_save='1'/>
+                            <field name="allowable_housing_intrest" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="total_income_interest" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="house_loan_doc" class="oe_subtotal_footer_separator oe_left " attrs="{'required':[('temp_interest_payment','>',0),('check_month','=',True)],'readonly': [('state','!=','draft')],}" filename='house_loan_doc_file_name'/>
+                                <field name="house_loan_doc_file_name" invisible='1'/>
+                        </group>
+                        <group string="Allowances Exempted U/S 10(C)" >
+                            <field name="hra_exemption" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" class="oe_subtotal_footer_separator oe_left" string='5. HRA U/S (13A)'/>
+                        </group>
+                        <group>
+                            <group string="Income from Other Sources">
+                                <field name="income_from_other_sources"  attrs="{'readonly': [('state','!=','draft')]}" style="color:#4c4c4c;font-weight:bold;font-size:15px" force_save='1' class="oe_subtotal_footer_separator oe_left "/>
+                                <field name="actual_income_from_other_sources"   attrs="{'invisible': [('invisible','=',False)],'required':[('check_month','=',True),('income_from_other_sources','>',0)],'readonly':[('state','=','approved')]}"  style="color:#4c4c4c;font-weight:bold;font-size:15px" force_save='1' class="oe_subtotal_footer_separator oe_left "/>
+                                <field name="income_from_other_sources_doc" filename='other_source_income_file_name' widget="binary" attrs="{'required':[('actual_income_from_other_sources','>',0),('check_month','=',True)],'readonly': [('state','!=','draft')],'invisible': [('invisible','=',False)]}" class="oe_subtotal_footer_separator oe_left "/>
+                                <field name="other_source_income_file_name" invisible='1'/>
+                            </group>
+                        </group>
+                    </group>
+                    <group string='Deduction U/S 16(D)' >
+                        <field name="professional_tax" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" string='6. Tax on Employment/P.T'/>
+                    </group>
+                    <group >
+
+                        <field name="income_from_salary" class="oe_subtotal_footer_separator oe_left" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" string='7. Income From Salary (4-5-6)'/>
+                    </group>
+
+                    <group string='Income/Loss From House Property'>
+                        <group>
+                            <field name="calculate_interest_payment" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" string='8. Income/Loss From House Property'/>
+                            <field name="final_amount_other_income" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" string='9. Income from Other Sources'/>
+                            <field name="gross_total_income" class="oe_subtotal_footer_separator oe_left " readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" string='10. Gross Total Income (7+8+9)'/>
+
+                        </group>
+                    </group>
+                    <group string="Investments"  attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_ids" attrs="{'readonly':[('state','=','approved')],'invisible': [('tax_regime','=','new_regime')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1' />
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'readonly':[('parent.check_month','=',True)]}"/>
+                                <field name="actual_amt" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'column_invisible':[('parent.invisible','=',False),('parent.state','=','draft')]}"/>
+                                <field name="document" widget="binary" attrs="{'column_invisible':[('parent.invisible','=',False),('parent.state','=','draft')]}" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" />
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group  attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <group>
+                            <field name="employees_epf" readonly='1' string="Employee's Contribution to P.F" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="total_80c_payable" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                        </group>
+                    </group>
+                    <group string=" ">
+                        <field name="slab_ccd_ids" attrs="{'readonly':[('state','=','approve')],'invisible': [('tax_regime','=','new_regime')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_ccd_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'readonly':[('parent.check_month','=',True)]}"/>
+                                <field name="actual_amt" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'column_invisible':[('parent.invisible','=',False),('parent.state','=','draft')]}"/>
+                                <field name="document" widget="binary" attrs="{'column_invisible':[('parent.invisible','=',False),('parent.state','=','draft')]}" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" />
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group  attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <group>
+                            <field name="allowed_rebate_under_80c" readonly='1' class="oe_subtotal_footer_separator oe_left" style="color:#4c4c4c;font-weight:bold;font-size:15px"  attrs="{'invisible': [('tax_regime','=','new_regime')]}"/>
+
+                            <field name="allowed_rebate_under_80ccd" readonly='1' class="oe_subtotal_footer_separator oe_left" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                        </group>
+                    </group>
+                    <group string=" " attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_80d_ids" attrs="{'readonly':[('state','=','approved')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_80d_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'readonly':[('parent.check_month','=',True)]}"/>
+                                <field name="actual_amt" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'column_invisible':[('parent.invisible','=',False),('parent.state','=','draft')]}"/>
+                                <field name="document" widget="binary" attrs="{'column_invisible':[('parent.invisible','=',False),('parent.state','=','draft')]}" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" />
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <group>
+                            <field name="prl_hlth_dependant" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="health_insurance_parent" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="allowed_rebate_under_80d" readonly='1' class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                        </group>
+                    </group>
+                    <group string=" " attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_80dd_ids" attrs="{'readonly':[('state','=','approved')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_80dd_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="handicapped_percent" style="color:#4c4c4c;font-weight:bold;font-size:15px" />
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" readonly='1' force_save='1'/>
+                                <field name="document" widget="binary" attrs="{'column_invisible':[('parent.invisible','=',False),('parent.state','=','draft')]}" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" />
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <group>
+                            <field name="allowed_rebate_under_80dd" readonly='1' class="oe_subtotal_footer_separator oe_left" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                        </group>
+                    </group>
+                    <group string=" " attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_80ddb_ids" attrs="{'readonly':[('state','=','approve')]}">
+                            <tree string="Slab - 80 DDB Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_80ddb_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'readonly':[('parent.check_month','=',True)]}"/>
+                                <field name="actual_amt" sum="Total" attrs="{'column_invisible':[('parent.invisible','=',False)]}" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="document" attrs="{'column_invisible':[('parent.invisible','=',False)]}" widget="binary" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" string='Amount'/>
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="allowed_rebate_under_80ddb" class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                    </group>
+                    <group string=" " attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_80e_ids" attrs="{'readonly':[('state','=','approved')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_80e_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'readonly':[('parent.check_month','=',True)]}"/>
+                                <field name="actual_amt" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'column_invisible':[('parent.invisible','=',False),('parent.state','=','draft')]}"/>
+                                <field name="document" widget="binary" attrs="{'column_invisible':[('parent.invisible','=',False),('parent.state','=','draft')]}" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" />
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <group>
+                            <field name="allowed_rebate_under_80e" readonly='1' class="oe_subtotal_footer_separator oe_left" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                        </group>
+                    </group>
+                    <group string=" " attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_80g_ids" attrs="{'readonly':[('state','=','approved')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_80g_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'readonly':[('parent.check_month','=',True)]}"/>
+                                <field name="actual_amt" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'column_invisible':[('parent.invisible','=',False),('parent.state','=','draft')]}"/>
+                                <field name="document" widget="binary" attrs="{'column_invisible':[('parent.invisible','=',False),('parent.state','=','draft')]}" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" />
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <group>
+                            <field name="allowed_rebate_under_80g" style="color:#4c4c4c;font-weight:bold;font-size:15px" readonly='1'/>
+                        </group>
+                    </group>
+                        <group>
+                            <field name="standard_deduction" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" string="11. Standard Deduction" force_save='1'/>
+                            <field name="final_amount" readonly='1' string ='12. Total deduction' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="taxable_income" style="color:#4c4c4c;font-weight:bold;font-size:15px" readonly='1' string='13. Taxable Income (10-12)'/>
+
+                    </group>
+                    <group>
+                        <group>
+                            <field name="tax_payable" readonly='1' string='14. Tax Payable' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="rebate" readonly='1' string='15. Rebate' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="net_tax_payable" readonly='1' string='16. Net Tax Payable' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="additional_sub_chrg" readonly='1' string='17. Subcharge' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="additional_edu_cess" readonly='1' string='18. Additional Educational Cess' style="color:#4c4c4c;font-weight:bold;font-size:15px" />
+                            <field name="total_tax_payable" class="oe_subtotal_footer_separator oe_left" readonly='1' string='19. Total Tax Payable' style="color:#4c4c4c;font-weight:bold;font-size:15px" />
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="tax_recovered" readonly='1' string='Tax Recovered Till Date' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="balance_tax_payable" readonly='1' string="Balance Tax Payable/Refundable" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record> -->
+    <!-- view declaration form view of finance screen -->
+    <!-- <record id="view_declarations_form" model="ir.ui.view">
+        <field name="name">hr.declaration.view.form</field>
+        <field name="model">hr.declaration</field>
+        <field name="priority">2</field>
+        <field name="arch" type="xml">
+            <form string="" create='0' edit='0' delete='0' >
+                <style>
+                    .o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 250px !important;}
+                </style>
+                <script>
+
+                                $('.o_form_button_save').hide();
+                                $('.o_form_button_cancel').hide();
+
+                </script>
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,approved" />
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="test_css" invisible='1'/>
+                            <field name="emp_code"/>
+                            <field name="date_range" options="{'no_edit': True, 'no_create': True,'no_open':True}" readonly='1' string='Financial Year'/>
+                            <field name="date_of_joining"/>
+                            <field name="tax_regime"/>
+                        </group>
+                        <group>
+                            <field name="employee_id" options="{'no_edit': True, 'no_create': True,'no_open':True}" readonly='1'/>
+                            <field name="comming_fy" options="{'no_edit': True, 'no_create': True,'no_open':True}" readonly='1' string='Assesment Year'/>
+                            <field name="pan_number"/>
+                        </group>
+                    </group>
+
+                    <group >
+                        <group string='Income Tax Computation Statement'>
+                            <field name="basic_salary" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" class="oe_subtotal_footer_separator oe_left"/>
+                            <field name="hra" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" class="oe_subtotal_footer_separator oe_left"/>
+                            <field name="other_income" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" class="oe_subtotal_footer_separator oe_left"/>
+                            <field name="sub_total" string="1. Sub Total (A)" class="oe_subtotal_footer_separator oe_left" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                        </group>
+                        <group string='HRA Computation'>
+                            <field name="hra_by_employee" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" force_save='1'/>
+                            <field name="pan_of_landlord" class="oe_subtotal_footer_separator oe_left " readonly='1' attrs="{'invisible':[('hra_by_employee','&lt;',100000)]}" style="font-weight:bold;font-size:15px"/>
+                            <field name="pan_landlord" class="oe_subtotal_footer_separator oe_left " readonly='1' attrs="{'invisible':[('check_month','=',False)]}"/>
+                            <field name="excess_10_percent" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" force_save='1'/>
+                            <field name="actual_hra" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="basic_40_percent" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" />
+                            <field name="lowest_hra" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" />
+                        </group>
+
+                        <group>
+                            <field name="previous_employer_income_final" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" string="2. Income from Previous Employer (B)"/>
+                            <field name="lwop" string="3. LWOP (C)" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="total" class="oe_subtotal_footer_separator oe_left" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" string='4. Total (A+B-C)'/>
+                        </group>
+                        <group string='Income From House Property'>
+                            <field name="invisible" invisible='1'/>
+                            <field name="gross_annual_value" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" force_save='1'/>
+                            <field name="municipal_taxes" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" force_save='1'/>
+                            <field name="net_annual_value" class="oe_subtotal_footer_separator oe_left" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="standard_30_deduction" class="oe_subtotal_footer_separator oe_left" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="temp_interest_payment" string="Less: Interest on House Loan" class="oe_subtotal_footer_separator oe_left" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"  attrs="{'invisible': [('tax_regime','=','new_regime')]}"  force_save='1'/>
+                            <field name="actual_interest_payment" string="Actual Less: Interest on House Loan" class="oe_subtotal_footer_separator oe_left"  style="color:#4c4c4c;font-weight:bold;font-size:15px"  attrs="{'invisible': ['|',('tax_regime','=','new_regime'),('invisible','=',False)],'required':[('check_month','=',True),('temp_interest_payment','>',0)],'readonly':[('state','=','approved')]}"  force_save='1'/>
+                            <field name="total_income_interest" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="house_loan_doc" attrs="{'invisible':[('temp_interest_payment','=',0)]}" class="oe_subtotal_footer_separator oe_left " readonly='1' filename='house_loan_doc_file_name'/>
+                                <field name="house_loan_doc_file_name" invisible='1'/>
+                        </group>
+                        <group string="Allowances Exempted U/S 10(C)">
+                            <group>
+                                <field name="hra_exemption" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" string='5. HRA U/S (13A)'/>
+                                <field name="check_month" invisible='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            </group>
+                        </group>
+                    </group>
+                    <group string='Deduction U/S 16(D)'>
+                        <field name="professional_tax" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" string='6. Tax on Employment/P.T'/>
+                        <field name="standard_deduction" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" string="7. Standard Deduction of 50,000"/>
+                        <field name="income_from_salary" class="oe_subtotal_footer_separator oe_left" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" string='8. Income From Salary (4-5-6-7)'/>
+                    </group>
+
+                    <group string='Income/Loss From House Property'>
+                        <group>
+                            <field name="calculate_interest_payment" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" string='8. Income/Loss From House Property'/>
+                            <field name="gross_total_income" class="oe_subtotal_footer_separator oe_left " readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px" string='9. Gross Total Income (7+8)'/>
+                        </group>
+                    </group>
+                    <group string="Investments">
+                        <field name="slab_ids" attrs="{'readonly':[('state','=','approved')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1' />
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="actual_amt" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="document" widget="binary" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" />
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="employees_epf" readonly='1' string="Employee's Contribution to P.F" style="color:#4c4c4c;font-weight:bold;font-size:15px" />
+                            <field name="total_80c_payable" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                        </group>
+                    </group>
+                    <group string=" ">
+                        <field name="slab_ccd_ids" attrs="{'readonly':[('state','=','approve')],'invisible': [('tax_regime','=','new_regime')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_ccd_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="actual_amt" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="document" widget="binary" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" />
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group>
+                        <group>
+
+                            <field name="allowed_rebate_under_80c" readonly='1' class="oe_subtotal_footer_separator oe_left" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="allowed_rebate_under_80ccd" readonly='1' class="oe_subtotal_footer_separator oe_left" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                        </group>
+                    </group>
+                    <group string=" ">
+                        <field name="slab_80d_ids" attrs="{'readonly':[('state','=','approved')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_80d_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="actual_amt" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="document" widget="binary" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" />
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="prl_hlth_dependant" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="health_insurance_parent" readonly='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="allowed_rebate_under_80d" readonly='1' class="oe_subtotal_footer_separator oe_left" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                        </group>
+                    </group>
+                    <group string=" ">
+                        <field name="slab_80dd_ids" attrs="{'readonly':[('state','=','approved')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_80dd_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="handicapped_percent" required='1' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" readonly="1"/>
+                                <field name="document" widget="binary" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" />
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="allowed_rebate_under_80dd" readonly='1' class="oe_subtotal_footer_separator oe_left" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                        </group>
+                    </group>
+                    <group string=" " attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="slab_80ddb_ids" attrs="{'readonly':[('state','=','approve')]}">
+                            <tree string="Slab - 80 DDB Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_80ddb_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px" attrs="{'readonly':[('parent.check_month','=',True)]}"/>
+                                <field name="actual_amt" sum="Total" attrs="{'column_invisible':[('parent.invisible','=',False)]}" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="document" attrs="{'column_invisible':[('parent.invisible','=',False)]}" widget="binary" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" string='Amount'/>
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group attrs="{'invisible': [('tax_regime','=','new_regime')]}">
+                        <field name="allowed_rebate_under_80ddb" class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                    </group>
+                    <group string=" ">
+                        <field name="slab_80e_ids" attrs="{'readonly':[('state','=','approved')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_80e_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="actual_amt" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="document" widget="binary" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" />
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="allowed_rebate_under_80e" readonly='1' class="oe_subtotal_footer_separator oe_left " style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                        </group>
+                    </group>
+                    <group string=" ">
+                        <field name="slab_80g_ids" attrs="{'readonly':[('state','=','approved')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom" create='0' delete='0'>
+                                <field name="slab_80g_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" domain="[('it_rule', '=', it_rule)]" readonly='1' force_save='1'/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]" options="{'no_open':True}" invisible='1'/>
+                                <field name="investment" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="actual_amt" sum="Total" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                                <field name="document" widget="binary" filename='file_name'/>
+                                <field name="file_name" invisible="1"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="saving_master" options="{'no_edit': True, 'no_create': True,'no_open':True}" required="1" readonly='1' force_save='1'/>
+                                    <field name="investment" sum="Total" />
+                                    <field name="actual_amt" sum="Total" />
+                                    <field name="document" widget="binary" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="allowed_rebate_under_80g" style="color:#4c4c4c;font-weight:bold;font-size:15px" readonly='1'/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="final_amount" readonly='1' string ='12. Total deduction' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="taxable_income" style="color:#4c4c4c;font-weight:bold;font-size:15px" readonly='1' string='13. Taxable Income (10-12)'/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="tax_payable" readonly='1' string='14. Tax Payable' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="rebate" readonly='1' string='15. Rebate' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="net_tax_payable" readonly='1' string='16. Net Tax Payable' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="additional_sub_chrg" readonly='1' string='17. Subcharge' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="additional_edu_cess" readonly='1' string='18. Additional Educational Cess' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="total_tax_payable" class="oe_subtotal_footer_separator oe_left" readonly='1' string='19. Total Tax Payable' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="tax_recovered" readonly='1' string='Tax Recovered Till Date' style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                            <field name="balance_tax_payable" readonly='1' string="Balance Tax Payable/Refundable" style="color:#4c4c4c;font-weight:bold;font-size:15px"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record> -->
+
+
+
+
+    <record id="hr_declaration_pending_action" model="ir.actions.act_window">
+        <field name="name">Pending Approvals</field>
+        <field name="res_model">hr.declaration</field>
+        <field name="binding_view_types">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state','=','draft')]</field>
+        <field name="context">{'check_emp': 1}</field>
+        <field name="groups_id" eval="[(6,0,[ref('tds.group_manager_hr_declaration')])]"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('declaration_view_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('hr_declaration_bifurcation_view_form')})
+               ]"/>
+    </record>
+    <!--============Action view of hr.saving.type rejected============-->
+    <record id="hr_declaration_saving_master_action" model="ir.actions.act_window">
+        <field name="name">HR Saving Type</field>
+        <field name="res_model">saving.master</field>
+        <field name="binding_view_types">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="groups_id" eval="[(6,0,[ref('tds.group_manager_hr_declaration')])]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+          No Record To Show...
+            </p>
+        </field>
+    </record>
+
+    <!--============Action view of hr.saving.type rejected============-->
+    <record id="hr_declaration_it_rule_action" model="ir.actions.act_window">
+        <field name="name">HR IT Rule</field>
+        <field name="res_model">hr.itrule</field>
+        <field name="binding_view_types">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="groups_id" eval="[(6,0,[ref('tds.group_manager_hr_declaration')])]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+          No Record To Show...
+            </p>
+        </field>
+    </record>
+
+
+    <record id="user_tds_for_manager_action" model="ir.actions.act_window">
+        <field name="name">Declarations</field>
+        <field name="res_model">hr.declaration</field>
+        <field name="binding_view_types">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state','!=','draft')]</field>
+        <field name="context">{'create':False,'edit':False,'delete':False,'import':False,'duplicate':False,'hide_compute_btn':1}</field>
+        <field name="search_view_id" ref="view_hr_declaration_request_search_form"/>
+        <field name="groups_id" eval="[(6,0,[ref('tds.group_manager_hr_declaration')])]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+          No Record To Show...
+            </p>
+        </field>
+        <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('hr_declaration_tree_view')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('tds.hr_declaration_bifurcation_view_form')})]"/>
+    </record>
+</odoo>
