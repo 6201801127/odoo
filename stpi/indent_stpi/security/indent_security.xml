@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+
+    <record model="ir.module.category" id="module_Indent">
+        <field name="name">Indent</field>
+        <field name="description">Help You For Indent</field>
+        <field name="sequence">21</field>
+    </record>
+
+
+    <!-- <record id="group_issue_request_forward" model="res.groups">
+        <field name="name">Indent Issue Request Forwarder</field>
+        <field name="stpi">1</field>
+        <field name="category_id" ref="module_Indent"/>
+    </record> -->
+    
+    <record id="group_grn_create" model="res.groups">
+        <field name="name">GRN Creation</field>
+        <field name="stpi">1</field>
+        <field name="category_id" ref="module_Indent"/>
+    </record>
+    
+    <record id="group_grn_manager" model="res.groups">
+        <field name="name">GRN Manager</field>
+        <field name="stpi">1</field>
+        <field name="implied_ids" eval="[(4, ref('group_grn_create'))]"/>
+        <field name="category_id" ref="module_Indent"/>
+    </record>
+    
+    <record id="group_indent_approver" model="res.groups">
+        <field name="name">Indent Approver</field>
+        <field name="stpi">1</field>
+        <field name="category_id" ref="module_Indent"/>
+    </record>
+    
+    <record id="group_store_manager" model="res.groups">
+        <field name="name">Store Manager</field>
+        <field name="stpi">1</field>
+        <field name="implied_ids" eval="[(4, ref('group_grn_manager')),(4, ref('group_grn_create'))]"/>
+        <field name="category_id" ref="module_Indent"/>
+    </record>
+    
+    <record id="group_indent_2ndlvl_approver" model="res.groups">
+        <field name="name">Competent Authority</field>
+        <field name="stpi">1</field>
+        <!-- <field name="implied_ids" eval="[(4, ref('group_grn_manager')),(4, ref('group_grn_create'))]"/> -->
+        <field name="category_id" ref="module_Indent"/>
+    </record>
+
+
+    <!-- <record id="group_issue_request_manager" model="res.groups">
+        <field name="name">Indent Issue Request Manager</field>
+        <field name="stpi">1</field>
+        <field name="category_id" ref="module_Indent"/>
+    </record> -->
+    
+
+   <!--  <record id="group_serial_number_user" model="res.groups">
+        <field name="name">Serial Number User</field>
+        <field name="stpi">1</field>
+        <field name="category_id" ref="module_Indent"/>
+    </record>
+    <record id="group_serial_number_manager" model="res.groups">
+        <field name="name">Serial Number Manager</field>
+        <field name="stpi">1</field>
+        <field name="category_id" ref="module_Indent"/>
+    </record> -->
+
+
+    <record id="ir_rule_Indent_global_security" model="ir.rule">
+        <field name="model_id" ref="model_indent_request"/>
+        <field name="domain_force">['|', ('employee_id.branch_id','=',False), ('employee_id.branch_id.id','in',[g.id for g in user.branch_ids])] </field>
+        <field name="name">Indent Request</field>
+        <field name="global" eval="True"/>
+    </record>
+
+    <record id="ir_rule_Indent_self_security" model="ir.rule">
+        <field name="model_id" ref="model_indent_request"/>
+        <field name="domain_force">['|', ('employee_id.user_id', '=', user.id), ('employee_id.parent_id.user_id', '=', user.id)]</field>
+        <field name="name">Indent Request Self or Subordinates only</field>
+        <field name="groups" eval="[(4, ref('base.group_user')),(4, ref('indent_stpi.group_indent_2ndlvl_approver'))]"/>
+    </record>
+    
+    <record id="ir_rule_Issue_self_security" model="ir.rule">
+        <field name="model_id" ref="model_issue_request"/>
+        <field name="domain_force">['|', ('employee_id.user_id', '=', user.id), ('employee_id.parent_id.user_id', '=', user.id)]</field>
+        <field name="name">Indent Request Self or Subordinates only</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+    
+    <record id="ir_rule_Indent_self_security_all" model="ir.rule">
+        <field name="name">Indent Request Self All</field>
+        <field ref="model_indent_request" name="model_id"/>
+        <field name="domain_force">[(1,'=',1)]</field>
+        <field name="groups" eval="[(4, ref('base.user_admin'))]"/>
+    </record>
+    
+    <record id="ir_rule_Issue_self_security_all" model="ir.rule">
+        <field name="name">Issue Request Self All</field>
+        <field ref="model_issue_request" name="model_id"/>
+        <field name="domain_force">[(1,'=',1)]</field>
+        <field name="groups" eval="[(4, ref('base.user_admin'))]"/>
+    </record>
+
+
+    <record id="ir_rule_Indent_allowed_self_security" model="ir.rule">
+        <field name="model_id" ref="model_indent_request"/>
+        <field name="domain_force">['|',  ('employee_id.branch_id','=','False'), ('employee_id.branch_id.id','in',[g.id for g in user.branch_ids])]</field>
+        <field name="name">Indent Branch Rule</field>
+        <field name="groups" eval="[(4, ref('indent_stpi.group_grn_manager'))]"/>
+    </record>
+
+    <record id="ir_rule_Indent_approve_self_security" model="ir.rule">
+        <field name="model_id" ref="model_indent_request"/>
+        <field name="domain_force">['&amp;',('item_ids.item_sub_category_id.competent_authority','in',[user.id]),'|',('employee_id.branch_id','=','False'), ('employee_id.branch_id.id','in',[g.id for g in user.branch_ids])]</field>
+        <field name="name">Indent Branch Rule</field>
+        <field name="groups" eval="[(4, ref('indent_stpi.group_indent_2ndlvl_approver'))]"/>
+    </record>
+
+    <record id="ir_rule_Approver_self_security" model="ir.rule">
+        <field name="model_id" ref="model_indent_request"/>
+        <field name="domain_force">['&amp;',('item_ids.item_sub_category_id.user_id','in',[user.id]),'|',('employee_id.branch_id','=','False'), ('employee_id.branch_id.id','in',[g.id for g in user.branch_ids])]</field>
+        <field name="name">Indent Branch Rule</field>
+        <field name="groups" eval="[(4, ref('indent_stpi.group_indent_approver'))]"/>
+    </record>
+    
+
+
+    <record id="ir_rule_Indent_request_global_security" model="ir.rule">
+        <field name="model_id" ref="model_issue_request"/>
+        <field name="domain_force">['|', ('employee_id.branch_id','=',False), ('employee_id.branch_id.id','in',[g.id for g in user.branch_ids])] </field>
+        <field name="name">Indent Issue Request</field>
+        <field name="global" eval="True"/>
+    </record>
+    
+    <record id="ir_rule_In_issue_request_global_security" model="ir.rule">
+        <field name="model_id" ref="model_issue_request"/>
+        <field name="domain_force">['|', ('employee_id.branch_id','=',False), ('employee_id.branch_id.id','in',[g.id for g in user.branch_ids]),'|',('item_category_id.category_id.user_id','=',False),('item_category_id.category_id.user_id','in',[user.id])] </field>
+        <field name="name">Indent Issue Request record</field>
+        <field name="groups" eval="[(4, ref('indent_stpi.group_indent_approver'))]"/>
+    </record>
+    
+    <record id="ir_rule_Indent_item_request_global_security" model="ir.rule">
+        <field name="model_id" ref="model_indent_request_items"/>
+        <field name="domain_force">['|','|',('item_sub_category_id.user_id','in',[user.id]),('item_sub_category_id.user_id','=',False),('request_id.employee_id.user_id', '=', user.id)] </field>
+        <field name="name">Indent Issue Request record</field>
+        <field name="groups" eval="[(4, ref('indent_stpi.group_indent_approver'))]"/>
+        
+    </record>
+    
+    <record id="ir_rule_Indent_request_global_security_cauth" model="ir.rule">
+        <field name="model_id" ref="model_indent_request_items"/>
+        <field name="domain_force">['|',('request_id.employee_id.user_id', '=', user.id),('item_sub_category_id.competent_authority','in',[user.id])] </field>
+        <field name="name">Indent Issue Request item record</field>
+        <field name="groups" eval="[(4, ref('indent_stpi.group_indent_2ndlvl_approver'))]"/>
+        
+    </record>
+    
+    <record id="ir_rule_Indent_item_request_security" model="ir.rule">
+        <field name="model_id" ref="model_issue_request"/>
+        <field name="domain_force">['|', ('employee_id.branch_id','=',False), ('employee_id.branch_id.id','in',[g.id for g in user.branch_ids])] </field>
+        <field name="name">Indent item Request record</field>
+        <field name="groups" eval="[(4, ref('indent_stpi.group_grn_manager'))]"/>
+    </record>
+    
+    <record id="ir_rule_Indent_item_request_security_global" model="ir.rule">
+        <field name="model_id" ref="model_indent_request_items"/>
+        <field name="domain_force">[(1,'=',1)] </field>
+        <field name="name">Indent item Request record</field>
+        <field name="groups" eval="[(4, ref('base.user_admin')),(4, ref('indent_stpi.group_grn_manager'))]"/>
+    </record>
+
+
+    <record id="ir_rule_Indent_stock_global_security" model="ir.rule">
+        <field name="model_id" ref="model_indent_stock"/>
+        <field name="domain_force">['|', ('branch_id','=',False), ('branch_id.id','in',[g.id for g in user.branch_ids])] </field>
+        <field name="name">Item Master</field>
+        <field name="global" eval="True"/>
+    </record>
+    
+    <record id="ir_rule_Indent_serial_global_security" model="ir.rule">
+        <field name="model_id" ref="model_indent_serialnumber"/>
+        <field name="domain_force">['|', ('branch_id','=',False), ('branch_id.id','in',[g.id for g in user.branch_ids])] </field>
+        <field name="name">Serial Master</field>
+        <field name="global" eval="True"/>
+    </record>
+
+
+
+    <record id="ir_rule_stock_log_book_global_security" model="ir.rule">
+        <field name="model_id" ref="model_stock_log_book"/>
+        <field name="domain_force">['|', ('employee_id.branch_id','=',False), ('employee_id.branch_id.id','in',[g.id for g in user.branch_ids])] </field>
+        <field name="name">Indent Request</field>
+        <field name="global" eval="True"/>
+    </record>
+
+
+    <record id="ir_rule_child_indent_stock_global_security" model="ir.rule">
+        <field name="model_id" ref="model_child_indent_stock"/>
+        <field name="domain_force">['|', ('child_indent_stock.branch_id','=',False), ('child_indent_stock.branch_id.id','in',[g.id for g in user.branch_ids])] </field>
+        <field name="name">Stock Item Global Rule</field>
+        <field name="global" eval="True"/>
+    </record>
+
+    <record id="ir_rule_stock_log_book_self_security" model="ir.rule">
+        <field name="model_id" ref="model_stock_log_book"/>
+        <field name="domain_force">['|', ('employee_id.user_id', '=', user.id), ('employee_id.parent_id.user_id', '=', user.id)]</field>
+        <field name="name">Indent Request Self or Subordinates only</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+
+    <record id="ir_rule_stock_log_book_allowed_self_security" model="ir.rule">
+        <field name="model_id" ref="model_stock_log_book"/>
+        <field name="domain_force">['|',  ('employee_id.branch_id','=','False'), ('employee_id.branch_id.id','in',[g.id for g in user.branch_ids])]</field>
+        <field name="name">Indent Branch Rule</field>
+        <field name="groups" eval="[(4, ref('indent_stpi.group_grn_manager'))]"/>
+    </record>
+
+
+
+
+<!--    <record id="ir_rule_Indent_ledger_self_security" model="ir.rule">-->
+<!--        <field name="model_id" ref="model_issue_request"/>-->
+<!--        <field name="domain_force">['|', ('employee_id.user_id', '=', user.id), ('employee_id.parent_id.user_id', '=', user.id)]</field>-->
+<!--        <field name="name">Indent_ledger Request Self or Subordinates only</field>-->
+<!--        <field name="groups" eval="[(4, ref('base.group_user'))]"/>-->
+<!--    </record>-->
+
+
+<!--    <record id="ir_rule_Indent_ledger_allowed_self_security" model="ir.rule">-->
+<!--        <field name="model_id" ref="model_issue_request"/>-->
+<!--        <field name="domain_force">['|',  ('branch_id','=','False'), ('branch_id.id','in',[g.id for g in user.branch_ids])]</field>-->
+<!--        <field name="name">Indent_ledger Branch Rule</field>-->
+<!--        <field name="groups" eval="[(4, ref('indent_stpi.group_Indent_manager'))]"/>-->
+<!--    </record>-->
+
+		<record model="ir.module.category" id="indent_procurement_security_groups">
+            <field name="name">Indent Procurement Group</field>
+        </record>
+        
+        <record model="res.groups" id="indent_procur_tech_group">
+            <field name="name">Technical Group</field>
+            <field name="category_id" ref="indent_stpi.indent_procurement_security_groups"/>
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
+        </record>
+
+        <record model="res.groups" id="indent_procur_non_tech_group">
+            <field name="name">Non-Technical Group</field>
+            <field name="category_id" ref="indent_stpi.indent_procurement_security_groups"/>
+        </record>
+        
+        <record model="res.groups" id="indent_procur_admin_group">
+            <field name="name">Administrative</field>
+            <field name="category_id" ref="indent_stpi.indent_procurement_security_groups"/>
+        </record>
+
+
+</odoo>

@@ -1,0 +1,1078 @@
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="exit_transfer_management_list">
+            <field name="name">Exit Transfer Management list</field>
+            <field name="model">exit.transfer.management</field>
+            <field name="arch" type="xml">
+                <tree string ="Exit/Transfer Management">
+                  <field name="name"/>
+                  <field name="employee_id" required="1"/>
+                  <field name="job_id"/>
+                  <field name="department_id"/>
+                  <field name="branch_id"/>
+                  <field name="exit_type"/>
+                  <field name="state" required="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="seq_exit_management" model="ir.sequence">
+        <field name="name">Exit Management sequence</field>
+        <field name="code">exit.transfer.management</field>
+        <field name="padding">3</field>
+        <field name="company_id" eval="False"/>
+     </record>
+
+        <record model="ir.ui.view" id="exit_transfer_management_from">
+            <field name="name">Exit Transfer Management from</field>
+            <field name="model">exit.transfer.management</field>
+            <field name="arch" type="xml">
+                <form string="Exit/Transfer Management">
+                  <header>
+                      <button name="button_verify" string="Send for Verify" class="oe_highlight" type="object" 
+                                states="draft" groups="exit_transfer_management.group_exit_admin_department"/>
+                      <button name="button_ignore_all" string="Ignore All" class="oe_highlight" type="object" 
+                                states="verify" groups="exit_transfer_management.group_exit_admin_department"/>
+                        <button name="finance_approve"  attrs="{'invisible': ['|','|',('state', '!=', 'send_for_approval'),('dues_finance', '=', False),('finance_approved', '=', True)]}" string="Finance Approve" class="oe_highlight" type="object" 
+                                 groups="exit_transfer_management.group_exit_finance_department"/>
+                        <button name="general_approve" attrs="{'invisible': ['|','|',('state', '!=', 'send_for_approval'),('dues_general', '=', False),('general_approved', '=', True)]}" string="General Approve" class="oe_highlight" type="object" 
+                                 groups="exit_transfer_management.group_exit_general_department"/>
+                        <button name="personal_approve" attrs="{'invisible': ['|','|',('state', '!=', 'send_for_approval'),('dues_personal', '=', False),('personal_approved', '=', True)]}" string="Personal Approve" class="oe_highlight" type="object" 
+                                 groups="exit_transfer_management.group_exit_personal_department"/>
+                        <button name="technical_approve" attrs="{'invisible': ['|','|',('state', '!=', 'send_for_approval'),('dues_technical', '=', False),('technical_approved', '=', True)]}" string="Technical Approve" class="oe_highlight" type="object" 
+                                 groups="exit_transfer_management.group_exit_technical_department"/>
+                        <button name="ro_approve" attrs="{'invisible': ['|','|','|',('check_ro', '=', False),('state', '!=', 'send_for_approval'),('dues_ro', '=', False),('ro_approved', '=', True)]}" string="RO Approve" class="oe_highlight" type="object" 
+                                 />
+                      <button name="button_send_for_approval" string="Send for Approval" class="oe_highlight" type="object" 
+                                states="verify" groups="exit_transfer_management.group_exit_admin_department,exit_transfer_management.group_exit_user"
+                                confirm="Are you sure you want to send for approval?"/>
+                       <button name="button_confirm" string="Completed" class="oe_highlight" type="object" 
+                                attrs="{'invisible':['|','|','|','|','|',('finance_approved','=',False),('general_approved','=',False),('personal_approved','=',False),('technical_approved','=',False),('ro_approved','=',False),('state','!=','send_for_approval')]}" groups="exit_transfer_management.group_exit_admin_department"/>
+                       <button name="get_current_status" string="Get Current Status" class="oe_highlight" type="object" states="verify"
+                                groups="exit_transfer_management.group_exit_admin_department,exit_transfer_management.group_exit_user"/>
+                      <button name="button_cancel" string="Cancel" type="object" states="complete"/>
+                      <button name="button_redraft" string="Redraft" class="oe_highlight" type="object" states="cancel"/>
+                      <field name="state" widget="statusbar" statusbar_visible="draft,verify,send_for_approval,complete"/>
+                  </header>
+                  <sheet>
+                    <div class="oe-tittle">
+                         <h1>
+                             <field name="name" readonly="1" class="oe_inline"/>
+                         </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name ="employee_id" attrs="{'readonly': [('state', '!=', 'draft')]}" required="1" options="{'no_create': True,'no_open': True}"/>
+                            <field name ="employee_no"/>
+                            <field name ="job_id" options="{'no_create': True,'no_open': True}"/>
+                            <field name ="department_id" options="{'no_create': True,'no_open': True}"/>
+                            <field name ="branch_id" options="{'no_create': True,'no_open': True}"/>
+                            <field name="ignore_all" readonly="1" force_save="1"/>
+                        </group>
+                        <group>
+                            <field name="date" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="exit_reason" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="exit_type" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="reg_type" attrs="{'invisible': [('exit_type', '!=', 'technical resignation')],
+                                                    'readonly': [('state', '!=', 'draft')],
+                                                    'required': [('exit_type', '=', 'technical resignation')]}"/>
+                            <field name="transferred_req" attrs="{'invisible': [('exit_type', '!=', 'Suspended')],
+                                                    'readonly': [('state', '!=', 'draft')],
+                                                    'required': [('exit_type', '=', 'Suspended')]}"/>
+                            <field name="to_branch_id" options="{'no_create': True,'no_open': True}" attrs="{'invisible': [('exit_type', '!=', 'Transferred'),('transferred_req', '!=', 'yes')],
+                                                    'readonly': [('state', '!=', 'draft')],
+                                                    'required': ['|',('exit_type', '=', 'Transferred'),('transferred_req', '=', 'yes')]}"/>
+                            <field name="transfer_allowance" attrs="{'invisible': [('exit_type', '!=', 'Transferred')],
+                                                    'readonly': [('state', '!=', 'draft')],
+                                                    'required': [('exit_type', '=', 'Transferred')]}"/>
+                            <!-- <field name="roster_line_item" options="{'no_create': True,'no_open': True}" attrs="{'invisible': [('exit_type', '!=', 'Transferred')],
+                                                    'readonly': ['|', ('check_admin','!=', True), 
+                                                                            ('state', '=', 'complete')],
+                                                    'required': [('exit_type', '=', 'Transferred')]}" 
+                                                    domain="[('job_id', '=',job_id),('employee_id', '=', False),('branch_id','=',to_branch_id)]"/> -->
+                            
+                            <!-- <field name="exit_date" attrs="{'required':[('finance_approved','=',True),
+                                                    ('general_approved','=',True),('personal_approved','=',True)
+                                                    ,('ro_approved','=',True),('technical_approved','=',True),
+                                                    ('check_admin','=',True)],'invisible':[('state','not in',
+                                                    ['send_for_approval','complete'])],'readonly': [('check_admin','=',False)]}"/> -->
+                            <field name="exit_date" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="noc_visible" invisible="1"/>
+                        </group>
+                    </group>
+                        <notebook>
+                            <page name = "officer_remark" string="Departmental Approval" attrs="{'invisible':['|','|',('state','!=','send_for_approval'),('noc_visible','!=',True)]}">
+                                <br/>
+                                    <group>
+                                        <group string="Finance Department"  groups="exit_transfer_management.group_exit_finance_department,exit_transfer_management.group_exit_admin_department">
+                                            <field name="employee_finance" string='Employee Name' readonly="1" force_save="1" groups="exit_transfer_management.group_exit_admin_department" attrs="{'invisible': [('finance_approved','!=',True)]}"/>
+                                            <field name="dues_finance" string='No Dues' widget="radio" attrs="{'readonly':['|',('check_finance','=',False),('finance_approved','=',True)],'required':[('state','=','send_for_approval'),('check_finance','=',True),('noc_visible','=',True)]}"/>
+                                            <field name="remarks_finance" string="Remarks" attrs="{'readonly':['|',('check_finance','=',False),('finance_approved','=',True)],'required':[('state','=','send_for_approval'),('check_finance','=',True),('noc_visible','=',True)]}"/>
+                                            <field name="check_finance" invisible="1"/>
+                                        </group>
+                                        <group string="General Department" groups="exit_transfer_management.group_exit_general_department,exit_transfer_management.group_exit_admin_department">
+                                            <field name="employee_general" string='Employee Name' readonly="1" force_save="1" groups="exit_transfer_management.group_exit_admin_department" attrs="{'invisible': [('general_approved','!=',True)]}"/>
+                                            <field name="dues_general" string='No Dues' widget="radio" attrs="{'readonly':['|',('check_general','=',False),('general_approved','=',True)],'required':[('state','=','send_for_approval'),('check_general','=',True),('noc_visible','=',True)]}"/>
+                                            <field name="remarks_general" string="Remarks"  attrs="{'readonly':['|',('check_general','=',False),('general_approved','=',True)],'required':[('state','=','send_for_approval'),('check_general','=',True),('noc_visible','=',True)]}"/>
+                                            <field name="check_general" invisible="1"/>
+                                        </group>
+                                        <group string="Personal" groups="exit_transfer_management.group_exit_personal_department,exit_transfer_management.group_exit_admin_department">
+                                            <field name="employee_personal" string='No Dues' readonly="1" force_save="1" groups="exit_transfer_management.group_exit_admin_department" attrs="{'invisible': [('personal_approved','!=',True)]}"/>
+                                            <field name="dues_personal" string='No Dues' widget="radio" attrs="{'readonly':['|',('check_personal','=',False),('personal_approved','=',True)],'required':[('state','=','send_for_approval'),('check_personal','=',True),('noc_visible','=',True)]}"/>
+                                            <field name="remarks_personal" string="Remarks" attrs="{'readonly':['|',('check_personal','=',False),('personal_approved','=',True)],'required':[('state','=','send_for_approval'),('check_personal','=',True),('noc_visible','=',True)]}"/>
+                                            <field name="check_personal" invisible="1"/>
+                                        </group>
+                                        <group string="Technical Department" groups="exit_transfer_management.group_exit_technical_department,exit_transfer_management.group_exit_admin_department">
+                                            <field name="employee_technical"  string='Employee Name' readonly="1" force_save="1" groups="exit_transfer_management.group_exit_admin_department" attrs="{'invisible': [('technical_approved','!=',True)]}"/>
+                                            <field name="dues_technical" widget="radio" attrs="{'readonly':['|',('check_technical','=',False),('technical_approved','=',True)],'required':[('state','=','send_for_approval'),('check_technical','=',True),('noc_visible','=',True)]}"/>
+                                            <field name="remarks_technical" string="Remarks" attrs="{'readonly':['|',('check_technical','=',False),('technical_approved','=',True)],'required':[('state','=','send_for_approval'),('check_technical','=',True),('noc_visible','=',True)]}"/>
+                                            <field name="check_technical" invisible="1"/>
+                                        </group>
+                                        <group string="Reporting Officer" attrs="{'invisible': [('check_ro','=',False),('check_admin','=',False)] }">
+                                            <field name="employee_ro" string='Employee Name' readonly="1" force_save="1" groups="exit_transfer_management.group_exit_admin_department" attrs="{'invisible': [('ro_approved','!=',True)]}"/>
+                                            <field name="dues_ro" string='No Dues' widget="radio" attrs="{'readonly':['|',('check_ro','=',False),('ro_approved','=',True)],'required':[('state','=','send_for_approval'),('check_ro','=',True),('noc_visible','=',True)]}"/>
+                                            <field name="remarks_ro" string="Remarks" attrs="{'readonly':['|',('check_ro','=',False),('ro_approved','=',True)],'required':[('state','=','send_for_approval'),('check_ro','=',True),('noc_visible','=',True)]}"/>
+                                            <field name="check_admin" invisible="1"/>
+                                            <field name="check_ro" invisible="1"/>
+                                            <field name="finance_approved" string='Finance Approved' invisible="1"/>
+                                            <field name="general_approved" invisible="1"/>
+                                            <field name="personal_approved" invisible="1"/>
+                                            <field name="ro_approved" string='Finance Approved' invisible="1"/>
+                                            <field name="technical_approved" string='Finance Approved' invisible="1"/>
+                                            <field name="edit_user" invisible="1"/>
+                                        </group>
+                                    </group>
+                                <br/>
+                            </page>
+
+                            <page name = "remarks" string="Remarks" states="complete" readonly="1">
+                                <br/>
+                                    <group>
+                                        <group string="Finance Department" >
+                                            <field name="employee_remark_finance" string='Employee Name' readonly="1"/>
+                                            <field name="dues_remark_finance" string='No Dues' widget="radio"/>
+                                            <field name="remarks_remark_finance" string="Remarks"/>
+                                        </group>
+                                        <group string="General Department">
+                                            <field name="employee_remark_general" string='Employee Name' readonly="1"/>
+                                            <field name="dues_remark_general" string='No Dues' widget="radio"/>
+                                            <field name="remarks_remark_general" string="Remarks"/>
+                                        </group>
+                                        <group string="Personal">
+                                            <field name="employee_remark_personal" string='Employee Name' readonly="1"/>
+                                            <field name="dues_remark_personal" string='No Dues' widget="radio"/>
+                                            <field name="remarks_remark_personal" string="Remarks"/>
+                                        </group>
+                                        <group string="Technical Department">
+                                            <field name="employee_remark_technical" string='Employee Name' readonly="1"/>
+                                            <field name="dues_remark_technical" string='No Dues' widget="radio"/>
+                                            <field name="remarks_remark_technical" string="Remarks"/>
+                                        </group>
+                                        <group string="Reporting Officer">
+                                            <field name="employee_remark_ro" string='Employee Name' readonly="1"/>
+                                            <field name="dues_remark_ro" string='No Dues' widget="radio"/>
+                                            <field name="remarks_remark_ro" string="Remarks"/>
+                                        </group>
+                                    </group>
+                                <br/>
+                            </page>
+<!--                            <page name = "remark" string="Remarks" states="complete">-->
+<!--                                <br/>-->
+<!--                                    <group>-->
+<!--                                        <group string="Remarks - Finance">-->
+<!--                                            <field name="dues_finance" readonly="1"/>-->
+<!--                                            <field name="remarks_finance" readonly="1"/>-->
+<!--                                        </group>-->
+<!--                                        <group string="Remarks - General">-->
+<!--                                            <field name="dues_general" readonly="1"/>-->
+<!--                                            <field name="remarks_general" readonly="1"/>-->
+<!--                                        </group>-->
+<!--                                        <group string="Remarks - Personal">-->
+<!--                                            <field name="dues_personal" readonly="1"/>-->
+<!--                                            <field name="remarks_personal" readonly="1"/>-->
+<!--                                        </group>-->
+<!--                                        <group string="Remarks - Technical">-->
+<!--                                            <field name="dues_technical" readonly="1"/>-->
+<!--                                            <field name="remarks_technical" readonly="1"/>-->
+<!--                                        </group>-->
+<!--                                        <group string="Remarks - Reporting Officer">-->
+<!--                                            <field name="dues_ro" readonly="1"/>-->
+<!--                                            <field name="remarks_ro" readonly="1"/>-->
+<!--                                        </group>-->
+<!--                                    </group>-->
+<!--                                <br/>-->
+<!--                            </page>-->
+                            <page string="Leaves" attrs="{'invisible': [('edit_user','=',False)]}">
+                                <br/>
+                                    <div><h2>Pending for Approval Leaves</h2></div>
+                                <br/>
+                                <field name="pending_leave_line_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="leave_type_id" string="Leave Type"/>
+                                        <field name="employee_id"/>
+                                        <field name="from_date"/>
+                                        <field name="to_date"/>
+                                        <field name="state"/>
+                                        <!-- <button name="leave_approved" type="object" string='Approved' confirm="Are you sure you want to Approve?" icon="fa-check-circle"/> -->
+                                        <!-- <button name="leave_rejected" type="object" string='Rejected' confirm="Are you sure you want to Reject?" icon="fa-times-circle"/> -->
+                                    </tree>
+                                </field>
+                                <br/>
+                                    <div><h2>Submitted Leaves</h2></div>
+                                <br/>
+                                <field name="leave_line_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="leave_type_id" string="Leave Type"/>
+                                        <field name="from_date"/>
+                                        <field name="to_date"/>
+                                        <field name="state"/>
+                                        <!-- <button name="leave_cancel" type="object" confirm="Are you sure you want to Cancel?" string='Cancelled' icon="fa-window-close"/> -->
+                                    </tree>
+                                </field>
+                                <!-- <br/>
+                                    <div><h2>Upcoming Leaves</h2></div>
+                                <br/>
+                                <field name="upcoming_leave_line_ids" string="Upcoming Lines" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="leave_type_id" string="Leave Type"/>
+                                        <field name="from_date"/>
+                                        <field name="to_date"/>
+                                    </tree>
+                                </field> -->
+                                <group string="Remarks" groups="exit_transfer_management.general_exit_transfer">
+                                    <group>
+                                        <field name="leave_no_dues" string="No Dues" attrs="{'readonly': [('state', '!=', 'verify')]}"/>
+                                    </group>
+                                    <group>
+                                        <field name="leave_remark" string="Remark" attrs="{'readonly': [('state', '!=', 'verify')]}"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Travels and Tour" attrs="{'invisible': [('edit_user','=',False)]}">
+                                <br/>
+                                    <div><h2>Pending Tour Request</h2></div>
+                                <br/>
+                                <field name="pending_tour_req_ids" string="Upcoming Lines" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="tour_request_id"/>
+                                        <field name="employee_id"/>
+                                        <field name="request_date"/>
+                                        <field name="purpose"/>
+                                        <field name="state"/>
+                                        <!-- <button name="tour_approved" type="object" string='Approved' icon="fa-check-circle" confirm="Are you sure, you want to approve?"/> -->
+                                        <!-- <button name="tour_rejected" type="object" string='Rejected' icon="fa-times-circle" confirm="Are you sure, you want to reject?"/> -->
+                                    </tree>
+                                </field>
+                                <br/>
+                                    <div><h2>Submitted Tour Request</h2></div>
+                                <br/>
+                                <field name="submitted_tour_req_ids" string="Upcoming Lines" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="tour_request_id"/>
+                                        <field name="request_date"/>
+                                        <field name="purpose"/>
+                                        <field name="state"/>
+                                        <!-- <button name="tour_cancel" type="object" string='Cancelled' icon="fa-window-close" confirm="Are you sure, you want to cancel?"/> -->
+                                    </tree>
+                                </field>
+
+                                <br/>
+                                    <div><h2>Pending Tour Claim Request</h2></div>
+                                <br/>
+                                <field name="pending_tour_claim_req_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                         <field name="tour_claim_id"/>
+                                        <field name="employee_id"/>
+                                        <field name="total_claimed_amount"/>
+                                        <field name="balance_left"/>
+                                        <field name="state"/>
+                                        <!-- <button name="tourclaim_approved" type="object" string='Approved' icon="fa-check-circle" confirm="Are you sure, you want to approve?"/> -->
+                                        <!-- <button name="tourclaim_rejected" type="object" string='Rejected' icon="fa-times-circle" confirm="Are you sure, you want to reject?"/> -->
+                                    </tree>
+                                </field>
+
+                                <br/>
+                                    <div><h2>Submitted Tour Claim Request</h2></div>
+                                <br/>
+                                <field name="submitted_tour_claim_req_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                         <field name="tour_claim_id"/>
+                                        <field name="employee_id"/>
+                                        <field name="total_claimed_amount"/>
+                                        <field name="balance_left"/>
+                                        <field name="state"/>
+                                        <!-- <button name="tourclaim_cancel" type="object" string='Cancelled' icon="fa-window-close" confirm="Are you sure, you want to cancel?"/> -->
+
+                                    </tree>
+                                </field>
+
+                            </page>
+                            <page string="LTC Request and Claim Request" attrs="{'invisible': [('edit_user','=',False)]}">
+                                <br/>
+                                    <div><h2>Pending for Approval LTC Request</h2></div>
+                                <br/>
+                                <field name="pending_ltc_sequence_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="ltc_sequence_id"/>
+                                        <field name="employee_id"/>
+                                        <field name="place_of_trvel"/>
+                                        <field name="block_year_id"/>
+                                        <field name="state"/>
+                                        <!-- <button name="ltc_approved" type="object" string='Approved' icon="fa-check-circle" confirm="Are you sure, you want to approve?"/> -->
+                                        <!-- <button name="ltc_rejected" type="object" string='Rejected' icon="fa-times-circle" confirm="Are you sure, you want to reject?"/> -->
+                                    </tree>
+                                </field>
+                                <br/>
+                                    <div><h2>Submitted LTC Request</h2></div>
+                                <br/>
+                                <field name="submitted_ltc_sequence_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="ltc_sequence_id"/>
+                                        <field name="employee_id"/>
+                                        <field name="place_of_trvel"/>
+                                        <field name="block_year_id"/>
+                                        <field name="state"/>
+                                        <!-- <button name="ltc_cancel" type="object" string='Cancelled' icon="fa-window-close" confirm="Are you sure, you want to cancel?"/> -->
+                                    </tree>
+                                </field>
+
+                                <br/>
+                                    <div><h2>Pending LTC Claim Request</h2></div>
+                                <br/>
+                                <field name="pending_ltc_claim_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="ltc_availed_for_id"/>
+                                        <field name="employee_id"/>
+                                        <field name="place_of_trvel"/>
+                                        <field name="total_claimed_amount"/>
+                                        <field name="balance_left"/>
+                                        <field name="ltc_availed_for_m2o"/>
+                                        <field name="state"/>
+                                        <!-- <button name="claim_approved" type="object" string='Approved' icon="fa-check-circle" confirm="Are you sure, you want to approve?"/> -->
+                                        <!-- <button name="claim_rejected" type="object" string='Rejected' icon="fa-times-circle" confirm="Are you sure, you want to reject?"/> -->
+                                    </tree>
+                                </field>
+                                <br/>
+                                    <div><h2>Submitted LTC Claim Request</h2></div>
+                                <br/>
+                                <field name="submitted_ltc_claim_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="ltc_availed_for_id"/>
+                                        <field name="employee_id"/>
+                                        <field name="place_of_trvel"/>
+                                        <field name="total_claimed_amount"/>
+                                        <field name="balance_left"/>
+                                        <field name="ltc_availed_for_m2o"/>
+                                        <field name="state"/>
+                                        <!-- <button name="claim_cancel" type="object" string='Cancelled' icon="fa-window-close" confirm="Are you sure, you want to cancel?"/> -->
+                                    </tree>
+                                </field>
+                            </page>
+                            <!-- <page string="Vehcile Request" attrs="{'invisible': [('edit_user','=',False)]}">
+                                <br/>
+                                    <div><h2>Pending Vehicle Request</h2></div>
+                                <br/>
+                                <field name="pending_vehicle_req_ids" string="Pending Vehicle Request" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="vehicle_id"/>
+                                        <field name="employee_id"/>
+                                        <field name="from_location"/>
+                                        <field name="to_location"/>
+                                        <field name="state"/>
+                                        <button name="vehicle_approved" type="object" string='Approved' icon="fa-check-circle"/>
+                                        <button name="vehicle_rejected" type="object" string='Rejected' icon="fa-times-circle"/>
+                                    </tree>
+                                </field>
+
+                                <br/>
+                                    <div><h2>Sumbitted Vehicle Request</h2></div>
+                                <br/>
+                                <field name="submitted_vehicle_req_ids" string="Submitted Vehicle Request" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="vehicle_id"/>
+                                        <field name="employee_id"/>
+                                        <field name="from_location"/>
+                                        <field name="to_location"/>
+                                        <field name="state"/>
+                                        <button name="vehicle_cancel" type="object" string='Cancelled' icon="fa-window-close"/>
+                                    </tree>
+                                </field>
+
+                                <br/>
+                                    <div><h2>Upcoming Vehicle Request</h2></div>
+                                <br/>
+                                <field name="upcoming_vehicle_req_ids" string="Upcoming Vehicle Request" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="vehicle_id"/>
+                                        <field name="employee_id"/>
+                                        <field name="from_location"/>
+                                        <field name="to_location"/>
+                                        <field name="state"/>
+                                    </tree>
+                                </field>
+                            </page> -->
+                            <page string="Reimbursement" attrs="{'invisible': [('edit_user','=',False)]}">
+                               <br/>
+                                    <div><h2>Pending Reimbursement Request</h2></div>
+                                <br/>
+                                <field name="pending_reimbursement_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <!-- <field name="name"/> -->
+                                        <field name="reimbursement_type_id"/>
+                                        <field name="claim_sub"/>
+                                        <field name="claimed_amount"/>
+                                        <field name="net_amount"/>
+                                        <field name="state"/>
+                                        <!-- <button name="button_approved" type="object" confirm="Are you sure you want to Approve?" string='Approved' icon="fa-check-circle"/> -->
+                                        <!-- <button name="button_reject" type="object" confirm="Are you sure you want to Reject?" string='Rejected' icon="fa-times-circle"/> -->
+                                    </tree>
+                                </field>
+
+                                <br/>
+                                    <div><h2>Submitted Reimbursement Request</h2></div>
+                                <br/>
+                                <field name="submitted_reimbursement_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <!-- <field name="name"/> -->
+                                        <field name="reimbursement_type_id"/>
+                                        <field name="claim_sub"/>
+                                        <field name="claimed_amount"/>
+                                        <field name="net_amount"/>
+                                        <field name="state"/>
+                                        <!-- <button name="button_reject" type="object" confirm="Are you sure you want to Reject?" string='Rejected' icon="fa-times-circle"/> -->
+                                    </tree>
+                                </field>
+
+                                <!-- <br/>
+                                    <div><h2>Upcoming Reimbursement Request</h2></div>
+                                <br/>
+                                <field name="upcoming_reimbursement_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="name"/>
+                                        <field name="reimbursement_type_id"/>
+                                        <field name="claim_sub"/>
+                                        <field name="claimed_amount"/>
+                                        <field name="net_amount"/>
+                                        <field name="state"/>
+                                    </tree>
+                                </field> -->
+                            </page>
+                            <page string="Loan" attrs="{'invisible': [('edit_user','=',False)]}">
+
+                                <br/>
+                                    <div><h2>Pending Loan Request</h2></div>
+                                <br/>
+                                <field name="pending_loan_request_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="type_id"/>
+                                        <field name="installment"/>
+                                        <field name="total_amount"/>
+                                        <field name="total_interest"/>
+                                        <field name="total_paid_amount"/>
+                                        <field name="balance_amount"/>
+                                        <field name="state"/>
+                                        <!-- <button name="action_approve" type="object" confirm="Are you sure you want to Approve?" string='Approved' icon="fa-check-circle"/> -->
+                                        <!-- <button name="action_refuse" type="object" confirm="Are you sure you want to Refuse?" string='Rejected' icon="fa-times-circle"/> -->
+                                    </tree>
+                                </field>
+
+                                <br/>
+                                    <div><h2>Submitted Loan Request</h2></div>
+                                <br/>
+                                <field name="submitted_loan_request_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="type_id"/>
+                                        <field name="installment"/>
+                                        <field name="total_amount"/>
+                                        <field name="total_interest"/>
+                                        <field name="total_paid_amount"/>
+                                        <field name="balance_amount"/>
+                                        <field name="state"/>
+                                        <!-- <button name="action_cancel" confirm="Are you sure you want to Reject?" type="object" string='Rejected' icon="fa-times-circle"/> -->
+                                    </tree>
+                                </field>
+
+                                <br/>
+                                    <div><h2>Completed Loan Request</h2></div>
+                                <br/>
+                                <field name="upcoming_loan_request_ids" options='{"no_open": True}' attrs="{'invisible':[('exit_type','!=','Transferred')]}">
+                                    <tree editable="bottom" create="false">
+                                        <field name="loan_id" readonly="1"/>
+                                        <field name="no_of_emi_paid" readonly="1"/>
+                                        <field name="no_of_emi_pending" readonly="1"/>
+                                        <field name="continue_emi" required="1"/>
+                                        <field name="remarks" attrs="{'invisible':[('continue_emi','!=','no')],'required':[('continue_emi','=','no')]}"/>
+                                        <field name="document" attrs="{'invisible':[('continue_emi','!=','no')],'required':[('continue_emi','=','no')]}"/>
+                                        <!-- <button name="button_continue_emi" confirm="Are you sure you want to Close?" type="object" string='Loan Close' attrs="{'invisible':[('continue_emi','!=','no')],'required':[('continue_emi','=','no')]}"/> -->
+                                    </tree>
+                                </field>
+                                <field name="not_transferrred_loan_request_ids" options='{"no_open": True}' attrs="{'invisible':[('exit_type','=','Transferred')]}">
+                                    <tree editable="bottom" create="false">
+                                        <field name="loan_id" readonly="1"/>
+                                        <field name="no_of_emi_paid" readonly="1"/>
+                                        <field name="no_of_emi_pending" readonly="1"/>
+                                        <field name="remarks" required="1"/>
+                                        <field name="document" required="1"/>
+                                        <!-- <button name="button_continue_emi" confirm="Are you sure you want to Close?" type="object" string='Loan Close'/> -->
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="PF Withdrawal" attrs="{'invisible': [('edit_user','=',False)]}">
+                                <br/>
+                                    <div><h2>Pending PF Request</h2></div>
+                                <br/>
+                                <field name="pending_pf_req_ids" string="Pending Vehicle Request" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <!-- <field name="pf_id"/> -->
+                                        <field name="employee_id"/>
+                                        <field name="advance_amount"/>
+                                        <field name="purpose"/>
+                                        <field name="state"/>
+                                        <!-- <button name="pf_approved" type="object" string='Approved' confirm="Are you sure you want to Approve?" icon="fa-check-circle"/> -->
+                                        <!-- <button name="pf_rejected" type="object" string='Rejected' confirm="Are you sure you want to Reject?" icon="fa-times-circle"/> -->
+                                    </tree>
+                                </field>
+
+                                 <br/>
+                                    <div><h2>Sumbitted PF Request</h2></div>
+                                <br/>
+                                <field name="submitted_pf_req_ids" string="Submitted Vehicle Request" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <!-- <field name="pf_id"/> -->
+                                        <field name="employee_id"/>
+                                        <field name="advance_amount"/>
+                                        <field name="purpose"/>
+                                        <field name="state"/>
+                                        <!-- <button name="pf_cancel" type="object" string='Rejected' confirm="Are you sure you want to Reject?" icon="fa-times-circle"/> -->
+                                    </tree>
+                                </field>
+
+                                <br/>
+                                    <div><h2>Upcoming PF Request</h2></div>
+                                <br/>
+                                <field name="upcoming_pf_req_ids" string="Upcoming Vehicle Request" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <!-- <field name="pf_id"/> -->
+                                        <field name="employee_id"/>
+                                        <field name="advance_amount"/>
+                                        <field name="purpose"/>
+                                        <field name="state"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Appraisal Request" attrs="{'invisible': [('edit_user','=',False)]}">
+                                <br/>
+                                    <div><h2>Pending Appraisal Request</h2></div>
+                                <br/>
+                                <field name="pending_appraisal_request_ids" string="Upcoming Vehicle Request" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="employee_id"/>
+                                        <field name="abap_id"/>
+                                        <field name="template_id"/>
+                                        <field name="state"/>
+                                        <!-- <button name="button_reporting_authority_review" type="object" string="Reporting Authority Review" icon="fa-check-circle" confirm="Are you sure, you want to approve?" attrs="{'invisible': [('state', '!=', 'self_review')]}"/> -->
+                                        <!-- <button name="button_reviewing_authority_reviewed" type="object" string='Reviewing Authority Review' icon="fa-check-circle" confirm="Are you sure, you want to approve?" attrs="{'invisible': [('state', '!=', 'reporting_authority_review')]}"/> -->
+                                        <!-- <button name="button_completed" type="object" string='Publish' icon="fa-check-circle" confirm="Are you sure, you want to publish?" attrs="{'invisible': [('state', '!=', 'reviewing_authority_review')]}"/> -->
+                                        <!-- <button name="button_reject" type="object" string='Rejected' icon="fa-times-circle" confirm="Are you sure, you want to reject?"/> -->
+                                    </tree>
+                                </field>
+
+                                <br/>
+                                    <div><h2>Submitted Appraisal Request</h2></div>
+                                <br/>
+                                <field name="submitted_appraisal_request_ids" string="Upcoming Vehicle Request" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="employee_id"/>
+                                        <field name="abap_id"/>
+                                        <field name="template_id"/>
+                                        <field name="state"/>
+                                        <!-- <button name="button_cancel" type="object" string='Rejected' icon="fa-times-circle" confirm="Are you sure, you want to cancel?"/> -->
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Income Tax" attrs="{'invisible': [('edit_user','=',False)]}">
+                                <br/>
+                                    <div><h2>Pending Income Tax Request</h2></div>
+                                <br/>
+                                <field name="pending_income_tax_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="running_fy_id"/>
+                                        <field name="date_range_id"/>
+                                        <field name="total_gross"/>
+                                        <field name="taxable_income"/>
+                                        <field name="tax_payable"/>
+                                        <field name="tax_paid"/>
+                                        <field name="total_rem"/>
+                                        <field name="state"/>
+                                        <!-- <button name="tax_approved" type="object" string='Approved' confirm="Are you sure you want to Approve?" icon="fa-check-circle"/> -->
+                                        <!-- <button name="tax_rejected" type="object" string='Rejected' confirm="Are you sure you want to Reject?" icon="fa-times-circle"/> -->
+                                    </tree>
+                                </field>
+
+                                <br/>
+                                    <div><h2>Submitted Income Tax Request</h2></div>
+                                <br/>
+                                <field name="submitted_income_tax_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="running_fy_id"/>
+                                        <field name="date_range_id"/>
+                                        <field name="total_gross"/>
+                                        <field name="taxable_income"/>
+                                        <field name="tax_payable"/>
+                                        <field name="tax_paid"/>
+                                        <field name="total_rem"/>
+                                        <field name="state"/>
+                                        <!-- <button name="tax_rejected" type="object" string='Rejected' confirm="Are you sure you want to Reject?" icon="fa-times-circle"/> -->
+                                    </tree>
+                                </field>
+                                <!-- <br/>
+                                    <div><h2>Upcoming Income Tax Request</h2></div>
+                                <br/>
+                                <field name="upcoming_income_tax_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="running_fy_id"/>
+                                        <field name="date_range_id"/>
+                                        <field name="total_gross"/>
+                                        <field name="taxable_income"/>
+                                        <field name="tax_payable"/>
+                                        <field name="tax_paid"/>
+                                        <field name="total_rem"/>
+                                        <field name="state"/>
+                                    </tree>
+                                </field> -->
+                            </page>
+                            <page string="eFile" attrs="{'invisible': [('edit_user','=',False)]}">
+                                <!-- <group>
+                                    <group>
+                                        <field name="forward_to_user"/>
+                                    </group>
+                                    <group>
+                                        <button type="object" name="button_forward_all"  string="Forward All" colspan="2"/>
+                                    </group>
+                                </group> -->
+                                <br/>
+                                    <div><h2>Correspondence</h2></div>
+                                <br/>
+                                <field name="my_correspondence_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="correspondence_id"/>
+                                        <field name="letter_no"/>
+                                        <field name="file_assign_id"/>
+                                        <!-- <button name = "correspondence_forward" string="Forward" type="object"/> -->
+                                    </tree>
+                                </field>
+
+                                 <br/>
+                                    <div><h2>File</h2></div>
+                                <br/>
+                                <field name="my_file_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="file_id"/>
+                                        <field name="file_name"/>
+                                        <field name="number"/>
+                                        <field name="state"/>
+                                        <!-- <button name = "file_forward" string="Forward" type="object"/> -->
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Indent" attrs="{'invisible': [('edit_user','=',False)]}">
+                                <br/>
+                                    <div><h2>Pending GRN </h2></div>
+                                <br/>
+                                <field name="pending_grn_ids" string="Pending Indent Request" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="number"/>
+                                        <field name="employee_id"/>
+                                        <field name="indent_type"/>
+                                        <field name="state"/>
+                                        <!-- <button name="button_approved" type="object" string='Approved' 
+                                                confirm="Are you sure you want to Approve this GRN?"
+                                                icon="fa-check-circle"/>
+                                        <button name="button_reject" type="object" string='Rejected' 
+                                                confirm="Are you sure you want to Reject this GRN?"
+                                                icon="fa-times-circle"/> -->
+                                    </tree>
+                                </field>
+
+                                <br/>
+                                    <div><h2>Submitted GRN</h2></div>
+                                <br/>
+                                <field name="submitted_grn_ids" string="Submitted Indent Request" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="number"/>
+                                        <field name="employee_id"/>
+                                        <field name="indent_type"/>
+                                        <field name="state"/>
+                                        <!-- <button name="button_reject" type="object" string='Rejected' 
+                                                confirm="Are you sure you want to Reject this GRN?"
+                                                icon="fa-times-circle"
+                                                states="cancel"
+                                                /> -->
+                                    </tree>
+                                </field>
+
+                                <!-- <br/>
+                                    <div><h2>Upcoming GRN</h2></div>
+                                <br/>
+                                <field name="upcoming_grn_ids" string="Upcoming Indent Request" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="number"/>
+                                        <field name="employee_id"/>
+                                        <field name="indent_type"/>
+                                        <field name="state"/>
+                                    </tree>
+                                </field> -->
+                                <br/>
+                                    <div><h2>Pending GRN Request</h2></div>
+                                <br/>
+                                <field name="pending_grn_req_ids" string="Pending GRN Request" >
+                                    <tree editable="bottom" create="false">
+                                        <field name="indent_grn" readonly="1"/>
+                                        <field name="item_category_id" readonly="1"/>
+                                        <field name="item_id" readonly="1"/>
+                                        <field name="serial_number" 
+                                                domain="[('grn', '!=', True),
+                                                     ('issue', '!=', True), 
+                                                     ('branch_id', '=', parent.branch_id),
+                                                      ('item_category_id', '=', item_category_id), 
+                                                      ('item_id', '=', item_id), ('state', '=', 'approved')]" 
+                                                />
+                                        <field name="requested_quantity" readonly="1"/>
+                                        <field name="approved_quantity"/>
+                                        <!-- <button name="button_approved" type="object" string='Approved'
+                                                confirm="Are you sure you want to Approve this GRN Request?"
+                                                icon="fa-check-circle"/>
+                                        <button name="button_reject" type="object" string='Rejected'
+                                                confirm="Are you sure you want to Reject this GRN Request?"
+                                                icon="fa-times-circle"/> -->
+                                    </tree>
+                                </field>
+
+                                <br/>
+                                    <div><h2>Submitted GRN Request</h2></div>
+                                <br/>
+                                <field name="submitted_grn_req_ids" string="Pending GRN Request" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="indent_grn"/>
+                                        <field name="item_category_id"/>
+                                        <field name="item_id"/>
+                                        <field name="serial_number" />
+                                        <field name="requested_quantity"/>
+                                        <field name="approved_quantity"/>
+                                        <!-- <button name="button_reject" type="object" string='Rejected' icon="fa-times-circle"/> -->
+                                    </tree>
+                                </field>
+
+                                 <!-- <br/>
+                                    <div><h2>Upcoming GRN Request</h2></div>
+                                <br/>
+                                <field name="upcoming_grn_req_ids" string="Pending GRN Request" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="indent_grn"/>
+                                        <field name="item_category_id"/>
+                                        <field name="item_id"/>
+                                        <field name="requested_quantity"/>
+                                        <field name="approved_quantity"/>
+                                    </tree>
+                                </field> -->
+                                
+                                <!-- <br/>
+                                    <div><h2>Pending Indent Request</h2></div>
+                                <br/>
+                                <field name="pending_indent_req_ids" string="Pending Indent Request" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="number"/>
+                                        <field name="employee_id"/>
+                                        <field name="indent_type"/>
+                                        <field name="state"/>
+                                        <button name="button_approved" type="object" string='Approved' 
+                                                confirm="Are you sure you want to Approve this Indent Request?"
+                                                icon="fa-check-circle"/>
+                                        <button name="button_reject" type="object" string='Rejected' 
+                                                confirm="Are you sure you want to Reject this Indent Request?"
+                                                icon="fa-times-circle"/>
+                                    </tree>
+                                </field> -->
+                                
+                                  <br/>
+                                    <div><h2>Pending Indent Request</h2></div>
+                                <br/>
+                                <field name="pending_issue_req_ids"  options='{"no_open": True}'>
+                                    <tree editable="bottom" create="false">
+                                        <field name="indent_grn" readonly="1"/>
+                                        <field name="item_category_id" readonly="1"/>
+                                        <field name="item_id" readonly="1"/>
+                                        <field name="serial_number" domain="[('grn', '=', True),
+                                                     ('issue', '!=', True), 
+                                                     ('branch_id', '=', parent.branch_id),
+                                                      ('item_category_id', '=', item_category_id), 
+                                                      ('item_id', '=', item_id), ('state', '=', 'approved')]"/>
+                                        <field name="requested_quantity" readonly="1"/>
+                                        <field name="approved_quantity"/>
+                                        <!-- <button name="button_approved" type="object" string='Approved' 
+                                                confirm="Are you sure you want to Approve this Issues Request?"
+                                                icon="fa-check-circle"/>
+                                        <button name="button_reject" type="object" string='Rejected' 
+                                                confirm="Are you sure you want to Reject this Issues Request?"
+                                                icon="fa-times-circle"/> -->
+                                    </tree>
+                                </field>
+
+                                <br/>
+                                    <div><h2>Submitted Indent Request</h2></div>
+                                <br/>
+                                <field name="submitted_indent_req_ids"  string="Submitted Indent Request" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="number"/>
+                                        <field name="employee_id"/>
+                                        <field name="indent_type"/>
+                                        <field name="state"/>
+                                        <field name="indent_return" widget="radio" nolabel="1" options="{'horizontal': true}"/>
+
+                                    </tree>
+                                </field>
+
+                                <!-- <br/>
+                                    <div><h2>Upcoming Indent Request</h2></div>
+                                <br/>
+                                <field name="upcoming_indent_req_ids" string="Upcoming Indent Request" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="number"/>
+                                        <field name="employee_id"/>
+                                        <field name="indent_type"/>
+                                        <field name="state"/>
+                                    </tree>
+                                </field> -->
+
+                                
+
+                              
+
+                                <!-- <br/>
+                                    <div><h2>Submitted Issues Request</h2></div>
+                                <br/>
+                                <field name="submitted_issue_req_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="indent_grn"/>
+                                        <field name="item_category_id"/>
+                                        <field name="item_id"/>
+                                        <field name="requested_quantity"/>
+                                        <field name="approved_quantity"/>
+                                        <button name="button_reject" type="object" string='Rejected' 
+                                                confirm="Are you sure you want to reject this Issues Request?"
+                                                icon="fa-times-circle"/>
+                                    </tree>
+                                </field> -->
+
+                                <!-- <br/>
+                                    <div><h2>Upcoming Issues Request</h2></div>
+                                <br/>
+                                <field name="upcoming_issue_req_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="indent_grn"/>
+                                        <field name="item_category_id"/>
+                                        <field name="item_id"/>
+                                        <field name="requested_quantity"/>
+                                        <field name="approved_quantity"/>
+                                    </tree>
+                                </field> -->
+
+                                
+                            </page>
+
+                            <page string="Cheque Birthday" attrs="{'invisible': [('edit_user','=',False)]}">
+                                <br/>
+                                    <div><h2>Pending Cheque Birthday Request</h2></div>
+                                <br/>
+                                <field name="pending_check_birth_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="name"/>
+                                        <field name="birthday"/>
+                                        <field name="state"/>
+                                        <!-- <button name="button_approved" type="object" string='Approved' icon="fa-check-circle"/> -->
+                                        <!-- <button name="button_reject" type="object" string='Rejected' icon="fa-times-circle"/> -->
+                                    </tree>
+                                </field>
+
+                                <br/>
+                                    <div><h2>Submitted Cheque Birthday Request</h2></div>
+                                <br/>
+                                <field name="submitted_check_birth_ids" readonly="1" options='{"no_open": True}'>
+                                    <tree edittable="bottom">
+                                        <field name="name"/>
+                                        <field name="birthday"/>
+                                        <field name="state"/>
+                                        <!-- <button name="button_reject" type="object" string='Rejected' icon="fa-times-circle"/> -->
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                  </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+
+            </field>
+        </record>
+
+
+    <record model="ir.actions.act_window" id="exit_transfer_management_action_window">
+      <field name="name">Exit/Transfer Management</field>
+      <field name="res_model">exit.transfer.management</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+        <menuitem id = "exit_transfer_management_menu_1_list"
+                  name = "Exit Management"
+                  web_icon="exit_transfer_management,static/description/icon.png" sequence="50"
+                  />
+        <menuitem id = "exit_transfer_management_create_list"
+                  name = "Exit Management"
+                  action="exit_transfer_management_action_window"
+                  parent="exit_transfer_management_menu_1_list"
+                  />
+
+                <record model="ir.ui.view" id="exit_transfer_management_report_list">
+            <field name="name">Exit Transfer Management list</field>
+            <field name="model">exit.management.report</field>
+            <field name="arch" type="xml">
+                <tree string ="Exit/Transfer Management Report" create="false">
+                  <field name="exit_transfer_id" readonly="1"/>
+                  <field name="employee_id" readonly="1"/>
+                  <field name="exit_type" readonly="1"/>
+                  <field name="module" readonly="1"/>
+                  <field name="module_id" readonly="1"/>
+                  <field name="action_taken_by" readonly="1"/>
+                  <field name="action_taken_on" readonly="1"/>
+                </tree>
+            </field>
+        </record>
+
+    <record model="ir.actions.act_window" id="exit_transfer_management_report_action_window">
+      <field name="name">Exit/transfer Management Report</field>
+      <field name="res_model">exit.management.report</field>
+      <field name="view_mode">tree</field>
+    </record>
+
+     <!--============Initiate============-->
+    <record id="exit_initiate_action" model="ir.actions.act_window">
+        <field name="name">Initiate</field>
+        <field name="res_model">exit.transfer.management</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state','=','draft')]</field>
+    </record>
+
+    <menuitem id = "exit_transfer_management_initiate"
+                  name = "Initiate"
+                  action="exit_initiate_action"
+                  parent="exit_transfer_management_create_list"
+                  />
+    <!--============Verify============-->
+    <record id="exit_verify_action" model="ir.actions.act_window">
+        <field name="name">Verify</field>
+        <field name="res_model">exit.transfer.management</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'create':0}</field>
+        <field name="domain">[('state','=','verify')]</field>
+    </record>
+
+    <menuitem id = "exit_transfer_management_verify"
+                  name = "Verify"
+                  action="exit_verify_action"
+                  parent="exit_transfer_management_create_list"
+                  />
+    <!--============To Approve============-->
+    <record id="exit_to_approve_action" model="ir.actions.act_window">
+        <field name="name">To Approve</field>
+        <field name="res_model">exit.transfer.management</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+         <field name="context">{'create':0}</field>
+        <field name="domain">[('state','=','send_for_approval')]</field>
+    </record>
+
+    <menuitem id = "exit_transfer_management_to_approve"
+                  name = "To Approve"
+                  action="exit_to_approve_action"
+                  parent="exit_transfer_management_create_list"
+                  />
+    <!--============Complete============-->
+    <record id="exit_complete_action" model="ir.actions.act_window">
+        <field name="name">Complete</field>
+        <field name="res_model">exit.transfer.management</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'create':0}</field>
+        <field name="domain">[('state','=','complete')]</field>
+    </record>
+
+    <menuitem id = "exit_transfer_management_complete"
+                  name = "Complete"
+                  action="exit_complete_action"
+                  parent="exit_transfer_management_create_list"
+                  />
+
+    <!--============All============-->
+    <record id="exit_all_action" model="ir.actions.act_window">
+        <field name="name">All</field>
+        <field name="res_model">exit.transfer.management</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'create':0, 'delete':0}</field>
+    </record>
+
+    <menuitem id = "exit_transfer_management_all"
+                  name = "All"
+                  action="exit_all_action"
+                  parent="exit_transfer_management_create_list"
+                  />
+    
+
+        <menuitem id = "exit_transfer_management_report_menu_id"
+                  name = "Report"
+                  parent="exit_transfer_management_menu_1_list"
+                  action="exit_transfer_management_report_action_window"
+                  />
+<!--    <menuitem name="Exit/transfer Management" id="exit_transfer_management_menu_1_list" action="exit_transfer_management.action_window"/>-->
+
+    <record model="ir.ui.view" id="employee_form_inherited">
+            <field name="name">hr.employee.form</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='active_group']" position="after">
+                    <group name="exit_transferr" string="Exit Transfer">
+                        <field name="last_working_date"/>
+                        <field name="exit_type"/>
+                    </group>
+                </xpath>
+            </field>
+    </record>
+
+    <record model="ir.ui.view" id="employee_form_inherited_new">
+            <field name="name">hr.employee.form</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="employee_stages.hr_employee_stages_inherit_form_view"/>
+            <field name="arch" type="xml">
+                 <xpath expr="//page[@name='stage_history']" position="after">
+                    <field name="validate_exit" invisible='1'/>
+                    <page name="exit_history" string="Exit/Transfer History" attrs="{'invisible':[('validate_exit', '=', False)]}" groups="hr.group_hr_manager">
+                        <group  name="exit_history">
+                            <field name="exit_history" string="Exit/Transfer History">
+                                <tree string="Caption" create="false" delete="false" edit="false" >
+                                    <field name="exit_type" string="Type"/>
+                                    <field name="exit_date" string="Exit/Transfer Date"/> 
+                                </tree>
+                            </field>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+    </record>
+  </data>
+</odoo>

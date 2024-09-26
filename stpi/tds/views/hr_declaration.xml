@@ -1,0 +1,764 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    
+    <!--=======Tree view of HR Declaration=======-->
+    <record id="hr_declaration_tree_view" model="ir.ui.view">
+        <field name="name">hr.declaration.tree</field>
+        <field name="model">hr.declaration</field>
+        <field name="arch" type="xml">
+            <tree string="HR Declarations">
+                  <field name="employee_id"/>
+                  <field name="date_range"/>
+                  <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!--=======Form view of HR Declaration=======-->
+    <record id="hr_declaration_form_view" model="ir.ui.view">
+        <field name="name">hr.declaration.form</field>
+        <field name="model">hr.declaration</field>
+        <field name="arch" type="xml">
+            <form string="HR Declarations">
+                <header>
+                    <button name="button_to_approve" string="Send for Approval" class="oe_highlight" type="object" states="draft"/>
+                    <button name="button_forecast_gross" string="Forecast Gross" class="oe_highlight" type="object" states="draft" invisible="1"/>
+                    <button name="button_reset_to_draft" string="Send Back" type="object" states="to_approve"/>
+                    <button name="button_approved" string="Forward" class="oe_highlight" type="object" states="to_approve" groups="tds.group_manager_hr_declaration"/>
+                    <button name="button_reject" string="Reject" type="object" states="to_approve" groups="tds.group_manager_hr_declaration"/>
+                    <button name="button_compute_tax" string="Compute Tax" class="oe_highlight" type="object" invisible="1"/>
+                    <button name="button_payment_tax" string="Tax Payment" class="oe_highlight" type="object" invisible="1"/>
+                    <button name="button_verify" string="Verify" type="object" class="oe_highlight" states="approved" groups="tds.group_manager_hr_declaration"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,to_approve,approved" />
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="employee_id" options="{'no_create_edit': True, 'no_create': True, 'no_open': True}" required="1" readonly="1"/>
+                            <field name="job_id" options="{'no_create_edit': True, 'no_create': True, 'no_open': True}" readonly="1"/>
+                            <field name="branch_id" options="{'no_create_edit': True, 'no_create': True, 'no_open': True}" readonly="1"/>
+                            <field name="address_employee" invisible="1"/>
+                            <field name="department_id" options="{'no_create_edit': True, 'no_create': True, 'no_open': True}" readonly="1"/>
+                            <field name="which_it" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
+                            <field name="date_range" options="{'no_create_edit': True, 'no_create': True, 'no_open': True}" attrs="{'readonly':[('state','!=','draft')], 'required':[('state','=','draft')]}"/>
+                            <field name="rent_paid" string='Rent Paid' widget="monetary" options="{'currency_field': 'currency_id'}" attrs="{'invisible':[('which_it','=','new')],'readonly':[('which_it','!=','new'),('state','!=','draft')]}"/>
+                            <field name="rent_paid_attach_files" invisible="1"/>
+                            <field name="pan_card" attrs="{'invisible':[('rent_paid_attach_files','!=',True)], 'required':[('rent_paid_attach_files','!=',False)]}" filename="document_pan"/>
+                            <field name="document_pan" invisible="1"/>
+                            <field name="owner_address" attrs="{'invisible':[('rent_paid_attach_files','!=',True)], 'required':[('rent_paid_attach_files','!=',False)]}"/>
+                            <field name="total_tds_paid" attrs="{'readonly':[('state','!=','draft')], 'required':[('state','=','draft')]}" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="tds_paid_current" attrs="{'required':[('state','=','draft')]}" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="tds_total_paid" attrs="{'required':[('state','=','draft')]}" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="previous_employer_income" attrs="{'readonly':[('state','!=','draft')], 'required':[('state','=','draft')]}" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="forecast_gross" invisible="1" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="tax_payable_zero" invisible="1"/>
+                            <field name="tax_computed_bool" invisible="1"/>
+                            <field name="currency_id" options="{'no_create': True}" invisible="1 "/>
+                            <field name="income_after_house_property" string='Income from House Property' readonly="1"/>
+                            <field name="income_after_other_sources" string='Income from Other Sources' readonly="1"/>
+                            <field name="income_from_home" invisible="1"/>
+                            <field name="income_dividend" invisible="1"/>
+                            <field name="income_interest" invisible="1"/>
+                            <field name="income_pension" invisible="1"/>
+                            <field name="income_other" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="allowance_current" invisible="1"/>
+                            <field name="el_encashment" invisible="1"/>
+                            <field name="basic_salary" readonly="1" widget="monetary" options="{'currency_field': 'currency_id'}" invisible="1"/>
+                            <field name="da_salary" readonly="1" widget="monetary" options="{'currency_field': 'currency_id'}" invisible="1"/>
+                            <field name="tax_salary_final" readonly="1" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="income_after_exemption" readonly="1" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="income_after_std_ded" readonly="1" widget="monetary" options="{'currency_field': 'currency_id'}" attrs="{'invisible':[('which_it','=','new')]}"/>
+                            <field name="income_after_pro_tax" readonly="1" widget="monetary" options="{'currency_field': 'currency_id'}" attrs="{'invisible':[('which_it','=','new')]}"/>
+                            <field name="taxable_income" readonly="1" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+<!--                            <field name="net_allowed_rebate" readonly="1"/>-->
+<!--                            <field name="income_after_rebate" readonly="1"/>-->
+                            <field name="tax_payable" readonly="1" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="tax_payable_after_rebate" readonly="1" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                    <page string="Exemption">
+                        <separator string="Exemption"/>
+                        <field name="exemption_ids" readonly="1">
+                            <tree string="Exemption" editable="bottom">
+                                <field name="exemption_id" invisible="1"/>
+                                <field name="it_rule" required="1"/>
+                                <field name="saving_master" options="{'no_create_edit': True, 'no_create': True}" required="1"/>
+                                <field name="investment" invisible="1"/>
+                                <field name="allowed_rebate" sum="Total"/>
+                            </tree>
+                        </field>
+                    </page>
+
+                    <page string="Std. Deduction" attrs="{'invisible':[('which_it','=','new')]}">
+                        <separator string="Std. Deduction"/>
+                        <field name="std_ded_ids" readonly="1">
+                            <tree string="Exemption" editable="bottom">
+                                <field name="std_ded_id" invisible="1"/>
+                                <field name="it_rule" invisible="1"/>
+                                <field name="saving_master" options="{'no_create_edit': True, 'no_create': True}" required="1"/>
+                                <field name="investment" invisible="1"/>
+                                <field name="allowed_rebate" sum="Total"/>
+                            </tree>
+                        </field>
+                    </page>
+
+                    <page string="Rebate">
+                        <separator string="Rebate"/>
+                        <field name="rebate_ids" readonly="1">
+                            <tree string="Rebate Ids" editable="bottom">
+                                <field name="rebate_id" invisible="1"/>
+                                <field name="it_rule" required="1"/>
+                                <field name="saving_master" options="{'no_create_edit': True, 'no_create': True}" invisible="1"/>
+                                <field name="investment" invisible="1"/>
+                                <field name="allowed_rebate" sum="Total"/>
+                            </tree>
+                        </field>
+                        <group class="oe_subtotal_footer oe_right" colspan="2" >
+                                <field name="rebate_received" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </group>
+                    </page>
+                    <page string="Income">
+                        <separator string="Income from House Property"/>
+                        <field name="income_house_ids">
+                            <tree string="Income from House Property" editable="bottom">
+                                <field name="income_house_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]"/>
+                                <field name="saving_master" options="{'no_create_edit': True, 'no_create': True}" domain="[('it_rule', '=', it_rule)]"/>
+                                <field name="investment"/>
+                                <field name="document"/>
+                            </tree>
+                        </field>
+<!--                        <group class="oe_subtotal_footer oe_right" colspan="2" >-->
+<!--                                <field name="rebate_received" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>-->
+<!--                            </group>-->
+                        <separator string="Income from Other Sources"/>
+                        <field name="income_other_ids">
+                            <tree string="Income from Other Sources" editable="bottom">
+                                <field name="income_other_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]"/>
+                                <field name="saving_master_related" invisible="1"/>
+                                <field name="saving_master" options="{'no_create_edit': True, 'no_create': True}" domain="[('it_rule', '=', it_rule)]"/>
+                                <field name="other" attrs="{'invisible':[('saving_master_related','!=','Other')]}"/>
+                                <field name="investment"/>
+                                <field name="document"/>
+                            </tree>
+                        </field>
+<!--                        <group class="oe_subtotal_footer oe_right" colspan="2" >-->
+<!--                                <field name="rebate_received" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>-->
+<!--                            </group>-->
+                    </page>
+
+                    <page string="Deductions" attrs="{'invisible':[('which_it','=','new')]}">
+                        <group class="oe_subtotal_header oe_right" colspan="2" >
+                                <field name="total_deductions" class="oe_subtotal_header_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </group>
+                        <group string="Slab - 80 Declaration ">
+<!--                        <separator string="Slab - 80 Declaration "/>-->
+                        <field name="slab_ids" attrs="{'readonly':[('state','=','verified')]}">
+                            <tree string="Slab - 80 Declaration" editable="bottom">
+                                <field name="slab_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]"/>
+                                <field name="saving_master" options="{'no_create_edit': True, 'no_create': True}" required="1" domain="[('it_rule', '=', it_rule)]"/>
+                                <field name="investment" sum="Total"/>
+                                <field name="document"/>
+                            </tree>
+                        </field>
+                        <group class="oe_subtotal_footer oe_right" colspan="2" >
+                                <field name="allowed_rebate_under_80c" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="allowed_rebate_under_80b" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </group>
+                        </group>
+<!--                        <separator string="HRA - House Rent Allowances "/>-->
+<!--                        <field name="hra_ids">-->
+<!--                            <tree string="HRA - House Rent Allowances " editable="bottom">-->
+<!--                                <field name="hra_id" invisible="1"/>-->
+<!--                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]"/>-->
+<!--                                <field name="saving_master" options="{'no_create_edit': True, 'no_create': True}" required="1"/>-->
+<!-- -->
+<!-- -->
+<!--                                <field name="investment" sum="Total"/>-->
+<!-- -->
+<!--                                <field name="allowed_rebate" sum="Total"/>-->
+<!--                            </tree>-->
+<!--                        </field>-->
+                         <group string="Medical Insurance Premium paid">
+                        <field name="med_ins_ids" attrs="{'readonly':[('state','=','verified')]}">
+                            <tree string="Medical Insurance Premium paid" editable="bottom">
+                                <field name="med_ins_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]"/>
+                                <field name="saving_master" options="{'no_create_edit': True, 'no_create': True}" required="1" domain="[('it_rule', '=', it_rule)]"/>
+                                <field name="investment" sum="Total"/>
+                                <field name="document"/>
+                            </tree>
+                        </field>
+                        <group class="oe_subtotal_footer oe_right" colspan="2">
+                                <field name="allowed_rebate_under_80d" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </group>
+                         </group>
+                         <group string="Deductions on Interest on Savings Account">
+                        <field name="deduction_saving_ids" attrs="{'readonly':[('state','=','verified')]}">
+                            <tree string="Deductions on Interest on Savings Account" editable="bottom">
+                                <field name="deduction_saving_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]"/>
+                                <field name="saving_master" options="{'no_create_edit': True, 'no_create': True}" required="1" domain="[('it_rule', '=', it_rule)]"/>
+<!--                                <field name="saving_type" required="1" readonly="1"/>-->
+
+                                <field name="investment" sum="Total"/>
+
+                                <field name="document"/>
+                            </tree>
+                        </field>
+                        <group class="oe_subtotal_footer oe_right" colspan="2">
+                                <field name="allowed_rebate_under_80dsa" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </group>
+                         </group>
+                        <group string="Tax Benefits on Home Loan">
+                        <field name="tax_home_ids" attrs="{'readonly':[('state','=','verified')]}">
+                            <tree string="Tax Benefits on Home Loan" editable="bottom">
+                                <field name="tax_home_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]"/>
+                                <field name="saving_master" options="{'no_create_edit': True, 'no_create': True}" required="1" domain="[('it_rule', '=', it_rule)]"/>
+<!--                                <field name="saving_type" required="1" readonly="1"/>-->
+                                <field name="investment" sum="Total"/>
+
+                                <field name="document"/>
+                            </tree>
+                        </field>
+                        <group class="oe_subtotal_footer oe_right" colspan="2" >
+                                <field name="allowed_rebate_under_tbhl" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="allowed_rebate_under_80ee" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="allowed_rebate_under_24" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </group>
+                        </group>
+                        <group string="Tax benefit on Education Loan (80E) ">
+                        <field name="tax_education_ids" attrs="{'readonly':[('state','=','verified')]}">
+                            <tree string="Tax benefit on Education Loan (80E) " editable="bottom">
+                                <field name="tax_education_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]"/>
+                                <field name="saving_master" options="{'no_create_edit': True, 'no_create': True}" required="1" domain="[('it_rule', '=', it_rule)]"/>
+                                <field name="investment" sum="Total"/>
+                                <field name="document"/>
+                            </tree>
+                        </field>
+                        <group class="oe_subtotal_footer oe_right" colspan="2" >
+                                <field name="allowed_rebate_under_80e" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </group>
+                        </group>
+                         <group string="RGESS">
+                        <field name="rgess_ids" attrs="{'readonly':[('state','=','verified')]}">
+                            <tree string="RGESS" editable="bottom">
+                                <field name="rgess_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]"/>
+                                <field name="saving_master" options="{'no_create_edit': True, 'no_create': True}" required="1" domain="[('it_rule', '=', it_rule)]"/>
+                                <field name="investment" sum="Total"/>
+                                 <field name="document"/>
+                            </tree>
+                        </field>
+                        <group class="oe_subtotal_footer oe_right" colspan="2" >
+                                <field name="allowed_rebate_under_80ccg" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </group>
+                         </group>
+                         <group string="Deductions on Medical Expenditure for a Handicapped Relative">
+                        <field name="dedmedical_ids" attrs="{'readonly':[('state','=','verified')]}">
+                            <tree string="Deductions on Medical Expenditure for a Handicapped Relative" editable="bottom">
+                                <field name="dedmedical_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]"/>
+                                <field name="saving_master" options="{'no_create_edit': True, 'no_create': True}" required="1" domain="[('it_rule', '=', it_rule)]"/>
+                                <field name="investment" sum="Total"/>
+                                <field name="document"/>
+                            </tree>
+                        </field>
+                        <group class="oe_subtotal_footer oe_right" colspan="2" >
+                                <field name="allowed_rebate_under_80cdd" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </group>
+                         </group>
+                        <group string="Deductions on Medical Expenditure on Self or Dependent Relative">
+                        <field name="dedmedical_self_ids" attrs="{'readonly':[('state','=','verified')]}">
+                            <tree string="Deductions on Medical Expenditure on Self or Dependent Relative" editable="bottom">
+                                <field name="dedmedical_self_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]"/>
+                                <field name="saving_master" options="{'no_create_edit': True, 'no_create': True}" required="1" domain="[('it_rule', '=', it_rule)]"/>
+                                <field name="investment" sum="Total"/>
+                                <field name="document"/>
+                            </tree>
+                        </field>
+                        <group class="oe_subtotal_footer oe_right" colspan="2" >
+                                <field name="allowed_rebate_under_80mesdr" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </group>
+                            </group>
+                        <group string="Deductions on Donations">
+                        <field name="deddonation_ids">
+                            <tree string="Deduction on Donations" editable="bottom">
+                                <field name="deddonation_id" invisible="1"/>
+                                <field name="deduction_id" invisible="1"/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]"/>
+                                <field name="saving_master_related" invisible="1"/>
+                                <field name="saving_master" options="{'no_create_edit': True, 'no_create': True}" domain="[('it_rule', '=', it_rule)]"/>
+                                <field name="other" attrs="{'invisible':[('saving_master_related','!=','Other')]}"/>
+                                <field name="investment"/>
+                                <field name="document"/>
+                            </tree>
+                        </field>
+                        <group class="oe_subtotal_footer oe_right" colspan="2" >
+                                <field name="allowed_rebate_under_donation" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </group>
+                            </group>
+                    </page>
+                        <page string="Tax Payment" name="tax_payment_g">
+                            <field name="tax_payment_ids" attrs="{'invisible':[('tax_payable_zero','=',False)]}">
+                                <tree string="Tax Payment" editable="bottom">
+                                    <field name="tax_payment_id" invisible="1"/>
+                                    <field name="date" required="1"/>
+                                    <field name="amount" required="1"/>
+                                    <field name="branch_id"/>
+                                    <field name="paid"/>
+                                    <field name="mona_payslip_id" string="Payslip" readonly="1"/>
+                                </tree>
+                            </field>
+                            <group class="oe_subtotal_footer oe_right" colspan="2" >
+
+                                <field name="tax_paid" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="pending_tax" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </group>
+                        </page>
+                        <page string="Rent Paid" name="rent_paid_g" attrs="{'invisible':[('which_it','=','new')]}">
+                            <field name="rent_paid_ids" string='Rent Paid' attrs="{'readonly':[('state','=','verified')]}">
+                                <tree string="Rent Paid" editable="bottom">
+                                    <field name="rent_paid_id" invisible="1"/>
+                                    <field name="date_from" required="1"/>
+                                    <field name="date_to" required="1"/>
+                                    <field name="amount" required="1" sum="Amount"/>
+                                    <field name="attchment"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Deduction" name="deduction_new" attrs="{'invisible':[('which_it','!=','new')]}">
+                            <field name="dednew_rule_ids" string='Deductions on Donation' attrs="{'readonly':[('state','=','verified')]}">
+                                <tree string="80 C" editable="bottom">
+                                    <field name="deduction_id" invisible="1"/>
+                                <field name="dednew_rule_id" invisible="1"/>
+                                <field name="it_rule" required="1" domain="[('deduction_id', '=', deduction_id)]"/>
+                                <field name="saving_master_related" invisible="1"/>
+                                <field name="saving_master" options="{'no_create_edit': True, 'no_create': True}" domain="[('it_rule', '=', it_rule)]"/>
+                                <field name="investment"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Salary Breakup" name="salary_break">
+                            <table class="table table-bordered" style="width: auto;">
+                                <thead>
+                                    <tr>
+                                        <th><strong>Name</strong></th>
+                                        <th><strong>Amount</strong></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Yearly Basic</td>
+                                        <td><field name="basic_actual_forecast" readonly="1" force_save="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Yearly DA</td>
+                                        <td><field name="da_actual_forecast" readonly="1" force_save="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Yearly TA</td>
+                                        <td><field name="ta_actual_forecast" readonly="1" force_save="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Yearly MISC</td>
+                                        <td><field name="misc_salary" readonly="1" force_save="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Yearly HRA</td>
+                                        <td><field name="hra_actual_forecast" readonly="1" force_save="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Yearly GROSS</td>
+                                        <td><field name="gross_actual_forecast" readonly="1" force_save="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Medical</td>
+                                        <td><field name="medical_salary" readonly="1" force_save="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>EL Encashment</td>
+                                        <td><field name="el_encash_salary" readonly="1" force_save="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Hostel</td>
+                                        <td><field name="hostel_salary" readonly="1" force_save="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tuition</td>
+                                        <td><field name="tuition_salary" readonly="1" force_save="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Lunch</td>
+                                        <td><field name="lunch_salary" readonly="1" force_save="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>LTC Advance</td>
+                                        <td><field name="ltc_advance_salary" readonly="1" force_save="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Income From House</td>
+                                        <td><field name="house_income_salary" readonly="1" force_save="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Other Income</td>
+                                        <td><field name="other_income_salary" string='Other Income' readonly="1" force_save="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Gross</td>
+                                        <td><field name="total_gross_salary" readonly="1" force_save="1"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+
+                            <!-- <table class="table table-bordered" style="width: auto;">
+                                <thead>
+                                    <tr>
+                                        <th>Basic</th>
+                                        <th>DA</th>
+                                        <th>TA</th>
+                                        <th>MISC</th>
+                                        <th>HRA</th>
+                                        <th>GROSS</th>
+                                        <th>Medical</th>
+                                        <th>EL Encashment</th>
+                                        <th>Hostel</th>
+                                        <th>Tuition</th>
+                                        <th>Lunch</th>
+                                        <th>LTC Advance</th>
+                                        <th>Income From House</th>
+                                        <th>Other Income</th>
+                                        <th>Total Gross</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><field name="basic_actual_forecast" readonly="1" force_save="1"/></td>
+                                        <td><field name="da_actual_forecast" readonly="1" force_save="1"/></td>
+                                        <td><field name="ta_actual_forecast" readonly="1" force_save="1"/></td>
+                                        <td><field name="misc_salary" readonly="1" force_save="1"/></td>
+                                        <td><field name="hra_actual_forecast" readonly="1" force_save="1"/></td>
+                                        <td><field name="gross_actual_forecast" readonly="1" force_save="1"/></td>
+                                        <td><field name="medical_salary" readonly="1" force_save="1"/></td>
+                                        <td><field name="el_encash_salary" readonly="1" force_save="1"/></td>
+                                        <td><field name="hostel_salary" readonly="1" force_save="1"/></td>
+                                        <td><field name="tuition_salary" readonly="1" force_save="1"/></td>
+                                        <td><field name="lunch_salary" readonly="1" force_save="1"/></td>
+                                        <td><field name="ltc_advance_salary" readonly="1" force_save="1"/></td>
+                                        <td><field name="house_income_salary" readonly="1" force_save="1"/></td>
+                                        <td><field name="other_income_salary" readonly="1" force_save="1"/></td>
+                                        <td><field name="total_gross_salary" readonly="1" force_save="1"/></td>
+                                    </tr>
+                                </tbody>
+                            </table> -->
+
+                        </page>
+
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+            </form>
+        </field>
+    </record>
+
+        <!--=======Tree view of HR Declaration=======-->
+    <record id="hr_savings_type_tree_view" model="ir.ui.view">
+        <field name="name">saving.master.tree</field>
+        <field name="model">saving.master</field>
+        <field name="arch" type="xml">
+            <tree string="Savings Type" editable="bottom">
+<!--                  <field name="deduction_id"/>-->
+                  <field name="it_rule" required="1"/>
+                  <field name="saving_type" required="1"/>
+                  <field name="description"/>
+                  <field name="is_percent_req"/>
+                  <field name="with_max_limit" attrs="{'readonly': [('is_percent_req', '=', False)]}"/>
+                  <field name="percent" attrs="{'readonly': [('is_percent_req', '=', False)]}"/>
+                  <field name="rebate"/>
+            </tree>
+        </field>
+    </record>
+
+        <!--=======Tree view of HR Declaration=======-->
+    <record id="hr_it_rule_tree_view" model="ir.ui.view">
+        <field name="name">hr.itrule.tree</field>
+        <field name="model">hr.itrule</field>
+        <field name="arch" type="xml">
+            <tree string="IT Rule" editable="bottom">
+                  <field name="deduction_id"/>
+                  <field name="code" required="1"/>
+                  <field name="name" required="1"/>
+            </tree>
+        </field>
+    </record>
+
+
+        <!--IT Declaration search view-->
+    <record id="view_hr_declaration_request_search_form" model="ir.ui.view">
+        <field name="name">hr.declaration.search.form</field>
+        <field name="model">hr.declaration</field>
+        <field name="arch" type="xml">
+           <search string="IT Declaration">
+               <filter string="My Declarations" name="mydeclaration" domain="[('employee_id.user_id.id', '=', uid)]" />
+                <field name="employee_id" string="Employee"/>
+                    <filter string="Employee" name="employee_id" context="{'group_by':'employee_id'}"/>
+                    <filter string="Status" name="status" context="{'group_by':'state'}"/>
+            </search>
+        </field>
+    </record>
+
+
+    
+        <!--============Action view of hr.declaration Draft============-->
+    <record id="hr_declaration_menu_action_all" model="ir.actions.act_window">
+        <field name="name">IT Declaration</field>
+        <field name="res_model">hr.declaration</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_mydeclaration': 1, 'search_default_status': 1}</field>
+        <field name="search_view_id" ref="view_hr_declaration_request_search_form"/>
+    </record>
+
+
+        <!--============Action view of hr.declaration Draft============-->
+    <record id="hr_declaration_menu_action" model="ir.actions.act_window">
+        <field name="name">IT Declaration</field>
+        <field name="res_model">hr.declaration</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_mydeclaration': 1}</field>
+        <field name="search_view_id" ref="view_hr_declaration_request_search_form"/>
+        <field name="domain">[('state','=','draft')]</field>
+    </record>
+    <!--============Action view of hr.declaration Waiting============-->
+    <record id="hr_declaration_pending_action" model="ir.actions.act_window">
+        <field name="name">IT Declaration</field>
+        <field name="res_model">hr.declaration</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state','=','to_approve')]</field>
+    </record>
+    <!--============Action view of hr.declaration approved============-->
+    <record id="hr_declaration_approved_action" model="ir.actions.act_window">
+        <field name="name">IT Declaration</field>
+        <field name="res_model">hr.declaration</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_mydeclaration': 1}</field>
+        <field name="search_view_id" ref="view_hr_declaration_request_search_form"/>
+        <field name="domain">[('state','=','approved')]</field>
+    </record>
+    <!--============Action view of hr.declaration verified============-->
+    <record id="hr_declaration_verified_action" model="ir.actions.act_window">
+        <field name="name">IT Declaration</field>
+        <field name="res_model">hr.declaration</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_mydeclaration': 1}</field>
+        <field name="search_view_id" ref="view_hr_declaration_request_search_form"/>
+        <field name="domain">[('state','=','verified')]</field>
+    </record>
+    <!--============Action view of hr.declaration rejected============-->
+    <record id="hr_declaration_rejected_action" model="ir.actions.act_window">
+        <field name="name">IT Declaration</field>
+        <field name="res_model">hr.declaration</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_mydeclaration': 1}</field>
+        <field name="search_view_id" ref="view_hr_declaration_request_search_form"/>
+        <field name="domain">[('state','=','rejected')]</field>
+    </record>
+
+    <record id="hr_declaration_all_action" model="ir.actions.act_window">
+        <field name="name">All</field>
+        <field name="res_model">hr.declaration</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_mydeclaration': 1}</field>
+        <field name="search_view_id" ref="view_hr_declaration_request_search_form"/>
+        <field name="domain">[]</field>
+    </record>
+    
+    
+    <!--===============Action view of Employee IT Declaration claim Status=================-->
+    <record id="menu_hr_declaration_status_action" model="ir.actions.act_window">
+        <field name="name">IT Declaration</field>
+        <field name="res_model">hr.declaration</field>
+        <!--<field name="view_type">form</field>-->
+        <field name="view_mode">tree,form,search</field>
+        <field name="context">{'group_by': 'state'}</field>
+    </record>
+
+
+<!--===============Action view of Employee IT Declaration claim Department=================-->
+    <record id="menu_hr_declaration_department_action" model="ir.actions.act_window">
+        <field name="name">IT Declaration</field>
+        <field name="res_model">hr.declaration</field>
+        <!--<field name="view_type">form</field>-->
+        <field name="view_mode">tree,form,search</field>
+        <field name="context">{'group_by': 'department_id'}</field>
+    </record>
+
+
+<!--===============Action view of Employee IT Declaration claim Job=================-->
+    <record id="menu_hr_declaration_job_action" model="ir.actions.act_window">
+        <field name="name">IT Declaration</field>
+        <field name="res_model">hr.declaration</field>
+        <!--<field name="view_type">form</field>-->
+        <field name="view_mode">tree,form,search</field>
+        <field name="context">{'group_by': 'job_id'}</field>
+    </record>
+
+
+<!--===============Action view of Employee IT Declaration claim Branch=================-->
+    <record id="menu_hr_declaration_branch_action" model="ir.actions.act_window">
+        <field name="name">IT Declaration</field>
+        <field name="res_model">hr.declaration</field>
+        <!--<field name="view_type">form</field>-->
+        <field name="view_mode">tree,form,search</field>
+        <field name="context">{'group_by': 'branch_id'}</field>
+    </record>
+
+
+
+    <!--============Action view of hr.saving.type rejected============-->
+    <record id="hr_declaration_saving_master_action" model="ir.actions.act_window">
+        <field name="name">HR Saving Type</field>
+        <field name="res_model">saving.master</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!--============Action view of hr.saving.type rejected============-->
+    <record id="hr_declaration_it_rule_action" model="ir.actions.act_window">
+        <field name="name">HR IT Rule</field>
+        <field name="res_model">hr.itrule</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+
+      <menuitem id="menu_hr_declaration_main"
+                name="IT Declaration"
+                web_icon="tds,static/description/icon.png"
+      />
+
+      <menuitem id="menu_hr_declaration_id"
+                name="IT Declaration"
+                parent="menu_hr_declaration_main"
+      />
+
+
+    <menuitem id = "hr_declaration_new_menu_id"
+                  name = "New"
+                  parent ="menu_hr_declaration_id"
+                  action ="hr_declaration_menu_action"
+                  sequence="2"
+                  />
+
+    <menuitem id = "hr_declaration_pending_menu_id"
+                name = "Pending Approvals"
+                parent ="menu_hr_declaration_id"
+                action ="hr_declaration_pending_action"
+                sequence="3"
+                />
+    <menuitem id = "hr_declaration_approved_menu_id"
+                name = "Approved"
+                parent ="menu_hr_declaration_id"
+                action ="hr_declaration_approved_action"
+                sequence="4"
+                />
+    <menuitem id = "hr_declaration_verified_menu_id"
+                  name = "Verified"
+                  parent ="menu_hr_declaration_id"
+                  action ="hr_declaration_verified_action"
+                  sequence="5"
+                  />
+    <menuitem id = "hr_declaration_rejected_menu_id"
+                name = "Rejected"
+                parent ="menu_hr_declaration_id"
+                action ="hr_declaration_rejected_action"
+                sequence="6"
+                />
+    <menuitem id="menu_hr_declaration_all"
+                parent="menu_hr_declaration_id"
+                action="hr_declaration_all_action"
+                sequence="7"
+                />
+    
+    
+        <menuitem name="Reporting"
+            id="menu_hr_declaration" parent="menu_hr_declaration_main"
+              groups="tds.group_manager_hr_declaration"
+            />
+
+    <menuitem id = "hr_declaration_all_menu_id"
+                  name = "All"
+                  parent ="menu_hr_declaration"
+                  action ="hr_declaration_menu_action_all"
+                  sequence="1"
+                  />
+    <menuitem name="IT Declaration by status"
+                id="menu_hr_declaration_status" parent="menu_hr_declaration"
+                 action="menu_hr_declaration_status_action"
+                 />
+    <menuitem name="IT Declaration by Department"
+                id="menu_hr_declaration_department" parent="menu_hr_declaration"
+                 action="menu_hr_declaration_department_action"
+                 />
+    <menuitem name="IT Declaration by Functional Designation"
+                id="menu_hr_declaration_job" parent="menu_hr_declaration"
+                 action="menu_hr_declaration_job_action"
+                 />
+    <menuitem name="IT Declaration by Branch"
+                id="menu_hr_declaration_branch" parent="menu_hr_declaration"
+                 action="menu_hr_declaration_branch_action"
+                 />
+
+
+        <menuitem name="Configuration"
+            id="menu_hr_declaration_configuration"
+                  parent="menu_hr_declaration_main"
+                  groups="base.group_no_one"
+                  sequence="100"
+            />
+
+        <menuitem id = "hr_declaration_saving_master_menu_id"
+                  name = "Savings Master"
+                  parent ="menu_hr_declaration_configuration"
+                  action ="hr_declaration_saving_master_action"
+                  />
+
+        <menuitem id = "hr_declaration_it_rule_menu_id"
+                  name = "IT Rule"
+                  parent ="menu_hr_declaration_configuration"
+                  action ="hr_declaration_it_rule_action"
+                  />
+
+
+</odoo>

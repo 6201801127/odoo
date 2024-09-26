@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!--    Tree View-->
+    <record id="hr_property_employee_modification_tree_view" model="ir.ui.view">
+        <field name="name">hr.employee.property.tree.modification</field>
+        <field name="model">hr.employee.property.modification</field>
+        <field name="arch" type="xml">
+            <tree string="HR Property">
+                <field name="mov_sequence" />
+                <field name="employee_id"/>
+                <field name="state" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="hr_property_employee_modification_form_view" model="ir.ui.view">
+        <field name="name">hr.employee.property.form.modification</field>
+        <field name="model">hr.employee.property.modification</field>
+        <field name="arch" type="xml">
+            <form string="FORM-II">
+
+                <header>
+                    <button name="button_to_approve" string="Send for Approval" class="oe_highlight" type="object" states="draft"/>
+                    <button name="button_reset_to_draft" string="Cancel" type="object" states="submitted"/>
+                    <button name="button_approved" string="Approve" class="oe_highlight" type="object" states="submitted" groups="hr_property_new.group_hr_property_new_manager"/>
+                    <button name="button_reject" string="Reject" type="object"  states="submitted" groups="hr_property_new.group_hr_property_new_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved" />
+                </header>
+
+                <sheet>
+                    <group>
+                        <field name="mov_sequence" invisible="1"/>
+                        <field name="property_id" domain="[('propert_ad','=','disposal')]" attrs="{'readonly':[('state','!=','draft')]}"/>
+                        <field name="need_cancel" attrs="{'readonly':[('state','!=','draft')]}"/>
+                        <field name="employee_id" required="1" readonly="1" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+                        <field name="designation" required="1" readonly="1" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+<!--                        <field name="service_belo"/>-->
+                        <field name="employee_no" readonly="1" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+                        <field name="scale_pay" readonly="1" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+                        <br/>
+                        <field name="purpose" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+                    </group>
+
+                    <notebook>
+                        <page string = "Description of Movable Property">
+                            <group>
+                                <group class="mb-0">
+                                    <field name="propert_ad" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+                                    <field name="acq_date" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+                                    <br/>
+                                    <field name="details_property" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+                                    <field name="mode_of_acquisition" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+                                    <br/>
+                                </group>
+                                <group>
+                                    <field name="full_part" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+                                    <br/>
+                                    <field name="owner_property" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+                                    <field name="property_price" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+
+                    <group class="custom_string mt-0" string="In case of acquistion, source or sources from which financed/propsed to be financed" attrs="{'invisible':[('propert_ad','!=','acquisition')]}">
+                        <field name="finance_id" nolabel="1" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}" >
+                            <tree editable="top">
+                                <field name="property_id" invisible="1"/>
+                                <field name="mode_of_finance" />
+                                <field name="description" />
+                                <field name="amount" sum="total_finance_amount"/>
+                                <field name="document_filename" invisible="1" widget="binary"/>
+                                <field name="finance_attachment" filename="document_filename"/>
+                            </tree>
+                        </field>
+                    </group>
+                    <group class="mt-0">
+                        <field name="copy_attached" attrs="{'invisible':[('propert_ad','!=','disposal')]}"/>
+                        <br/>
+                        <field name="disposed_attachment" filename="disposed_attachment_name" attrs="{'invisible': [('copy_attached','!=','yes')]}"/>
+                        <field name="disposed_attachment_name" invisible="1" />
+                    </group>
+                    <notebook>
+                        <page string = "Details of the Parties with whom transaction is proposed to be made! has been made">
+                                <group>
+                                    <field name="address_details" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+                                    <br/>
+                                    <field name="party_relation" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+                                    <field name="state_relationship" attrs="{'invisible':[('party_relation','!=','yes')],'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}" />
+                                    <br/>
+                                    <field name="dealings" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+                                    <field name="official_party" attrs="{'invisible':[('dealings','!=','yes')],'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}" />
+                                    <br/>
+                                    <field name="transaction" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+                                </group>
+                        </page>
+                    </notebook>
+                    <group>
+                        <field name="acquistion_gift" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+                        <br/>
+                        <field name="rel_fact" attrs="{'readonly':['|',('need_cancel','=',True),('state','!=','draft')]}"/>
+                    </group>
+
+                    <group string="Declaration" attrs="{'invisible':[('acquistion_gift','!=','yes')]}">
+                        <h6>  I <field name="employee_id" nolabel="1" readonly="1" options="{'no_open': True}"/> hereby declare that the particulars given above are true. I request that I may be given permission to acquire/ dispose of property as described above form/to the party whose name is mentioned in item 7 above.</h6>
+                    </group>
+                    <group string="Declaration" attrs="{'invisible':[('acquistion_gift','!=','no')]}">
+                        <h6>  I <field name="employee_id" nolabel="1" readonly="1" options="{'no_open': True}"/> hereby intimate the proposed acquisition/disposal of property by me as detailed above. I declare that the particulars given are true. </h6>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="action_modification_movable" model="ir.actions.act_window">
+        <field name="name">Movable Modifications</field>
+        <field name="res_model">hr.employee.property.modification</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">Please fill the Movable Property Modification Form</p>
+        </field>
+    </record>
+
+
+    <menuitem id="seperate_hr_modification_movable" parent="modification_form_main_menu" name="Movable Property"
+              action="action_modification_movable" sequence="2"/>
+
+    </data>
+</odoo>

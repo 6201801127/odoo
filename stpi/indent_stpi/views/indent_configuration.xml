@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        
+
+
+        <record model='ir.ui.view' id='Indent_configuration_tree_view'>
+            <field name="name">indent.stock.tree</field>
+            <field name="model">indent.stock</field>
+            <field name="arch" type="xml">
+                <tree string="Item Master">
+                    <field name="name" required="1"/>
+                    <field name="category_id" required="1"/>
+                    <field name="branch_id" required="1"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="Indent_configuration_form_view" model="ir.ui.view">
+            <field name="name">indent.stock.form</field>
+            <field name="model">indent.stock</field>
+            <field name="arch" type="xml">
+                <form string="Items">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name" required="1"/>
+                                <field name="category_id" required="1"/>
+                                <field name="specification" required="1"/>
+                                <field name="asset" />
+                                <field name="serial_bool"/>
+                                <field name="is_barcode"/>
+                            </group>
+                            <group>
+                                <field name="branch_id" readonly="1" required="1"/>
+                                <field name="received" readonly="1"/>
+                                <field name="issue" readonly="1"/>
+                                <field name="balance" readonly="1"/>
+                            </group>
+                        </group>
+                        <!-- <notebook>
+                        <page string="Items">
+                            <field name="child_indent_stocks">
+                                <tree editable="bottom">
+                                    <field name="child_indent_stock" invisible="1"/>
+                                    <field name="name" required="1"/>
+                                    <field name="specification" required="1"/>
+                                    <field name="serial_bool"/>
+                                    <field name="is_barcode"/>
+                                    <field name="asset" attrs="{'readonly':[('serial_bool','=', False)]}"/>
+                                    <field name="received" readonly="1"/>
+                                    <field name="issue" readonly="1"/>
+                                    <field name="balance" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook> -->
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!--Indent Item Master Action-->
+        <record id="Indent_configuration_action_id" model="ir.actions.act_window">
+            <field name="name">Item Master</field>
+            <field name="res_model">indent.stock</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+
+
+
+
+        <record model='ir.ui.view' id='Indent_configuration_sn_tree_view'>
+            <field name="name">indent.serialnumber.tree</field>
+            <field name="model">indent.serialnumber</field>
+            <field name="arch" type="xml">
+                <tree string="Serial Number" editable="bottom">
+                    <field name="name" required="1" attrs="{'readonly':[('state','=', 'approved')]}"/>
+                    <field name="branch_id" required="1" attrs="{'readonly':[('state','=', 'approved')]}"/>
+                    <field name="item_category_id" required="1" attrs="{'readonly':[('state','=', 'approved')]}"/>
+                    <field name="item_id" required="1" attrs="{'readonly':[('state','=', 'approved')]}" domain="[('category_id','=',item_category_id)]"/>
+                    <field name="grn"  readonly="1"/>
+                    <field name="issue" readonly="1" />
+                    <field name="state" readonly="1"/>
+                    <field name="is_asset" readonly="1"/>
+                    <button name="fill_asset_details" 
+                    	string="Fill Asset Details" 
+                    	type="object" 
+                    	 attrs="{'invisible': [('is_asset', '=', False)]}"/>
+                    <button name="send_for_approval" string="Send for Approval" type="object" icon = "fa-forward" states="draft" />
+                    <button name="button_send_back" string="Send Back" type="object" icon = "fa-undo" states="to_approve" groups="indent_stpi.group_store_manager,indent_stpi.group_grn_create"/>
+                    <button name="button_approved" string="Approve" type="object" icon = "fa-thumbs-o-up" states="to_approve" groups="indent_stpi.group_store_manager,indent_stpi.group_grn_create"/>
+                    <button name="button_reject" string="Reject" type="object" icon = "fa-ban" states="to_approve" groups="indent_stpi.group_store_manager"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <!--Indent Item Master Action-->
+        <record id="Indent_configuration_sn_action_id" model="ir.actions.act_window">
+            <field name="name">Serial Number</field>
+            <field name="res_model">indent.serialnumber</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+
+
+
+
+ <menuitem name="Configuration"
+           id="menu_Indent_configuration" parent="menu_Indent"
+           groups="indent_stpi.group_store_manager,indent_stpi.group_grn_create"
+           sequence="6"
+ />
+
+    <menuitem name="Item Master"
+                id="menu_Indent_configuration_id" parent="menu_Indent_configuration"
+                groups="indent_stpi.group_store_manager"
+                action="Indent_configuration_action_id"
+                sequence="2"
+                 />
+
+    <menuitem name="Serial Number"
+                id="menu_Indent_configuration_sn_id" parent="menu_Indent_configuration"
+                groups="indent_stpi.group_store_manager,indent_stpi.group_grn_create"
+                 action="Indent_configuration_sn_action_id"
+                 sequence="3"
+                 />
+                 
+   <!-- Category master -->
+   
+	   <record id="indent_category_form_view" model="ir.ui.view">
+	         <field name="name">indent.category.form</field>
+	         <field name="model">product.category</field>
+	         <field name="arch" type="xml">
+	             <form class="oe_form_configuration">
+	                 <sheet>
+	                     <div class="oe_title">
+	                         <label for="name" string="Category name" class="oe_edit_only"/>
+	                         <h1><field name="name" placeholder="e.g. Lamps"/></h1>
+	                     </div>
+	                     <group name="first" col="2">
+	                         <field name="parent_id" class="oe_inline" domain="[('indent_category','=',True)]"/>
+	                         
+	                     </group>
+	                     
+	                     <group name="first" col="2">
+	                         <field name="user_id" widget="many2many_tags" class="oe_inline"/>
+	                         <field name="indent_category" invisible="1"/>
+	                         <field name="level_2"/>
+	                         
+	                         <field name="competent_authority" 
+	                         		widget="many2many_tags" 
+	                         		class="oe_inline" 
+	                         		attrs="{'invisible': [('level_2', '=', False)]}"/>
+                       		<field name="procur_group" class="oe_inline"/>
+	                     </group>
+	                    
+	                 </sheet>
+	             </form>
+	         </field>
+	     </record>
+	     <record id="indent_category_list_view" model="ir.ui.view">
+	         <field name="name">indent.category.list</field>
+	         <field name="model">product.category</field>
+	         <field name="priority">1</field>
+	         <field name="arch" type="xml">
+	             <tree string="Product Categories">
+	                 <field name="display_name" string="Product Category"/>
+	                 <field name="user_id"/>
+	             </tree>
+	         </field>
+	     </record>
+	     <record id="indent_category_action_form" model="ir.actions.act_window">
+	         <field name="name">Indent Categories</field>
+	         <field name="type">ir.actions.act_window</field>
+	         <field name="res_model">product.category</field>
+	         <field name="view_type">form</field>
+	         <field name="domain">[('indent_category','=',True)]</field>
+	         <field name="context">{'default_indent_category': 1}</field>
+	         <field name="view_ids" eval="[(5,0,0),
+                          (0,0,{'view_mode':'tree','view_id': ref('indent_category_list_view')}),
+                          (0,0,{'view_mode':'form', 'view_id': ref('indent_category_form_view')})]"/>
+	     </record>
+	     
+	     <menuitem name="Category Master"
+                id="menu_Indent_configuration_category" parent="menu_Indent_configuration"
+                groups="indent_stpi.group_store_manager"
+                action="indent_category_action_form"
+                sequence="1"
+              />
+              
+         <!-- Vendor master -->
+   
+	   <record id="grn_vendor_form_view" model="ir.ui.view">
+	         <field name="name">grn.vendor.form</field>
+	         <field name="model">res.partner</field>
+	         <field name="arch" type="xml">
+	             <form class="oe_form_configuration">
+	                 <sheet>
+	                     
+	                     <group name="first" col="2">
+	                         <field name="name" />
+	                         <field name="email" />
+	                         <field name="branch_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+	                     </group>
+	                    
+	                 </sheet>
+	             </form>
+	         </field>
+	     </record>
+	     <record id="grn_vendor_list_view" model="ir.ui.view">
+	         <field name="name">grn.vendor.list</field>
+	         <field name="model">res.partner</field>
+	         <field name="priority">1</field>
+	         <field name="arch" type="xml">
+	             <tree string="vendor">
+	                 <field name="name" string="Vendor"/>
+	                 <field name="email"/>
+	                 <field name="branch_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+	                 <field name="active"/>
+	             </tree>
+	         </field>
+	     </record>
+	     <record id="grn_vendor_action_form" model="ir.actions.act_window">
+	         <field name="name">GRN Vendors</field>
+	         <field name="type">ir.actions.act_window</field>
+	         <field name="res_model">res.partner</field>
+	         <field name="view_type">form</field>
+	         <field name="domain">[('supplier','=',True)]</field>
+	     </record>
+	     
+	     <menuitem name="Vendor Master"
+                id="menu_Indent_configuration_vendor" parent="menu_Indent_configuration"
+                groups="indent_stpi.group_store_manager"
+                action="grn_vendor_action_form"
+                sequence="4"
+              />
+
+    </data>
+</odoo>

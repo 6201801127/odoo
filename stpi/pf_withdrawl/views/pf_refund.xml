@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_pf_refund_tree" model="ir.ui.view">
+        <field name="name">pf.refund.tree</field>
+        <field name="model">pf.refund</field>
+        <field name="arch" type="xml">
+            <tree string="PF">
+                <field name="employee_id"/>
+                <field name="designation_id"/>
+                <field name="amount"/>
+                <field name="date"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_pf_refund_form" model="ir.ui.view">
+        <field name="name">pf.refund.form</field>
+        <field name="model">pf.refund</field>
+        <field name="arch" type="xml">
+            <form string="PF Refund">
+                <header>
+                    <button name="button_forward" string="Forward" class="oe_highlight" type="object" states="draft"/>
+                    <button name="button_approve" string="Approve" class="oe_highlight" type="object" states="to_approve" groups="pf_withdrawl.group_pf_withdraw_approver"/>
+                    <button name="button_reject" string="Reject" type="object" states="to_approve" groups="pf_withdrawl.group_pf_withdraw_approver"/>
+                    <button name="button_paid" string="Paid" class="oe_highlight" type="object" states="approve" groups="pf_withdrawl.group_pf_withdraw_approver"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,to_approve,approve,reject,paid" />
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="check_approver" invisible="1"/>
+                            <field name="employee_id" readonly="1" options="{'no_create': True, 'no_create_edit':True, 'no_open': True}"/>
+                            <field name="designation_id" options="{'no_create': True, 'no_create_edit':True, 'no_open': True}"/>
+                            <field name="branch_id" options="{'no_create': True, 'no_create_edit':True, 'no_open': True}"/>
+                            <field name="pf_id" options="{'no_create': True, 'no_create_edit':True, 'no_open': True}"
+                                    attrs="{'readonly': [('state','!=','draft')]}"/>
+                            <field name="date" attrs="{'readonly': [('state','!=','draft')]}"/>
+                        </group>
+                        <group>
+                            <field name="amount" attrs="{'readonly': [('state','!=','draft')]}"/>
+                            <field name="description" attrs="{'readonly': [('state','!=','draft')]}"/>
+                            <field name="emp_mpf_vpf_bal" 
+                                    attrs="{'readonly': ['|', ('check_approver', '=', False), ('state', '!=', 'to_approve')],
+                                            'invisible': [('state', '=', 'draft')]}" force_save="1"/>
+                            <field name="emp_epf_bal" 
+                                    attrs="{'readonly': ['|', ('check_approver', '=', False), ('state', '!=', 'to_approve')],
+                                            'invisible': [('state', '=', 'draft')]}" force_save="1"/>
+                            <field name="cheque_detail"
+                                    attrs="{'readonly': ['|', ('check_approver', '=', False), ('state', '!=', 'approve')],
+                                            'invisible': [('state', 'not in', ('approve', 'paid'))],
+                                            'required': [('state', '=', 'approve')]}"/>
+                            <field name="payment_detail"
+                                    attrs="{'readonly': ['|', ('check_approver', '=', False), ('state', '!=', 'approve')],
+                                            'invisible': [('state', 'not in', ('approve', 'paid'))],
+                                            'required': [('state', '=', 'approve')]}"/>
+                            <field name="paid_date"
+                                    attrs="{'readonly': ['|', ('check_approver', '=', False), ('state', '!=', 'approve')],
+                                            'invisible': [('state', 'not in', ('approve', 'paid'))],
+                                            'required': [('state', '=', 'approve')]}"/>
+                        </group>
+                        <field name="remark"
+                                attrs="{'readonly': ['|', ('check_approver', '=', False), ('state', '!=', 'approve')],
+                                        'invisible': [('state', 'not in', ('approve', 'paid'))]}"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_pf_refund_search" model="ir.ui.view">
+        <field name="name">pf.refund.search</field>
+        <field name="model">pf.refund</field>
+        <field name="arch" type="xml">
+           <search string="PF Refund">
+                <field name="employee_id" string="Employee"/>
+                <field name="branch_id" string="Center"/>
+                <field name="designation_id" string="Designation"/>
+                    <filter string="Employee" name="employee_id" context="{'group_by':'employee_id'}"/>
+                    <filter string="Status" name="status" context="{'group_by':'state'}"/>
+                    <!-- <filter string="Center" name="branch_id" context="{'group_by':'branch_id'}"/> -->
+                    <!-- <filter string="Designation" name="department" context="{'group_by':'designation_id'}"/> -->
+            </search>
+        </field>
+    </record>
+
+    <record id="action_pf_refund_draft" model="ir.actions.act_window">
+        <field name="name">New</field>
+        <field name="res_model">pf.refund</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state','=','draft')]</field>
+        <field name="context">{'create': 1, 'edit': 1}</field>
+    </record>
+
+    <record id="action_pf_refund_to_approve" model="ir.actions.act_window">
+        <field name="name">To Approve</field>
+        <field name="res_model">pf.refund</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state','=','to_approve')]</field>
+        <field name="context">{'create': 0, 'edit': 1}</field>
+    </record>
+
+    <record id="action_pf_refund_approved" model="ir.actions.act_window">
+        <field name="name">Approved</field>
+        <field name="res_model">pf.refund</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state','=','approve')]</field>
+        <field name="context">{'create': 0, 'edit': 1}</field>
+    </record>
+
+    <record id="action_pf_refund_rejected" model="ir.actions.act_window">
+        <field name="name">Rejected</field>
+        <field name="res_model">pf.refund</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state','=','reject')]</field>
+        <field name="context">{'create': 0, 'edit': 0}</field>
+    </record>
+
+    <record id="action_pf_refund_all" model="ir.actions.act_window">
+        <field name="name">All</field>
+        <field name="res_model">pf.refund</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{'create': 0, 'edit': 0}</field>
+    </record>
+
+    <menuitem id="menu_pf_refund" parent="pf_withdrawl_menu" sequence="1" name="PF Refund"
+                groups="group_pf_withdraw_approver,group_pf_withdraw_user"/>
+    <menuitem id="menu_pf_refund_draft" parent="menu_pf_refund" action="action_pf_refund_draft"
+                groups="group_pf_withdraw_approver,group_pf_withdraw_user"/>
+    <menuitem id="menu_pf_refund_to_approve" parent="menu_pf_refund" action="action_pf_refund_to_approve"
+                groups="group_pf_withdraw_approver,group_pf_withdraw_user"/>
+    <menuitem id="menu_pf_refund_approved" parent="menu_pf_refund" action="action_pf_refund_approved"
+                groups="group_pf_withdraw_approver,group_pf_withdraw_user"/>
+    <menuitem id="menu_pf_refund_rejected" parent="menu_pf_refund" action="action_pf_refund_rejected"
+                groups="group_pf_withdraw_approver,group_pf_withdraw_user"/>
+    <menuitem id="menu_pf_refund_all" parent="menu_pf_refund" action="action_pf_refund_all"
+                groups="group_pf_withdraw_approver,group_pf_withdraw_user"/>
+</odoo>

@@ -1,0 +1,434 @@
+<odoo>
+
+    <!--=======Tree view of HR appraisal.main=======-->
+    <record id="hr_appraisal_main_tree_view" model="ir.ui.view">
+        <field name="name">appraisal.main.tree</field>
+        <field name="model">appraisal.main</field>
+        <field name="arch" type="xml">
+            <tree string="HR appraisal.mains">
+                  <field name="appraisal_sequence"/>
+                  <field name="employee_id"  string='Requested By'/>
+                  <field name="template_id"/>
+                  <field name="state" string='Status'/>
+            </tree>
+        </field>
+    </record>
+
+    <!--=======Form view of HR appraisal.main=======-->
+    <record id="hr_appraisal_main_form_view" model="ir.ui.view">
+        <field name="name">appraisal.main.form</field>
+        <field name="model">appraisal.main</field>
+        <field name="arch" type="xml">
+            <form string="HR appraisal">
+                <header>
+                    <button name="button_self_reviewed" string="Submit" class="oe_highlight" type="object" states="draft,raise_query"  confirm="Are you sure you want to confirm the request?."/>
+                     <button name="button_reporting_authority_reviewed" string="Submit" class="oe_highlight" type="object" states="self_review" groups="appraisal_stpi.group_reporting_authority_appraisal" confirm="Are you sure you want to confirm the request?."/>
+                    <button name="button_reviewing_authority_reviewed" string="Submit" class="oe_highlight" type="object" states="reporting_authority_review" groups="appraisal_stpi.group_reviewing_authority_appraisal" confirm="Are you sure you want to confirm the request?."/>
+                    <button name="button_completed" string="Publish" class="oe_highlight" type="object" states="reviewing_authority_review" groups="appraisal_stpi.group_manager_appraisal" confirm="Are you sure you want to publish the request?."/>
+<!--                    <button name="agreed" string="Agree" class="oe_highlight" type="object" states="completed"/>-->
+<!--                    <button name="Disagree" string="disagree" class="oe_highlight" type="object" states="completed"/>-->
+<!--                    <button name="button_raised_query" string="Not Satisfied? Raise Query" class="oe_highlight" type="object" states="completed"/>-->
+                    <button name="button_reject" string="Reject" type="object" attrs="{'invisible':[('state','in',('draft','completed'))]}"/>
+                    <button name="print_appraisal_form" string="Print" type="object" states="completed"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,self_review,reporting_authority_review,reviewing_authority_review,completed" />
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="employee_id"  string='Requested By' readonly="1" options="{'no_open': True,'no_create':True,'no_create_edit': True}"/>
+                            <field name="abap_period" readonly="1" options="{'no_open': True,'no_create':True,'no_create_edit': True}"/>
+                            <field name="branch_id" string="Center" readonly="1" options="{'no_open': True,'no_create':True,'no_create_edit': True}"/>
+                            <field name="category_id" readonly="1" options="{'no_open': True,'no_create':True,'no_create_edit': True}"/>
+                            <field name="If_not_happy" attrs="{'required':[('state','in',('raise_query'))],'readonly':[('state','not in',('raise_query'))]}" invisible="1"/>
+                            <field name="If_not_happy" attrs="{'required':[('state','in',('raise_query'))],'readonly':[('state','not in',('raise_query'))]}" invisible="1"/>
+<!--                            <field name="dob" readonly="1"/>-->
+                        </group>
+                        <group>
+                            <field name="job_id" readonly="1" options="{'no_open': True,'no_create':True,'no_create_edit': True}"/>
+                            <field name="struct_id" readonly="1" options="{'no_open': True,'no_create':True,'no_create_edit': True}"/>
+                            <field name="pay_level_id" readonly="1" options="{'no_open': True,'no_create':True,'no_create_edit': True}"/>
+                            <field name="pay_level" readonly="1" options="{'no_open': True,'no_create':True,'no_create_edit': True}"/>
+                            <field name="template_id" readonly="1" required="1" options="{'no_open': True,'no_create':True,'no_create_edit': True}"/>
+                            <field name="overall_grade" attrs="{'invisible':[('state','not in',('completed'))],'readonly':[('state','in',('completed'))]}"/>
+                            <field name="agree_dis" attrs="{'invisible':[('state','not in',('completed'))],'required':[('state','in',('completed'))]}" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string = "Part-2: Self-assessment by the officer requested upon">
+<!--                            <group>-->
+                                <separator string="Brief Description Of Duties"/>
+                                <newline/>
+                                <field name="duties_description" nolabel="1" attrs="{'readonly':[('state','!=','draft')],'required':[('state','=','draft')]}"/>
+                                <newline/>
+                                <br />
+                                <br />
+                                <br />
+                                <separator string="Please  specify  targets/objectives/goals  (in  quantitative  or  other  terms)  of  work  you  set  for  yourself or that were set for you, eight to ten items of work in the order of priority and your achievement against each target (Example: Annual Action Plan for your Division)."/>
+                                <newline/>
+                                <field name="app_ids" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}">
+                                    <tree editable="bottom">
+                                        <field name="app_id" invisible="1"/>
+                                        <field name="targets" required="1"/>
+                                        <field name="achievements" required="1"/>
+                                    </tree>
+                                </field>
+                                <newline/>
+                                <br />
+                                <br />
+                                <br />
+                                <separator string="Please  state  briefly,  the  shortfalls  with  reference  to  the  targets/objective/goals  referred  to  in  item  2.  Please  specify  constraints,  if  any, in achieving the targets."/>
+                            <newline/>
+                            <field name="sortfalls" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}"/>
+                                <newline/>
+                                <br />
+                                <br />
+                                <br />
+                                <separator string="Please  state  whether  the  annual  return  on  immovable  property  for  the  preceding  calendar  year  was  filed  within  the  prescribed  date  i.e  31st  January  of  the  year  following  the  calendar  year. If not, the date of filling the return should be given."/>
+                            <newline/>
+                            <group><field name="immovatable_property" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}"/></group>
+<!--                            </group>-->
+                        </page>
+                        <page string = "Part-3: Assessment by the Reporting and Reviewing Officer">
+                            <separator string="Assessment of Work Output"/>
+                            <field name="kpia_ids">
+                                <tree editable="bottom" create="0" delete="0">
+                                    <field name="kpia_id" invisible="1"/>
+                                    <field name="state" string='Status' invisible="1"/>
+                                    <field name="kra" readonly="1" invisible="1"/>
+                                    <field name="kpi" readonly="1"/>
+                                    <field name="weightage_comp" string="Weightage Comp" invisible="1"/>
+                                    <field name="weightage_int" string="Weightage"/>
+                                    <field name="reporting_auth" attrs="{'readonly':[('state','not in',('self_review'))]}"/>
+                                    <field name="reviewing_auth" attrs="{'readonly':[('state','not in',('reporting_authority_review'))],'invisible':[('state','in',('self_review'))]}" force_save="1"/>
+                                    <field name="average" invisible="1"/>
+                                    <field name="reviewing_auth_user" attrs="{'invisible':[('state','not in',('completed'))],'readonly':[('state','in',('completed'))]}" invisible="1"/>
+                                </tree>
+                            </field>
+                            <group class="oe_subtotal_footer oe_right"><field name="average1" string="Overall Grading On ‘Work Output’"/></group>
+                            <separator string="Assessment of Personal Attributes"/>
+                            <field name="kpia_ids1">
+                                <tree editable="bottom" create="0" delete="0">
+                                    <field name="kpia_id" invisible="1"/>
+                                    <field name="state" string='Status' invisible="1"/>
+                                    <field name="kra" readonly="1" invisible="1"/>
+                                    <field name="kpi" readonly="1"/>
+                                    <field name="weightage_comp" string="Weightage Comp" invisible="1"/>
+                                    <field name="weightage_int" string="Weightage"/>
+                                    <field name="reporting_auth" attrs="{'readonly':[('state','not in',('self_review'))]}"/>
+                                    <field name="reviewing_auth" attrs="{'readonly':[('state','not in',('reporting_authority_review'))],'invisible':[('state','in',('self_review'))]}" force_save="1"/>
+                                    <field name="average" invisible="1"/>
+                                    <field name="reviewing_auth_user" attrs="{'invisible':[('state','not in',('completed'))],'readonly':[('state','in',('completed'))]}" invisible="1"/>
+                                </tree>
+                            </field>
+                           <group class="oe_subtotal_footer oe_right"> <field name="average2" string="Overall Grading On ‘Personal Attributes’"/></group>
+                            <separator string="Assessment of functional competency"/>
+                            <field name="kpia_ids2">
+                                <tree editable="bottom" create="0" delete="0">
+                                    <field name="kpia_id" invisible="1"/>
+                                    <field name="state" string='Status' invisible="1"/>
+                                    <field name="kra" readonly="1" invisible="1"/>
+                                    <field name="kpi" readonly="1"/>
+                                    <field name="weightage_comp" string="Weightage Comp" invisible="1"/>
+                                    <field name="weightage_int" string="Weightage"/>
+                                    <field name="reporting_auth" attrs="{'readonly':[('state','not in',('self_review'))]}"/>
+                                    <field name="reviewing_auth" attrs="{'readonly':[('state','not in',('reporting_authority_review'))],'invisible':[('state','in',('self_review'))]}" force_save="1"/>
+                                    <field name="average" invisible="1"/>
+                                    <field name="reviewing_auth_user" attrs="{'invisible':[('state','not in',('completed'))],'readonly':[('state','in',('completed'))]}" invisible="1"/>
+                                </tree>
+                            </field>
+                           <group class="oe_subtotal_footer oe_right"> <field name="average3" string="Overall Grading On ‘Functional Competency"/></group>
+                           <group></group>
+                            <group class="oe_subtotal_footer oe_right" colspan="2" attrs="{'invisible':[('state','not in',('reviewing_authority_review', 'completed'))]}">
+                                <field name="overall_rate_num" class="oe_subtotal_footer_separator"/>
+                            </group>
+                        </page>
+                        <page string="Part-4: General" attrs="{'invisible':[('state','in',('draft'))]}">
+                            <separator string="Please comment on the officer’s accessibility to the public and responsiveness to their needs."/>
+                            <newline/>
+                            <field name="comment_oa" nolabel="1" attrs="{'readonly':[('state','!=','self_review')],'required':[('state','=','self_review')]}"/>
+                            <newline/>
+                            <br />
+                            <br />
+                            <br />
+                            <separator string="Please  give  recommendations  for  training  with  a  view  to  further  improving  the  effectiveness and capabilities of the officers."/>
+                            <newline/>
+                            <field name="train_gen" nolabel="1" attrs="{'readonly':[('state','!=','self_review')]}"/>
+                            <newline/>
+                            <br />
+                            <br />
+                            <br />
+                            <separator string="State Of Health"/>
+                            <newline/>
+                            <field name="soh" nolabel="1" attrs="{'readonly':[('state','!=','self_review')]}"/>
+                            <newline/>
+                            <br />
+                            <br />
+                            <br />
+                            <separator string="Integrity"/>
+                            <newline/>
+                            <separator string="Please comment on the integrity of the officer."/>
+                            <newline/>
+                            <field name="inte_general" nolabel="1" attrs="{'readonly':[('state','!=','self_review')]}"/>
+                            <newline/>
+                            <br />
+                            <br />
+                            <br />
+                            <separator string="Pen picture by Reporting Officer (in about 100 words) on the  overall  qualities  of  the  officer  including  area  of  strengths  and  lesser  strength,  extraordinary  achievement, significant failures (ref: A and B  of Part –3) and attitude towards weaker sections. "/>
+                            <newline/>
+                            <field name="pen_picture" nolabel="1" attrs="{'readonly':[('state','!=','self_review')]}"/>
+                            <newline/>
+                            <br />
+                            <br />
+                            <br />
+                        </page>
+                        <page string="Part-5: Remark of the Reviewing Officer" attrs="{'invisible':[('state','in',('draft','self_review'))]}">
+                            <separator string="Length Of Service Under The Reviewing Officer."/>
+                            <!-- <field name="len_rev" nolabel="1" attrs="{'readonly':[('state','!=','reporting_authority_review')]}"/> -->
+
+                        <label for="from_date" string=''/>
+                        <div colspan="2">
+                            <field name="from_date" invisible="1"/>
+                            <field name="to_date" invisible="1"/>
+                            <div colspan="2">
+                                <span class="oe_inline">
+                                    From
+                                </span>
+                                <field name="from_date" class="oe_inline" attrs="{'readonly':[('state','!=','reporting_authority_review')],'required':[('state','=','reporting_authority_review')]}"/>
+                                <span class="oe_inline">
+                                    To
+                                </span>
+                                <field name="to_date" class="oe_inline" attrs="{'readonly':[('state','!=','reporting_authority_review')],'required':[('state','=','reporting_authority_review')]}"/>
+                            </div>
+                        </div>
+                          
+                            <newline/>
+                            <br />
+                            <br />
+                            <br />
+                            <separator string="Do  you  agree  with  the  assessment  made  by  the  reporting  officer  with respect to the work output and the various attributes in Part-3 and Part-4?   Do you agree with the assessment of Reporting Officer in respect of extraordinary achievements/significant failures of the officer reported upon? (Ref; A (iv) of Part-3  and 5 of Part-4)."/>
+                            <newline/>
+                            <separator string="In  case  you  do  not  agree  with  any  of  the  numerical  assessment  of  attributes  please  record  your  assessment  in  the  column  provided  for  you  in  that  section  and  initial your entries."/>
+                            <newline/>
+                            <field name="ag_no" nolabel="1" widget="radio" attrs="{'readonly':[('state','!=','reporting_authority_review')]}"/>
+                            <newline/>
+                            <br />
+                            <br />
+                            <br />
+                            <separator string="In case of disagreement,  please specify the reasons.  Is there anything you wish to modify or add? "/>
+                            <newline/>
+                            <field name="dis_mod" nolabel="1" attrs="{'readonly':[('state','!=','reporting_authority_review')]}"/>
+                            <newline/>
+                            <br />
+                            <br />
+                            <br />
+                            <separator string="Pen picture by Reviewing Officer. Please comment (in about 100 words) on the overall qualities  of  the  officer  including  area  of  strengths  and  lesser  strength  and  his  attitude  towards  weaker sections."/>
+                            <newline/>
+                            <field name="pen_pic_rev" nolabel="1" attrs="{'readonly':[('state','!=','reporting_authority_review')]}"/>
+                            <newline/>
+                            <br />
+                            <br />
+                            <br />
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+            </form>
+        </field>
+    </record>
+
+
+<!--    <record id="view_appraisal_search_form" model="ir.ui.view">-->
+<!--        <field name="name">appraisal.main.search.form</field>-->
+<!--        <field name="model">appraisal.main</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--           <search string="Appraisal">-->
+<!--               <filter string="Employee" name="employee_id" context="{'group_by':'employee_id'}"/>-->
+<!--               <filter string="Department" name="department_id" context="{'group_by':'department_id'}"/>-->
+<!--               <filter string="Status" name="status" context="{'group_by':'state'}"/>-->
+<!--            </search>-->
+<!--        </field>-->
+<!--    </record>-->
+
+    <record id="seq_appraisal_sequence" model="ir.sequence">
+        <field name="name">Appraisal Main</field>
+        <field name="code">appraisal.main</field>
+        <field name="padding">3</field>
+        <field name="company_id" eval="False"/>
+     </record>
+
+    <!--============Action view of Appraisal============-->
+    <record id="appraisal_menu_new_action" model="ir.actions.act_window">
+        <field name="name">Appraisal</field>
+        <field name="res_model">appraisal.main</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state','=','draft')]</field>
+    </record>
+    
+
+    <!--============Action view of Appraisal============-->
+    <record id="appraisal_menu_self_review_action" model="ir.actions.act_window">
+        <field name="name">Appraisal</field>
+        <field name="res_model">appraisal.main</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state','=','self_review')]</field>
+    </record>
+
+
+    <!--============Action view of Appraisal============-->
+    <record id="appraisal_menu_reporting_authority_action" model="ir.actions.act_window">
+        <field name="name">Appraisal</field>
+        <field name="res_model">appraisal.main</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state','=','reporting_authority_review')]</field>
+    </record>
+    <!--============Action view of Appraisal============-->
+    <record id="appraisal_menu_reviewing_authority_approved_action" model="ir.actions.act_window">
+        <field name="name">Appraisal</field>
+        <field name="res_model">appraisal.main</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state','=','reviewing_authority_review')]</field>
+    </record>
+
+    <!--============Action view of Appraisal============-->
+    <record id="appraisal_menu_reject_action" model="ir.actions.act_window">
+        <field name="name">Appraisal</field>
+        <field name="res_model">appraisal.main</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state','=','rejected')]</field>
+    </record>
+
+    <!--============Action view of Appraisal============-->
+    <record id="appraisal_menu_completed_action" model="ir.actions.act_window">
+        <field name="name">Appraisal</field>
+        <field name="res_model">appraisal.main</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state','=','completed')]</field>
+    </record>
+
+    <!--============Action view of Appraisal============-->
+    <record id="menu_appraisal_employee_action" model="ir.actions.act_window">
+        <field name="name">Appraisal</field>
+        <field name="res_model">appraisal.main</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'group_by': 'employee_id'}</field>
+    </record>
+    <!--============Action view of Appraisal============-->
+    <record id="menu_appraisal_branch_action" model="ir.actions.act_window">
+        <field name="name">Appraisal</field>
+        <field name="res_model">appraisal.main</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'group_by': 'branch_id'}</field>
+    </record>
+    <!--============Action view of Appraisal============-->
+    <record id="menu_appraisal_status_action" model="ir.actions.act_window">
+        <field name="name">Appraisal</field>
+        <field name="res_model">appraisal.main</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'group_by': 'state'}</field>
+    </record>
+
+    <record id="appraisal_menu_new_action_all" model="ir.actions.act_window">
+        <field name="name">Appraisal</field>
+        <field name="res_model">appraisal.main</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree</field>
+        <field name="domain">[('employee_id.user_id', '=', uid)]</field>
+    </record>
+
+
+
+      <menuitem id="menu_appraisal_main"
+                name="Appraisal"
+                web_icon="appraisal_stpi,static/description/icon.png"
+                groups="appraisal_stpi.group_reporting_authority_appraisal,appraisal_stpi.group_reviewing_authority_appraisal,appraisal_stpi.group_manager_appraisal,appraisal_stpi.group_appraisal_user"
+      />
+
+      <menuitem id="menu_appraisal_id"
+                name="Appraisal"
+                parent="menu_appraisal_main"
+      />
+
+    <menuitem id = "appraisal_new_menu_id"
+                  name = "New"
+                  parent ="menu_appraisal_id"
+                  action ="appraisal_menu_new_action"
+                  sequence='1'
+                  />
+    <menuitem id = "appraisal_waiting_menu_id"
+                  name = "Pending for Reporting Officer"
+                  parent ="menu_appraisal_id"
+                  action ="appraisal_menu_self_review_action"
+                  groups="appraisal_stpi.group_reporting_authority_appraisal"
+                  sequence='2'
+                  />
+    <menuitem id = "appraisal_approved_menu_id"
+                  name = "Pending for Reviewing Officer"
+                  parent ="menu_appraisal_id"
+                  action ="appraisal_menu_reporting_authority_action"
+                  groups="appraisal_stpi.group_reviewing_authority_appraisal"
+                  sequence='3'
+
+                  />
+    <menuitem id = "appraisal_approved_reviewing_authority_menu_id"
+                  name = "Pending to Publish"
+                  parent ="menu_appraisal_id"
+                  action ="appraisal_menu_reviewing_authority_approved_action"
+                  groups="appraisal_stpi.group_manager_appraisal"
+                  sequence='4'
+                  />
+    <menuitem id = "appraisal_completed_menu_id"
+                  name = "Completed"
+                  parent ="menu_appraisal_id"
+                  action ="appraisal_menu_completed_action"
+                  sequence='5'
+                  />
+    <menuitem id = "appraisal_rejected_menu_id"
+                  name = "Rejected"
+                  parent ="menu_appraisal_id"
+                  action ="appraisal_menu_reject_action"
+                  sequence='6'
+                  />
+
+
+      <menuitem id="menu_appraisal_reporting_id"
+                name="Reporting"
+                parent="menu_appraisal_main"
+                groups="appraisal_stpi.group_manager_appraisal"
+      />
+
+      <menuitem id="menu_appraisal_employee_id"
+                name="Appraisal by Employee"
+                parent="menu_appraisal_reporting_id"
+                action="menu_appraisal_employee_action"
+      />
+      <menuitem id="menu_appraisal_branch_id"
+                name="Appraisal by Branch"
+                parent="menu_appraisal_reporting_id"
+                action="menu_appraisal_branch_action"
+      />
+      <menuitem id="menu_appraisal_status"
+                name="Appraisal by Status"
+                parent="menu_appraisal_reporting_id"
+                action="menu_appraisal_status_action"
+      />
+      <menuitem id = "appraisal_new_menu_id_all"
+                  name = "Track Status"
+                  parent ="menu_appraisal_id"
+                  action ="appraisal_menu_new_action_all"
+                  sequence='7'
+                  />
+
+</odoo>

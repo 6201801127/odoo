@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model='ir.ui.view' id='wizard_employee_form'>
+        <field name="name">wizard.employee.form</field>
+        <field name="model">wizard.employee.stage</field>
+        <field name="arch" type="xml">
+            <form string="Set as Employee">
+                <group>
+                    <field name="related_user"/>
+                </group>
+                <footer>
+                    <button name="set_as_employee" string="Set as Employee" type="object" class="oe_highlight"/>
+                    or
+                    <button string="Cancel" class="oe_link" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record model='ir.actions.act_window' id='wizard_employee_act'>
+        <field name="name">Set as Employee</field>
+        <field name="res_model">wizard.employee.stage</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="wizard_employee_form"/>
+        <field name="target">new</field>
+    </record>
+
+    <record model="ir.ui.view" id="hr_employee_stages_inherit_form_view">
+        <field name="name">hr.employee.form.view</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="/form/sheet" position="before">
+                <header>
+                    <button name="change_employee_stage" invisible="context.get('hide_stage_change',False)" groups="hr.group_hr_manager" string="Change Stage" type="object" class="oe_highlight"/>
+                    <button name="employee_promotions" groups="hr.group_hr_manager" invisible="context.get('hide_stage_change',False)" string="Promotion" type="object" class="oe_highlight" />
+                    <!--<button name="start_grounding" string="Start Induction" type="object" states="joined"/>-->
+                    <!--<button name="start_test_period" string="Start Probation" type="object" states="grounding"/>-->
+                    <!--<button name="check_before_set_as_employee" string="Set as Employee" type="object"-->
+                    <!--states="joined,test_period"/>-->
+                    <!--<button name="start_notice_period" string="Start Notice Period" type="object" states="employment"/>-->
+                    <!--<button name="relived" string="Relieved" type="object" states="notice_period"/>-->
+                    <!--<button name="terminate" string="Terminate" type="object" states="grounding,employment"/>-->
+                    <!--<button name="employee_retired" string="Set Retirement" type="object" states="employment" groups="employee_stages.group_retirement_employee"/>-->
+
+                    <!-- <field name="emp_state" widget="statusbar"/> -->
+                </header>
+            </xpath>
+            <!--<xpath expr="//field[@name='resource_calendar_id']" position="after">-->
+            <!--<field name="gratuity_check_no" attrs="{'invisible':[('state','!=','retired')]}"/>-->
+            <!--</xpath>-->
+            <xpath expr="//page[@name='hr_settings']" position="attributes">
+                <attribute name="groups">base.group_no_one</attribute>
+            </xpath>
+            <page name="hr_settings" position="after">
+                <field name="validate_details" invisible='1'/>
+                <page name="stage_history" attrs="{'invisible':[('validate_details', '=', False)]}" string="Status History" groups="hr.group_hr_manager">
+                    <field name="stages_history" style="pointer-events: none;">
+                        <tree create="false" edit="false" delete="false">
+                            <field name="designation_id"/>
+                            <field name="file_no"/>
+                            <field name="order_no"/>
+                            <field name="state"/>
+                            <field name="order_date"/>
+                            <field name="Date_wef" invisible='1'/>
+                            <field name="remarks"/>
+                            <field name="start_date" invisible="0"/>
+                            <field name="end_date" invisible="0"/>
+                            <field name="duration" invisible="0" sum="Total"/>
+                        </tree>
+                    </field>
+                </page>
+            </page>
+        </field>
+    </record>
+
+    <record id="hr_employee_form_field_inherited_from_groups_inherit" model="ir.ui.view">
+        <field name="name">hr.employee.inherit.view.form2</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="groups_inherit.hr_employee_form_field_inherited"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='recruitment_type']" position="after">
+                <field name="state" attrs="{'invisible': [('employee_type', '!=', 'regular')],'required': [('employee_type', '=', 'regular')]}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="hr_employee_stages_inherit_tree_view">
+        <field name="name">hr.employee.tree.view</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="groups_inherit.view_add_employee_doc_tree"/>
+        <field name="arch" type="xml">
+            <field name="message_needaction" position="after">
+                <field name="state"/>
+            </field>
+        </field>
+    </record>
+
+     <record model="ir.ui.view" id="hr_employee_stages_inherit_tree_view1">
+        <field name="name">hr.employee.tree.view</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="groups_inherit.view_add_employee_doc_tree1"/>
+        <field name="arch" type="xml">
+            <field name="message_needaction" position="after">
+                <field name="state"/>
+            </field>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="hr_employee_stages_inherit_search_view">
+        <!--<field name="name">hr.employee.search.view</field>-->
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_filter"/>
+        <field name="arch" type="xml">
+            <field name="job_id" position="after">
+                <field name="state"/>
+                <filter name="employee" string="Regular" domain="[('state','=','employment')]"/>
+                <filter name="employee" string="Probation" domain="[('state','=','test_period')]"/>
+                <filter name="employee" string="Contract" domain="[('state','=','contract')]"/>
+                <filter name="employee" string="Deputation" domain="[('state','=','deputation')]"/>
+            </field>
+            <xpath expr="//group" position="inside">
+                <filter name="state" string="Stage" domain="[]" context="{'group_by':'state'}"/>
+            </xpath>
+            <xpath expr="//filter[@name='inactive']" position="before">
+                <separator/>
+                <filter name="my_subbordinates" string="Subordinates" domain="['|','|','|','|','|','|','|','|','|','|','|','|','|','|','|','|',('parent_id.user_id','=',uid),('parent_id.parent_id.user_id','=',uid),('parent_id.parent_id.parent_id.user_id','=',uid),('parent_id.parent_id.parent_id.parent_id.user_id','=',uid),('parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.user_id','=',uid),('parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.user_id','=',uid),('parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.user_id','=',uid),('parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.user_id','=',uid),('parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.user_id','=',uid),('parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.user_id','=',uid),('parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.user_id','=',uid),('parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.user_id','=',uid),('parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.user_id','=',uid),('parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.user_id','=',uid),('parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.user_id','=',uid),('parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.user_id','=',uid),('parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.parent_id.user_id','=',uid)]"/>
+                <separator/>
+                <filter name="my_branch" string="Own Center" domain="[('branch_own','=',True)]"/>
+                <separator/>
+                <filter name="jan_jun_join" string="Jan Jun Join" domain="[('date_join_month', '&lt;=', 6)]"/>
+                <filter name="jul_dec_join" string="Jul Dec Join" domain="[('date_join_month', '&gt;', 6),
+                                                                            ('date_join_month', '&lt;=', 12)]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="hr_employee_stages_inherit_kanban_view">
+        <!--<field name="name">hr.employee.kanban.view</field>-->
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.hr_kanban_view_employees"/>
+        <field name="arch" type="xml">
+            <field name="message_needaction_counter" position="after">
+                <field name="state"/>
+            </field>
+            <xpath expr="//li[2]" position="after">
+                <li t-if="record.state.raw_value">
+                    <field name="state"/>
+                </li>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr.open_view_employee_list_my" model="ir.actions.act_window">
+        <field name="name">Employees</field>
+        <field name="res_model">hr.employee</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{"search_default_employee":1}</field>
+        <field name="view_id" eval="False"/>
+        <field name="search_view_id" ref="hr.view_employee_filter"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+            Click to add a new employee.
+            </p>
+            <p>
+            With just a quick glance on the Odoo employee screen, you
+            can easily find all the information you need for each person;
+            contact data, job position, availability, etc.
+            </p>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="change_hr_employee_stages_view">
+        <field name="name">change.employee.stage.view</field>
+        <field name="model">change.employee.stage</field>
+        <field name="arch" type="xml">
+            <form string="Change Employee Stage">
+                <group>
+                    <group>
+                        <field name="state" required="1"/>
+                        <field name="reason"/>
+                        <field name="employee_id" invisible="1"/>
+                    </group>
+                </group>
+                <footer>
+                    <button string="Change Stage" name="change_stage" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="oe_link" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="hr_employee_stages_config_tree_view">
+        <field name="name">employee.stage.configuration.view</field>
+        <field name="model">employee.stage.configuration</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="employee_type"/>
+                <field name="recruitment_type"/>
+                <field name="existing_state"/>
+                <field name="days" required="1"/>
+                <field name="new_state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_employee_stages_config" model="ir.actions.act_window">
+        <field name="name">Employee Stage Configuration</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">employee.stage.configuration</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="hr_employee_stages_config_tree_view"/>
+    </record>
+    <menuitem id="employee_employee_stages_config" name="Employee Stage" parent="hr.menu_human_resources_configuration" sequence="8" action="action_employee_stages_config"/>
+
+    <record model="ir.ui.menu" id="hr.menu_open_view_employee_list_my">
+        <field name="action" eval="False"/>
+    </record>
+
+    <record id="hr_employee_form_inherits_set_required" model="ir.ui.view">
+        <field name="name">hr.employee.inherit.view.private_form</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="groups_inherit.hr_employee_private_inherited"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='gende']" position="attributes">
+                <attribute name="required">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='address_home_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="inherited_hr_employee_form_inherits_set_required" model="ir.ui.view">
+        <field name="name">hr.employee.inherit.view.form</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='category_ids']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <!-- <xpath expr="//field[@name='bank_account_id']" position="attributes">
+                <attribute name="invisible">0</attribute>
+            </xpath> -->
+        </field>
+    </record>
+
+    <!-- <record id="inherited_hr_employee_form_hr_branch_company" model="ir.ui.view">
+        <field name="name">hr.employee.inherit.view.branch_compnay_form</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr_branch_company.hr_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='branch_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record> -->
+</odoo>

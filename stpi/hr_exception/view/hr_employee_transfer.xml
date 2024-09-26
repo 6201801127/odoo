@@ -1,0 +1,78 @@
+<?xml version="1.0" ?>
+<odoo>
+    <record id="action_hr_employee_transfer_test_tree" model="ir.actions.act_window">
+                  <field name="name">Hr Employee Transfer Rules</field>
+                  <field name="res_model">exception.rule</field>
+                  <field name="view_type">form</field>
+                  <field name="view_mode">tree,form</field>
+                  <field name="view_id" ref="base_exception_and_approval.view_exception_rule_tree"/>
+                  <field name="domain">[('rule_group', '=', 'hr_employee_transfer')]</field>
+                  <field name="context">{'active_test': False, 'default_rule_group' : 'hr_employee_transfer'}</field>
+              </record>
+        <menuitem
+                id="menu_hr_tranfer_con_parent"
+                parent="hr_employee_transfer.employee_transfer_configuration_menu_id_parent"
+                sequence="20"
+                name="Exceptions"
+        />
+        <menuitem
+                action="action_hr_employee_transfer_test_tree"
+                id="menu_hr_employee_transfer_test"
+                parent="menu_hr_tranfer_con_parent"
+        />
+
+        <record id="view_hr_employee_transfer_exp_form" model="ir.ui.view">
+                <field name="name">hr_employee_transfer.view_hr_employee_transfer_exp_form</field>
+                <field name="model">hr.employee.transfer</field>
+                <field name="inherit_id" ref="hr_employee_transfer.employeetransfer_form_view"/>
+                <field name="arch" type="xml">
+                    <xpath expr="//field[@name='transfer_attach']" position="after">
+                        <field name="main_exception_id" options='{"no_open": True}' string="Error:" attrs="{'invisible':[('main_exception_id','=', False)]}"/>
+                        <field name="ignore_exception" invisible="1"/>
+                    </xpath>
+                    <xpath expr="//notebook" position="inside">
+                        <page string="Other Info" groups="base.group_no_one">
+                            <group name="exception" colspan="2" col="2">
+                                <separator string="Exception" colspan="2"/>
+                                <field name="exception_ids" colspan="2" nolabel="1" readonly="1"/>
+                            </group>
+                        </page>
+                    </xpath>
+
+                    <xpath expr="//sheet" position="after">
+                        <div class="oe_chatter">
+                            <field name="message_follower_ids" widget="mail_followers"/>
+                            <field name="activity_ids" widget="mail_activity"/>
+                            <field name="message_ids" widget="mail_thread"/>
+                       </div>
+                    </xpath>
+                </field>
+        </record>
+
+        <record id="view_hr_employee_transfer_exp_tree" model="ir.ui.view">
+            <field name="name">hr_employee_transfer.view_hr_employee_transfer_exp_tree</field>
+            <field name="model">hr.employee.transfer</field>
+            <field name="inherit_id" ref="hr_employee_transfer.employeetransfer_tree_view"/>
+            <field name="arch" type="xml">
+                 <field name="state" position="before">
+                       <field name="main_exception_id"/>
+                 </field>
+            </field>
+        </record>
+
+        <record id="view_hr_employee_transfer_exp_filter" model="ir.ui.view">
+            <field name="name">hr_exception.view_hr_employee_transfer_exp_filter</field>
+            <field name="model">hr.employee.transfer</field>
+            <field name="inherit_id" ref="hr_employee_transfer.view_employee_transfer_search_form"/>
+            <field name="arch" type="xml">
+                <filter name="status" position="after">
+                    <separator orientation="vertical"/>
+                    <filter icon="terp-emblem-important" name="tofix" string="Blocked in draft" domain="[('main_exception_id','!=',False)]"/>
+                </filter>
+            </field>
+        </record>
+
+
+
+</odoo>
+

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- pre function to write no update false -->
+        <function name="write" model="ir.model.data">
+            <function name="search" model="ir.model.data">
+                <value eval="[('module', '=', 'ohrms_loan'), ('name', 'in', ['group_loan_requester','group_loan_approver','ir_rule_loan_security','ir_rule_loan_self_security','ir_rule_loan_allowed_self_security'])]"/>
+            </function>
+            <value eval="{'noupdate': False}" />
+        </function>
+
+        <record model="ir.module.category" id="module_loan_employee">
+            <field name="name">Loan</field>
+            <field name="description">Loan</field>
+            <field name="sequence">22</field>
+        </record>
+
+        <record id="group_loan_requester" model="res.groups">
+            <field name="name">Officer</field>
+            <field name="stpi">1</field>
+            <field name="category_id" ref="module_loan_employee"/>
+        </record>
+
+        <record id="group_loan_approver" model="res.groups">
+            <field name="name">Admin Manager</field>
+            <field name="stpi">1</field>
+            <field name="category_id" ref="module_loan_employee"/>
+            <field name="implied_ids" eval="[(4, ref('group_loan_requester'))]"/>
+        </record>
+
+        <record id="group_loan_finance_approver" model="res.groups">
+            <field name="name">Finance Manager</field>
+            <field name="stpi">1</field>
+            <field name="category_id" ref="module_loan_employee"/>
+            <field name="implied_ids" eval="[(4, ref('group_loan_requester'))]"/>
+        </record>
+
+        <record id="groups_inherit.group_employee_type_regular" model="res.groups">
+            <field name="implied_ids" eval="[(4, ref('ohrms_loan.group_loan_requester')),(3, ref('ohrms_loan.group_loan_approver'))]"/>
+        </record>
+
+        <record id="group_loan_employee_change" model="res.groups">
+            <field name="name">Loan Employee Change</field>
+            <field name="stpi">1</field>
+            <field name="category_id" ref="module_loan_employee"/>
+        </record>
+
+        <!-- <record id="ir_rule_loan_security" model="ir.rule">
+            <field name="model_id" ref="model_hr_loan"/>
+            <field name="domain_force">['|', ('employee_id.branch_id','=',False), ('employee_id.branch_id.id','in',[g.id for g in user.branch_ids])] </field>
+            <field name="name">Allowed Loan User</field>
+            <field name="global" eval="True"/>
+        </record> -->
+
+        <!-- <record id="ir_rule_loan_self_security" model="ir.rule">
+            <field name="model_id" ref="model_hr_loan"/>
+            <field name="domain_force">[('employee_id.user_id','=',user.id)]</field>
+            <field name="name">Loan User</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        </record> -->
+
+
+        <!-- <record id="ir_rule_loan_allowed_self_security" model="ir.rule">
+            <field name="model_id" ref="model_hr_loan"/>
+            <field name="domain_force">['|', ('employee_id.branch_id','=','False'), ('employee_id.branch_id.id','in',[g.id for g in user.branch_ids])]</field>
+            <field name="name">Allowed Loan User</field>
+            <field name="groups" eval="[(4, ref('ohrms_loan.group_loan_approver'))]"/>
+        </record> -->
+
+        <record id="hr_loan_officer_record_rule" model="ir.rule">
+            <field name="name">Officer : Own records only</field>
+            <field name="model_id" ref="model_hr_loan"/>
+            <field name="domain_force">[('employee_id.user_id','=', user.id)]</field>
+            <field name="groups" eval="[(6,0,[ref('ohrms_loan.group_loan_requester')])]"/>
+        </record>
+
+        <record id="hr_loan_manager_record_rule" model="ir.rule">
+            <field name="name">Manager : Branch records only</field>
+            <field name="model_id" ref="model_hr_loan"/>
+            <field name="domain_force">['|', ('employee_id.branch_id','=','False'), ('employee_id.branch_id.id','in',[g.id for g in user.branch_ids])]</field>
+            <field name="groups" eval="[(6,0,[ref('ohrms_loan.group_loan_approver'),ref('ohrms_loan.group_loan_finance_approver')])]"/>
+        </record>
+
+    </data>
+</odoo>

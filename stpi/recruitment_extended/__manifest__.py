@@ -1,0 +1,27 @@
+# -*- coding: utf-8 -*-
+{
+    'name': "Job Application Form",
+    'summary': "Job Application Form",
+    'description': "Job Application Form",
+    'author': "Dexciss Technology",
+    'website': "https://dexciss.com/",
+    'category': 'Job Application Form',
+    'version': '0.1',
+    'depends': ['hr_applicant', 'website_hr_recruitment'],
+    'data': [
+        'security/ir.model.access.csv',
+        'views/website_hr_recruitment_templates.xml',
+        'views/website_hr_recruitment_email.xml',
+        'views/kw_email_otp_template.xml',
+        'views/recruitment_index_template.xml',
+        'views/hr_applicant.xml',
+        'views/hr_job_views.xml',
+        'data/applicant_nationality_data.xml',
+        'views/applicant_nationality_views.xml',
+        'views/applicant_form_draft_submitted.xml',
+    ],
+    'demo': [],
+    'installable': True,
+    'auto_install': True,
+    'application': True,
+}

@@ -1,0 +1,470 @@
+<odoo>
+
+    <record id="seq_sequence_file_id" model="ir.sequence">
+        <field name="name">Sequence</field>
+        <field name="code">folder.master</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <record id="foldermaster_form_view" model="ir.ui.view">
+        <field name="name">folder.master.form</field>
+        <field name="model">folder.master</field>
+        <field name="arch" type="xml">
+            <form string="File">
+                <header>
+                    <button name="button_submit" string="Save" class="oe_highlight" type="object" states="draft" confirm="Are you sure to save ?"/>
+                    <button name="button_part_file" string="Part File" confirm="Are you sure to create part file ?" class="oe_highlight" type="object" attrs="{'invisible':['|',('state','not in',['in_progress','shelf']),('version','!=',False)]}"/>
+                    <button name="%(part_file_wizard_action_view)d" class="oe_highlight" type="action" string="Merge File" context="{'default_deffolderid': id}" attrs="{'invisible':['|','|','|',('no_of_part_files','&lt;=',0),('is_current_owner','=',False),('state','!=','in_progress'),('version','!=',False)]}"/>
+                    <!-- <button name="button_merge_file" string="Merge File" class="oe_highlight" type="object" states="in_progress"/>-->
+                    <button name="button_close" string="Close" class="oe_highlight" type="object" attrs="{'invisible':['|','|',('same_department','=',False),('is_current_owner','=',False),('state','!=', 'in_progress')]}"/>
+
+                    <button name="action_cancel_file_close" string="Cancel Close" class="oe_highlight" type="object" attrs="{'invisible':['|','|',('same_department','=',False),('is_current_owner','=',False),('state','!=', 'pending_close')]}" invisible="context.get('action_pending_close_reopen')"/>
+                    
+                    <button name="action_approve_file_close" string="Approve" states="pending_close" class="oe_highlight" type="object" invisible="not context.get('action_pending_close_reopen')"/>
+
+                    <button name="action_reject_file_close" string="Reject" states="pending_close" class="oe_highlight" type="object" invisible="not context.get('action_pending_close_reopen')"/>
+                    
+                    <button name="action_submit_file_reopen" string="Reopen" class="oe_highlight" type="object" attrs="{'invisible':['|','|',('same_department','=',False),('state','!=','closed'),'&amp;',('is_current_owner','=',False),('is_on_approver_group','=',False)]}"/>
+
+                    <button name="action_cancel_file_reopen" string="Cancel Reopen" class="oe_highlight" type="object" attrs="{'invisible':['|','|',('same_department','=',False),('is_current_owner','=',False),('state','!=','pending_reopen')]}" invisible="context.get('action_pending_close_reopen')"/>
+
+                    <button name="action_approve_file_reopen" string="Approve" class="oe_highlight" type="object" states="pending_reopen" invisible="not context.get('action_pending_close_reopen')"/>
+
+                    <button name="action_reject_file_reopen" string="Reject" class="oe_highlight" type="object" states="pending_reopen" invisible="not context.get('action_pending_close_reopen')"/>
+
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_progress" />
+                </header>
+                <sheet>
+                <div class="row">
+                    <div class="text-left col-6">
+                        <div attrs="{'invisible':[('is_current_owner','=',False)]}">
+                            <h5 class="mt-0 pt-0" style="color: #00A09D;" attrs="{'invisible':[('noting_ids','=',[]),('file_ids','=',[]),('document_dispatch','=',[])]}">Download</h5>
+                            <button name="action_download_notings" type="object" string="Notings" icon="fa-download" attrs="{'invisible':[('noting_ids','=',[])]}"/>
+                            <button name="action_download_correspondences" type="object" string="Correspondences" icon="fa-download" attrs="{'invisible':[('file_ids','=',[])]}"/>
+                            <!-- <button name="action_download_dispatch_letters" type="object" string="Dispatch Letters" icon="fa-download" attrs="{'invisible':[('document_dispatch','=',[])]}" invisible="1"/> -->
+                            <!-- <button name="action_download_file" type="object" string="File" icon="fa-download" attrs="{'invisible':[('noting_ids','=',[]),('file_ids','=',[]),('document_dispatch','=',[])]}"/> -->
+                        </div>
+                    </div>
+                    
+                    <div class="oe_button_box w-100 col-6" name="button_box">
+                        <button name="%(folder_forward_button_wizard_action_view)d" type="action" string="Forward" icon="fa-forward" context="{'default_defid': id}" attrs="{'invisible':['|',('is_current_owner','=',False),('state','!=','in_progress')]}"/>
+                        <button name="deal_with_file" string="Deal with File" type="object" attrs="{'invisible':['|',('is_current_owner','=',False),('state','!=', 'in_progress')]}"  class="font-weight-bold font-italic" icon="fa-pencil-square-o"/>
+                        <button type="object" class="oe_stat_button" icon="fa-folder-open-o" attrs="{'invisible':[('state','=','draft')]}" name="tracker_view_file" string="Tracking info"/>
+                        <button type="object" attrs="{'invisible':['|',('state','=','draft'),('version','!=',False)]}" class="oe_stat_button" icon="fa-folder-open-o" name="view_part_files" string="Part Files"/>
+                    </div>
+                </div>
+
+                    <group>
+                        <group>
+                            <field name="is_current_owner" invisible="1"/>
+                            <field name="same_department" invisible="1"/>
+                            <field name="is_on_approver_group" invisible="1"/>
+                            <field name="no_of_part_files" invisible="1"/> 
+                            <field name="version" invisible="1"/>
+                            <field name="folder_name" required ="1" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="department_id" attrs="{'readonly':[('state','!=', 'draft')]}" options="{'no_open':True,'no_create':True,'no_edit':True,'no_create_edit':True}"/>
+                            <field name="division_id" attrs="{'readonly':[('state','!=', 'draft')]}" domain="[('parent_id','!=',False),('parent_id','=',department_id)]" options="{'no_open':True,'no_create':True,'no_edit':True,'no_create_edit':True}"/>
+                            <field name="subject" required="1" attrs="{'readonly':[('state','!=', 'draft')]}" options="{'no_open':True,'no_create':True,'no_edit':True,'no_create_edit':True}" domain="[('division_id','=',department_id),('sub_division_id','=',division_id)]"/>
+                            <field name="date" readonly="1"/>
+                            <field name="branch_id" readonly="1" options="{'no_open':True,'no_create':True,'no_edit':True,'no_create_edit':True}"/>
+                            <field name="previous_reference" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                        </group>
+                        <group>
+                            <field name="number" readonly="1"/>
+                            <field name="old_file_number" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="write_date"/>
+                            <field name="tags" widget="many2many_tags" placeholder="Tags..." options="{'color_field': 'color','no_open':True,'no_create':True,'no_edit':True,'no_create_edit':True}" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="sequence" invisible="1"/>
+                            <field name="type" widget="many2many_tags" placeholder="Type..." options="{'color_field': 'color','no_open':True,'no_create':True,'no_edit':True,'no_create_edit':True}" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="status" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="later_reference" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                        </group>
+                        <field name="description" placeholder="Description" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                    </group>
+                    <notebook>
+                        <page name="notings" string="Notings">
+                            <field name="noting_ids" readonly="1"/>
+                        </page>
+                        <page name="Letters" string="Correspondences">
+                            <button name="%(add_reference_wizard_action_view)d" type="action" icon="fa-plus" class="oe_stat_button" string="Add Correspondence" context="{'default_folder_id': id}" attrs="{'invisible':['|',('is_current_owner','=',False),('state','in', ['draft','closed','closed_part','pending_close','pending_reopen'])]}"/>
+                            <field name="file_ids" readonly="1">
+                                <tree default_order="attach_to_file_time desc">
+                                    <field name="subject"/>
+                                    <field name="letter_number"/>
+                                    <field name="sender_name"/>
+                                    <field name="sender_designation"/>
+                                    <field name="sender_organisation"/>
+                                    <field name="letter_no"/>
+                                    <field name="letter_date"/>
+                                    <field name="is_removable" invisible="1"/>
+                                    <field name="attach_to_file_date" invisible="1"/>
+                                    <field name="attach_to_file_time" invisible="1"/>
+                                    <field name="sender_type" invisible="1"/>
+                                    <field name="letter_type" invisible="1"/>
+                                    <field name="sender_ministry" invisible="1"/>
+                                    <field name="sender_department" invisible="1"/>
+                                    <field name="last_owner_id" invisible="1"/>
+                                    <field name="current_owner_id" invisible="1"/>
+                                    <field name="sec_owner" invisible="1"/>
+                                    <button name="open_popup" class="btn btn-primary" type="object" attrs="{'invisible':['|',('parent.is_current_owner','=',False),('is_removable','=',False)]}" string="Remove"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page name="Write_correspondence" string="Dispatch Letter" invisible="1">
+                            <button type="action" name="%(write_correspondence_wizard_action_view)d" string="Add Dispatch Letter" colspan="2" class="oe_stat_button" icon="fa-plus" attrs="{'invisible':['|',('is_current_owner','=',False),('state','in', ['draft','closed','closed_part','pending_close','pending_reopen'])]}" context="{'default_folder_id': id, 'default_current_user_id': uid, 'default_branch_id': branch_id, 'default_department_id': department_id, 'default_version': False, 'default_previousversion': False}"/>
+                            <!-- <button type="object" name="view_tracking_info" string="Tracking Info" attrs="{'invisible':['|',('is_current_owner','=',False),('state','in', ['draft','closed','closed_part'])]}" colspan="2" class="oe_stat_button ml-3" icon="fa-history"/> -->
+                            <field name="document_dispatch" readonly="1">
+                                <tree string="Folder">
+                                    <field name="forwarded" invisible="1"/>
+                                    <field name="current_user_id"/>
+                                    <field name="branch_id"/>
+                                    <field name="dispatch_mode"/>
+                                    <field name="department_id"/>
+                                    <field name="created_on"/>
+                                    <field name="select_template"/>
+                                    <field name="template_html" invisible="1"/>
+                                    <field name="version_str"/>
+                                    <field name="prev_version_str"/>
+                                    <field name="state"/>
+                                    <button name="button_edit" string=" Revise" class="fa fa-history btn-primary" type="object" attrs="{'invisible':['|','|',('parent.state','in', ['draft','closed','closed_part','pending_close','pending_reopen']),('state','in',['approve','sent_approval','obsolete','dispatched']),'&amp;',('state','!=','reject'),('forwarded','=',False)]}"/>
+                                    <button name="%(edit_doc_dispatch_button_wizard_action_view)d" string=" Edit" class="fa fa-pencil btn-primary" type="action" attrs="{'invisible':['|','|',('parent.state','in', ['draft','closed','closed_part','pending_close','pending_reopen']),('state','!=','draft'),'&amp;',('state','!=','draft'),('forwarded','=',False)]}" context="{'default_doc_dispatch': id, 'default_select_template': select_template, 'default_template_html': template_html}"/>
+                                    <button name="action_delete_correspondence" string=" Delete" type="object" attrs="{'invisible':['|','|',('parent.state','in', ['draft','closed','closed_part','pending_close','pending_reopen']),('state','!=','draft'),('forwarded','=',True)]}" class="fa fa-trash btn-danger"/>
+                                    <button name="action_send_dispatch_approval" string=" Send Approval" type="object" states="draft" class="fa fa-check btn-primary" confirm="Are you sure to send for approval ?"/>
+                                    <!--  <button name="%(edit_doc_dispatch_mode_button_wizard_action_view)d" states="draft,ready_for_dispatched" string="Edit Dispatch Mode" icon="fa-paper-plane-o" type="action" context="{'default_doc_dispatch': id, 'default_dispatch_mode': dispatch_mode}"/>-->
+                                    <!-- <button name="action_send_dispatch_approval" string=" Request Approval" type="object" states="draft" class="fa fa-check btn-primary"/> -->
+                                    <!-- <button name="button_dispatch" string=" Approve" type="object" attrs="{'invisible':['|',('parent.state','in', ['draft','closed','closed_part','pending_close','pending_reopen']),('state','not in',['draft','ready_for_dispatched'])]}" groups="" class="fa fa-thumbs-up btn-primary" confirm="Are you sure to approve ?"/> -->
+                                </tree>
+                            </field>
+                        </page>
+                        <!-- <page name="FileTrackingInformation" string="File Tracking Information" invisible="1">
+                            <field name="folder_track_ids" readonly="1">
+                                <tree editable="bottom">
+                                    <field name="create_let_id" invisible="1"/>
+                                    <field name="forwarded_by"/>
+                                    <field name="forwarded_date"/>
+                                    <field name="forwarded_to_user"/>
+                                    <field name="job_pos"/>
+                                    <field name="remarks"/>
+                                </tree>
+                            </field>
+                        </page> -->
+                        <page name="meta_info" string="Meta Information">
+                            <group>
+                                <group>
+                                    <field name="create_uid" readonly="1" options="{'no_open':True,'no_create_edit': True, 'no_create': True,'no_edit':True}"/>
+                                    <field name="current_owner_id" readonly="1" options="{'no_open':True,'no_create_edit': True, 'no_create': True,'no_edit':True}"/>
+                                    <field name="last_owner_id" readonly="1" options="{'no_open':True,'no_create_edit': True, 'no_create': True,'no_edit':True}"/>
+                                    <field name="sec_owner" widget="many2many_tags" invisible="1" options="{'no_open':True,'no_create_edit': True, 'no_create': True,'no_edit':True}"/>
+                                    <field name="previous_owner" widget="many2many_tags" readonly="1" options="{'no_open':True,'no_create_edit': True, 'no_create': True,'no_edit':True}"/>
+                                </group>
+                                <group>
+                                    <field name="forwarded_by_employee_id" readonly="1" options="{'no_open':True,'no_create_edit': True, 'no_create': True,'no_edit':True}"/>
+                                    <field name="forwarded_to_employee_id" readonly="1" options="{'no_open':True,'no_create_edit': True, 'no_create': True,'no_edit':True}"/>
+                                    <field name="forwarded_date" readonly="1" options="{'no_open':True,'no_create_edit': True, 'no_create': True,'no_edit':True}"/>
+                                </group>
+                            </group>
+                        </page>
+                        <!-- <page name="php_info" string="Page Information" invisible="1">
+                            <group>
+                                <group>
+                                    <field name="notesheet_url"/>
+                                    <field name="iframe_dashboard" string="URL"/>
+                                    <field name="document_ids"/>
+                                    <field name="assignment_id"/>
+                                </group>
+                            </group>
+                        </page> -->
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_popup_remark_form" model="ir.ui.view">
+        <field name="name">view_popup_remark_form</field>
+        <field name="model">muk_dms.file</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <form string="Remarks">
+                <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").hide();
+                        $(".o_form_statusbar").hide();
+                    });
+                </script>
+                <sheet>
+                    <group>
+                        <field name="remarks"/>
+                    </group>
+                    <button name="remove_from_file" class="btn-primary" string="Confirm" type="object"/>
+                    <button string="Cancel" class="btn-default m-2" special="cancel"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="foldermaster_tree_view1" model="ir.ui.view">
+        <field name="name">folder.master.tree</field>
+        <field name="model">folder.master</field>
+        <field name="arch" type="xml">
+            <tree string="Folder">
+                <field name="is_current_owner" invisible="1"/>
+                <field name="same_department" invisible="1"/>
+                <field name="file_mode" invisible="1"/>
+                <field name="folder_name"/>
+                <field name="number"/>
+                <field name="subject"/>
+                <field name="department_id"/>
+                <field name="division_id"/>
+                <field name="incoming_source"/>
+                <field name="action_by_uid"/>
+                <field name="action_date"/>
+                <!-- <field name="date"/>
+                <field name="forwarded_by_employee_id"/>
+                <field name="forwarded_to_employee_id"/>
+                <field name="forwarded_date"/>
+                <field name="tags" widget="many2many_tags"/> -->
+                <field name="state" invisible="1"/> 
+                <button name="deal_with_file" string=" Deal with File" class="font-weight-bold font-italic btn btn-primary fa fa-pencil-square-o" attrs="{'invisible':['|',('is_current_owner','=',False),('state','!=','in_progress')]}" type="object"/>
+                <button name="%(folder_forward_button_wizard_action_view)d" string=" Forward" class="fa fa-forward bnt btn-primary" type="action" context="{'default_defid': id}" attrs="{'invisible':['|',('is_current_owner','=',False),('state','!=','in_progress')]}"/>
+                <button name="%(action_put_file_in_shelf_window)d" string=" Move to Shelf" class="fa fa-book btn btn-primary" type="action" attrs="{'invisible':['|','|','&amp;',('same_department','=',False),('file_mode','!=','inbox'),('is_current_owner','=',False),('state','!=', 'in_progress')]}"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="foldermaster_tree_view2" model="ir.ui.view">
+        <field name="name">folder.master.tree</field>
+        <field name="model">folder.master</field>
+        <field name="arch" type="xml">
+            <tree string="Folder">
+                <field name="folder_name"/>
+                <field name="number"/>
+                <field name="subject"/>
+                <field name="department_id"/>
+                <field name="division_id"/>
+                <!-- <field name="closed_by_uid"/> -->
+                <field name="closed_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_folder_master_take_action_tree" model="ir.ui.view">
+        <field name="name">folder.master.take_action.tree</field>
+        <field name="model">folder.master</field>
+        <field name="arch" type="xml">
+            <tree string="Folder">
+                <field name="folder_name"/>
+                <field name="number"/>
+                <field name="subject"/>
+                <field name="department_id"/>
+                <field name="division_id"/>
+                <field name="reopen_request_user"/>
+                <field name="close_reopen_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_folder_master_part_file_tree" model="ir.ui.view">
+        <field name="name">view.folder.master.part.file.tree</field>
+        <field name="model">folder.master</field>
+        <field name="arch" type="xml">
+            <tree string="Part File">
+                <field name="version" invisible="1"/>
+                <field name="folder_name"/>
+                <field name="number"/>
+                <field name="department_id"/>
+                <field name="division_id"/>
+                <field name="current_owner_id"/>
+                <button string="Part File" name="button_part_file" type="object" class="oe_highlight" attrs="{'invisible':[('version','!=',False)]}"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_folder_master_view_part_tree" model="ir.ui.view">
+        <field name="name">view.folder.master.view.part.tree</field>
+        <field name="model">folder.master</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="folder_name"/>
+                <field name="number"/>
+                <field name="part_created_by" />
+                <field name="part_created_on" />
+                <field name="part_merged_by" />
+                <field name="part_merged_on" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_folder_master_outbox_tree" model="ir.ui.view">
+        <field name="name">folder.master.shelf.tree</field>
+        <field name="model">folder.master</field>
+        <field name="arch" type="xml">
+            <tree string="Shelf">
+                <field name="folder_name"/>
+                <field name="number"/>
+                <field name="date"/>
+                <field name="forwarded_by_employee_id"/>
+                <field name="forwarded_to_employee_id"/>
+                <field name="department_id"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_folder_master_search" model="ir.ui.view">
+        <field name="name">view.folder.master.search</field>
+        <field name="model">folder.master</field>
+        <field name="arch" type="xml">
+            <search string="Search File">
+                <field name="folder_name"/>
+                <field name="number"/>
+                <field name="subject"/>
+                <field name="branch_id"/>
+                <field name="department_id" />
+                <field name="division_id" />
+                <field name="search_correspondence"/>
+                <separator/>
+                <filter string="Create Date" name="filter_create_date" date="create_date"/>
+                <filter string="Modified Date" name="filter_write_date" date="write_date"/>
+                <filter string="Division" name="group_division" context="{'group_by':'department_id'}"/>
+                <filter string="My Subordinates" name="filter_my_subordinates" domain="[('current_owner_id.employee_ids.parent_id.user_id','=',uid)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_folder_master_inbox_all_subordinate_tree" model="ir.ui.view">
+        <field name="name">folder.master.inbox.all.subordinate.tree</field>
+        <field name="model">folder.master</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="same_department" invisible="1" />
+                <field name="is_on_shelf" invisible="1"  />
+                <field name="version" invisible="1"/>
+                <field name="folder_name"/>
+                <field name="number"/>
+                <field name="subject"/>
+                <field name="department_id"/>
+                <field name="division_id"/>
+                <field name="incoming_source"/>
+                <field name="action_by_uid"/>
+                <field name="action_date"/>
+                <field name="current_owner_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="foldermaster_action_view" model="ir.actions.act_window">
+        <field name="name">New File</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">folder.master</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="foldermaster_tree_view1"/>
+        <field name="domain">[('state','=','draft'),('current_owner_id.id', '=', uid),('is_on_shelf','=',False)]</field>
+    </record>
+
+    <record id="action_folder_master_part_file_window" model="ir.actions.act_window">
+        <field name="name">Part File</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">folder.master</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="view_folder_master_part_file_tree"/>
+        <field name="domain">[('state','=','in_progress'),('is_on_shelf','=',False),('version','=',False)]</field>
+        <field name="context">{"create":False,"edit":False,"delete":False,'search_default_group_division':1}</field>
+    </record>
+
+    <record id="action_folder_master_incoming_my_inbox_window" model="ir.actions.act_window">
+        <field name="name">File: My Inbox</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">folder.master</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" eval="False"/>
+        <field name="view_id" ref="foldermaster_tree_view1"/>
+        <field name="domain">[('current_owner_id','=', uid),('is_on_shelf','=',False),('state','=','in_progress'),('file_mode','=','inbox')]</field>
+        <field name="context">{"create":False,"delete":False}</field>
+    </record>
+
+    <record id="action_folder_master_incoming_subordinate_inbox_window" model="ir.actions.act_window">
+        <field name="name">File: Subordinates Inbox</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">folder.master</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_folder_master_inbox_all_subordinate_tree"/>
+        <field name="domain">[('is_on_shelf','=',False),('state','not in',['draft','closed','closed_part']),('current_owner_id','!=',uid),('file_mode','=','inbox')]</field>
+        <field name="context">{"filter_subordinates":1,"create":False,"edit":False,"delete":False}</field>
+    </record>
+
+    <record id="action_folder_master_incoming_all_inbox_window" model="ir.actions.act_window">
+        <field name="name">File: All Inbox</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">folder.master</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_folder_master_inbox_all_subordinate_tree"/>
+        <field name="domain">[('is_on_shelf','=',False),('current_owner_id','!=',uid),('state','=','in_progress'),('file_mode','=','inbox')]</field>
+        <field name="context">{"create":False,"edit":False,"delete":False,'filter_subordinates':1,'group_by':'branch_id','search_default_filter_my_subordinates':1}</field>
+    </record>
+
+    <record id="action_folder_master_outgoing" model="ir.actions.act_window">
+        <field name="name">Sent Files</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">folder.master</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_ids" eval="[(5, 0, 0), 
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('view_folder_master_outbox_tree')})]"/>
+        <field name="domain">[('previous_owner', 'in', [uid]),('is_on_shelf','=',False),('state','!=','draft')]</field>
+        <field name="context">{"create":False,"edit":False,"delete":False,"filter_allowed_branches":1}</field>
+    </record>
+
+    <record id="foldermaster_closed_action_view" model="ir.actions.act_window">
+        <field name="name">View Closed Files</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">folder.master</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="foldermaster_tree_view2"/>
+        <field name="domain">[('state','=','closed'),('is_on_shelf','=',False)]</field>
+        <field name="context">{"create":False,"edit":False,"delete":False,"toolbar":False,'filter_department':1,'filter_allowed_branches':1}</field>
+    </record>
+
+    <!-- <menuitem id="muk_dms.menu_dms_file" parent="muk_dms.main_menu_muk_dms" name="Correspondence" sequence="1"/> -->
+    <record id="muk_dms.menu_dms_file" model="ir.ui.menu">
+        <field name="action" eval="False"/>
+        <field name="name">Correspondence</field>
+        <field name="sequence">2</field>
+    </record>
+
+    <menuitem id="menuitem_files_fol" parent="muk_dms.main_menu_muk_dms" name="Files" sequence="1"/>
+
+    <menuitem id="menuitem_files_add_fol" parent="menuitem_files_fol" name="Create Files" sequence="2" groups="smart_office_file_create"/>
+
+    <menuitem id="menu_folder_master_new_file" parent="menuitem_files_add_fol" name="New File" action="foldermaster_action_view" sequence="1" groups="smart_office_file_create"/>
+
+    <menuitem id="menu_folder_master_part_file" parent="menuitem_files_add_fol" name="Part File" action="action_folder_master_part_file_window" sequence="2" groups="smart_office_file_create"/>
+
+    <menuitem id="menu_folder_master_incoming" name="Incoming files" parent="menuitem_files_fol" sequence="1"/>
+
+    <menuitem id="menu_folder_master_incoming_my_inbox" name="My Inbox" parent="menu_folder_master_incoming" action="action_folder_master_incoming_my_inbox_window" sequence="1"/>
+
+    <menuitem id="menu_folder_master_incoming_subordinate_inbox" name="Subordinates Inbox" action="action_folder_master_incoming_subordinate_inbox_window" parent="menu_folder_master_incoming" sequence="2"/>
+
+    <menuitem id="menu_folder_master_incoming_all_inbox" name="All Inbox" action="action_folder_master_incoming_all_inbox_window" groups="smart_office_pull_manager" parent="menu_folder_master_incoming" sequence="3"/>
+
+    <menuitem id="menu_folder_master_outgoing" parent="menuitem_files_fol" name="Sent Files" action="action_folder_master_outgoing" sequence="3"/>
+
+    <menuitem id="menu_folder_master_closed" name="Closed Files" parent="menuitem_files_fol" sequence="5" groups="smart_office_closed_file_viewer"/>
+
+    <menuitem id="menu_folder_master_closed_view" name="View Closed Files" action="foldermaster_closed_action_view" parent="menu_folder_master_closed" sequence="1"/>
+
+</odoo>

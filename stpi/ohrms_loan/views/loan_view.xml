@@ -1,0 +1,105 @@
+<odoo>
+    <record id="hr_Loan_type_tree_view"  model="ir.ui.view">
+        <field name="name">Loan Type</field>
+        <field name="model">loan.type</field>
+        <field name ="arch" type="xml">
+            <tree>
+                 <field name="type_emp"/>
+                 <field name="interest"/>
+                 <!-- <field name="category_ids" widget="many2many_tags"/> -->
+            </tree>
+        </field>
+    </record>
+    <record id="hr_Loan_type_form_view"  model="ir.ui.view">
+        <field name="name">Loan Type</field>
+        <field name="model">loan.type</field>
+        <!--<field name="inherit_id" ref="ohrms_loan.hr_Loan_type_tree_view"/>-->
+        <field name ="arch" type="xml">
+            <form string="Loan Eligibility Criteria ">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="type_emp" required="1"/>
+                            <field name="interest" required="1"/>
+                            <field name="max_emi"  required="1"/>
+                        </group>
+                        <group>
+                            <!-- <field name="category_ids" widget="many2many_tags"/> -->
+                            <field name="filter_domain" widget="domain" options="{'model': 'hr.employee', 'in_dialog': True}" />
+
+                        </group>
+                        <group>
+                            <field name="threshold_emi" required="1"/>
+                            <field name="threshold_below_emi" required="1"/>
+                            <field name="threshold_above_emi" required="1"/>
+                        </group>
+                        <group>
+                            <field name="apply_day_threshold" required="1"/>
+                            <field name="close_day_threshold" required="1"/>
+                        </group>
+                    </group>
+                </sheet>
+
+            </form>
+        </field>
+    </record>
+    <record id="action_view_loan_type" model="ir.actions.act_window">
+        <field name="name">LoanType</field>
+        <field name="res_model">loan.type</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="assign_loan_amount_view" model="ir.ui.view">
+        <field name="name">assign_loan_amount_tree_view</field>
+        <field name="model">assign.loan.amount</field>
+        <field name="arch" type="xml">
+            <tree string="Advance Loan Payment" editable="top">
+                <field name="employee_id" required="True" 
+                        options="{'no_create_edit': True,'no_open': True}"
+                        attrs="{'readonly': [('is_paid', '=', True)]}"/>
+                <field name="loan_id" domain="[('state', '=', 'grant'), ('employee_id', '=', employee_id)]"
+                        options="{'no_create_edit': True,'no_open': True}"
+                        attrs="{'readonly': [('is_paid', '=', True)]}"/>
+                <field name="installment_date" required="True"
+                        attrs="{'readonly': [('is_paid', '=', True)]}"/>
+                <field name="amount" required="True"
+                        attrs="{'readonly': [('is_paid', '=', True)]}"/>
+                <field name="active" widget="boolean_toggle" invisible="True"/>
+                <field name="is_paid" readonly="True"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_assign_loan_amount" model="ir.actions.act_window">
+        <field name="name">Advance Loan Payment</field>
+        <field name="res_model">assign.loan.amount</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <menuitem id="loan_menu_configuration"
+        name="Configuration"
+        parent="menu_hr_loans_and_advances"
+        sequence="100"
+        groups="ohrms_loan.group_loan_approver"
+        />
+    <menuitem id="loan_type_configuration"
+        name="Loan Type"
+        parent="loan_menu_configuration"
+        sequence="10"
+        action="action_view_loan_type"
+        />
+    <menuitem id="menu_assign_loan_amount"
+        parent="menu_hr_loans_and_advances"
+        sequence="3"
+        action="action_assign_loan_amount"
+        groups="ohrms_loan.group_loan_approver"
+        />
+
+    <record id="loan_menu_configuration" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+</odoo>

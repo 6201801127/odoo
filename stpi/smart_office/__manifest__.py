@@ -1,0 +1,87 @@
+# -*- coding: utf-8 -*-
+{
+    'name': "Smart Office",
+
+    'summary': """
+            Smart Office
+             """,
+
+    'description': """
+        Smart Office
+    """,
+
+    'author': "Sachin Burnawal",
+    'website': "https://theerpstore.com/",
+    'category': 'Smart Office',
+    'version': '0.1',
+
+    'depends': ['mail', 'hr', 'base_exception_and_approval', 'muk_dms', 'muk_dms_actions', 'kw_web_notify'],
+
+    'data': [
+        'data/data.xml',
+        'data/ir_cron_data.xml',
+        'data/system_parameter_data.xml',
+        'data/sequence.xml',
+        'data/doc_receive_type.xml',
+        'data/smart_office_file_stage_master_data.xml',
+        'data/dispatch_letter_stage_data.xml',
+        'security/security.xml',
+        'security/ir.model.access.csv',
+        'wizard/part_file.xml',
+        'wizard/folderwizard.xml',
+        'wizard/write_correspondence.xml',
+        'wizard/add_reference.xml',
+        'wizard/put_file_in_shelf_views.xml',
+        'views/folder.xml',
+        'wizard/filewizard.xml',
+        'wizard/pull_into.xml',
+        'wizard/pull_into_file.xml',
+        'wizard/create_folder_wizard.xml',
+        'wizard/assign_folder_wizard.xml',
+        'wizard/file_exception_wizard_view.xml',
+        'wizard/report_wizard.xml',
+        'wizard/pull_into_my_inbox.xml',
+        'wizard/pull_into_my_inbox_file.xml',
+        'wizard/edit_doc_dispatch.xml',
+        'wizard/edit_doc_dispatch_mode.xml',
+        'wizard/send_back_file.xml',
+        'wizard/send_back.xml',
+        'views/department_job.xml',
+        'views/add_letter.xml',
+        'views/add_files.xml',
+        'views/files_view.xml',
+        'views/templates.xml',
+        'views/master.xml',
+        'views/select_template_html.xml',
+        'views/see_file.xml',
+        'views/file_exception.xml',
+        'views/dispatch_document.xml',
+        'report/dispatch_document.xml',
+        'views/smart_office_noting_views.xml',
+        'views/dispatch_letter_tracking_views.xml',
+        'wizard/pull_file_from_shelf_views.xml',
+        'views/file_shelf_views.xml',
+        'views/file_pending_for_close_views.xml',
+        'report/smart_office_noting_report.xml',
+        'views/folder_type_views.xml',
+        'views/smart_office_file_stage_views.xml',
+        'views/smart_office_file_tracking_views.xml',
+        'wizard/smart_office_part_file_views.xml',
+        'wizard/smart_office_close_file_views.xml',
+        'wizard/smart_office_close_file_cancel_views.xml',
+        'wizard/smart_office_reopen_file_views.xml',
+        'wizard/smart_office_reopen_file_cancel_views.xml',
+        'wizard/smart_office_close_file_approve_reject_views.xml',
+        'wizard/smart_office_reopen_file_approve_reject_views.xml',
+        'views/file_client_view.xml',
+        'views/dispatch_letter_stages_views.xml',
+        
+    ],
+    'qweb': [
+        'static/src/xml/*.xml',
+    ],
+    'demo': [
+    ],
+    # 'installable': True,
+    'application': True,
+}

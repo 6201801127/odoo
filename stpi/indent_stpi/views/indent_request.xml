@@ -1,0 +1,807 @@
+<odoo>
+    <!--==========Form view of Employee Indent Advance==========-->
+    <record id="grn_request_form_view" model="ir.ui.view">
+        <field name="name">grn.request.form</field>
+        <field name="model">indent.request</field>
+        <field name="arch" type="xml">
+            <form string="Indent">
+                <header>
+                    <button name="button_to_approve" string="Send for Approval" class="oe_highlight" type="object" states="draft"/>
+                    <button name="button_reset_to_draft" string="Send Back" type="object" states="to_approve"/>
+                    <button name="button_approved" 
+                    	string="Forward" 
+                    	class="oe_highlight" 
+                    	type="object" 
+                    	attrs="{'invisible':['|',('indent_type','=', 'issue'),('state','!=','to_approve')]}"
+                    	groups="indent_stpi.group_grn_manager"/>
+                    <button name="button_reject" 
+                    		string="Reject" 
+                    		type="object" 
+                    		attrs="{'invisible':['|',('indent_type','=', 'issue'),('state','!=','to_approve')]}"
+                    		groups="indent_stpi.group_grn_manager"/>
+                    
+                    
+                   	<field name="state" widget="statusbar" 
+                   			statusbar_visible="draft,to_approve,approved,rejected" 
+                    	/>
+                   	
+                </header>
+                <sheet>
+                	
+                    <group>
+                        <group>
+                            <field name="indent_sequence" readonly="True"/>
+                            <field name="employee_id" readonly="1" required="1" 
+                            	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                            <field name="branch_id" readonly="1" 
+                            	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                            <field name="requested_date" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="job_id" readonly="1" 
+                            	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                            <field name="department_id" readonly="1" 
+                            	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                            <field name="indent_type" readonly="1" />
+                        </group>
+                        <group>
+                            <!-- <field name="vendor_info" string='Vendor' attrs="{ 'readonly':[('state','!=', 'draft')]}" />-->
+                           <field name="vendor_id" string='Vendor'
+                            	attrs="{ 'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="bill_no" attrs="{ 'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="bill_date" attrs="{ 'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="upload_invoice" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="filename" invisible="1"/>
+                            <field name="amount" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="received_by" 
+                            	attrs="{ 'readonly':[('state','!=', 'draft')]}"
+                            	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"
+                            	/>
+                            <field name="item_checked_by" attrs="{ 'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="date_of_receive" attrs="{ 'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="purchase_date" attrs="{ 'readonly':[('state','!=', 'draft')]}"/>
+                        </group>
+                        <group>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Item Details">
+                            <field name="item_ids" mode="tree">
+                                <tree editable="bottom">
+                                    <field name="request_id" invisible="1"/>
+                                    <field name="item_category_id" required="1"
+                                    	attrs="{'readonly': [('parent.state', '!=', 'draft')]}" 
+                                    	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                                    <field name="item_id" required="1" 
+                                    	attrs="{'readonly': [('parent.state', '!=', 'draft')]}"
+                                    	options="{'no_open': True}"  domain="[('category_id','=',item_category_id)]"/>
+                                    <field name="specification" required="1" readonly="1" force_save="1"/>
+                                    <field name="requested_quantity" required="1" string="Received Quantity" attrs="{'readonly': [('parent.state', '!=', 'draft')]}"/>
+                                    <field name="amount" widget='monetary' options="{'currency_field': 'currency_id'}" attrs="{'readonly': [('parent.state', '!=', 'draft')]}"/>
+                                    
+                                    <field name="requested_date" required="1" attrs="{'readonly': [('parent.state', '!=', 'draft')]}" />
+                                    <field name="issue_approved" invisible="1"/>
+                                    <field name="approved_quantity" attrs="{'column_invisible': [('parent.state', '=', 'draft')],'invisible': [('parent.state', '=', 'draft')]}"/>
+                                    <field name="approved_date" string="Approved Date" attrs="{'column_invisible': [('parent.state', '!=', 'approved')],'invisible': [('parent.state', '!=', 'approved')],'readonly': [('issue_approved', '!=', False)]}"/>
+                                    <field name="state" invisible="1"/>
+                                    <field name="user_id" invisible="1" />
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+
+                </sheet>
+                <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+            </form>
+        </field>
+    </record>
+    
+    <record id="employeeIndent_request_form_view" model="ir.ui.view">
+        <field name="name">indent.request.form</field>
+        <field name="model">indent.request</field>
+        <field name="arch" type="xml">
+            <form string="Indent">
+                <header>
+                    <button name="button_to_approve" string="Send for Approval" class="oe_highlight" type="object" states="draft"/>
+                    <button name="button_reset_to_draft" string="Send Back" type="object" states="to_approve"/>
+                    		
+           			<button name="button_cancel" string="Cancel" type="object" 
+           					attrs="{'invisible':[('is_usr_activity','=',False)]}"
+           					/>
+               		<!-- <button name="button_approved" 
+                    	string="Forward" 
+                    	class="oe_highlight" 
+                    	type="object" 
+                    	attrs="{'invisible':['|',('indent_type','=', 'grn'),('state','!=','to_approve')]}"
+                    	groups="indent_stpi.group_indent_approver"/>
+                    <button name="button_reject" 
+                    		string="Reject" 
+                    		type="object" 
+                    		attrs="{'invisible':['|',('indent_type','=', 'grn'),('state','!=','to_approve')]}"
+                    		groups="indent_stpi.group_indent_approver"/> -->
+                    
+                   	
+                   	<field name="state" widget="statusbar" statusbar_visible="draft,to_approve,inprogress,approved,cancel,rejected" 
+                    	attrs="{'invisible': [('indent_type', '=', 'grn')]}"/>
+                   	<field name="is_usr_activity"  string='Is the indent approved' invisible="1" />
+                </header>
+                <sheet>
+                	<!-- <div class="oe_button_box" name="button_box" groups="indent_stpi.group_indent_approver">
+                       <button name="action_view_items" type="object" class="oe_stat_button" icon="fa-pencil-square-o" 
+                        		attrs="{'invisible': ['|',('state', '=', 'draft'),('indent_type', '=', 'grn')]}">
+                            Item's
+                        </button>
+                    </div> -->
+                    <group>
+                        <group>
+                            <field name="indent_sequence" readonly="True"/>
+                            <field name="employee_id" readonly="1" required="1" 
+                            	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                            <field name="branch_id" readonly="1" 
+                            	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                            <field name="requested_date" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="job_id" readonly="1" 
+                            	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                            <field name="department_id" readonly="1" 
+                            	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                            <field name="indent_type" readonly="1" />
+                            <field name="item_receive_user" invisible="1"/>
+                        </group>
+                       
+                    </group>
+                    <notebook>
+                        <page string="Item Details">
+                            <field name="item_ids"  mode="tree" >
+                                <tree editable="bottom" delete="0" >
+                                
+                                    <field name="request_id" invisible="1"/>
+                                    <field name="item_category" required="1"
+                                    	attrs="{'readonly': [('parent.state', '!=', 'draft')]}" 
+                                    	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"
+                                    	string="Item Category" />
+                                    	
+                                   	<field name="item_sub_category_id" required="1"
+                                    	attrs="{'readonly': [('parent.state', '!=', 'draft')]}" 
+                                    	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"
+                                    	domain="[('parent_id', '=', item_category)]" 
+                                    	string="Item Sub Category" />
+                                    	
+                                    <field name="item_id" required="1" 
+                                    	attrs="{'readonly': [('parent.state', '!=', 'draft')]}"
+                                    	domain="[('category_id', '=', item_sub_category_id)]"
+                                    	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}" string="Item Name"/>
+                                    <field name="show_item" invisible="1" />
+                                   	<field name="item_details"
+                                    	attrs="{'readonly': [('show_item', '!=', True)]}"
+                                    	
+                                    	/>
+                                    
+                                   
+                                    <field name="specification" required="1" readonly="1" force_save="1" string="Item Specification"/>
+                                    <field name="serial_bool" invisible="1" />
+                                    
+									<field name="requested_spec" string="Required Specification" required="1" attrs="{'readonly': [('parent.state', '!=', 'draft')]}"/>
+                                    <field name="requested_quantity" required="1" string="Required Quantity" attrs="{'readonly': [('parent.state', '!=', 'draft')]}"/>
+                                    <field name="requested_date" required="1" string="Required Date" attrs="{'readonly': [('parent.state', '!=', 'draft')]}" />
+                                    <field name="item_available" attrs="{'column_invisible': [(('parent.state', '=', 'draft'))],'readonly': [('is_1st_level_done', '=',True)]}" required="1" groups="indent_stpi.group_indent_approver,indent_stpi.group_indent_2ndlvl_approver" />
+                                    <field name="alternative_item_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}" force_save="1"
+                                    		groups="indent_stpi.group_indent_approver,indent_stpi.group_indent_2ndlvl_approver" 
+                                   			domain="[('category_id', '=', item_sub_category_id),('id','!=',item_id)]"
+                                            attrs="{'column_invisible': [(('parent.state', '=', 'draft'))],'readonly': ['|','|',('is_1st_level_done', '=',True),('item_available', '=', False),('item_available', '!=', 'alternate_available')]}"/>
+                                   	<field name="temporary_item_id" force_save = '1' invisible="1"/>		
+                                	<field name="serial_number" force_save="1"
+										domain="[('grn', '=', True),
+											 ('issue', '!=', True), 
+											 ('branch_id', '=', parent.branch_id),('item_id', '=', temporary_item_id),('state', '=', 'approved')]" 
+										options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"
+										attrs="{'column_invisible': [(('parent.state', '=', 'draft'))],'readonly': ['|','|',('is_1st_level_done', '=',True),('item_available', '=', 'not_available'),('serial_bool', '=', False)]}"
+										groups="indent_stpi.group_indent_approver,indent_stpi.group_indent_2ndlvl_approver"
+										/>
+                                   
+                                    <field name="issue_approved" invisible="1"/>
+                                    <field name="approved_quantity" force_save="1" attrs="{'column_invisible':[('parent.state', '=', 'draft')], 'invisible': [('parent.state', '=', 'draft')],'readonly': ['|',('item_available','=','not_available'),('is_1st_level_done', '=',True),('parent.indent_type', '=', 'issue')]}"/>
+                                    <field name="item_in_stock" attrs="{'column_invisible':[('parent.state', '=', 'draft')]}" groups="indent_stpi.group_indent_approver,indent_stpi.group_indent_2ndlvl_approver"/>
+                                    <field name="state" readonly="1" attrs="{'column_invisible':[('parent.state', '!=', 'approved')], 'invisible': [('parent.state', '!=', 'approved')]}"/>
+                                    <field name="approved_date" string="Action Date" attrs="{'column_invisible':[('parent.state', '!=', 'approved')], 'invisible': [('parent.state', '!=', 'approved')],'readonly': [('state', '=', 'approved')]}"/>
+                                    <field name="user_id" attrs="{'column_invisible':[('parent.state', '!=', 'approved')],'invisible': [('parent.state', '!=', 'approved')],'readonly': [('state', '=', 'approved')]}" />
+                                    <field name="remark"  attrs="{'column_invisible': [(('parent.state', 'not in', ['inprogress','approved','cancel','rejected']))]}" readonly="1"/>
+                                    <field name="user_receive" attrs="{'column_invisible':[('parent.state', '!=', 'approved')]}" readonly="1" force_save="1" groups="indent_stpi.group_indent_approver,indent_stpi.group_indent_2ndlvl_approver"/>
+                                    <field name="is_2nd_level_item" invisible="1" />
+                                    <field name="is_1st_level_done" invisible="1" />
+                                    <field name="is_2nd_level_done" invisible="1" />
+                                    <button name="button_confirm_apr" string="Approve" groups="indent_stpi.group_indent_approver" type="object" attrs="{'invisible': ['|','|',('parent.state','=','draft'),('is_2nd_level_item', '=', True),('is_1st_level_done', '=', True)]}"/>
+                                    <button name="button_confirm_reject" string="Reject" groups="indent_stpi.group_indent_approver" type="object" attrs="{'invisible': ['|','|',('parent.state','=','draft'),('is_2nd_level_item', '=', True),('is_1st_level_done', '=', True)]}"/>
+                                    <button name="button_send_approval" string="Send for Approval" groups="indent_stpi.group_indent_approver" type="object" attrs="{'invisible': ['|',('is_2nd_level_item', '=', False),('is_1st_level_done', '=', True)]}"/>
+                                    <button name="button_confirm_apr" string="Approve" type="object" attrs="{'invisible': ['|',('is_1st_level_done', '=', False),('is_2nd_level_done', '=', True)]}" groups="indent_stpi.group_indent_2ndlvl_approver"/>
+                                    <button name="button_confirm_reject" string="Reject" type="object" attrs="{'invisible': ['|',('is_1st_level_done', '=', False),('is_2nd_level_done', '=', True)]}" groups="indent_stpi.group_indent_2ndlvl_approver"/>
+                                    <button name="button_confirm_procure" string="To Be procured" type="object"  attrs="{'invisible': ['|',('is_1st_level_done', '=', False),('is_2nd_level_done', '=', True)]}" groups="indent_stpi.group_indent_2ndlvl_approver"/>
+                                    <button name="button_delete"  type="object" class="fa fa-trash" attrs="{'invisible': [('parent.state', '!=', 'draft')]}" />
+                                    <button name="button_received"  type="object" string="Receive" attrs="{'invisible': ['|','|','|',('parent.item_receive_user', '=', False),('parent.state', '!=', 'approved'),('approved_quantity', '&lt;', 1),('user_receive','=',True)]}"  />
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+
+                </sheet>
+                <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+            </form>
+        </field>
+    </record>
+    
+       
+        <!--==========Form view of Employee Indent Advance==========-->
+    <record id="employeeissue_request_form_view" model="ir.ui.view">
+        <field name="name">indent.issue.request.form</field>
+        <field name="model">indent.request</field>
+        <field name="arch" type="xml">
+            <form string="Indent">
+                <header>
+               		<button name="button_grant" 
+                    	string="Grant" 
+                    	class="oe_highlight" 
+                    	type="object" 
+                    	attrs="{'invisible':[('is_approve','=',True)]}"
+                    	groups="indent_stpi.group_indent_approver"/>
+                    <button name="button_reject" 
+                    		string="Reject" 
+                    		type="object" 
+                    		attrs="{'invisible':[('is_approve','=',True)]}"
+                    		groups="indent_stpi.group_indent_approver"/>
+                    <field name="state" invisible="1"/>
+                    <field name="is_approve" invisible="1"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="indent_sequence" readonly="True"/>
+                            <field name="employee_id" readonly="1" required="1" 
+                            	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                            <field name="branch_id" readonly="1" 
+                            	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                            <field name="requested_date" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="job_id" readonly="1" 
+                            	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                            <field name="department_id" readonly="1" 
+                            	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                            <field name="indent_type" readonly="1" />
+                        </group>
+                        <group>
+                            <!-- <field name="vendor_info" string='Vendor' attrs="{'invisible':[('indent_type','=', 'issue')], 'readonly':[('state','!=', 'draft')]}"/> -->
+                            <field name="vendor_id" string='Vendor'
+                            	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}" 
+                            	attrs="{'invisible':[('indent_type','=', 'issue')], 'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="bill_no" attrs="{'invisible':[('indent_type','=', 'issue')], 'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="bill_date" attrs="{'invisible':[('indent_type','=', 'issue')], 'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="upload_invoice" attrs="{'invisible':[('indent_type','=', 'issue')],'required':[('indent_type','!=', 'issue')], 'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="filename" invisible="1"/>
+                            <field name="amount" widget='monetary' options="{'currency_field': 'currency_id'}"  attrs="{'invisible':[('indent_type','=', 'issue')], 'readonly':[('state','!=', 'draft')]}"/>
+                            
+                            <field name="received_by" 
+                            	attrs="{'invisible':[('indent_type','=', 'issue')], 'readonly':[('state','!=', 'draft')]}"
+                            	options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"
+                            	/>
+                            <field name="item_checked_by" attrs="{'invisible':[('indent_type','=', 'issue')], 'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="date_of_receive" attrs="{'invisible':[('indent_type','=', 'issue')], 'readonly':[('state','!=', 'draft')]}"/>
+                            <field name="purchase_date" attrs="{'invisible':[('indent_type','=', 'issue')], 'readonly':[('state','!=', 'draft')]}"/>
+                        </group>
+                        <group>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Item Details">
+                            <field name="issue_id">
+                                <tree editable="bottom" create="false">
+                                    <field name="Indent_id" invisible="1"/>
+                                    <field name="branch_id" invisible="1"/>
+                                    <field name="serial_bool" invisible="1"/>
+                                    <field name="item_category_id" readonly="1" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                                    <field name="item_id" readonly="1" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"  domain="[('child_indent_stock','=',item_category_id)]"/>
+                                    <field name="specification" required="1" readonly="1" force_save="1"/>
+                                    <field name="serial_number" 
+	                                    attrs="{'required': [('serial_bool', '=', True)],'invisible': [('serial_bool', '=', False)],'readonly': [('state', '!=', 'to_approve')]}" 
+										domain="[('grn', '=', True),
+											 ('issue', '!=', True), 
+											 ('branch_id', '=', branch_id),
+											  ('item_category_id', '=', item_category_id), 
+											  ('item_id', '=', item_id), ('state', '=', 'approved')]" 
+										options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                                    <field name="requested_quantity" readonly="1"/>
+                                    <field name="requested_date" readonly="1"/>
+                                    <field name="issue_state" readonly="1"/>
+                                    <field name="state" invisible="1"/>
+                                    <field name="approved_quantity" attrs="{'invisible': [('state', '=', 'draft')],'readonly': [('state', '!=', 'to_approve')]}"/>
+                                    <field name="approved_date" readonly="1"/>
+                                    <!-- <button name="action_show_details" string="Register Serial" type="object" icon="fa-list"  options="{&quot;warn&quot;: true}"/> -->
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+
+                </sheet>
+                
+            </form>
+        </field>
+    </record>
+    
+   <!--  <record id="view_indent_operations" model="ir.ui.view">
+            <field name="name">indent.operations.form</field>
+            <field name="model">stock.move</field>
+            <field name="priority">1000</field>
+            <field name="arch" type="xml">
+                <form string="Move Detail">
+                    <field name="state" invisible="1"/>
+                    <field name="location_id" invisible="1"/>
+                    <field name="location_dest_id" invisible="1"/>
+                    <field name="picking_id" invisible="1"/>
+                    <field name="is_locked" invisible="1"/>
+                    <field name="picking_type_entire_packs" invisible="1"/>
+                    <group>
+                        <group>
+                            <field name="product_id" readonly="1"/>
+                            <label for="product_uom_qty"/>
+                            <div class="o_row">
+                                <span><field name="product_uom_qty" readonly="1" nolabel="1"/></span>
+                                <span><field name="product_uom" readonly="1" nolabel="1"/></span>
+                            </div>
+                            <label for="quantity_done"/>
+                            <div class="o_row">
+                                <span><field name="quantity_done" readonly="1" nolabel="1"/></span>
+                                <span attrs="{'invisible': [('state', '=', 'done')]}"> / </span>
+                                <span><field name="reserved_availability" nolabel="1" attrs="{'invisible': [('state', '=', 'done')]}" /></span>
+                                <span><field name="product_uom" readonly="1" nolabel="1"/></span>
+                            </div>
+
+                        </group>
+                    </group>
+                    <field name="move_line_ids" attrs="{'readonly': ['|', ('state', '=', 'cancel'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}" context="{'tree_view_ref': 'stock.view_stock_move_line_operation_tree', 'default_product_uom_id': product_uom, 'default_picking_id': picking_id, 'default_move_id': id, 'default_product_id': product_id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id}"/>
+                    <footer class="oe_edit_only">
+                        <button string="Confirm" special="save" class="oe_highlight"/>
+                        <button string="Discard" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record> -->
+    
+
+    <!--==========Tree view of Employee Indent Advance==========-->
+    <record id="employeeIndent_request_tree_view" model="ir.ui.view">
+        <field name="name">indent.request.tree</field>
+        <field name="model">indent.request</field>
+        <field name="arch" type="xml">
+            <tree string="Indent" create="false">
+                <field name="indent_sequence"/>
+                <field name="employee_id"/>
+                <field name="branch_id" readonly="1"/>
+                <field name="job_id" readonly="1"/>
+                <field name="department_id" readonly="1"/>
+                <field name="indent_type" readonly="1"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    
+    <record id="employeeIndent_request_tree_view_draft" model="ir.ui.view">
+        <field name="name">indent.request.tree</field>
+        <field name="model">indent.request</field>
+        <field name="arch" type="xml">
+            <tree string="Indent">
+                <field name="indent_sequence"/>
+                <field name="employee_id"/>
+                <field name="branch_id" readonly="1"/>
+                <field name="job_id" readonly="1"/>
+                <field name="department_id" readonly="1"/>
+                <field name="indent_type" readonly="1"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    
+
+    <!--==========Search view of Employee Indent Advance Status==========-->
+     <record id="view_Indent_request_status_filter_report" model="ir.ui.view">
+        <field name="name">indent.request.search</field>
+        <field name="model">indent.request</field>
+        <field name="arch" type="xml">
+            <search string="Search for Indent Request">
+                <field name="indent_sequence"/>
+                <group expand="0" string="Group By">
+                   <filter name="group_category" string="State" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+     <!--=====Sequence of Employee Indent Advance=====-->STPI607
+     <record id="seq_indent_sequence" model="ir.sequence">
+        <field name="name">Indent sequence</field>
+        <field name="code">indent.request</field>
+        <field name="padding">3</field>
+        <field name="company_id" eval="False"/>
+     </record>
+
+    <!--===============Action view of Employee Indent Advance===============-->
+    <record id="hremployeeIndent_request_action" model="ir.actions.act_window">
+        <field name="name">Indent Request</field>
+        <field name="res_model">indent.request</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form,search</field>
+        <field name="context">{'default_indent_type': 'issue'}</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('indent_stpi.employeeIndent_request_tree_view')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('indent_stpi.employeeIndent_request_form_view')})]"/>
+        <field name="domain">[('indent_type','=','issue')]</field>
+    </record>
+    
+    <record id="hremployeeIndent_request_action_issue" model="ir.actions.act_window">
+        <field name="name">Indent Request</field>
+        <field name="res_model">indent.request</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form,search</field>
+        <field name="view_id" ref="employeeissue_request_form_view"/>
+        <field name="context">{'default_indent_type': 'issue'}</field>
+    </record>
+
+    <!--============Action view of Employee Indent Advance Draft============-->
+    <record id="employeeIndent_request_action_draft" model="ir.actions.act_window">
+        <field name="name">Indent Request</field>
+        <field name="res_model">indent.request</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_Indent_request_status_filter_report"/>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('indent_stpi.employeeIndent_request_tree_view_draft')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('indent_stpi.employeeIndent_request_form_view')})]"/>
+        <field name="context">{'default_indent_type': 'issue'}</field>
+        <field name="domain">[('state','=','draft'),('indent_type','=','issue')]</field>
+    </record>
+
+    <!--============Action view of Employee Indent Advance To Approve============-->
+    <record id="employeeIndent_request_action_to_approve" model="ir.actions.act_window">
+        <field name="name">Indent Request</field>
+        <field name="res_model">indent.request</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'default_indent_type': 'issue'}</field>
+        <field name="search_view_id" ref="view_Indent_request_status_filter_report"/>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('indent_stpi.employeeIndent_request_tree_view')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('indent_stpi.employeeIndent_request_form_view')})]"/>
+        <field name="domain">[('state','in',('to_approve','inprogress')),('indent_type','=','issue')]</field>
+    </record>
+
+
+    <!--============Action view of Employee Indent Advance Approved============-->
+    <record id="employeeIndent_request_action_approved" model="ir.actions.act_window">
+        <field name="name">Indent Request</field>
+        <field name="res_model">indent.request</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'default_indent_type': 'issue'}</field>
+        <field name="search_view_id" ref="view_Indent_request_status_filter_report"/>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('indent_stpi.employeeIndent_request_tree_view')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('indent_stpi.employeeIndent_request_form_view')})]"/>
+        <field name="domain">[('state','=','approved'),('indent_type','=','issue')]</field>
+    </record>
+
+
+    <!--============Action view of Employee Indent Advance Rejected============-->
+    <record id="employeeIndent_request_action_rejected" model="ir.actions.act_window">
+        <field name="name">Indent Request</field>
+        <field name="res_model">indent.request</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'default_indent_type': 'issue'}</field>
+        <field name="search_view_id" ref="view_Indent_request_status_filter_report"/>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('indent_stpi.employeeIndent_request_tree_view')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('indent_stpi.employeeIndent_request_form_view')})]"/>
+        <field name="domain">[('state','=','rejected'),('indent_type','=','issue')]</field>
+    </record>
+
+
+
+
+<!--===============Action view of Employee Indent Advance Status=================-->
+    <record id="menu_Indent_reporting_request_status_action" model="ir.actions.act_window">
+        <field name="name">Indent/GRN  - Status</field>
+        <field name="res_model">indent.request</field>
+        <!--<field name="view_type">form</field>-->
+        <field name="view_mode">tree,form,search</field>
+        <field name="context">{'group_by': 'state'}</field>
+    </record>
+
+
+<!--===============Action view of Employee Indent Advance Department=================-->
+    <record id="menu_Indent_reporting_request_department_action" model="ir.actions.act_window">
+        <field name="name">Indent/GRN Request</field>
+        <field name="res_model">indent.request</field>
+        <!--<field name="view_type">form</field>-->
+        <field name="view_mode">tree,form,search</field>
+        <field name="context">{'group_by': 'department_id'}</field>
+    </record>
+
+
+<!--===============Action view of Employee Indent Advance Job=================-->
+    <record id="menu_Indent_reporting_request_job_action" model="ir.actions.act_window">
+        <field name="name">Indent/GRN - Functional Designation</field>
+        <field name="res_model">indent.request</field>
+        <!--<field name="view_type">form</field>-->
+        <field name="view_mode">tree,form,search</field>
+        <field name="context">{'group_by': 'job_id'}</field>
+    </record>
+
+
+<!--===============Action view of Employee Indent Advance Branch=================-->
+    <record id="menu_Indent_reporting_request_branch_action" model="ir.actions.act_window">
+        <field name="name">Indent/GRN - Branch</field>
+        <field name="res_model">indent.request</field>
+        <!--<field name="view_type">form</field>-->
+        <field name="view_mode">tree,form,search</field>
+        <field name="context">{'group_by': 'branch_id'}</field>
+    </record>
+
+<!--===============Action view of Employee Indent Advance Branch=================-->
+    <record id="menu_Indent_reporting_request_type_action" model="ir.actions.act_window">
+        <field name="name">Indent/GRN - Type</field>
+        <field name="res_model">indent.request</field>
+        <!--<field name="view_type">form</field>-->
+        <field name="view_mode">tree,form,search</field>
+        <field name="context">{'group_by': 'indent_type'}</field>
+    </record>
+
+
+
+    <!--=Menu Item of Indent menu snd their submenu=-->
+    <menuitem name="Indent"
+              id="menu_Indent"
+              web_icon="indent_stpi,static/description/icon.png"
+              sequence="7"/>
+    
+    <menuitem name="Indent Request"
+                id="menu_Indent_request" parent="menu_Indent"
+                groups="hr.group_hr_user,hr.group_hr_manager,indent_stpi.group_indent_approver"
+              sequence="3"
+                />
+
+    <menuitem name="New"
+                id="menu_Indent_request_apply_draft" parent="menu_Indent_request"
+                 action="employeeIndent_request_action_draft"
+                 />
+    <menuitem name="To Approve"
+                id="menu_Indent_request_apply_to_approve" parent="menu_Indent_request"
+                groups="hr.group_hr_user,hr.group_hr_manager,indent_stpi.group_indent_approver"
+                action="employeeIndent_request_action_to_approve"
+                 />
+    <menuitem name="Approved"
+                id="menu_Indent_request_apply_approved" parent="menu_Indent_request"
+                 action="employeeIndent_request_action_approved"
+                 />
+    <menuitem name="Rejected"
+                id="menu_Indent_request_apply_rejected" parent="menu_Indent_request"
+                 action="employeeIndent_request_action_rejected"
+                 />
+                 
+   <menuitem name="All"
+              id="menu_issue_request_all_id" parent="menu_Indent_request"
+              action="hremployeeIndent_request_action"
+                 />
+
+
+    <menuitem name="Reporting"
+            id="menu_Indent_reporting" parent="menu_Indent"
+            groups="indent_stpi.group_store_manager,indent_stpi.group_indent_approver,indent_stpi.group_grn_manager"
+              sequence="5"
+            />
+
+    <menuitem name="Indent Request"
+            id="menu_Indent_reporting_request" parent="menu_Indent_reporting"
+            />
+        <menuitem name="All"
+                id="menu_Indent_request_apply" parent="menu_Indent_reporting_request"
+                 action="hremployeeIndent_request_action"
+                 />
+    <menuitem name="Indent by status"
+                id="menu_Indent_reporting_request_status" parent="menu_Indent_reporting_request"
+                 action="menu_Indent_reporting_request_status_action"
+                 />
+    <menuitem name="Indent by Department"
+                id="menu_Indent_reporting_request_department" parent="menu_Indent_reporting_request"
+                 action="menu_Indent_reporting_request_department_action"
+                 />
+    <menuitem name="Indent by Functional Designation"
+                id="menu_Indent_reporting_request_job" parent="menu_Indent_reporting_request"
+                 action="menu_Indent_reporting_request_job_action"
+                 />
+    <menuitem name="Indent by Type"
+                id="menu_Indent_reporting_request_job" parent="menu_Indent_reporting_request"
+                 action="menu_Indent_reporting_request_job_action"
+                 /> 
+  	<menuitem name="Indent by Branch"
+                id="menu_Indent_reporting_request_type" parent="menu_Indent_reporting_request"
+                 action="menu_Indent_reporting_request_type_action"
+                 />
+
+
+
+
+     <!--=====Sequence of Employee Indent Advance=====-->
+     <record id="seq_grn_sequence" model="ir.sequence">
+        <field name="name">GRN sequence</field>
+        <field name="code">grn.seqid</field>
+        <field name="padding">3</field>
+        <field name="company_id" eval="False"/>
+     </record>
+
+
+    <!--============Action view of Employee Indent Advance Draft============-->
+    <record id="grn_Indent_request_action_draft" model="ir.actions.act_window">
+        <field name="name">GRN</field>
+        <field name="res_model">indent.request</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+<!--        <field name="context">{'search_default_my_tour': 1}</field>-->
+        <field name="search_view_id" ref="view_Indent_request_status_filter_report"/>
+        <!-- <field name="view_id" ref="employeeIndent_request_tree_view_draft" /> -->
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('indent_stpi.employeeIndent_request_tree_view_draft')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('indent_stpi.grn_request_form_view')})]"/>
+        <field name="context">{'default_indent_type': 'grn'}</field>
+        <field name="domain">[('state','=','draft'),('indent_type','=','grn')]</field>
+    </record>
+
+    <!--============Action view of Employee Indent Advance To Approve============-->
+    <record id="grn_Indent_request_action_to_approve" model="ir.actions.act_window">
+        <field name="name">GRN</field>
+        <field name="res_model">indent.request</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'default_indent_type': 'grn'}</field>
+        <field name="search_view_id" ref="view_Indent_request_status_filter_report"/>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('indent_stpi.employeeIndent_request_tree_view')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('indent_stpi.grn_request_form_view')})]"/>
+        <field name="domain">[('state','=','to_approve'),('indent_type','=','grn')]</field>
+    </record>
+
+
+    <!--============Action view of Employee Indent Advance Approved============-->
+    <record id="grn_Indent_request_action_approved" model="ir.actions.act_window">
+        <field name="name">GRN</field>
+        <field name="res_model">indent.request</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'default_indent_type': 'grn'}</field>
+        <field name="search_view_id" ref="view_Indent_request_status_filter_report"/>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('indent_stpi.employeeIndent_request_tree_view')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('indent_stpi.grn_request_form_view')})]"/>
+        <field name="domain">[('state','=','approved'),('indent_type','=','grn')]</field>
+    </record>
+
+
+    <!--============Action view of Employee Indent Advance Rejected============-->
+    <record id="grn_Indent_request_action_rejected" model="ir.actions.act_window">
+        <field name="name">GRN</field>
+        <field name="res_model">indent.request</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'default_indent_type': 'grn'}</field>
+        <field name="search_view_id" ref="view_Indent_request_status_filter_report"/>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('indent_stpi.employeeIndent_request_tree_view')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('indent_stpi.grn_request_form_view')})]"/>
+        <field name="domain">[('state','=','rejected'),('indent_type','=', 'grn')]</field>
+    </record>
+
+    <!--============Action view of Employee Indent Advance All============-->
+    <record id="grn_Indent_request_action_all" model="ir.actions.act_window">
+        <field name="name">GRN</field>
+        <field name="res_model">indent.request</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'default_indent_type': 'grn', 'create': False, 'delete': False}</field>
+        <field name="search_view_id" ref="view_Indent_request_status_filter_report"/>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('indent_stpi.employeeIndent_request_tree_view')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('indent_stpi.grn_request_form_view')})]"/>
+    </record>
+
+
+
+    <menuitem name="GRN"
+			  id="menu_grn_Indent_request" parent="menu_Indent"
+			  groups="indent_stpi.group_grn_create,indent_stpi.group_grn_manager"
+			  sequence="1"
+			/>
+
+
+    <menuitem name="New"
+                id="menu_grn_Indent_request_apply_draft" parent="menu_grn_Indent_request"
+                groups="indent_stpi.group_grn_create,indent_stpi.group_grn_manager"
+                action="grn_Indent_request_action_draft"
+                 />
+    <menuitem name="To Approve"
+                id="menu_grn_Indent_request_apply_to_approve" parent="menu_grn_Indent_request"
+                groups="indent_stpi.group_grn_create,indent_stpi.group_grn_manager"
+                 action="grn_Indent_request_action_to_approve"
+                 />
+    <menuitem name="Approved"
+                id="menu_grn_Indent_request_apply_approved" parent="menu_grn_Indent_request"
+                groups="indent_stpi.group_grn_create,indent_stpi.group_grn_manager"
+                 action="grn_Indent_request_action_approved"
+                 />
+    <menuitem name="Rejected"
+                id="menu_grn_Indent_request_apply_rejected" parent="menu_grn_Indent_request"
+                groups="indent_stpi.group_grn_create,indent_stpi.group_grn_manager"
+                 action="grn_Indent_request_action_rejected"
+                 />
+    
+    <menuitem name="All"
+                id="menu_grn_Indent_request_apply_all" parent="menu_grn_Indent_request"
+                groups="indent_stpi.group_grn_create,indent_stpi.group_grn_manager"
+                 action="grn_Indent_request_action_all"
+                 />
+
+	<!-- Item details form -->
+	<record id="item_details_form_view" model="ir.ui.view">
+        <field name="name">child.indent.stock.form</field>
+        <field name="model">child.indent.stock</field>
+        <field name="arch" type="xml">
+            <form string="Item Details">
+            	<group>
+                     <group>
+                     	<field name="child_indent_stock" string="Item Category" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                     	<field name="name" />
+                     	<field name="specification" />
+                     	<field name="branch_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}" readonly="1"/>
+                     </group>
+                     <group>
+                     	<field name="asset" />
+                     	<field name="serial_bool" />
+                     	<field name="is_barcode" />
+                     </group>
+                 </group>
+            </form>
+       	</field>
+    </record>
+    
+    <record id="indent_request_items_form_view" model="ir.ui.view">
+        <field name="name">indent.request.items.form</field>
+        <field name="model">indent.request.items</field>
+        <field name="arch" type="xml">
+            <form string="Item request Details" create="false">
+            	<group>
+                     <group>
+                     	<field name="item_category_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}" />
+                     	<field name="item_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                     	<field name="specification" />
+                     </group>
+                 </group>
+            </form>
+       	</field>
+    </record>
+</odoo>

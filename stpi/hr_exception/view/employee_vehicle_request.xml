@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+<odoo>
+    <record id="action_hr_employee_vehicle_test_tree" model="ir.actions.act_window">
+        <field name="name">Hr Employee Vehicle Rules</field>
+        <field name="res_model">exception.rule</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="base_exception_and_approval.view_exception_rule_tree"/>
+        <field name="domain">[('rule_group', '=', 'employee_fleet')]</field>
+        <field name="context">{'active_test': False, 'default_rule_group' : 'employee_fleet'}</field>
+    </record>
+
+    <menuitem id="menu_hr_vehicle_con_parent" parent="employee_vehicle_request.employee_fleet_configuration_menu_id" sequence="20" groups="employee_vehicle_request.group_employee_manager_v" name="Exceptions" />
+
+    <menuitem action="action_hr_employee_vehicle_test_tree" id="menu_hr_employee_vehicle_test" parent="menu_hr_vehicle_con_parent" />
+
+    <record id="view_hr_employee_vehicle_req_exp_form" model="ir.ui.view">
+        <field name="name">view.hr.employee.vehicle.req.exp.form</field>
+        <field name="model">employee.fleet</field>
+        <field name="inherit_id" ref="employee_vehicle_request.employee_fleet_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='to_location']" position="after">
+                <field name="main_exception_id" options='{"no_open": True}' string="Error:" attrs="{'invisible':[('main_exception_id','=', False)]}"/>
+                <field name="ignore_exception" invisible="1"/>
+            </xpath>
+            <xpath expr="//form/sheet" position="inside">
+                <notebook>
+                    <page string="Other Info" groups="base.group_no_one">
+                        <group name="exception" colspan="2" col="2">
+                            <separator string="Exception" colspan="2"/>
+                            <field name="exception_ids" colspan="2" nolabel="1" readonly="1"/>
+                        </group>
+                    </page>
+                </notebook>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_hr_employee_vehicle_req_exp_tree" model="ir.ui.view">
+        <field name="name">view.hr.vehicle.req.transfer.exp.tree</field>
+        <field name="model">employee.fleet</field>
+        <field name="inherit_id" ref="employee_vehicle_request.employee_fleet_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="state" position="before">
+                <field name="main_exception_id"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_hr_employee_vehicle_req_exp_filter" model="ir.ui.view">
+        <field name="name">view.hr.employee.vehicle.req.exp.filter</field>
+        <field name="model">employee.fleet</field>
+        <field name="inherit_id" ref="employee_vehicle_request.employee_fleet_search_view"/>
+        <field name="arch" type="xml">
+            <filter name="status" position="after">
+                <separator orientation="vertical"/>
+                <filter icon="terp-emblem-important" name="tofix" string="Blocked in draft" domain="[('main_exception_id','!=',False)]"/>
+            </filter>
+        </field>
+    </record>
+
+</odoo>
+

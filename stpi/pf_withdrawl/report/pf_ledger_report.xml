@@ -1,0 +1,165 @@
+<odoo>
+
+    <template id="report_pf_withdrawl_template_view">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <head>
+                        <style>
+                            .custom-bg-color {
+                                background-color: #E3EEF7;
+                            }
+                            .thead-bg-color {
+                                background-color: #4c566a;
+                            }
+                            .custom-row {
+                                display: -ms-flexbox;
+                                display: flex;
+                                -ms-flex-wrap: wrap;
+                                flex-wrap: wrap;
+                                margin-right: -3px;
+                                margin-left: -3px;
+                            }
+                            .table {
+                                width: 100%;
+                                margin-bottom: 1rem;
+                                background-color: transparent;
+                            }
+                            .table th,
+                            .table td {
+                                padding: 0.75rem;
+                                vertical-align: top;
+                                border-top: 1px solid #dee2e6;
+                            }
+                            .table-bordered {
+                                border: 1px solid #dee2e6;
+                            }
+                            .table-bordered th,
+                            .table-bordered td {
+                                border: 1px solid #dee2e6;
+                            }
+                            .td-custom {
+                                font-size:20px;
+                                width:510px;
+                            }
+                            #pf-ledger-table thead th,
+                            #pf-ledger-table thead td {
+                                text-align:center;
+                            }
+                        </style>
+                    </head>
+
+                    <div>
+                        <div class="oe_structure">
+                            <t t-set="dateRangeObj" t-value="o._current_fy()"/>
+                            <div class="custom-row" style="font-size:11px">
+                                <table class="table table-bordered" style="width:1000px;">
+
+                                    <tr>
+                                        <td class="td-custom" colspan="2">
+                                            <t t-if="o.employee_id">
+                                                <strong>Name</strong> :- <span t-field="o.employee_id"/><br/>
+                                            </t>
+                                            <t t-if="o.employee_id">
+                                                <strong>CPF</strong> :- 0<br/>
+                                            </t>
+                                        </td>
+                                        <td class="td-custom" colspan="2">
+                                            <t t-if="o.employee_id.branch_id">
+                                                <strong>Branch</strong> :- <span t-field="o.employee_id.branch_id"/><br/>
+                                            </t>
+                                            <t t-if="o.employee_id.branch_id">
+                                                <strong>Designation</strong> :- <span t-field="o.employee_id.job_id"/><br/>
+                                            </t>
+                                            <t t-if="o.employee_id.branch_id">
+                                                <strong>Ledger for FY</strong> :- <span t-esc="dateRangeObj.name"/><br/>
+                                            </t>
+                                        </td>
+                                    </tr>
+
+                                </table>
+
+                                <table id="pf-ledger-table" class="table table-bordered" style="width:1000px; font-size: 15px;">
+                                    <thead>
+                                      <tr>
+                                        <th rowspan="2">Month &amp; Year</th>
+                                        <th colspan="5">Contribution</th>
+                                        <th rowspan="2">Total</th>
+                                      </tr>
+                                      <tr>
+                                        <td>Employee (A) (MPF)</td>
+                                        <td>Voluntary (B) (VPF)</td>
+                                        <td>STPI (C) (EPF)</td>
+                                        <td>Interest (A+B) (MPF+VPF)</td>
+                                        <td>Interest (C) (EPF)</td>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <t t-set="i" t-value="int(2)"/>
+                                      <t t-foreach="range(i)" t-as="l">
+                                        <t t-if="l == 0">
+                                          <tr>
+                                            <td><span t-esc="o.balance_ason_label"/></td>
+                                            <td><span t-esc="o.calc_opening_bal('CEPF')"/></td>
+                                            <td><span t-esc="o.calc_opening_bal('VCPF')"/></td>
+                                            <td><span t-esc="o.calc_opening_bal('CEPF')"/></td>
+                                            <td><span t-esc="o.calc_opening_bal('CPF')"/></td>
+                                            <td><span t-esc="o.calc_opening_bal('IntCEPF+VCPF')"/></td>
+                                            <td><span t-esc="o.calc_opening_bal('IntCPF')"/></td>
+                                          </tr>
+                                        </t>
+                                        <t t-else="">
+                                          <t t-set="fy_months" t-value="o._fy_months()"/>
+                                          <t t-foreach="fy_months" t-as="month">
+                                              <tr>
+                                                  <td><span t-esc="month"/></td>
+                                                  <td>1</td>
+                                                  <td>2</td>
+                                                  <td>3</td>
+                                                  <td>4</td>
+                                                  <td>5</td>
+                                                  <td>6</td>
+                                              </tr>
+                                          </t>
+                                        </t>
+                                      </t>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <report
+        id="report_pf_ledger"
+        string="PF Ledger"
+        model="pf.employee"
+        report_type="qweb-pdf"
+        file="pf_withdrawl.report_pf_withdrawl_template_view"
+        name="pf_withdrawl.report_pf_withdrawl_template_view"
+        menu="False"
+        print_report_name="'PF Ledger - %s' % (object.employee_id.name)" />
+
+    <report
+            id="boi_payroll_advice"
+            model="pf.payment.advice" 
+            string="Print Advice (BOI)"
+            report_type="qweb-pdf"
+            name="pf_withdrawl.report_boi_payroll_advice" 
+            file="pf_withdrawl.report_boi_payroll_advice"
+            print_report_name="'PF Payment Advice %s - %s' % (object.date.strftime('%B'), object.date.strftime('%Y'))"/>
+
+    <report
+            id="non_boi_payroll_advice"
+            model="pf.payment.advice" 
+            string="Print Advice (Non-BOI)"
+            report_type="qweb-pdf"
+            name="pf_withdrawl.report_non_boi_payrolladvice" 
+            file="pf_withdrawl.report_non_boi_payrolladvice"
+            print_report_name="'PF Payment Advice %s - %s' % (object.date.strftime('%B'), object.date.strftime('%Y'))"/>
+
+</odoo>

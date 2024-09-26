@@ -1,0 +1,226 @@
+<odoo>
+
+    <template id="payroll_register_report">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <!-- <t t-call="web.external_layout"> -->
+                    <style>
+                        * {
+                            font-family: Calibri, 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', sans-serif;
+                            font-weight:bold;
+                        }
+                        table {
+                        border-collapse: collapse;
+                        }
+                        th {
+                        text-align: inherit;
+                        }
+                        .table {
+                        width: 100%;
+                        margin-bottom: 1rem;
+                        background-color: transparent;
+                        }
+
+                        .table th,
+                        .table td {
+                        vertical-align: top;
+                        border-top: 2px solid #000;
+                        }
+
+                        .table thead th {
+                        vertical-align: bottom;
+                        border-bottom: 2px solid #000;
+                        }
+
+                        .table tbody + tbody {
+                        border-top: 2px solid #000;
+                        }
+
+                        .table .table {
+                        background-color: #fff;
+                        }
+
+                        .table-bordered {
+                        border: 2px solid #000;
+                        }
+
+                        .table-bordered th,
+                        .table-bordered td {
+                        border: 2px solid #000;
+                        }
+
+                        .table-bordered thead th,
+                        .table-bordered thead td {
+                        border-bottom-width: 2px;
+                        }
+                        .table-dark.table-bordered {
+                        border: 0;
+                        }
+                        tr,
+                        img {
+                            page-break-inside: avoid;
+                        }
+                        .center-align {
+                            text-align: center;
+                            vertical-align: middle;
+                            font-size: 30px;
+                        }
+                        .text-blue {
+                            color: #004085;
+                        }
+                        .font-10 {
+                            font-size: 12px;
+                        }
+                    </style>
+                    <div class="page">
+                        <!-- <t t-set="decimal_precision" t-value="request.env['decimal.precision'].precision_get('Payroll')"/> -->
+                        <t t-set="decimal_precision" t-value="0"/>
+                        <table class="table table-bordered font-10">
+                            <tr>
+                                <td colspan="29" class="center-align text-blue">Software Technology Parks of India <br/><span t-esc="o.branch_id.name"/></td>
+                            </tr>
+                            <tr>
+                                <td colspan="29">SALARY SHEET FOR THE MONTH OF <span t-esc="o.date_end.strftime('%B')"/> - <span t-esc="o.date_end.strftime('%Y')"/></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sl.</strong></td>
+                                <td><strong>Emp ID</strong></td>
+                                <td><strong>Name</strong></td>
+                                <td><strong>Designation</strong></td>
+                                <td><strong>Level</strong></td>
+                                <td><strong>Basic Salary</strong></td>
+                                <td><strong>DA</strong></td>
+                                <td><strong>HRA</strong></td>
+                                <td><strong>TA</strong></td>
+                                <td><strong>Arrears</strong></td>
+                                <td><strong>Misc</strong></td>
+                                <td><strong>Gross Salary</strong></td>
+                                <td><strong>CPF</strong></td>
+                                <td><strong>CPF Vol.</strong></td>
+                                <td><strong>License Fee</strong></td>
+                                <td><strong>PM Relief Fund</strong></td>
+                                <!-- <td><strong>CPF/EMI NO</strong></td> -->
+                                <td><strong>Short Term/EMI NO</strong></td>
+                                <td><strong>Short Term Intt</strong></td>
+                                <!-- <td><strong>Other/EMI NO</strong></td> -->
+                                <td><strong>Rent Recovery</strong></td>
+                                <td><strong>TDS</strong></td>
+                                <td><strong>PTax</strong></td>
+                                <td><strong>Misc. Ded.</strong></td>
+                                <td><strong>Net Salary</strong></td>
+                                <td><strong>CPF - (STPI)</strong></td>
+                                <td><strong>CPF Total</strong></td>
+                                <td><strong>EPS - (STPI)</strong></td>
+                                <td><strong>TDS Till Date</strong></td>
+                            </tr>
+                            <tr></tr>
+                            <t t-foreach="o.slip_ids.sorted(key=lambda r: r.contract_id.pay_level_id.pay_band_from, reverse=True)" t-as="slip">
+                                <t t-set="l" t-value="o.get_details(slip)"/>
+                                <tr>
+                                    <td><span t-esc="slip_index+1"/></td>
+                                    <td><span t-esc="slip.employee_id.identify_id"/></td>
+                                    <td><span t-esc="slip.employee_id.name"/></td>
+                                    <td><span t-esc="slip.employee_id.job_title.name"/></td>
+                                    <td><span t-esc="l['level']"/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'BASIC').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'DA').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'HRA').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'TA').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'ARRE').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'MISC').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'GROSS').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'MPF').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'VPF').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'LF').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'PMRF').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <!-- <td>CPF/EMI NO</td> -->
+                                    <td><span t-esc="l['loan_emi_no']"/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'LOI').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <!-- <td>Other/EMI NO</td> -->
+                                    <td><span t-esc="l['rent_recovery']"/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'TDS').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <!-- <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'TDS').mapped('total'))"/></td> -->
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'PTD').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'MISD').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'NET').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'EPF').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'CPFT').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'EPS').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                    <td><span t-esc="sum(slip.line_ids.filtered(lambda x: x.code == 'TDSTILL').mapped('total'))"
+                                                t-options='{"widget": "float", "precision": decimal_precision}'/></td>
+                                </tr>
+                            </t>
+                            <tr>
+                                <strong><td colspan="5">TOTAL</td></strong>
+                                <strong><td><span t-esc="o.get_total(code='BASIC')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='DA')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='HRA')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='TA')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='ARRE')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='MISC')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='GROSS')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='MPF')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='VPF')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='LF')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='PMRF')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='LO')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='LOI')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='NOHRA')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='TDS')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='PTD')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='MISD')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='NET')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='EPF')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='CPFT')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='EPS')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                                <strong><td><span t-esc="o.get_total(code='TDS')"
+                                                    t-options='{"widget": "float", "precision": decimal_precision}'/></td></strong>
+                            </tr>
+                        </table>
+                    </div>
+                <!-- </t> -->
+            </t>
+        </t>
+    </template>
+
+</odoo>

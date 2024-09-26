@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <record id="vigilance_tree_view" model="ir.ui.view">
+        <field name="name">my.vigilance.tree</field>
+        <field name="model">my.vigilance</field>
+        <field name="arch" type="xml">
+            <tree string="Vigilance">
+                <field name="vigilance_sequence"/>
+                <field name="mode_of_complaint"/>
+                <field name="type_of_complaint"/>
+                <field name="name_of_complaint"/>
+                <field name="address"/>
+                <field name="reg_no"/>
+                <field name="allegation_in_brief"/>
+                <field name="com_date"/>
+                <field name="date_of_receipt"/>
+                <field name="remarks"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="vigilance_form_view" model="ir.ui.view">
+        <field name="name">my.vigilance.form</field>
+        <field name="model">my.vigilance</field>
+        <field name="arch" type="xml">
+            <form string="Vigilance">
+                <header>
+                    <button name="button_draft" string="Reset to Draft" type="object" states="in_progress" groups="my_vigilance.group_vigilance_user"/>
+                    <button name="button_in_progress" string="Forward to Admin" class="oe_highlight" type="object" states="draft" groups="my_vigilance.group_vigilance_user"/>
+                    <button name="button_pi" string="PI" class="oe_highlight" type="object" states="draft,in_progress"/>
+                    <!--                        <button name="button_register_actions" string="Register Actions" class="oe_highlight" type="object" states="in_progress" groups="my_vigilance.group_vigilance_user"/>-->
+                    <!--                        <button name="button_create_activities" string="Create Activities" class="oe_highlight" type="object" states="in_progress" groups="my_vigilance.group_vigilance_user"/>-->
+                    <button name="button_closed" string="Close" class="oe_highlight" type="object" states="PI" groups="my_vigilance.group_vigilance_manager"/>
+                    <button name="button_re_open" string="Re-Open" class="oe_highlight" type="object" states="closed" groups="my_vigilance.group_vigilance_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,PI,closed" />
+                </header>
+                <sheet>
+                    <field name="complaint_against" invisible="1"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(my_vigilance.vigilance_initiate_major_menu_action)d" string="Major Intimations" type="action" icon="fa-pencil-square-o" domain="[('vigilance_id', '=', id)]" context = "{'default_vigilance_id': id, 'default_charged_officer': complaint_against}"/>
+                        <button name="%(my_vigilance.vigilance_initiate_minor_menu_action_own)d" string="Minor Intimations" type="action" icon="fa-pencil-square-o" domain="[('vigilance_id', '=', id)]" context = "{'default_vigilance_id': id, 'default_charged_officer': complaint_against}"/>
+                        <button name="%(my_vigilance.vigilance_suspension_menu_action)d" string="Suspension" type="action" icon="fa-pencil-square-o" domain="[('vigilance_id', '=', id)]" context = "{'default_vigilance_id': id}"/>
+                        <button name="%(my_vigilance.vigilance_disciplinary_menu_action)d" string="DA Decision" type="action" icon="fa-pencil-square-o" domain="[('vigilance_id', '=', id)]" context = "{'default_vigilance_id': id}"/>
+                        <button name="%(my_vigilance.vigilance_appeal_menu_action)d" string="Appeal" type="action" icon="fa-pencil-square-o" domain="[('vigilance_id', '=', id)]" context = "{'default_vigilance_id': id}"/>
+                        <button name="%(my_vigilance.vigilance_cvc_menu_action)d" string="CVC" type="action" icon="fa-pencil-square-o" domain="[('vigilance_id', '=', id)]" context = "{'default_vigilance_id': id}"/>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="vigilance_sequence" placeholder="Vigilance number" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <!-- <field name="complaint_type" required="1" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/> -->
+                            <field name="mode_of_complaint" required="1" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                            <field name="type_of_complaint" required="1" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                            <field name="name_of_complaint" required="1" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                            <field name="complaint_against" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                            <field name="address" required="1" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                            <field name="penalty" readonly="1" states="closed"/>
+                        </group>
+                        <group>
+                            <field name="reg_no" required="1" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                            <field name="allegation_in_brief" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                            <field name="com_date" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                            <field name="date_of_receipt" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                        </group>
+                    </group>
+                    <field name='remarks' placeholder='Remarks.....'/>
+                    <notebook>
+                        <page name = "pi" string = "Preliminary investigation (PI)">
+                            <group>
+                                <group>
+                                    <field name="pi_conducted_by" attrs="{'readonly':[('state','!=','PI')]}"/>
+                                    <field name="pi_conducted_ext" attrs="{'invisible': [('pi_conducted_by', '=', 'internal_emp')],'required': [('pi_conducted_by', '!=', 'internal_emp'),('state', '=', 'PI')]}"/>
+                                    <field name="pi_conducted_int" attrs="{'invisible': [('pi_conducted_by', '!=', 'internal_emp')],'required': [('pi_conducted_by', '=', 'internal_emp'),('state', '=', 'PI')]}"/>
+                                </group>
+                                <group>
+                                    <field name="date_pi" attrs="{'readonly':[('state','!=','PI')]}"/>
+                                    <field name="outcome_pi" attrs="{'readonly':[('state','!=','PI')]}"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page name = "co" string = "Representation of the Charged Officer">
+                            <group>
+                                <group>
+                                    <field name="date_co" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                    <field name="comm_number_co" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                </group>
+                                <group>
+                                    <field name="comm_date_co" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                    <field name="remarks_co" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page name = "iopo" string = "Inquiry proceedings- Appointment of IO and PO">
+                            <group>
+                                <group>
+                                    <field name="io_conducted_by" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                    <field name="io_conducted_ext" attrs="{'invisible': [('io_conducted_by', '=', 'internal_emp')]}"/>
+                                    <field name="io_conducted_int" attrs="{'invisible': [('io_conducted_by', '!=', 'internal_emp')]}"/>
+                                    <field name="address_io" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                    <field name="date_io" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                    <field name="order_number_io" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                </group>
+                                <group>
+                                    <field name="po_conducted_int" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                    <field name="date_po" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                    <field name="address_po" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                    <field name="order_number_po" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                    <field name="remarks_io_po" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page name = "ir" string = "Inquiry Report">
+                            <group>
+                                <group>
+                                    <field name="date_ir" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                    <field name="date_fw_ir" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                    <field name="date_rep_ir" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                    <field name="date_cvc" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+
+                                </group>
+                                <group>
+                                    <field name="comm_num_ir" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                    <field name="stpi_ref" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                    <field name="report_num_ir" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                    <field name="find_io" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                    <field name="comm_num_co" attrs="{'readonly':[('state','not in',('draft','PI'))]}"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_my_vigilance_filter_report" model="ir.ui.view">
+        <field name="name">my.vigilance.search</field>
+        <field name="model">my.vigilance</field>
+        <field name="arch" type="xml">
+            <search string="Search for Vigilance">
+                <field name="vigilance_sequence"/>
+                <field name="reg_no"/>
+                <field name="name"/>
+                <field name="date_of_receipt"/>
+                <field name="mobile"/>
+                <field name="email"/>
+                <field name="state"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_category" string="State" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="vigilance_menu_action_draft" model="ir.actions.act_window">
+        <field name="name">Vigilance</field>
+        <field name="res_model">my.vigilance</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form,search</field>
+        <field name="domain">[('state','=','draft')]</field>
+    </record>
+
+
+    <record id="vigilance_menu_action_inprogress" model="ir.actions.act_window">
+        <field name="name">Vigilance</field>
+        <field name="res_model">my.vigilance</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form,search</field>
+        <field name="domain">[('state','=','in_progress')]</field>
+    </record>
+
+    <record id="vigilance_menu_action_pi" model="ir.actions.act_window">
+        <field name="name">Vigilance</field>
+        <field name="res_model">my.vigilance</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form,search</field>
+        <field name="domain">[('state','=','PI')]</field>
+    </record>
+
+
+    <record id="vigilance_menu_action_closed" model="ir.actions.act_window">
+        <field name="name">Vigilance</field>
+        <field name="res_model">my.vigilance</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form,search</field>
+        <field name="domain">[('state','=','closed')]</field>
+    </record>
+
+     <record id="vigilance_menu_action_all" model="ir.actions.act_window">
+        <field name="name">Vigilance</field>
+        <field name="res_model">my.vigilance</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form,search</field>
+        <field name="context">{'create': False, 'delete': False}</field>
+    </record>
+
+
+    <!--=====Sequence ofVigilance=====-->
+    <record id="seq_ltc_sequence" model="ir.sequence">
+        <field name="name">Vigilance sequence</field>
+        <field name="code">my.vigilance</field>
+        <field name="padding">3</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+
+    <record id="vigilance_receipt_type_tree" model="ir.ui.view">
+        <field name="name">vigilance.receipt.type.tree</field>
+        <field name="model">vigilance.receipt.type</field>
+        <field name="arch" type="xml">
+            <tree string="Vigilance Receipt Type" editable="bottom">
+                <field name="name" required="True"/>
+            </tree>
+        </field>
+    </record>
+    <record id="vigilance_receipt_type_form" model="ir.ui.view">
+        <field name="name">vigilance.receipt.type.form</field>
+        <field name="model">vigilance.receipt.type</field>
+        <field name="arch" type="xml">
+            <form string="Vigilance Receipt Type">
+                <field name="name"/>
+            </form>
+        </field>
+    </record>
+
+    <record id="vigilance_receipt_type_action" model="ir.actions.act_window">
+        <field name="name">Vigilance Receipt Type</field>
+        <field name="res_model">vigilance.receipt.type</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <record id="vigilance_penalty_tree" model="ir.ui.view">
+        <field name="name">vigilance.penalty.tree</field>
+        <field name="model">vigilance.penalty</field>
+        <field name="arch" type="xml">
+            <tree string="Vigilance Receipt Type" editable="bottom">
+                <field name="name" required="True"/>
+                <field name="type"/>
+            </tree>
+        </field>
+    </record>
+    <record id="vigilance_penalty_action" model="ir.actions.act_window">
+        <field name="name">Vigilance Penalty</field>
+        <field name="res_model">vigilance.penalty</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <menuitem id = "vigilance_menu_id"
+              name = "Vigilance" web_icon="my_vigilance,static/description/icon.png"
+              sequence="21" />
+
+    <menuitem id = "vigilance_my_menu"
+              name = "Vigilance"
+              parent = "vigilance_menu_id" />
+
+    <menuitem id = "vigilance_my_menu_draft"
+              name = "New"
+              parent = "vigilance_my_menu"
+              action ="vigilance_menu_action_draft" />
+
+    <menuitem id = "vigilance_my_menu_in_progress"
+              name = "Forwarded"
+              parent = "vigilance_my_menu"
+              action ="vigilance_menu_action_inprogress" groups="my_vigilance.group_vigilance_manager" />
+    <menuitem id = "vigilance_my_menu_pi"
+              name = "PI"
+              parent = "vigilance_my_menu"
+              action ="vigilance_menu_action_pi" />
+
+    <menuitem id = "vigilance_my_menu_closed"
+              name = "Closed"
+              parent = "vigilance_my_menu"
+              action ="vigilance_menu_action_closed" />
+
+    <menuitem id = "vigilance_my_menu_all"
+              name = "All"
+              parent = "vigilance_my_menu"
+              action ="vigilance_menu_action_all" />
+
+    <menuitem id = "vigilance_configuration"
+              name = "Configuration"
+              parent = "vigilance_menu_id" 
+              sequence = "100"
+              groups="group_vigilance_manager" />
+
+    <!-- <menuitem id = "vigilance_receipt_type"
+                 name = "Receipt Type"
+                 action ="vigilance_receipt_type_action"
+                 parent = "vigilance_configuration" /> -->
+
+    <menuitem id = "vigilance_penalty"
+              name = "Penalty"
+              action ="vigilance_penalty_action"
+              parent = "vigilance_configuration" />
+
+</odoo>

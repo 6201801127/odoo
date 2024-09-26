@@ -1,0 +1,184 @@
+<odoo>
+        <!-- ======Form View of master of Folder model====== -->
+        <record id="foldermaster_form_view" model="ir.ui.view">
+            <field name="name">folder.master.form</field>
+            <field name="model">folder.master</field>
+            <field name="arch" type="xml">
+                <form string="File">
+                    <header>
+                        <button name="button_submit" string="Submit" class="oe_highlight" type="object" states="draft"/>
+                        <button name="button_close" string="Close" class="oe_highlight" type="object" states="in_progress"/>
+                        <button name="button_reset_to_draft" string="Reopen" class="oe_highlight" type="object" states="closed"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,closed" />
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name = "%(folder_forward_button_wizard_action_view)d" type = "action" string = "Forward" icon = "fa-forward" context = "{'default_defid': id}" attrs="{'invisible':[('state','=', 'closed')]}"/>
+                            <button name="deal_with_file" string="Deal with File" type="object" icon="fa-pencil-square-o" attrs="{'invisible':[('state','=', 'closed')]}"/>
+                            <button type="object"
+                                            class="oe_stat_button"
+                                            icon="fa-folder-open-o"
+                                            name="tracker_view_file"
+                                            string = "Tracking info - File"
+                                            >
+                                    </button>
+                        </div>
+                        <group>
+                            <group>
+
+                                <field name="folder_name" required ="1" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                                <field name="subject" required="1" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                                <field name="date" readonly="1"/>
+                                <field name="branch_id" readonly="1"/>
+                                <field name="department_id" readonly="1"/>
+                                <field name="previous_reference" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+
+                            </group>
+                            <group>
+                                <field name="write_date"/>
+                                <field name="tags" widget="many2many_tags" placeholder="Tags..." options="{'color_field': 'color', 'no_create_edit': True}" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                                <field name="sequence" invisible="1"/>
+                                <field name="number" readonly="1"/>
+                                <field name="old_file_number" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                                <field name="type" widget="many2many_tags" placeholder="Type..." options="{'color_field': 'color'}" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                                <field name="status" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                                <field name="later_reference" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                            </group>
+                            <field name="description" placeholder="Description" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                        </group>
+                        <notebook>
+                            <page name = "Letters" string = "Add Correspondence">
+                                <button name = "%(add_reference_wizard_action_view)d" type = "action" string = "Add Reference" context = "{'default_folder_id': id}" attrs="{'invisible':[('state','=', 'closed')]}"/>
+                                <field name="file_ids" readonly="1"/>
+                            </page>
+                            <page name = "Write_correspondence" string = "Draft correspondence">
+                                <button type="action" name="%(write_correspondence_wizard_action_view)d" string="Draft Correspondence"  colspan="2"
+                            class="oe_stat_button"
+                            icon="fa-clock-o" context = "{'default_folder_id': id, 'default_current_user_id': uid, 'default_branch_id': branch_id, 'default_department_id': department_id, 'default_version': '1', 'default_previousversion': '1'}"/>
+                                <field name="document_dispatch" readonly="1"/>
+                            </page>
+                            <page name="FileTrackingInformation" string="File Tracking Information" invisible="1">
+                                <field name="folder_track_ids" readonly="1">
+                                    <tree editable="bottom">
+                                        <field name="create_let_id" invisible="1"/>
+                                        <field name="forwarded_by"/>
+                                        <field name="forwarded_date"/>
+                                        <field name="forwarded_to_user"/>
+                                        <field name="job_pos"/>
+                                        <field name="remarks"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page name="meta_info" string="Meta Information">
+                                <group>
+                                    <group>
+                                        <field name="current_owner_id"/>
+                                        <field name="last_owner_id"/>
+                                        <field name="sec_owner" widget="many2many_tags" invisible="1"/>
+                                        <field name="previous_owner" widget="many2many_tags"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page name="php_info" string="Page Information" invisible="1">
+                                <group>
+                                    <group>
+                                            <field name="notesheet_url"/>
+                                        <field name="iframe_dashboard" string="URL"/>
+                                        <field name="document_ids"/>
+                                        <field name="assignment_id"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+     <!-- ======Tree View of master of Folder model====== -->
+     <record id="foldermaster_tree_view1" model="ir.ui.view">
+            <field name="name">folder.master.tree</field>
+            <field name="model">folder.master</field>
+            <field name="arch" type="xml">
+                <tree string="Folder">
+                    <field name="folder_name"/>
+                    <field name="date"/>
+                    <field name="tags"/>
+                    <field name="write_date"/>
+                    <field name="state"/>
+                    <button name="deal_with_file" string="Deal with File" type="object"/>
+                    <button name = "%(folder_forward_button_wizard_action_view)d" string="Forward" type="action"/>
+                    <button name="button_close" string="Close" type="object" states="in_progress"/>
+                </tree>
+            </field>
+     </record>
+
+    <record id="seq_sequence_file_id" model="ir.sequence">
+            <field name="name">Sequence</field>
+            <field name="code">folder.master</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+     <!-- ==========Action View of master of Folder model=========== -->
+     <record id="foldermaster_action_view" model="ir.actions.act_window">
+            <field name="name">Files</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">folder.master</field>
+            <field name="view_type">form</field>
+         <field name="view_mode">tree,form</field>
+          <field name="view_id" ref="foldermaster_tree_view1"/>
+         <field name="domain">[('state','=','draft'),('current_owner_id.id', '=', uid)]</field>
+    </record>
+
+
+
+
+     <!-- ======Tree View of master of Folder model====== -->
+     <record id="foldermaster_tree_view2" model="ir.ui.view">
+            <field name="name">folder.master.tree</field>
+            <field name="model">folder.master</field>
+            <field name="arch" type="xml">
+                <tree string="Folder">
+                    <field name="folder_name"/>
+                    <field name="date"/>
+                    <field name="tags"/>
+                    <field name="write_date"/>
+                    <field name="state"/>
+                    <button name="button_reset_to_draft" string="Reopen" type="object" states="closed"/>
+                </tree>
+            </field>
+     </record>
+
+         <!-- ==========Action View of master of Folder Closed=========== -->
+     <record id="foldermaster_closed_action_view" model="ir.actions.act_window">
+         <field name="name">Files</field>
+         <field name="type">ir.actions.act_window</field>
+         <field name="res_model">folder.master</field>
+         <field name="view_type">form</field>
+         <field name="view_mode">tree,form</field>
+         <field name="view_id" ref="foldermaster_tree_view2"/>
+         <field name="domain">[('state','=','closed')]</field>
+    </record>
+
+
+        <menuitem id="menuitem_files_fol"
+                  parent="muk_dms.main_menu_muk_dms"
+                  name="Files"/>
+
+        <menuitem id="menuitem_files_add_fol"
+                  parent="menuitem_files_fol"
+                  action="foldermaster_action_view"
+                  name="Add Files"/>
+
+            <menuitem id="menuitem_files_closed_add_fol"
+                  parent="menuitem_files_fol"
+                  action="foldermaster_closed_action_view"
+                  name="Closed Files"/>
+
+</odoo>

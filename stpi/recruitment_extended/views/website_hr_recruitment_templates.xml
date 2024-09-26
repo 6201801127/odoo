@@ -1,0 +1,1561 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <template id="website_hr_recruitment.apply">
+        <t t-call="website.layout">
+            <script src="/recruitment_extended/static/src/js/materials.js"/>
+            <script src="/recruitment_extended/static/src/js/job_application.js"/>
+            <!-- <script type="text/javascript" src="/recruitment_extended/static/src/js/country_filter.js"/> -->
+            <script type="text/javascript" src="/recruitment_extended/static/src/js/jquery.validate.min.js"/>
+            <style>
+                .error{color: red;}
+                .close{ float: unset; opacity: 1;}
+                .table th, .table td {
+                    vertical-align:middle;
+                    text-align: center;
+                }
+                .navbar-light{ display: none;}
+                .table thead th {
+                        border-bottom: 2px solid #acacac;
+                }
+                .table-bordered th, .table-bordered td {
+                        border: 1px solid #acacac;
+                    }
+                .section-job-application {
+                    cursor: pointer;
+                    border-left: 5px solid #69455f !important;
+                    border-right: 5px solid #69455f !important;
+                }
+                .side-icon {
+                    border: 2px solid #69455f;
+                    border-radius: 50%;
+                    padding: 0px 6px;
+                }
+                .avatar-upload {
+                    position: relative;
+                    max-width: 100px;
+                    
+                }
+                .avatar-upload .avatar-edit {
+                    position: absolute;
+                    right: -10px;
+                    z-index: 1;
+                    top: 10px;
+                }
+                .avatar-upload .avatar-edit input {
+                    display: none;
+                }
+                .avatar-upload .avatar-edit input + label {
+                    display: inline-block;
+                    width: 34px;
+                    height: 34px;
+                    margin-bottom: 0;
+                    border-radius: 100%;
+                    background: #FFFFFF;
+                    border: 1px solid transparent;
+                    box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.12);
+                    cursor: pointer;
+                    font-weight: normal;
+                    transition: all 0.2s ease-in-out;
+                }
+                .avatar-upload .avatar-edit input + label:hover {
+                    background: #f1f1f1;
+                    border-color: #d6d6d6;
+                }
+                .avatar-upload .avatar-edit input + label:after {
+                    content: "\f040";
+                    font-family: 'FontAwesome';
+                    color: #757575;
+                    position: absolute;
+                    top: 8px;
+                    left: 3px;
+                    right: 0;
+                    text-align: center;
+                    margin: auto;
+                }
+                .avatar-upload .avatar-preview {
+                    width: 100px;
+                    height: 100px;
+                    position: relative;
+                    border: 6px solid #F8F8F8;
+                    box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.1);
+                    }
+                    .avatar-upload .avatar-preview > div {
+                    width: 100%;
+                    height: 100%;
+                    background-size: cover;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                }
+            </style>
+            <t t-set="additional_title">Apply Job</t>
+            <div id="wrap" class="container py-4">
+                <div class="d-flex flex-row flex-nowrap justify-content-between mb-4">
+                    <div>
+                        <a t-att-href="'/jobs/'" class=" btn btn-primary application-button text-white font-weight-bold"><i class="fa fa-long-arrow-left"/> Back to Jobs</a>
+                    </div>
+                    <div>
+                        <a t-att-href="'/logout-jobs/'" class=" btn btn-primary application-button text-white font-weight-bold"> Log Out <i class="fa fa-sign-out" /></a>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header d-flex flex-row flex-nowrap justify-content-between text-white align-items-center" style="background-color: #69455f !important;">
+                        <div/>
+                        <div class="text-center">
+                            <h5 class="text-uppercase"> Application for the Post of </h5>
+                            <h2 t-if="published_advertisement" class="mb-0 font-weight-bold">
+                                <span t-field="published_advertisement.job_id.name"/>
+                            </h2>
+                        </div>
+                        <div >
+                            <badge class='badge badge-primary p-1' style="font-size: 1rem;" t-if="exist_applicant == 1">Submitted </badge>
+                        </div>
+                    </div>
+                    <div class="card-body px-1">
+                        <section id="forms" class="col">
+                            <form action="/website_form/submit/form" method="post" id="recruitment_form" class="" enctype="multipart/form-data">
+                                <div>
+                                    <input type="hidden" name="advertisement_slug" id="advertisement_slug" t-att-value="slug(published_advertisement)"/>
+                                    <input type="hidden" name="published_advertisement_id" id="published_advertisement_id" t-att-value="published_advertisement.id"/>
+                                    
+                                    <input type="hidden" name="age_required" id="age_required" t-att-value="age_required"/>
+                                    <input type="hidden" name="min_age"     id="min_age" t-att-value="min_age"/>
+                                    <input type="hidden" name="max_age"     id="max_age" t-att-value="max_age"/>
+
+                                    <div class="card">
+                                        <div class="card-header alert alert-primary section-job-application mb-0 d-flex align-items-center">
+                                            <div class="text-uppercase font-weight-bold text-left"> Job Details </div>
+                                        </div>
+                                        <div class="card-body" style="background: rgba(221, 221, 221, 0.22);">
+                                            <div class="form-row">
+                                                <div class="col-md-6">
+                                                    <div class="row">
+                                                        <div class="form-group form-field o_website_form_required_custom col-md-12">
+                                                            <label for="application_no">Application No</label>
+                                                            <input type="text" id="application_no"  t-att-value="published_advertisement.advertisement_id.name" readonly="1" class="form-control o_website_form_input" placeholder="Application No" name="application_no" />
+                                                        </div>
+                                                        
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="form-group form-field o_website_form_required_custom col-md-12">
+                                                        <label for="application_post">Application for the Post of</label>
+                                                        <input type="text" id="application_post" t-att-value="published_advertisement.job_id.name" readonly='1' class="form-control o_website_form_input" name="application_post" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Personal Details -->
+                                    <div class="card mt-4">
+                                        <div class="card-header alert alert-primary section-job-application mb-0 d-flex align-items-center">
+                                            <div class="text-uppercase font-weight-bold text-left"> Personal Details </div>
+                                           
+                                        </div>
+
+                                        <div class="card-body" style="background: rgba(221, 221, 221, 0.22);">
+                                            <div class="form-row">
+                                                <!-- <col -->
+                                                <div class="form-group form-field o_website_form_required_custom col-auto ml-auto align-self-end">
+                                                    <div class="avatar-upload">
+                                                        <div class="avatar-edit">
+                                                            <input type='file' id="imageUpload" name="imageUpload"  accept=".png, .jpg, .jpeg" />
+                                                            <label for="imageUpload"></label>
+                                                        </div>
+                                                        <div class="avatar-preview">
+                                                            <t t-if="applicant_record.image">
+                                                                <div id="imagePreview" exist_image="yes" t-attf-style="background-image: url('data:image/*;base64,{{applicant_record.image}}');">
+                                                                </div>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <div id="imagePreview" exist_image="no" style="background-image: url('/recruitment_extended/static/src/img/user.png');">
+                                                                </div>
+                                                            </t>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="partner_salutation">Salutation</label>
+                                                    <select class="form-control o_website_form_input" id="partner_salutation" name="partner_salutation" size="1">
+                                                        <option value="">Select</option>
+                                                        <t t-foreach="salutation" t-as="title">
+                                                            <option t-att-value="title.id" t-att-selected="applicant_record.salutation.id == title.id"><t t-esc="title.name" /> </option>
+                                                        </t>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="partner_first_name">First Name</label>
+                                                    <input type="text" id="partner_first_name" t-att-value='applicant_record.partner_first_name' class="form-control o_website_form_input" placeholder="First Name" name="partner_first_name" />
+                                                </div>
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="partner_middle_name">Middle Name</label>
+                                                    <input type="text" id="partner_middle_name" t-att-value='applicant_record.partner_middle_name' class="form-control o_website_form_input" placeholder="Middle Name" name="partner_middle_name" />
+                                                </div>
+
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="partner_last_name">Last Name</label>
+                                                    <input type="text" id="partner_last_name" t-att-value='applicant_record.partner_last_name' class="form-control o_website_form_input" placeholder="Last Name" name="partner_last_name" />
+                                                </div>
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="applicant_father_name">Father's Name</label>
+                                                    <input type="text" id="applicant_father_name" t-att-value='applicant_record.father_name' class="form-control o_website_form_input" placeholder="Father's Name" name="applicant_father_name" />
+                                                </div>
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="applicant_mother_name">Mother's Name</label>
+                                                    <input type="text" id="applicant_mother_name" t-att-value='applicant_record.mother_name' class="form-control o_website_form_input" placeholder="Mother's Name" name="applicant_mother_name" />
+                                                </div>
+
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="email_from">Your Email</label>
+                                                    <input type="email" id="email_from" readonly='1' t-att-value='applicant_record.email' class="form-control o_website_form_input" name="email_from" />
+                                                </div>
+
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="gender">Gender</label>
+                                                    <select class="form-control o_website_form_input" id="gender" name="gender" >
+                                                        <option value="">Select</option>
+                                                        <option value="male" t-att-selected="applicant_record.gender == 'male'">Male</option>
+                                                        <option value="female"  t-att-selected="applicant_record.gender == 'female'">Female</option>
+                                                        <option value="transgender" t-att-selected="applicant_record.gender == 'transgender'">Transgender</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="mobile">Mobile</label>
+                                                    <input type="text" id="mobile" placeholder="Mobile" maxlength="10" t-att-value='applicant_record.mobile' class="form-control o_website_form_input" name="mobile" />
+                                                </div>
+
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="phone_with_area_code">Phone with Area Code</label>
+                                                    <input type="text" id="phone_with_area_code" class="form-control o_website_form_input" t-att-value='applicant_record.phone_with_area_code' placeholder="Phone with area code" name="phone_with_area_code" />
+                                                </div>
+
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="aadhar_no">Aadhar Card No.</label>
+                                                    <input type="text" name="cardNo" t-att-value='applicant_record.aadhar' id="cardNo" class="form-control o_website_form_input" onfocus="showCardValue()" onblur="hideCardValue(this.value)" maxlength="12" autocomplete="off" />
+                                                    <input name="aadhar_no" t-att-value='applicant_record.aadhar' id="aadhar_no" type="text" value="" style="display:none;"/>
+                                                </div>
+
+                                                <div class="form-group form-field col-md-6">
+                                                    <label for="upload_aadhar_upload">
+                                                        Document for Aadhaar
+                                                    </label>
+
+                                                    <input type="file" class="form-control-file" id="upload_aadhar_upload"
+                                                           accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg"
+                                                           filedata="" onchange="readAadhaarDocumentURL(this)" name="upload_aadhar_upload" />
+                                                    <t t-if="applicant_record.aadhar_upload_filename">
+                                                        <a t-att-href="'/attachment/download?attachment_id=%i&amp;document_id=%i' % (applicant_record.aadhar_upload_attachment_id,applicant_record.id)" t-att-title="applicant_record.aadhar_upload_filename" class="aadhar-upload-link">
+                                                            <span class="fa fa-download"/> <span t-esc="applicant_record.aadhar_upload_filename" />
+                                                        </a>
+                                                        <input type="hidden" t-att-filedata="applicant_record.aadhar_upload" class="hidden-aadhar-upload" t-att-filename="applicant_record.aadhar_upload_filename" name="hidden_aadhar_upload" />
+                                                    </t>
+                                                </div>
+
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="pan_no">PAN</label>
+                                                    <input type="text" t-att-value='applicant_record.pan' maxlength="10" class="form-control o_website_form_input" id="pan_no" name="pan_no" />
+                                                </div>
+
+                                                <div class="form-group form-field col-md-6">
+                                                    <label for="upload_pan_upload">
+                                                        Document for PAN
+                                                    </label>
+
+                                                    <input type="file" class="form-control-file" id="upload_pan_upload"
+                                                           accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg"
+                                                           filename="" filedata="" onchange="readPANDocumentURL(this)" name="upload_pan_upload" />
+                                                    <t t-if="applicant_record.pan_upload_filename">
+                                                        <a t-att-href="'/attachment/download?attachment_id=%i&amp;document_id=%i' % (applicant_record.pan_upload_attachment_id,applicant_record.id)" t-att-title="applicant_record.pan_upload_filename" class="pan-upload-link">
+                                                            <span class="fa fa-download"/> <span t-esc="applicant_record.pan_upload_filename" />
+                                                        </a>
+                                                        <input type="hidden" t-att-filedata="applicant_record.pan_upload" class="hidden-pan-upload" t-att-filename="applicant_record.pan_upload_filename" name="hidden_pan_upload" />
+                                                    </t>
+                                                </div>
+                                            
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="dob">Date of Birth</label>
+                                                    <input type="date" id="dob" t-att-value='applicant_record.dob' class="form-control o_website_form_input" name="dob" />
+                                                </div>
+
+                                                <div class="form-group form-field  col-md-6">
+                                                    <label for="upload_dob_doc">
+                                                        Document for Date of Birth
+                                                    </label>
+
+                                                    <input type="file" class="form-control-file" id="upload_dob_doc"
+                                                           accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg"
+                                                           filename="" filedata="" onchange="readDobDocumentURL(this)" name="upload_dob_doc" />
+                                                    <t t-if="applicant_record.dob_doc_file_name">
+                                                        <a t-att-href="'/attachment/download?attachment_id=%i&amp;document_id=%i' % (applicant_record.dob_doc_attachment_id,applicant_record.id)" t-att-title="applicant_record.dob_doc_file_name" class="dob-doc-link">
+                                                            <span class="fa fa-download"/> <span t-esc="applicant_record.dob_doc_file_name" />
+                                                        </a>
+                                                        <input type="hidden" t-att-filedata="applicant_record.dob_doc" class="hidden-dob-doc" t-att-filename="applicant_record.dob_doc_file_name" name="hidden_dob_doc" />
+                                                    </t>
+                                                </div>
+                                                
+                                                
+
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="category">Category</label>
+                                                    <select class="form-control o_website_form_input" id="category" name="category" >
+                                                        <option value="">Select</option>
+                                                        <t t-foreach="category" t-as="cat">
+                                                            <option t-att-value="cat.id" t-att-selected="applicant_record.category_id.id == cat.id"><t t-esc="cat.name" /> </option>
+                                                        </t>
+                                                    </select>
+                                                    <!-- <input type="text" id="category"  class="form-control o_website_form_input" placeholder="Category" name="category" /> -->
+                                                </div>
+
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="nationality">Nationality</label>
+                                                    <select class="form-control o_website_form_input" id="nationality" name="nationality" onchange="changeNationality(this)">
+                                                        <option value="">Select</option>
+                                                        <t t-foreach="nationality" t-as="nt">
+                                                            <t t-if="applicant_record.nationality">
+                                                                <option t-att-value="nt.id" t-att-selected="applicant_record.nationality.id == nt.id"><t t-esc="nt.name" /> </option>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <option t-att-value="nt.id"><t t-esc="nt.name" /> </option>
+                                                            </t>
+                                                        </t>
+                                                    </select>
+                                                </div>
+
+                                                <div t-attf-class="form-group form-field col-md-6 upload_nationality_upload #{'' if applicant_record.nationality.name and applicant_record.nationality.name.upper() != 'INDIAN' else 'd-none'}">
+                                                    <label for="upload_nationality_upload">
+                                                        Document for Nationality
+                                                    </label>
+
+                                                    <input type="file" class="form-control-file" id="upload_nationality_upload"
+                                                           accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg"
+                                                           filename="" filedata="" onchange="readNationalityDocumentURL(this)" name="upload_nationality_upload" />
+                                                    <t t-if="applicant_record.nationality_upload_filename">
+                                                        <a t-att-href="'/attachment/download?attachment_id=%i&amp;document_id=%i' % (applicant_record.nationality_upload_attachment_id,applicant_record.id)" t-att-title="applicant_record.nationality_upload_filename" class="nationality-upload-link">
+                                                            <span class="fa fa-download"/> <span t-esc="applicant_record.nationality_upload_filename" />
+                                                        </a>
+                                                        <input type="hidden" t-att-filedata="applicant_record.nationality_upload" class="hidden-nationality-upload" t-att-filename="applicant_record.nationality_upload_filename" name="hidden_nationality_upload" />
+                                                    </t>
+                                                </div>
+                                            
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="religion">Religion</label>
+                                                    <select class="form-control o_website_form_input" id="religion" name="religion" >
+                                                        <option value="">Select</option>
+                                                        <t t-foreach="religion" t-as="rel">
+                                                            <option t-att-value="rel.id" t-att-selected="applicant_record.religion.id == rel.id"><t t-esc="rel.name" /> </option>
+                                                        </t>
+                                                    </select>
+                                                    <!-- <input type="text" id="religion" class="form-control o_website_form_input" placeholder="Religion" name="religion" /> -->
+                                                </div>
+
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="ex_service">Whether Ex-Serviceman</label>
+                                                    <select class="form-control o_website_form_input" id="ex_service" name="ex_service" >
+                                                        <option value="">Select</option>
+                                                        <option value="yes" t-att-selected="applicant_record.ex_serviceman == 'yes'">Yes</option>
+                                                        <option value="no" t-att-selected="applicant_record.ex_serviceman == 'no'">No</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="govt_employee">Are you a Government Employee</label>
+                                                    <select class="form-control o_website_form_input" id="govt_employee" name="govt_employee">
+                                                        <option value="">Select</option>
+                                                        <option value="yes" t-att-selected="applicant_record.govt_employee == 'yes'">Yes</option>
+                                                        <option value="no" t-att-selected="applicant_record.govt_employee == 'no'">No</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="physically_handicapped">Differently Abled?</label>
+                                                    <select class="form-control o_website_form_input" id="physically_handicapped" name="physically_handicapped" onchange="changePhysicallyHandicapped(this)">
+                                                        <option value="">Select</option>
+                                                        <option value="yes" t-att-selected="applicant_record.physically_handicapped == 'yes'">Yes</option>
+                                                        <option value="no" t-att-selected="applicant_record.physically_handicapped == 'no'">No</option>
+                                                    </select>
+                                                </div>
+
+                                                <div t-attf-class="form-group form-field o_website_form_required_custom col-md-6 differently_abled #{'d-none' if applicant_record.physically_handicapped != 'yes' else ''}">
+                                                    <label for="kind_of_disability">Kind of Disability</label>
+                                                    <select class="form-control o_website_form_input" id="kind_of_disability" name="kind_of_disability">
+                                                        <option value="">Select</option>
+                                                        <option value="vh" t-att-selected="applicant_record.kind_of_disability == 'vh'">Visually Handicapped</option>
+                                                        <option value="hh" t-att-selected="applicant_record.kind_of_disability == 'hh'">Hearing Handicapped</option>
+                                                        <option value="ph" t-att-selected="applicant_record.kind_of_disability == 'ph'">Physically Handicapped</option>
+                                                    </select>
+                                                </div>
+
+                                                <div t-attf-class="form-group form-field o_website_form_required_custom col-md-6 differently_abled #{'d-none' if applicant_record.physically_handicapped != 'yes' else ''}">
+                                                    <label for="perc_disability">% of Disability</label>
+                                                    <input type="text" id="perc_disability" t-att-value='applicant_record.perc_disability' class="form-control o_website_form_input" name="perc_disability" />
+                                                </div>
+
+                                                <div t-attf-class="form-group form-field col-md-6 differently_abled #{'d-none' if applicant_record.physically_handicapped != 'yes' else ''}">
+                                                    <label for="upload_certificate_upload">
+                                                        Document for Disability
+                                                    </label>
+
+                                                    <input type="file" class="form-control-file" id="upload_certificate_upload"
+                                                           accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg"
+                                                           filename="" filedata="" onchange="readCertificateDocumentURL(this)" name="upload_certificate_upload" />
+                                                    <t t-if="applicant_record.certificate_upload_filename">
+                                                        <a t-att-href="'/attachment/download?attachment_id=%i&amp;document_id=%i' % (applicant_record.certificate_upload_attachment_id,applicant_record.id)" t-att-title="applicant_record.certificate_upload_filename" class="certificate-upload-link">
+                                                            <span class="fa fa-download"/> <span t-esc="applicant_record.certificate_upload_filename" />
+                                                        </a>
+                                                        <input type="hidden" t-att-filedata="applicant_record.certificate_upload" class="hidden-certificate-upload" t-att-filename="applicant_record.certificate_upload_filename" name="hidden_certificate_upload" />
+                                                    </t>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Communication Address -->
+                                    <div class="card mt-4">
+                                        <div class="card-header alert alert-primary section-job-application collapsed mb-0 d-flex align-items-center">
+                                            <div class="text-uppercase font-weight-bold"> Communication Address </div>
+                                           
+                                        </div>
+
+                                        <div class="card-body" style="background: rgba(221, 221, 221, 0.22);">
+                                            <div class="form-row">
+                                                <div class="form-group form-field o_website_form_required_custom col-md-12 table-responsive">
+                                                    <table id="address_details" class="table table-bordered table-sm mb-0">
+                                                        <thead>
+                                                            <tr class="d-none">
+                                                                <th class="text-center table-primary" colspan="8">Address Details</th>
+                                                            </tr>
+                                                            <tr style="background-color: #ddd;">
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    Address Type
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    Address 1
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    Address 2
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    Country
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    State
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    City/District
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    Pincode
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;" width="7%">
+                                                                    Action
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr id="tr_0">
+                                                                <td style="display:none">
+                                                                    <select class="form-control o_website_form_input" id="address_type_0" name="address_type_0" >
+                                                                        <option value="communication_add">Communication</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td style="display:none">
+                                                                    <textarea name="address_one_0" type='text' class="form-control" id="address_one_0"> </textarea>
+                                                                </td>
+                                                                <td style="display:none">
+                                                                    <textarea name="address_two_0" type='text' class="form-control" id="address_two_0" > </textarea>
+                                                                </td>
+                                                                
+                                                                <td style="display:none">
+                                                                    <select class="form-control o_website_form_input "  id="country_0" name="country_0" >
+                                                                        <option value="0">Select</option>
+                                                                        <t t-foreach="country" t-as="cnt">
+                                                                            <option t-att-value="cnt.id"><t t-esc="cnt.name" /> </option>
+                                                                        </t>
+                                                                    </select>
+                                                                </td>
+
+                                                                <td style="display:none">
+                                                                    <select class="form-control o_website_form_input " id="state_0" name="state_0" >
+                                                                        <option value="0">Select</option>
+                                                                        <t t-foreach="state" t-as="st">
+                                                                            <option t-att-value="st.id"><t t-esc="st.name" /> </option>
+                                                                        </t>
+                                                                    </select>
+                                                                </td>
+
+                                                                <td style="display:none">
+                                                                    <select class="form-control o_website_form_input " id="city_district_0" name="city_district_0" >
+                                                                        <option value="0">Select</option>
+                                                                        <t t-foreach="city" t-as="c">
+                                                                            <option t-att-value="c.id"><t t-esc="c.name" /> </option>
+                                                                        </t>
+                                                                    </select>
+                                                                </td>
+                                                                
+                                                                <td style="display:none">
+                                                                    <input name="pincode_0" type='text' class="form-control" maxlength="6" id="pincode_0" />
+                                                                </td>
+                                                                <td style="display:none;padding-left:3px;width:3%;" align="left">
+                                                                    <button onclick="addressdeleteRow(this)" type="button" class="close" aria-label="Close">
+                                                                    <span class="fa fa-trash" style="color: red;"></span>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                            <t t-if="applicant_record.address_ids">
+                                                                <t t-set="cnt" t-value="1"/>
+                                                                <t t-foreach="applicant_record.address_ids" t-as="address">
+                                                                    <tr t-att-id="'tr_'+str(cnt)">
+                                                                        <td>
+                                                                            <select class="form-control o_website_form_input" t-att-name="'address_type_'+str(cnt)" t-att-id="'address_type_'+str(cnt)">
+                                                                                <option value="communication_add"  t-att-selected="address.address_type == 'communication_add'">Communication</option>
+                                                                            </select>
+                                                                        </td>
+                                                                        <td>
+                                                                            <textarea t-raw='address.street' t-att-name="'address_one_'+str(cnt)" t-att-id="'address_one_'+str(cnt)" type='text' class="form-control" rows="2"> </textarea>
+                                                                        </td>
+                                                                        <td>
+                                                                            <textarea t-raw='address.street2' t-att-name="'address_two_'+str(cnt)" t-att-id="'address_two_'+str(cnt)" type='text' class="form-control" rows="2"> </textarea>
+                                                                        </td>
+                                                                        <td>
+                                                                            <select class="form-control o_website_form_input "  t-att-name="'country_'+str(cnt)" t-att-id="'country_'+str(cnt)" >
+                                                                                <option value="0">Select</option>
+                                                                                <t t-foreach="country" t-as="cn">
+                                                                                    <option t-att-value="cn.id" t-att-selected="address.country_id.id == cn.id"><t t-esc="cn.name" /> </option>
+                                                                                </t>
+                                                                            </select>
+                                                                        </td>
+                                                                        <td>
+                                                                            <select class="form-control o_website_form_input " t-att-name="'state_'+str(cnt)" t-att-id="'state_'+str(cnt)">
+                                                                                <option value="0">Select</option>
+                                                                                <t t-foreach="state" t-as="st">
+                                                                                    <option t-att-value="st.id" t-att-selected="address.state_id.id == st.id"><t t-esc="st.name" /> </option>
+                                                                                </t>
+                                                                            </select>
+                                                                        </td>
+                                                                        <td>
+                                                                            <select class="form-control o_website_form_input " t-att-name="'city_district_'+str(cnt)" t-att-id="'city_district_'+str(cnt)" >
+                                                                                <option value="0">Select</option>
+                                                                                <t t-foreach="city" t-as="c">
+                                                                                    <option t-att-value="c.id" t-att-selected="address.city_id.id == c.id"><t t-esc="c.name" /> </option>
+                                                                                </t>
+                                                                            </select>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type='text' class="form-control" maxlength="6" t-att-value='address.zip' t-att-name="'pincode_'+str(cnt)" t-att-id="'pincode_'+str(cnt)" />
+                                                                        </td>
+                                                                        <td style="padding-left:3px;width:3%;">
+                                                                            <button onclick="edudeleteRow(this)" type="button" class="close" aria-label="Close">
+                                                                                <span class="fa fa-trash" style="color: red;"></span>
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <t t-set="cnt" t-value="cnt+1"/>
+                                                                </t>
+                                                            </t>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row mb-0">
+                                                <div class="col-12 text-left">
+                                                    <a class="btn btn-md btn-secondary text-white" onclick="add_address_row();">Add a Line</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Educational Qualification -->
+                                    <div class="card mt-4">
+                                        <div class="card-header alert alert-primary section-job-application collapsed mb-0 d-flex align-items-center">
+                                            <div class="text-uppercase font-weight-bold"> Educational Qualification </div>
+                                           
+                                        </div>
+
+                                        <div class="card-body" style="background: rgba(221, 221, 221, 0.22);">
+                                            <div class="form-row">
+                                                <div class="form-field o_website_form_required_custom col-md-12">
+                                                    <p class="text-danger mb-1">Please enter the educational details from highest to lowest qualification.</p>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group form-field o_website_form_required_custom col-md-12 table-responsive">
+                                                    <table id="educational_details" class="table table-bordered table-sm mb-0">
+                                                        <thead>
+                                                            <tr class="d-none">
+                                                                <th class="table-primary text-center" colspan="7">EDUCATIONAL HISTORY</th>
+                                                            </tr>
+                                                            <tr style="background-color: #ddd;">
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    Degree
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    Exam Passed
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    Stream/Discipline
+                                                                </th>
+                                                                <!-- <th class="text-center" style="vertical-align: middle;">
+                                                                    NAME OF SCHOOL / COLLEGE
+                                                                </th> -->
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    University / Board
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    Year of Passing
+                                                                </th>
+                                                                <!-- <th class="text-center" style="vertical-align: middle;">
+                                                                    TO DATE
+                                                                </th> -->
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    % of Marks
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    Upload Certficate
+                                                                </th>
+                                                                <th class="text-center px-0" style="vertical-align: middle;" width="7%"> 
+                                                                    Action
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr id="tr_0" style="vertical-align: middle;">
+                                                                <td style="display:none">
+                                                                    <input name="grade_0" type='text' class="form-control" id="grade_0" placeholder="e.g. Xth, Graduation"/>
+                                                                </td>
+                                                                <td style="display:none">
+                                                                    <input name="fields_0" type='text' class="form-control" id="fields_0" placeholder="e.g. Xth, B.Tech"/>
+                                                                </td>
+                                                                <td style="display:none">
+                                                                    <input name="stream_0" type='text' class="form-control" id="stream_0" placeholder="e.g. Arts, Science"/>
+                                                                </td>
+                                                                <td style="display:none">
+                                                                    <input name="school_name_0" type='text' class="form-control" id="school_name_0" placeholder="University/Board" />
+                                                                </td>
+                                                                <td style="display:none">
+                                                                    <input name="passing_year_0" type='text' class="form-control" id="passing_year_0" placeholder="Year of Passing"/>
+                                                                </td>
+                                                                <td style="display:none">
+                                                                    <input name="percentage_0" class="form-control percentage" type='text' id="percentage_0" placeholder="e.g 79.8"/>
+                                                                </td>
+                                                                <td style="display:none">
+                                                                    <input name="upload_certificate_0" class="form-control" type='file' id="upload_certificate_0" filedata="" filename="" onChange="readPDFURL(this)" accept=".png, .jpg, .jpeg, .pdf"/>
+                                                                </td>
+                                                                <td style="display:none;padding-left:3px;width:3%;" >
+                                                                    <button onclick="edudeleteRow(this)" type="button" class="close" aria-label="Close">
+                                                                        <span class="fa fa-trash" style="color: red;"></span>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                            <t t-if="applicant_record.education_ids">
+                                                                <t t-set="cnt" t-value="1"/>
+                                                                <t t-foreach="applicant_record.education_ids" t-as="education">
+                                                                    <tr t-att-id="'tr_'+str(cnt)">
+                                                                        <td>
+                                                                            <input t-att-value='education.grade' t-att-name="'grade_'+str(cnt)" t-att-id="'grade_'+str(cnt)" type='text' class="form-control" />
+                                                                        </td>
+                                                                        <td>
+                                                                            <input t-att-value='education.field' t-att-name="'fields_'+str(cnt)" t-att-id="'fields_'+str(cnt)" type='text' class="form-control" />
+                                                                        </td>
+                                                                        <td>
+                                                                            <input t-att-value='education.stream' t-att-name="'stream_'+str(cnt)" t-att-id="'stream_'+str(cnt)" type='text' class="form-control"/>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input t-att-value='education.school_name' t-att-name="'school_name_'+str(cnt)" t-att-id="'school_name_'+str(cnt)" type='text' class="form-control"/>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input t-att-value='education.passing_year' t-att-name="'passing_year_'+str(cnt)" t-att-id="'passing_year_'+str(cnt)" type='text' class="form-control" />
+                                                                        </td>
+                                                                        <td>
+                                                                            <input t-att-value="education.percentage" t-att-name="'percentage_'+str(cnt)" t-att-id="'percentage_'+str(cnt)" class="form-control percentage" type='text' />
+                                                                        </td>
+                                                                        <td>
+                                                                            <t t-if="education.file_name">
+                                                                                <input t-att-name="'upload_certificate_'+str(cnt)" t-att-id="'upload_certificate_'+str(cnt)" class="form-control" type='file' filedata="" filename="" onChange="readPDFURL(this)" accept=".png, .jpg, .jpeg, .pdf"/>
+                                                                                <a  t-att-href="'/attachment/download?attachment_id=%i&amp;document_id=%i' % (education.attachment_id,education.id)" t-att-title="education.file_name" class="certificate-link">
+                                                                                    <span class="fa fa-download"/> <span t-esc="education.file_name[:10] + '...'" t-att-name="'upload_certificate_'+str(cnt)" t-att-id="'upload_certificate_'+str(cnt)"/>
+                                                                                </a>
+                                                                                <input type="hidden" t-att-filedata="education.certificate" class="hidden-certificate" t-att-filename="education.file_name" t-att-name="'upload_certificate_'+str(cnt)" t-att-id="'upload_certificate_'+str(cnt)" />
+                                                                            </t>
+                                                                            <t t-else="">
+                                                                                <input t-att-name="'upload_certificate_'+str(cnt)" t-att-id="'upload_certificate_'+str(cnt)" class="form-control" type='file' filedata="" filename="" onChange="readPDFURL(this)" accept=".png, .jpg, .jpeg, .pdf"/>
+                                                                            </t>
+                                                                        </td>
+                                                                        <td style="padding-left:3px;width:3%;">
+                                                                            <button onclick="edudeleteRow(this)" type="button" class="close" aria-label="Close">
+                                                                                <span class="fa fa-trash" style="color: red;"></span>
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <t t-set="cnt" t-value="cnt+1"/>
+                                                                </t>
+                                                            </t>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row mb-0">
+                                                <div class="col-12 text-left">
+                                                    <a class="btn btn-md btn-secondary text-white" onclick="add_educational_row();">Add a Line</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Employment Details -->
+                                    <div class="card mt-4">
+                                        <div class="card-header alert alert-primary section-job-application collapsed mb-0 d-flex align-items-center" >
+                                            <div class="text-uppercase font-weight-bold"> Employment Details </div>
+                                           
+                                        </div>
+                                        <div class="card-body" style="background: rgba(221, 221, 221, 0.22);">
+                                            <div class="form-row">
+                                                <div class="form-group form-field o_website_form_required_custom col-md-12 table-responsive">
+                                                    <table id="experience_details" class="table table-bordered table-sm mb-0">
+                                                        <thead>
+                                                            <tr class="d-none">
+                                                                <th class="text-center table-primary" colspan="6">EXPERIENCE</th>
+                                                            </tr>
+                                                            <tr style="background-color: #ddd;">
+                                                                <th class="text-center" style="vertical-align: middle;" width="15%">
+                                                                    From Date
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;" width="15%">
+                                                                    To Date
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    Employer's Name &amp;amp; Address
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    Positions Held
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    Job Description
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    Pay Scale
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;">
+                                                                    Upload Document
+                                                                </th>
+                                                                <th class="text-center" style="vertical-align: middle;" width="7%">
+                                                                    Action
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr id="tr_0">
+                                                                <td style="display:none">
+                                                                    <input name="experience_from_date_0" type='date' class="form-control" id="experience_from_date_0"/>
+                                                                </td>
+                                                                <td style="display:none">
+                                                                    <input name="experience_to_date_0" type='date' class="form-control" id="experience_to_date_0"/>
+                                                                </td>
+                                                                <td style="display:none">
+                                                                    <input name="expe_employers_name_0" type='text' class="form-control" id="expe_employers_name_0" placeholder="EMPLOYER's NAME &amp; ADDRESS"/>
+                                                                </td>
+                                                                <td style="display:none">
+                                                                    <input name="positions_held_0" type='text' class="form-control" id="positions_held_0" placeholder="POSITIONS HELD"/>
+                                                                </td>
+                                                                <td style="display:none">
+                                                                    <textarea name="job_description_0" type='text' class="form-control" id="job_description_0" placeholder="Job Description" rows="2"> </textarea>
+                                                                </td>
+                                                                <td style="display:none">
+                                                                    <input name="payscale_0" type='text' class="form-control" id="payscale_0" placeholder="Pay Scale"/>
+                                                                </td>
+                                                                <td style="display:none">
+                                                                    <input name="upload_document_0" class="form-control" type='file' id="upload_document_0" filedata="" filename="" onChange="readexperiencePDFURL(this)" accept=".png, .jpg, .jpeg, .pdf"/>
+                                                                </td>
+                                                                <td style="display:none;padding-left:3px;width:3%;" align="left">
+                                                                    <button onclick="expdeleteRow(this)" type="button" class="close" aria-label="Close">
+                                                                    <span class="fa fa-trash" style="color: red;"></span>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                            <t t-if="applicant_record.experience_ids">
+                                                                <t t-set="cnt" t-value="1"/>
+                                                                <t t-foreach="applicant_record.experience_ids" t-as="experience">
+                                                                    <tr t-att-id="'tr_'+str(cnt)">
+                                                                        <td>
+                                                                            <input t-att-value='experience.from_date' t-att-name="'experience_from_date_'+str(cnt)" t-att-id="'experience_from_date_'+str(cnt)" type='date' class="form-control"/>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input t-att-value='experience.to_date' t-att-name="'experience_to_date_'+str(cnt)" t-att-id="'experience_to_date_'+str(cnt)" type='date' class="form-control"/>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input t-att-value='experience.organization' t-att-name="'expe_employers_name_'+str(cnt)" t-att-id="'expe_employers_name_'+str(cnt)" type='text' class="form-control" />
+                                                                        </td>
+                                                                        <td>
+                                                                            <input t-att-value='experience.position' t-att-name="'positions_held_'+str(cnt)" t-att-id="'positions_held_'+str(cnt)" type='text' class="form-control"/>
+                                                                        </td>
+                                                                        <td>
+                                                                            <textarea t-raw='experience.job_description' t-att-name="'job_description_'+str(cnt)" t-att-id="'job_description_'+str(cnt)" type='text' class="form-control" rows="2"> </textarea>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input t-att-value='experience.pay_scale' t-att-name="'payscale_'+str(cnt)" t-att-id="'payscale_'+str(cnt)" type='text' class="form-control"/>
+                                                                        </td>
+                                                                        <td>
+                                                                            <t t-if="experience.file_name">
+                                                                                <input t-att-name="'upload_document_'+str(cnt)" t-att-id="'upload_document_'+str(cnt)" class="form-control" type='file' filedata="" filename="" onChange="readexperiencePDFURL(this)" accept=".png, .jpg, .jpeg, .pdf"/>
+                                                                                <a  t-att-href="'/attachment/download?attachment_id=%i&amp;document_id=%i' % (experience.attachment_id,experience.id)" t-att-title="experience.file_name" class="certificate-link">
+                                                                                    <span class="fa fa-download"/> <span t-esc="experience.file_name[:10] + '...'" t-att-name="'upload_document_'+str(cnt)" t-att-id="'upload_document_'+str(cnt)"/>
+                                                                                </a>
+                                                                                <input type="hidden" t-att-filedata="experience.document" class="hidden-experience-doc" t-att-filename="experience.file_name" t-att-name="'upload_document_'+str(cnt)" t-att-id="'upload_document_'+str(cnt)" />
+                                                                            </t>
+                                                                            <t t-else="">
+                                                                                <input t-att-name="'upload_certificate_'+str(cnt)" t-att-id="'upload_certificate_'+str(cnt)" class="form-control" type='file' filedata="" filename="" onChange="readexperiencePDFURL(this)" accept=".png, .jpg, .jpeg, .pdf"/>
+                                                                            </t>
+                                                                        </td>
+                                                                        <td style="padding-left:3px;width:3%;" align="left">
+                                                                            <button onclick="expdeleteRow(this)" type="button" class="close" aria-label="Close">
+                                                                            <span class="fa fa-trash" style="color: red;"></span>
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <t t-set="cnt" t-value="cnt+1"/>
+                                                                </t>
+                                                            </t>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row mb-0">
+                                                <div class="col-12 text-left">
+                                                    <a class="btn btn-md btn-secondary text-white" onclick="add_experience_row();">Add a Line</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row mt-4">
+                                        <div class="form-group form-field o_website_form_required_custom col-md-12">
+                                            <label for="additional_information">Additional Information</label>
+                                            <textarea type="text" t-raw="applicant_record.addition_information" id="additional_information" class="form-control o_website_form_input" name="additional_information" rows="2"> </textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group form-field o_website_form_required_custom col-md-12">
+                                            <label for="achievements">Achievements</label>
+                                            <textarea type="text" t-raw="applicant_record.achievements" id="achievements" class="form-control o_website_form_input" name="achievements" rows="2"> </textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Information on Vigilance and Discipline -->
+                                    <div class="card">
+                                        <div class="card-header alert alert-primary section-job-application collapsed mb-0 d-flex align-items-center">
+                                            <div class="text-uppercase font-weight-bold"> Information on Vigilance and Discipline </div>
+                                           
+                                        </div>
+
+                                        <div class="card-body" style="background: rgba(221, 221, 221, 0.22);">
+                                            <div class="form-group row">
+                                                <label for="penalty" class="col-sm-10 col-form-label">
+                                                    Any penalty awarded during the last 10 years
+                                                </label>
+                                                <div class="col-sm-2">
+                                                    <div class="form-group form-field o_website_form_required_custom mb-0">
+                                                        <select class="form-control o_website_form_input" id="penalty" name="penalty">
+                                                            <option value="">Select</option>
+                                                            <option t-att-selected="applicant_record.penalty == 'yes'" value="yes">Yes</option>
+                                                            <option t-att-selected="applicant_record.penalty == 'no'" value="no">No</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="action_injury" class="col-sm-10 col-form-label">
+                                                    Any action or inquiry is going on as far as candidate's knowledge
+                                                </label>
+                                                <div class="col-sm-2">
+                                                    <div class="form-group form-field o_website_form_required_custom mb-0">
+                                                        <select class="form-control o_website_form_input" id="action_injury" name="action_injury">
+                                                            <option value="">Select</option>
+                                                            <option t-att-selected="applicant_record.action_inquiry == 'yes'" value="yes">Yes</option>
+                                                            <option t-att-selected="applicant_record.action_inquiry == 'no'" value="no">No</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="criminal_vigilance" class="col-sm-10 col-form-label">
+                                                    Any criminal/ vigilance case is pending or contemplated
+                                                </label>
+                                                <div class="col-sm-2">
+                                                    <div class="form-group form-field o_website_form_required_custom mb-0">
+                                                        <select class="form-control o_website_form_input" id="criminal_vigilance" name="criminal_vigilance">
+                                                            <option value="">Select</option>
+                                                            <option t-att-selected="applicant_record.criminal == 'yes'" value="yes">Yes</option>
+                                                            <option t-att-selected="applicant_record.criminal == 'no'" value="no">No</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="relative_ccs" class="col-sm-10 col-form-label">
+                                                    Any relative defined in terms of CCS
+                                                </label>
+                                                <div class="col-sm-2">
+                                                    <div class="form-group form-field o_website_form_required_custom mb-0">
+                                                        <select class="form-control o_website_form_input" id="relative_ccs" name="relative_ccs" onchange="changeRelativeCcs(this)">
+                                                            <option value="">Select</option>
+                                                            <option value="yes" t-att-selected="applicant_record.relative_ccs == 'yes'">Yes</option>
+                                                            <option value="no" t-att-selected="applicant_record.relative_ccs == 'no'">No</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div t-attf-class="form-group row relative_ccs_name #{'d-none' if applicant_record.relative_ccs != 'yes' else ''}">
+                                                <label for="relative_ccs_name" class="col-sm-10 col-form-label">
+                                                    Relative Name
+                                                </label>
+                                                <div class="col-sm-2">
+                                                    <div class="form-group form-field o_website_form_required_custom mb-0">
+                                                        <input type="text" t-att-value='applicant_record.relative_ccs_name' id="relative_ccs_name" class="form-control o_website_form_input" placeholder="Relative Name" name="relative_ccs_name"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Declaration -->
+                                    <div class="form-group row mt-3 mb-0">
+                                        <div class="col-12">
+                                            <div class="alert alert-primary section-job-application">
+                                                <span class="font-weight-bold"> Declaration: </span><span>I affirm that the information given in this application is true and correct. I also fully 
+                                                undestand that if at any stage it is discovered that any attempt has been made by me to willfully conceal and misrepresent the facts, my candidature
+                                                will be summarily rejected and my employment terminated. </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- others -->
+                                    <div class="card mb-3">
+                                        <div class="card-header alert alert-primary section-job-application mb-0 d-flex align-items-center">
+                                            <div class="text-uppercase font-weight-bold text-left"> Payment Details </div>
+                                           
+                                        </div>
+
+                                        <div class="card-body" style="background: rgba(221, 221, 221, 0.22);">
+                                            <div class="form-group row mb-0">
+                                                <div class="form-group form-field o_website_form_required_custom col-md-6">
+                                                    <label for="applicable_fee">Fee Applicable</label>
+                                                    <select disabled="1" class="form-control o_website_form_input" id="applicable_fee" name="applicable_fee" >
+                                                        <option t-att-selected="application_fees and application_fees >0">Yes</option>
+                                                        <option t-att-selected="not application_fees or application_fees &lt;= 0">No</option>
+                                                    </select>
+                                                </div>
+                                                <div t-att-class="'form-group form-field o_website_form_required_custom col-md-6 enter-applicable-fee'+ ' d-none' if not application_fees or application_fees &lt;= 0 else 'form-group form-field o_website_form_required_custom col-md-6 enter-applicable-fee'">
+                                                    <label for="enter_applicable_fee">Fees Amount (in Rs.)</label>
+                                                    <input type="text" class="form-control o_website_form_input" disabled="1" id="enter_applicable_fee" name="enter_applicable_fee" t-att-value="application_fees if application_fees else 0" /> 
+                                                </div>
+                                                <div t-att-class="'col-md-6 payment-document' + ' d-none' if not application_fees or application_fees &lt;= 0 else 'col-md-6 payment-document'">
+                                                    <label for="upload_other_documents">
+                                                        Payment Document
+                                                    </label>
+                                                    <input type="file" class="form-control-file" id="upload_other_documents"
+                                                           accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg"
+                                                           filename="" filedata="" name="upload_other_documents" onchange="readPaymentDocumentURL(this)" />
+                                                </div>
+
+                                                <!-- <div class="col-md-6">
+                                                    <div class="form-group form-field o_website_form_required_custom">
+                                                        <label for="upload_signature">
+                                                            Signature
+                                                        </label>
+
+                                                        <input type="file" class="form-control-file" id="upload_signature"
+                                                                accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg"
+                                                                filename="" filedata="" onchange="readSignatureDocumentURL(this)" name="upload_signature" />
+                                                        <t t-if="applicant_record.signature_document_file_name">
+                                                            <a t-att-href="'/attachment/download?attachment_id=%i&amp;document_id=%i' % (applicant_record.signature_document_attachment_id,applicant_record.id)" t-att-title="applicant_record.signature_document_file_name" class="signature-link">
+                                                                <span class="fa fa-download"/> <span t-esc="applicant_record.signature_document_file_name" />
+                                                            </a>
+                                                            <input type="hidden" t-att-filedata="applicant_record.signature_document" class="hidden-signature" t-att-filename="applicant_record.signature_document_file_name" name="hidden_signature" />
+                                                        </t>
+                                                    </div>
+                                                </div> -->
+                                                
+                                                <div t-att-class="'col-md-12 payment-details'+' d-none' if not application_fees or application_fees &lt;= 0 else 'col-md-12 payment-details'" >
+                                                    <div class="form-group form-field o_website_form_required_custom">
+                                                        <label for="payment_details">Payment Details</label>
+                                                        <textarea type="text" t-raw="applicant_record.payment_details" id="payment_details" class="form-control o_website_form_input" name="payment_details" rows="2"> </textarea>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <div class="form-group form-field o_website_form_required_custom">
+                                                        <label for="other_document">
+                                                            Other Document
+                                                        </label>
+
+                                                        <input type="file" class="form-control-file" id="other_document"
+                                                               accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg"
+                                                               filename="" filedata="" onchange="readotherDocumentURL(this)" name="other_document" />
+                                                        <t t-if="applicant_record.other_doc_file_name">
+                                                            <a t-att-href="'/attachment/download?attachment_id=%i&amp;document_id=%i' % (applicant_record.other_doc_attachment_id,applicant_record.id)" t-att-title="applicant_record.other_doc_file_name" class="other-doc-link">
+                                                                <span class="fa fa-download"/> <span t-esc="applicant_record.other_doc_file_name" />
+                                                            </a>
+                                                            <input type="hidden" t-att-filedata="applicant_record.other_doc" class="hidden-other-doc" t-att-filename="applicant_record.other_doc_file_name" name="hidden_other_doc" />
+                                                        </t>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <div class="col-12 text-center">
+                                        <button t-if="exist_draft_applicant == 1" id="hr_recruitment_preview_button" type="button" name="hr_recruitment_preview_button" class="btn btn-secondary btn-md" data-toggle="modal" data-target=".preview_application">
+                                            Preview Application
+                                        </button>
+                                        <button id="hr_recruitment_save_as_draft_button" type="button" name="hr_recruitment_save_as_draft_button" class="btn btn-secondary btn-md">
+                                            Save As Draft
+                                        </button>
+                                        <button id="hr_recruitment_button" type="submit" name="hr_recruitment_button" class="btn btn-primary btn-md">
+                                            Submit
+                                        </button>
+                                        <span id="o_website_form_result"></span>
+                                    </div>
+                                </div>
+                            </form>
+                        </section>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade preview_application" tabindex="-1" role="dialog" aria-labelledby="PreviewApplication" aria-hidden="False">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title font-weight-bold" id="PreviewApplication">Preview Application</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="false">&amp;times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" id="printApplicationForm">
+                            <div class="form-row">
+                                <div class="form-group form-field col-auto ml-auto align-self-end">
+                                    <div class="avatar-upload">
+                                        <div class="avatar-preview">
+                                            <t t-if="applicant_record.image">
+                                                <div id="imagePreview" exist_image="yes" t-attf-style="background-image: url('data:image/*;base64,{{applicant_record.image}}');">
+                                                </div>
+                                            </t>
+                                            <t t-else="">
+                                                <div id="imagePreview" exist_image="no" style="background-image: url('/recruitment_extended/static/src/img/user.png');">
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group form-field col-md-6">
+                                    <label for="partner_salutation">Salutation</label>
+                                    <input id="partner_salutation" disabled="disabled" t-att-value='applicant_record.salutation.name' class="form-control" placeholder="Salutation" name="partner_salutation" />
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="partner_first_name">First Name</label>
+                                    <input id="partner_first_name" disabled="disabled" t-att-value='applicant_record.partner_first_name' class="form-control" placeholder="First Name" name="partner_first_name" />
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="partner_middle_name">Middle Name</label>
+                                    <input id="partner_middle_name" disabled="disabled" t-att-value='applicant_record.partner_middle_name' class="form-control" placeholder="Middle Name" name="partner_middle_name" />
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="partner_last_name">Last Name</label>
+                                    <input id="partner_last_name" disabled="disabled" t-att-value='applicant_record.partner_last_name' class="form-control" placeholder="Last Name" name="partner_last_name" />
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="applicant_father_name">Father's Name</label>
+                                    <input disabled="disabled" id="applicant_father_name" t-att-value='applicant_record.father_name' class="form-control" placeholder="Father's Name" name="applicant_father_name" />
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="applicant_mother_name">Mother's Name</label>
+                                    <input disabled="disabled" id="applicant_mother_name" t-att-value='applicant_record.mother_name' class="form-control" placeholder="Mother's Name" name="applicant_mother_name" />
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="email_from">Your Email</label>
+                                    <input disabled="disabled" type="email" id="email_from" t-att-value='applicant_record.email' class="form-control" name="email_from" />
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="gender">Gender</label>
+                                    <select class="form-control" id="gender" name="gender" disabled="disabled" style="-webkit-appearance: none;">
+                                        <option value="">Select</option>
+                                        <option value="male" t-att-selected="applicant_record.gender == 'male'">Male</option>
+                                        <option value="female"  t-att-selected="applicant_record.gender == 'female'">Female</option>
+                                        <option value="transgender" t-att-selected="applicant_record.gender == 'transgender'">Transgender</option>
+                                    </select>
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="mobile">Mobile</label>
+                                    <input disabled="disabled" id="mobile" placeholder="Mobile" maxlength="10" t-att-value='applicant_record.mobile' class="form-control" name="mobile" />
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="phone_with_area_code">Phone with Area Code</label>
+                                    <input disabled="disabled" id="phone_with_area_code" class="form-control" t-att-value='applicant_record.phone_with_area_code' placeholder="Phone with area code" name="phone_with_area_code" />
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="aadhar_no">Aadhar Card No.</label>
+                                    <input disabled="disabled" name="cardNo" placeholder="Aadhar Card No." t-att-value='applicant_record.aadhar' id="cardNo" class="form-control" onfocus="showCardValue()" onblur="hideCardValue(this.value)" maxlength="12" autocomplete="off" />
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="upload_aadhar_upload">
+                                        Document for Aadhaar
+                                    </label>
+
+                                    <t t-if="applicant_record.aadhar_upload_filename">
+                                        <p class="mb-0">
+                                            <a t-att-title="applicant_record.aadhar_upload_filename" class="aadhar-upload-link">
+                                                <span class="fa fa-download"/> <span t-esc="applicant_record.aadhar_upload_filename" />
+                                            </a>
+                                        </p>
+                                        <input type="hidden" t-att-filedata="applicant_record.aadhar_upload" class="hidden-aadhar-upload" t-att-filename="applicant_record.aadhar_upload_filename" name="hidden_aadhar_upload" />
+                                    </t>
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="pan_no">PAN</label>
+                                    <input disabled="disabled" Placeholder="PAN" t-att-value='applicant_record.pan' maxlength="10" class="form-control" id="pan_no" name="pan_no" />
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="upload_pan_upload">
+                                        Document for PAN
+                                    </label>
+
+                                    <p class="mb-0" t-if="applicant_record.pan_upload_filename">
+                                        <a t-att-title="applicant_record.pan_upload_filename" class="pan-upload-link">
+                                            <span class="fa fa-download"/> <span t-esc="applicant_record.pan_upload_filename" />
+                                        </a>
+                                        <input type="hidden" t-att-filedata="applicant_record.pan_upload" class="hidden-pan-upload" t-att-filename="applicant_record.pan_upload_filename" name="hidden_pan_upload" />
+                                    </p>
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="dob">Date of Birth</label>
+                                    <input disabled="disabled" placeholder="Date of Birth" id="dob" t-att-value='applicant_record.dob' class="form-control o_website_form_input" name="dob" />
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="upload_dob_doc">
+                                        Document for Date of Birth
+                                    </label>
+
+                                    <p class="mb-0" t-if="applicant_record.dob_doc_file_name">
+                                        <a t-att-title="applicant_record.dob_doc_file_name" class="dob-doc-link">
+                                            <span class="fa fa-download"/> <span t-esc="applicant_record.dob_doc_file_name" />
+                                        </a>
+                                        <input type="hidden" t-att-filedata="applicant_record.dob_doc" class="hidden-dob-doc" t-att-filename="applicant_record.dob_doc_file_name" name="hidden_dob_doc" />
+                                    </p>
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="category">Category</label>
+                                    <input disabled="disabled" placeholder="Category" t-att-value='applicant_record.category_id.name' maxlength="10" class="form-control" id="category" name="category" />
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="nationality">Nationality</label>
+                                    <input disabled="disabled" placeholder="Nationality" t-att-value='applicant_record.nationality.name' maxlength="10" class="form-control" id="nationality" name="nationality" />
+                                </div>
+                                <div t-attf-class="form-group form-field col-md-6 upload_nationality_upload #{'' if applicant_record.nationality.name and applicant_record.nationality.name.upper() != 'INDIAN' else 'd-none'}">
+                                    <label for="upload_nationality_upload">
+                                        Document for Nationality
+                                    </label>
+
+                                    <p class="mb-0" t-if="applicant_record.nationality_upload_filename">
+                                        <a t-att-title="applicant_record.nationality_upload_filename" class="nationality-upload-link">
+                                            <span class="fa fa-download"/> <span t-esc="applicant_record.nationality_upload_filename" />
+                                        </a>
+                                        <input type="hidden" t-att-filedata="applicant_record.nationality_upload" class="hidden-nationality-upload" t-att-filename="applicant_record.nationality_upload_filename" name="hidden_nationality_upload" />
+                                    </p>
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="religion">Religion</label>
+                                    <input disabled="disabled" placeholder="Religion" t-att-value='applicant_record.religion.name' maxlength="10" class="form-control" id="religion" name="religion" />
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="ex_service">Whether Ex-Serviceman</label>
+                                    <select class="form-control" id="ex_service" name="ex_service" disabled="disabled" style="-webkit-appearance: none;">
+                                        <option value="">Select</option>
+                                        <option value="yes" t-att-selected="applicant_record.ex_serviceman == 'yes'">Yes</option>
+                                        <option value="no" t-att-selected="applicant_record.ex_serviceman == 'no'">No</option>
+                                    </select>
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="govt_employee">Are you a Government Employee</label>
+                                    <select class="form-control" id="govt_employee" name="govt_employee" disabled="disabled" style="-webkit-appearance: none;">
+                                        <option value="">Select</option>
+                                        <option value="yes" t-att-selected="applicant_record.govt_employee == 'yes'">Yes</option>
+                                        <option value="no" t-att-selected="applicant_record.govt_employee == 'no'">No</option>
+                                    </select>
+                                </div>
+                                <div class="form-group form-field col-md-6">
+                                    <label for="physically_handicapped">Differently Abled?</label>
+                                    <select class="form-control" id="physically_handicapped" style="-webkit-appearance: none;" name="physically_handicapped" onchange="changePhysicallyHandicapped(this)" disabled="disabled">
+                                        <option value="">Select</option>
+                                        <option value="yes" t-att-selected="applicant_record.physically_handicapped == 'yes'">Yes</option>
+                                        <option value="no" t-att-selected="applicant_record.physically_handicapped == 'no'">No</option>
+                                    </select>
+                                </div>
+                                <div t-attf-class="form-group form-field col-md-6 differently_abled #{'d-none' if applicant_record.physically_handicapped != 'yes' else ''}">
+                                    <label for="kind_of_disability">Kind of Disability</label>
+                                    <select class="form-control" id="kind_of_disability" name="kind_of_disability" disabled="disabled" style="-webkit-appearance: none;">
+                                        <option value="">Select</option>
+                                        <option value="vh" t-att-selected="applicant_record.kind_of_disability == 'vh'">Visually Handicapped</option>
+                                        <option value="hh" t-att-selected="applicant_record.kind_of_disability == 'hh'">Hearing Handicapped</option>
+                                        <option value="ph" t-att-selected="applicant_record.kind_of_disability == 'ph'">Physically Handicapped</option>
+                                    </select>
+                                </div>
+                                <div t-attf-class="form-group form-field col-md-6 differently_abled #{'d-none' if applicant_record.physically_handicapped != 'yes' else ''}">
+                                    <label for="perc_disability">% of Disability</label>
+                                    <input disabled="disabled" id="perc_disability" placeholder="% of Disability" t-att-value='applicant_record.perc_disability' class="form-control" name="perc_disability" />
+                                </div>
+
+                                <div t-attf-class="form-group form-field col-md-6 differently_abled #{'d-none' if applicant_record.physically_handicapped != 'yes' else ''}">
+                                    <label for="upload_certificate_upload">
+                                        Document for Disability
+                                    </label>
+
+                                    <p class="mb-0" t-if="applicant_record.certificate_upload_filename">
+                                        <a t-att-title="applicant_record.certificate_upload_filename" class="certificate-upload-link">
+                                            <span class="fa fa-download"/> <span t-esc="applicant_record.certificate_upload_filename" />
+                                        </a>
+                                        <input type="hidden" t-att-filedata="applicant_record.certificate_upload" class="hidden-certificate-upload" t-att-filename="applicant_record.certificate_upload_filename" name="hidden_certificate_upload" />
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="card mt-4">
+                                <div class="card-header alert alert-primary section-job-application collapsed mb-0 d-flex align-items-center">
+                                    <div class="text-uppercase font-weight-bold"> Communication Address </div>
+                                </div>
+
+                                <div class="card-body" style="background: rgba(221, 221, 221, 0.22);">
+                                    <div class="form-row">
+                                        <div class="form-group form-field col-md-12 table-responsive">
+                                            <table class="table table-bordered table-sm mb-0">
+                                                <thead>
+                                                    <tr class="d-none">
+                                                        <th class="text-center table-primary" colspan="8">Address Details</th>
+                                                    </tr>
+                                                    <tr style="background-color: #ddd;">
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            Address Type
+                                                        </th>
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            Address 1
+                                                        </th>
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            Address 2
+                                                        </th>
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            City/District
+                                                        </th>
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            State
+                                                        </th>
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            Country
+                                                        </th>
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            Pincode
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-if="applicant_record.address_ids">
+                                                        <t t-foreach="applicant_record.address_ids" t-as="address">
+                                                            <tr>
+                                                                <td>
+                                                                    <t t-if="address.address_type == 'communication_add'">Communication Add </t>
+                                                                </td>
+                                                                <td>
+                                                                    <textarea t-raw='address.street' type='text' class="form-control" rows="1" disabled="disabled"> </textarea>
+                                                                </td>
+                                                                <td>
+                                                                    <textarea t-raw='address.street2' disabled="disabled" rows="1" class="form-control"> </textarea>
+                                                                </td>
+                                                                <td>
+                                                                    <t t-esc="address.city_id.name" />
+                                                                </td>
+                                                                <td>
+                                                                    <t t-esc="address.state_id.name" />
+                                                                </td>
+                                                                <td>
+                                                                    <t t-esc="address.country_id.name" />
+                                                                </td>
+                                                                <td>
+                                                                    <t t-esc='address.zip'/>
+                                                                </td>
+                                                            </tr>
+                                                        </t>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mt-4">
+                                <div class="card-header alert alert-primary section-job-application collapsed mb-0 d-flex align-items-center">
+                                    <div class="text-uppercase font-weight-bold"> Educational Qualification </div>
+                                    
+                                </div>
+
+                                <div class="card-body" style="background: rgba(221, 221, 221, 0.22);">
+                                    <div class="form-row">
+                                        <div class="form-group form-field o_website_form_required_custom col-md-12 table-responsive">
+                                            <table class="table table-bordered table-sm mb-0">
+                                                <thead>
+                                                    <tr class="d-none">
+                                                        <th class="table-primary text-center" colspan="7">EDUCATIONAL HISTORY</th>
+                                                    </tr>
+                                                    <tr style="background-color: #ddd;">
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            Degree
+                                                        </th>
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            Exam Passed
+                                                        </th>
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            Stream/Discipline
+                                                        </th>
+                                                        <!-- <th class="text-center" style="vertical-align: middle;">
+                                                            NAME OF SCHOOL / COLLEGE
+                                                        </th> -->
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            University / Board
+                                                        </th>
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            Year of Passing
+                                                        </th>
+                                                        <!-- <th class="text-center" style="vertical-align: middle;">
+                                                            TO DATE
+                                                        </th> -->
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            % of Marks
+                                                        </th>
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            Upload Certficate
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-if="applicant_record.education_ids">
+                                                        <t t-foreach="applicant_record.education_ids" t-as="education">
+                                                            <tr>
+                                                                <td>
+                                                                    <t t-esc='education.grade'/>
+                                                                </td>
+                                                                <td>
+                                                                    <t t-esc='education.field' />
+                                                                </td>
+                                                                <td>
+                                                                    <t t-esc='education.stream'/>
+                                                                </td>
+                                                                <td>
+                                                                    <t t-esc='education.school_name'/>
+                                                                </td>
+                                                                <td>
+                                                                    <t t-esc='education.passing_year'/>
+                                                                </td>
+                                                                <td>
+                                                                    <t t-esc="education.percentage" />
+                                                                </td>
+                                                                <td>
+                                                                    <t t-if="education.file_name">
+                                                                        <a t-att-title="education.file_name" class="certificate-link">
+                                                                            <span class="fa fa-download"/> <span t-esc="education.file_name[:10] + '...'" t-att-name="'upload_certificate_'+str(cnt)" t-att-id="'upload_certificate_'+str(cnt)"/>
+                                                                        </a>
+                                                                        <input type="hidden" t-att-filedata="education.certificate" class="hidden-certificate" t-att-filename="education.file_name" t-att-name="'upload_certificate_'+str(cnt)" t-att-id="'upload_certificate_'+str(cnt)" />
+                                                                    </t>
+                                                                </td>
+                                                            </tr>
+                                                        </t>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mt-4">
+                                <div class="card-header alert alert-primary section-job-application collapsed mb-0 d-flex align-items-center" >
+                                    <div class="text-uppercase font-weight-bold"> Employment Details </div>
+                                    
+                                </div>
+                                <div class="card-body" style="background: rgba(221, 221, 221, 0.22);">
+                                    <div class="form-row">
+                                        <div class="form-group form-field o_website_form_required_custom col-md-12 table-responsive">
+                                            <table class="table table-bordered table-sm mb-0">
+                                                <thead>
+                                                    <tr class="d-none">
+                                                        <th class="text-center table-primary" colspan="6">EXPERIENCE</th>
+                                                    </tr>
+                                                    <tr style="background-color: #ddd;">
+                                                        <th class="text-center" style="vertical-align: middle;" width="15%">
+                                                            From Date
+                                                        </th>
+                                                        <th class="text-center" style="vertical-align: middle;" width="15%">
+                                                            To Date
+                                                        </th>
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            Employer's Name &amp;amp; Address
+                                                        </th>
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            Positions Held
+                                                        </th>
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            Job Description
+                                                        </th>
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            Pay Scale
+                                                        </th>
+                                                        <th class="text-center" style="vertical-align: middle;">
+                                                            Upload Document
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-if="applicant_record.experience_ids">
+                                                        <t t-foreach="applicant_record.experience_ids" t-as="experience">
+                                                            <tr>
+                                                                <td>
+                                                                    <t t-esc='experience.from_date'/>
+                                                                </td>
+                                                                <td>
+                                                                    <t t-esc='experience.to_date'/>
+                                                                </td>
+                                                                <td>
+                                                                    <t-esc t-esc='experience.organization' />
+                                                                </td>
+                                                                <td>
+                                                                    <t t-esc='experience.position'/>
+                                                                </td>
+                                                                <td>
+                                                                    <textarea t-raw='experience.job_description' rows="1" disabled="disabled" class="form-control"> </textarea>
+                                                                </td>
+                                                                <td>
+                                                                    <t t-esc='experience.pay_scale'/>
+                                                                </td>
+                                                                <td>
+                                                                    <t t-if="experience.file_name">
+                                                                        <a  t-att-title="experience.file_name" class="certificate-link">
+                                                                            <span class="fa fa-download"/> <span t-esc="experience.file_name[:10] + '...'" t-att-name="'upload_document_'+str(cnt)" t-att-id="'upload_document_'+str(cnt)"/>
+                                                                        </a>
+                                                                        <input type="hidden" t-att-filedata="experience.document" class="hidden-experience-doc" t-att-filename="experience.file_name" t-att-name="'upload_document_'+str(cnt)" t-att-id="'upload_document_'+str(cnt)" />
+                                                                    </t>
+                                                                </td>
+                                                            </tr>
+                                                        </t>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-row mt-4">
+                                <div class="form-group form-field col-md-12">
+                                    <label for="additional_information">Additional Information</label>
+                                    <textarea disabled="disabled" type="text" t-raw="applicant_record.addition_information" id="additional_information" class="form-control" name="additional_information" rows="2"> </textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group form-field col-md-12">
+                                    <label for="achievements">Achievements</label>
+                                    <textarea disabled="disabled" type="text" t-raw="applicant_record.achievements" id="achievements" class="form-control" name="achievements" rows="2"> </textarea>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header alert alert-primary section-job-application collapsed mb-0 d-flex align-items-center">
+                                    <div class="text-uppercase font-weight-bold"> Information on Vigilance and Discipline </div>
+                                    
+                                </div>
+
+                                <div class="card-body" style="background: rgba(221, 221, 221, 0.22);">
+                                    <div class="form-group row">
+                                        <label for="penalty" class="col-sm-10 col-form-label">
+                                            Any penalty awarded during the last 10 years
+                                        </label>
+                                        <div class="col-sm-2">
+                                            <div class="form-group form-field o_website_form_required_custom mb-0">
+                                                <select class="form-control o_website_form_input" id="penalty" name="penalty" disabled="disabled" style="-webkit-appearance: none;">
+                                                    <option value="">Select</option>
+                                                    <option t-att-selected="applicant_record.penalty == 'yes'" value="yes">Yes</option>
+                                                    <option t-att-selected="applicant_record.penalty == 'no'" value="no">No</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="action_injury" class="col-sm-10 col-form-label">
+                                            Any action or inquiry is going on as far as candidate's knowledge
+                                        </label>
+                                        <div class="col-sm-2">
+                                            <div class="form-group form-field o_website_form_required_custom mb-0">
+                                                <select class="form-control o_website_form_input" id="action_injury" name="action_injury" disabled="disabled" style="-webkit-appearance: none;">
+                                                    <option value="">Select</option>
+                                                    <option t-att-selected="applicant_record.action_inquiry == 'yes'" value="yes">Yes</option>
+                                                    <option t-att-selected="applicant_record.action_inquiry == 'no'" value="no">No</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="criminal_vigilance" class="col-sm-10 col-form-label">
+                                            Any criminal/ vigilance case is pending or contemplated
+                                        </label>
+                                        <div class="col-sm-2">
+                                            <div class="form-group form-field o_website_form_required_custom mb-0">
+                                                <select class="form-control o_website_form_input" id="criminal_vigilance" name="criminal_vigilance" disabled="disabled" style="-webkit-appearance: none;">
+                                                    <option value="">Select</option>
+                                                    <option t-att-selected="applicant_record.criminal == 'yes'" value="yes">Yes</option>
+                                                    <option t-att-selected="applicant_record.criminal == 'no'" value="no">No</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="relative_ccs" class="col-sm-10 col-form-label">
+                                            Any relative defined in terms of CCS
+                                        </label>
+                                        <div class="col-sm-2">
+                                            <div class="form-group form-field o_website_form_required_custom mb-0">
+                                                <select class="form-control o_website_form_input" id="relative_ccs" name="relative_ccs" disabled="disabled" style="-webkit-appearance: none;">
+                                                    <option value="">Select</option>
+                                                    <option value="yes" t-att-selected="applicant_record.relative_ccs == 'yes'">Yes</option>
+                                                    <option value="no" t-att-selected="applicant_record.relative_ccs == 'no'">No</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div t-attf-class="form-group row relative_ccs_name #{'d-none' if applicant_record.relative_ccs != 'yes' else ''}">
+                                        <label for="relative_ccs_name" class="col-sm-10 col-form-label">
+                                            Relative Name
+                                        </label>
+                                        <div class="col-sm-2">
+                                            <div class="form-group form-field o_website_form_required_custom mb-0">
+                                                <input type="text" t-att-value='applicant_record.relative_ccs_name' id="relative_ccs_name" class="form-control o_website_form_input" placeholder="Relative Name" name="relative_ccs_name"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

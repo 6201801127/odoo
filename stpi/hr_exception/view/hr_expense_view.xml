@@ -1,0 +1,73 @@
+<?xml version="1.0" ?>
+<odoo>
+    <record id="action_hr_expense_test_tree" model="ir.actions.act_window">
+                  <field name="name">Hr Expense Rules</field>
+                  <field name="res_model">exception.rule</field>
+                  <field name="view_type">form</field>
+                  <field name="view_mode">tree,form</field>
+                  <field name="view_id" ref="base_exception_and_approval.view_exception_rule_tree"/>
+                  <field name="domain">[('rule_group', '=', 'hr_expense_sheet')]</field>
+                  <field name="context">{'active_test': False, 'default_rule_group' : 'hr_expense_sheet'}</field>
+              </record>
+        <menuitem
+                id="menu_hr_expanse_parent"
+                parent="hr_expense.menu_hr_expense_configuration"
+                sequence="20"
+                name="Exceptions"
+        />
+        <menuitem
+                action="action_hr_expense_test_tree"
+                id="menu_hr_expense_test"
+                parent="menu_hr_expanse_parent"
+        />
+
+         <record id="view_hr_expense_exp_form" model="ir.ui.view">
+                <field name="name">hr_expense.view_hr_expense_form</field>
+                <field name="model">hr.expense.sheet</field>
+                <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_form"/>
+                <field name="arch" type="xml">
+                   <xpath expr="//div[hasclass('oe_title')]" position="after">
+                        <div>
+                        <h5><field name="main_exception_id" options='{"no_open": True}'
+                               class="oe_inline" string="Error:"
+                               attrs="{'invisible':[('main_exception_id','=', False)]}"/>
+                            </h5>
+                        </div>
+                   </xpath>
+                    <xpath expr="//field[@name='user_id']/.." position="inside">
+                        <field name="ignore_exception" invisible="1"/>
+                    </xpath>
+                    <xpath expr="//sheet/notebook/page[2]" position="inside">
+                        <newline />
+                        <group name="exception" colspan="2" col="2">
+                            <separator string="Exception" colspan="2"/>
+                            <field name="exception_ids" colspan="2" nolabel="1" readonly="1"/>
+                        </group>
+                    </xpath>
+                </field>
+         </record>
+
+        <record id="view_hr_expense_exp_tree" model="ir.ui.view">
+            <field name="name">hr_exception.view_hr_expense_exp_tree</field>
+            <field name="model">hr.expense.sheet</field>
+            <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_tree"/>
+            <field name="arch" type="xml">
+                 <field name="state" position="after">
+                       <field name="main_exception_id"/>
+                 </field>
+            </field>
+        </record>
+
+        <record id="view_hr_expense_exp_filter" model="ir.ui.view">
+            <field name="name">hr_exception.view_hr_expense_exp_filter</field>
+            <field name="model">hr.expense.sheet</field>
+            <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
+            <field name="arch" type="xml">
+                <filter name="activities_upcoming_all" position="after">
+                    <separator orientation="vertical"/>
+                    <filter icon="terp-emblem-important" name="tofix" string="Blocked in draft" domain="[('main_exception_id','!=',False)]"/>
+                </filter>
+            </field>
+        </record>
+
+</odoo>

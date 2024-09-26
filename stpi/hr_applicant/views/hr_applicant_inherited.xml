@@ -1,0 +1,428 @@
+<odoo>
+<!-- Removal of stages menu to debug mode only -->
+    <record id="hr_recruitment.menu_hr_recruitment_stage" model="ir.ui.menu">
+        <field name="groups_id" eval="[[6,0,[]]]"/>
+    </record>
+
+    <record id="csm_crm_case_tree_view_job_inherit" model="ir.ui.view">
+        <field name="name">csm.crm.case.tree.view.job.inherit</field>
+        <field name="model">hr.applicant</field>
+        <field name="inherit_id" ref="hr_recruitment.crm_case_tree_view_job"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="inside">
+                <field name="is_final_statge" invisible="1"/>
+                <field name="active" invisible="1"/>
+                <button string="Change Stage" name="%(hr_applicant.change_stage_action)d"
+                        groups="hr_recruitment.group_hr_recruitment_user,hr_recruitment.group_hr_recruitment_manager" type="action"
+                        class="oe_highlight btn-sm" attrs="{'invisible': ['|',('active', '=', False),('is_final_statge', '=', True)]}"/>
+            </xpath>
+            <field name="partner_name" position="after">
+                <field name="personal_email" string="Email" />
+                <field name="phone" string="Phone" />
+            </field>
+            <field name="email_from" position="replace" />
+            <field name="partner_phone" position="replace" />
+            <field name="medium_id" position="replace" />
+            <field name="source_id" position="replace" />
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="hr_applicant_form_field_inherited">
+        <field name="name">hr.applicant.form</field>
+        <field name="model">hr.applicant</field>
+        <field name="inherit_id" ref="hr_recruitment.crm_case_form_view_job"/>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <field name="is_second_last_stage" invisible="1"/>
+                <button string="Send Offer Letter by Email" name="action_send_offer_letter"
+                        groups="hr_recruitment.group_hr_recruitment_user,hr_recruitment.group_hr_recruitment_manager" type="object"
+                        class="oe_highlight" attrs="{'invisible': ['|','|',('emp_id', '!=', False),('active', '=', False),('is_second_last_stage', '=', False)]}"/>
+                <button string="Change Stage" name="%(hr_applicant.change_stage_action)d"
+                        groups="hr_recruitment.group_hr_recruitment_user,hr_recruitment.group_hr_recruitment_manager" type="action"
+                        class="oe_highlight" attrs="{'invisible': ['|',('active', '=', False),('is_final_statge', '=', True)]}"/>
+            </xpath>
+            <xpath expr="//button[@name='archive_applicant']" position="attributes">
+                <attribute name='attrs'>{'invisible':['|',('active', '=', False),('related_stage_id','=','Joined')]}</attribute>
+            
+            </xpath>
+            <xpath expr="//button[@name='action_makeMeeting']" position="replace" />
+            <button name="action_get_attachment_tree_view" position="attributes">
+                <attribute name="icon">fa-list-ol</attribute>
+            </button>
+            <field name="user_id" position="after">
+                <field name="employee_type" attrs="{'required': [('is_second_last_stage', '=', True)],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                <field name="recruitment_type" attrs="{'invisible': [('employee_type', '!=', 'regular')],'required': [('employee_type', '=', 'regular'),('is_second_last_stage', '=', True)],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                <field name="technical_resignation" options="{'no_open': True,'no_create':True,'no_create_edit': True}" attrs="{'invisible': [('recruitment_type','!=','d_recruitment')],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                <field name="employee" options="{'no_open': True,'no_create':True,'no_create_edit': True}" attrs="{'invisible':[('technical_resignation','=',False)],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                <field name="state" attrs="{'invisible': [('employee_type', '!=', 'regular')],'required': [('employee_type', '=', 'regular'),('is_second_last_stage', '=', True)],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+            </field>
+
+            <xpath expr="//label[@for='salary_expected']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='salary_expected']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='salary_expected_extra']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='priority']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//label[@for='salary_proposed']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='salary_proposed']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='salary_proposed_extra']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='availability']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='medium_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//label[@for='name']" position="after">
+                    <field name="image" widget="image" class="oe_avatar" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                    <h2><field name="title" required="1" placeholder="Title" options="{'no_create_edit': 1,'no_open':True}" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)],'required': [('is_final_statge', '=', False)]}"/></h2>
+                </xpath>
+            <xpath expr="//label[@for='name']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='name']" position="attributes">
+                <attribute name="placeholder">Applicant's Name</attribute>
+                <attribute name="attrs">{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)],'required': [('is_final_statge', '=', False)]}</attribute>
+                
+            </xpath>
+            <xpath expr="//field[@name='job_id']" position="attributes">
+                <attribute name="required">{'required':[('is_final_statge','=', False)]}</attribute>
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//label[@for='salary_expected']" position="before">
+                <field name="struct_id" attrs="{'required': [('is_second_last_stage', '=', True)],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}" options="{'no_create_edit': 1,'no_open': 1}"/>
+                <field name="pay_level_id" attrs="{'invisible': [('employee_type', '!=', 'regular')],'required': [('employee_type', '=', 'regular'),('is_second_last_stage', '=', True)],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}" options="{'no_create_edit': 1,'no_open': 1}"/>
+                <field name="pay_level" domain="[('entry_pay_id', '=', pay_level_id)]" attrs="{'invisible': [('employee_type', '!=', 'regular')], 'required': [('employee_type', '=', 'regular'),('is_second_last_stage', '=', True)],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}" options="{'no_create_edit': 1,'no_open': 1}"/>
+            </xpath>
+
+            <xpath expr="//field[@name='categ_ids']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//label[@for='categ_ids']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//label[@for='partner_name']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='partner_name']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='partner_phone']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='email_from']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='partner_mobile']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='type_id']" position="attributes">
+                <attribute name="string">Highest Qualification</attribute>
+                <attribute name="attrs">{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='reference']" position="after">
+                <field name="refuse_reason" attrs="{'invisible':[('active','=',True)]}"/>
+            </xpath>
+
+            <xpath expr="//field[@name='source_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='user_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='reference']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <!-- <newline />
+                <button name="get_no_of_santioned_position" type="action" 
+                     class="oe_inline oe_stat_button" 
+                     style="width:198px !important"
+                     icon="fa-users" 
+                     help="Sanctioned Positions of applicant">
+                     <div class="o_form_field o_stat_info" style="margin-top: -12px;">
+                        <field name="cur_no_of_emp" widget="statinfo" nolabel="1" />/
+                        <field name="santioned_position" widget="statinfo" nolabel="1" />
+                     </div>
+                    <span for="santioned_position"  class="o_stat_text o_right_padding" style="padding-top: 21px;margin-left: -57px;">
+                        Sanctioned Position
+                    </span>
+                </button> -->
+                
+                <!-- <button name="get_religion_from_job_position" type="object" class="oe_stat_button" icon="fa-users">
+                    <div class="o_form_field o_stat_info" style="margin-top: -12px;">
+                        <field name="get_total_match_religion" nolabel="1"/>%
+                    </div>
+                    <span for="santioned_position"  class="o_stat_text o_right_padding" style="padding-top: 21px;margin-left: -27px;">
+                        Religion
+                    </span>
+                </button>
+                
+                 <button name="get_category_from_job_position" type="object" class="oe_stat_button" icon="fa-users">
+                    <div class="o_form_field o_stat_info" style="margin-top: -12px;">
+                        <field name="get_total_match_category" nolabel="1"/>%
+                    </div>
+                    <span for="santioned_position"  class="o_stat_text o_right_padding" style="padding-top: 21px;margin-left: -27px;">
+                        Category
+                    </span>
+                </button> -->
+            </xpath>
+            <xpath expr="//field[@name='description']" position="attributes">
+                <attribute name="placeholder">Comments...</attribute>
+            </xpath>
+            <xpath expr="//field[@name='description']" position="before">
+                <notebook>
+                    
+
+                    <page name="public" string="Work Information">
+                                <group>
+                                    <!--</group>-->
+                                    <group string="Position">
+                                        <field name="job_title" options="{'no_create_edit': True}" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="branch_id" options="{'no_open':True,'no_create_edit': True}" attrs="{'required':[('related_stage_id','!=','Joined')],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="center_id"  options="{'no_open':True,'no_create_edit': True}" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="parent_id" options="{'no_create_edit': True}" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="coach_id" invisible="1"/>
+                                        <field name="fax_number" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="ex_serviceman" attrs="{'required':[('related_stage_id','!=','Joined')],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+
+                                        <!--<field name="resource_calendar_id" required="1"/>-->
+                                        <!--<field name="tz"/>-->
+                                    </group>
+
+                                <group name="office_work" string="Office Work">
+                                    <field name="is_final_statge" invisible="1"/>
+                                    <field name="recruitment_file_no" attrs="{'invisible': [('employee_type', '=', 'contractual_with_agency')],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                    <field name="office_file_no" attrs="{'invisible': [('employee_type', '=', 'contractual_with_agency')],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                    <field name="office_order_date" 
+                                    attrs="{'invisible': [('employee_type', '=', 'contractual_with_agency')],'required':[('employee_type', '!=', 'contractual_with_agency'),('is_second_last_stage', '=', True)],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                    <field name="post" invisible="True"/>
+                                    <field name="date_of_join" attrs="{'required': [('is_second_last_stage', '=', True)],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                </group>
+                        </group>
+                                <!--<field name="notes" placeholder="Other Information ..." colspan="4"/>-->
+                    </page>
+                    <page name="personal_information" string="Private Information">
+                                <group>
+                                    <group string="Citizenship &amp; Other Information">
+                                         <field name="country_id" attrs="{'invisible': [('employee_type', '!=', 'regular')], 'required': [('employee_type', '=', 'regular'),('is_second_last_stage','=',True)],'readonly':['|',('is_final_statge','=',True),('emp_id','!=',False)]}" options="{'no_create': True, 'no_open': True, 'no_edit':True, 'no_create_edit': True}"/>
+                                         <field name="citizen_number" attrs="{'invisible':[('show_citizen_field','=',False)],'required':[('show_citizen_field','=',True)],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                          <field name="citizen_file_data" filename="citizen_file_name" widget="binary" class="oe_inline" attrs="{'invisible':[('show_citizen_field','=',False)],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                           <field name="date_of_eligibility" string='Date of Eligibility' attrs="{'invisible':[('show_citizen_field','=',False)],'required':[('show_citizen_field','=',True)],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="citizen_file_name" invisible="1"/>
+                                          <field name="show_citizen_field" invisible="1"/>
+                                        <field name="bank_account_id" invisible="1"/>
+                                        <field name="bank_account_number" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="ifsc_code" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                    </group>
+
+
+                                    <group string="Status">
+                                        <field name="gender" string='Gender' invisible="1"/>
+                                        <field name="gende" string='Gender' attrs="{'required':[('related_stage_id','!=','Joined')],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="marital" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="spouse_complete_name" invisible = "True"/>
+                                        <field name="spouse_birthdate" invisible = "True"/>
+                                        <field name="children" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                    </group>
+
+
+                                    <group string="Contact Information">
+                                        <!-- <field name="address_home_id" options="{&quot;always_reload&quot;: True, &quot;highlight_first_line&quot;: True}"/> -->
+                                        <field name="is_address_home_a_company" invisible="1"/>
+                                        <!-- <div class="text-warning">
+                                            Use here the home address of the employee.
+                                            This private address is used in the expense report reimbursement document.
+                                            It should be different from the work address.
+                                        </div> -->
+                                        <field name="emergency_contact" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="related_stage_id" invisible = '1' />
+                                        <field name="emergency_phone" attrs="{'required':[('is_second_last_stage','=',True)],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="km_home_work" string='KM Home-Work' groups="hr.group_hr_user" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="personal_email" attrs="{'required':[('related_stage_id','!=','Joined')],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="phone" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                    </group>
+
+                                    <group name="identify_id" string="Identification ID">
+
+                                        <field name="pan_no" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="pan_upload" filename="pan_upload_filename" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="pan_upload_filename" invisible="1"/>
+                                        <field name="aadhar_no" attrs="{'required':[('related_stage_id','!=','Joined')],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="aadhar_upload" filename="aadhar_upload_filename" attrs="{'required':[('related_stage_id','!=','Joined')],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="aadhar_upload_filename" invisible="1"/>
+                                        <field name="passport_id" string = "Passport No." groups="hr.group_hr_user" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="passport_upload" filename="passport_upload_filename" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="passport_upload_filename" invisible="1"/>
+                                    </group>
+
+                                    <group string="Birth">
+                                        <field name="dob" attrs="{'required':[('related_stage_id','!=','Joined')],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                        <field name="country_of_birth" groups="hr.group_hr_user" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                    </group>
+                                    <group string="Religion">
+                                        <field name="religion_id" attrs="{'required':[('related_stage_id','!=','Joined')],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}" options="{'no_create_edit': True, 'no_open': True}"/>
+                                        <field name="category_id" attrs="{'required':[('related_stage_id','!=','Joined')],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}" options="{'no_create_edit': True, 'no_open': True}"/>
+                                        <field name="minority" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                    </group>
+                                    <group string="Physical">
+                                         <field name="height" attrs="{'invisible': [('employee_type', '!=', 'regular')], 'required': [('employee_type', '=', 'regular'),('is_second_last_stage','=',True)],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                         <field name="weight" attrs="{'invisible': [('employee_type', '!=', 'regular')], 'required': [('employee_type', '=', 'regular'),('is_second_last_stage','=',True)],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                         <field name="blood_group" attrs="{'required':[('is_second_last_stage','=',True)],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                         <field name="differently_abled" attrs="{'required':[('related_stage_id','!=','Joined')],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                         <field name="kind_of_disability" attrs="{'required':[('differently_abled','=','yes')], 'invisible':[('differently_abled', '=', 'no')],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                         <field name="perc_disability" attrs="{'required':[('differently_abled','=','yes')], 'invisible':[('differently_abled', '=', 'no')],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                         <field name="certificate_upload" filename="certificate_upload_filename" attrs="{'required':[('differently_abled','=','yes')], 'invisible':[('differently_abled', '=', 'no')],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                         <field name="certificate_upload_filename" invisible="1"/>
+                                         <field name="personal_remark" attrs="{'invisible': [('employee_type', '!=', 'regular')],'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}"/>
+                                     </group>
+                                </group>
+
+                    </page>
+                    <page name="public" string="Certifications">
+                        <div class="row">
+                            <div class="col-lg-8 o_group_resume">
+                                <separator string="Educations/certifications"/>
+                                <field mode="tree" nolabel="1" name="resume_line_applicant_ids" widget="hr_resume" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}">
+                                    <tree>
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="line_type_id"/>
+                                        <field name="name"/>
+                                        <field name="date_start"/>
+                                        <field name="date_end"/>
+                                    </tree>
+                                </field>
+                            </div>
+                            <div class="col-lg-4 o_group_skills">
+                                <separator string="Skills"/>
+                                <field mode="tree" nolabel="1" name="applicant_skill_ids"  widget="hr_skills" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}">
+                                    <tree>
+                                        <field name="skill_type_id" invisible="1"/>
+                                        <field name="skill_id"/>
+                                        <field name="skill_level_id"/>
+                                        <field name="level_progress" widget="progressbar"/>
+                                    </tree>
+                                </field>
+                            </div>
+                        </div>
+                    </page>
+                     <page string="Address">
+                        <field name="address_ids" attrs="{'readonly':['|',('related_stage_id','=','Joined'),('emp_id','!=',False)]}">
+                        <tree editable="'bottom" string="Address">
+                            <field name="address_type"/>
+                            <field name="street"/>
+                            <field name="street2"/>
+                            <!-- <field name="city"/> -->
+                            <field name="country_id" options="{'no_create': True, 'no_open': True, 'no_edit' : True, 'no_create_edit': True}" />
+                            <field name="state_id" options="{'no_create': True, 'no_open': True, 'no_edit' : True, 'no_create_edit': True}" domain="[('country_id','=',country_id)]"/> 
+                            <field name="city_id" options="{'no_create': True, 'no_open': True, 'no_edit' : True, 'no_create_edit': True}" domain="[('state_id','=','state_id')]" />
+                            <field name="zip"/>
+                            <!-- <field name="is_correspondence_address"/> -->
+                        </tree>
+                        <form string="Address">
+                            <group>
+                                <group>
+                                    <field name="street"/>
+                                    <field name="street2"/>
+                                    <field name="city"/>
+                                </group>
+                                <group>
+                                    <field name="state_id"/>
+                                    <field name="country_id"/>
+                                    <field name="zip"/>
+                                </group>
+                            </group>
+                        </form>
+                    </field>
+                    </page>
+                </notebook>
+                </xpath>
+
+        </field>
+    </record>
+
+      <record model="ir.ui.view" id="hr_applicant_create_empoyee_wizard">
+        <field name="name">select.training</field>
+        <field name="model">select.training</field>
+        <field name="inherit_id" ref="hr_applicant.select_training_wizard_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='is_triaing_needed']" position="attributes">
+                    <attribute name = "invisible">1</attribute>
+            </xpath>
+            <xpath expr="//footer" position="before">
+                    <h5>You want to create an Employee?</h5>
+            </xpath>
+            <xpath expr="//form" position="attributes">
+                <attribute name="string">Create Employee?</attribute>
+            </xpath>
+        </field>
+      </record>
+
+     <record model="ir.ui.view" id="hr_applicant_relativess_form_field_inherited">
+        <field name="name">applicant.relative.form</field>
+        <field name="model">applicant.relative</field>
+        <field name="inherit_id" ref="hr_applicant.view_applicant_relative_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='relative_type']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='gender']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="relate_type" required="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="view_hr_applicant_custom_search">
+        <field name="name">view.hr_applicant_custom.search</field>
+        <field name="model">hr.applicant</field>
+        <field name="inherit_id" ref="hr_recruitment.view_crm_case_jobs_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='in_progress']" position="after">
+                <filter string="Refused" name="filter_refused" domain="[('active','=',False)]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_recruitment.menu_crm_case_categ_all_app" model="ir.ui.menu">
+        <field name="action" eval="False"/>
+    </record> 
+
+    <record id="hr_recruitment.menu_crm_case_categ0_act_job02" model="ir.ui.menu">
+        <field name="action" eval="False"/>
+    </record>
+
+
+    <template id="assets_backend" name="navybitss_kanban_draggable" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/hr_applicant/static/src/js/kanban_renderer.js"/>
+        </xpath>
+    </template>
+</odoo>

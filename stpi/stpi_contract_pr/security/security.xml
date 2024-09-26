@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <function name="write" model="ir.model.data">
+            <function name="search" model="ir.model.data">
+                <value eval="[('module', '=', 'stpi_contract_pr'), ('name', 'in', ['ir_rule_contract_security'])]"/>
+            </function>
+            <value eval="{'noupdate': False}" />
+        </function>
+
+
+        <record id="ir_rule_contract_security" model="ir.rule">
+            <field name="model_id" ref="hr_contract.model_hr_contract"/>
+            <field name="domain_force">['|', ('employee_id.branch_id','=',False), ('employee_id.branch_id','in',[g.id for g in user.branch_ids])] </field>
+            <field name="name">Manager : Branch records only</field>
+            <field name="groups" eval="[(3, ref('base.group_user')),(4, ref('hr_contract.group_hr_contract_manager'))]"/>
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="group_contract_officer" model="res.groups">
+            <field name="name">Officer</field>
+            <field name="category_id" ref="base.module_category_hr_contract"/>
+        </record>
+
+        <record id="group_contract_vpf_officer" model="res.groups">
+            <field name="name">VPF Manager</field>
+            <field name="category_id" ref="base.module_category_hr_contract"/>
+            <field name="implied_ids" eval="[(4, ref('hr_contract.group_hr_contract_manager'))]"/>
+
+        </record>
+
+        <record id="base.default_user" model="res.users">
+            <field name="groups_id" eval="[(3,ref('stpi_contract_pr.group_contract_officer')),(3,ref('hr_contract.group_hr_contract_manager'))]"/>
+        </record>
+
+        <record id="hr_contract_officer_rule" model="ir.rule">
+            <field name="model_id" ref="hr_contract.model_hr_contract"/>
+            <field name="domain_force">[('employee_id.user_id','=',user.id)] </field>
+            <field name="name">Officer : Own contract record only.</field>
+            <field name="groups" eval="[(4, ref('group_contract_officer'))]"/>
+            <field name="active" eval="False"/>
+        </record>
+
+        <function name="write" model="ir.model.data">
+            <function name="search" model="ir.model.data">
+                <value eval="[('module', '=', 'base'), ('name', 'in', ['default_user'])]"/>
+            </function>
+            <value eval="{'noupdate': False}" />
+        </function>
+
+        <record id="base.default_user" model="res.users">
+            <field name="groups_id" eval="[(3,ref('hr_contract.group_hr_contract_manager')),(4,ref('group_contract_officer'))]"/>
+        </record>
+
+        <function name="write" model="ir.model.data">
+            <function name="search" model="ir.model.data">
+                <value eval="[('module', '=', 'base'), ('name', 'in', ['default_user'])]"/>
+            </function>
+            <value eval="{'noupdate': True}" />
+        </function>
+
+        <!--        <record id="ir_rule_all_contract" model="ir.rule">-->
+        <!--            <field name="name">All contract</field>-->
+        <!--            <field name="model_id" ref="model_hr_contract"/>-->
+        <!--            <field name="domain_force">[(1, '=', 1)]</field>-->
+        <!--            <field name="groups" eval="[(4, ref('base.group_erp_manager'))]"/>-->
+        <!--        </record>-->
+
+        <!-- <record id="base.default_user" model="res.users">
+            <field name="groups_id" eval="[(3,ref('hr_contract.group_hr_contract_manager'))]"/>
+        </record> -->
+
+
+    </data>
+</odoo>

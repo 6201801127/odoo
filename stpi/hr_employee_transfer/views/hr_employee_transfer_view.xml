@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+        <record id="employeetransfer_tree_view" model="ir.ui.view">
+            <field name="name">employee.transfer.tree</field>
+            <field name="model">hr.employee.transfer</field>
+            <field name="arch" type="xml">
+                <tree string="HR Employee Transfer">
+                    <field name="employee_id"/>
+                    <field name="transfer_to"/>
+                    <field name="file_number"/>
+                    <field name="order_number"/>
+                    <field name="order_date"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+		<record id="employeetransfer_form_view" model="ir.ui.view">
+            <field name="name">employee.transfer.form</field>
+            <field name="model">hr.employee.transfer</field>
+            <field name="arch" type="xml">
+                <form string="HR Employee Transfer">
+                    <header>
+                        <button name="button_draft" string="Submit for Approval" states="draft" class="oe_highlight" type="object"/>
+                        <button name="button_approved" string="Approve" states="approval" class="oe_highlight" type="object"/>
+                         <button name="button_reset_to_draft" string="Revert" type="object" states="approval"/>
+                        <button name="button_rejected" string="Reject" states="approval" type="object"/>
+                        <button name="button_assign_to" string="Assign Pending Activities" states="approved" class="oe_highlight" type="object"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,approval,approved" />
+                    </header>
+                    <sheet>
+                     <group>
+                         <group>
+                             <field name="employee_id"  required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
+                             <field name="job_id" readonly="1"/>
+                             <field name="branch_id" readonly="1"/>
+                             <field name="department_id" readonly="1"/>
+                             <field name="date_of_join" readonly="1"/>
+                             <field name="emp_stages" readonly="1"/>
+                         </group>
+                         <group>
+                             <field name="create_uid" string="'Requested By" readonly="1"/>
+                             <field name="date"  readonly="1"/>
+                             <field name="transfer_to"  required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
+                             <field name="order_number" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
+                             <field name="file_number" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
+                             <field name="order_date" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
+                             <field name="transfer_attach" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
+                         </group>
+                     </group>
+                        <notebook>
+                            <page name="pending_activities" string="Pending Activities">
+                                <field name="emp_activity"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+    
+            <!--Tour search view-->
+    <record id="view_employee_transfer_search_form" model="ir.ui.view">
+        <field name="name">hr.employee.transfer.search.form</field>
+        <field name="model">hr.employee.transfer</field>
+        <field name="arch" type="xml">
+           <search string="HR Employee Transfer">
+               <filter string="My Transfer" name="my_transfer" domain="[('employee_id.user_id.id', '=', uid)]" />
+                <field name="employee_id" string="Employee"/>
+                <field name="department_id" string="Department"/>
+                    <filter string="Employee" name="employee" context="{'group_by':'employee_id'}"/>
+                    <filter string="Department" name="department" context="{'group_by':'department_id'}"/>
+                    <filter string="Status" name="status" context="{'group_by':'state'}"/>
+            </search>
+        </field>
+    </record>
+
+        <record id="hremployee_action" model="ir.actions.act_window">
+            <field name="name">HR Employee Transfer</field>
+            <field name="res_model">hr.employee.transfer</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_my_transfer': 1}</field>
+            <field name="search_view_id" ref="view_employee_transfer_search_form"/>
+            <field name="domain">[('state','=','draft')]</field>
+        </record>
+
+
+        <record id="hremployee_action_waiting" model="ir.actions.act_window">
+            <field name="name">HR Employee Transfer</field>
+            <field name="res_model">hr.employee.transfer</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_my_transfer': 1}</field>
+            <field name="search_view_id" ref="view_employee_transfer_search_form"/>
+            <field name="domain">[('state','=','approval')]</field>
+        </record>
+
+
+        <record id="hremployee_action_approved" model="ir.actions.act_window">
+            <field name="name">HR Employee Transfer</field>
+            <field name="res_model">hr.employee.transfer</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_my_transfer': 1}</field>
+            <field name="search_view_id" ref="view_employee_transfer_search_form"/>
+            <field name="domain">[('state','=','approved')]</field>
+        </record>
+
+
+        <record id="hremployee_action_rejected" model="ir.actions.act_window">
+            <field name="name">HR Employee Transfer</field>
+            <field name="res_model">hr.employee.transfer</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_my_transfer': 1}</field>
+            <field name="search_view_id" ref="view_employee_transfer_search_form"/>
+            <field name="domain">[('state','=','rejected')]</field>
+        </record>
+
+        <record id="hremployee_action_all" model="ir.actions.act_window">
+            <field name="name">HR Employee Transfer</field>
+            <field name="res_model">hr.employee.transfer</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_my_transfer': 1}</field>
+            <field name="search_view_id" ref="view_employee_transfer_search_form"/>
+        </record>
+
+        <record id="hremployee_action_employee" model="ir.actions.act_window">
+            <field name="name">HR Employee Transfer</field>
+            <field name="res_model">hr.employee.transfer</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_employee': 1}</field>
+            <field name="search_view_id" ref="view_employee_transfer_search_form"/>
+        </record>
+
+        <record id="hremployee_action_department" model="ir.actions.act_window">
+            <field name="name">HR Employee Transfer</field>
+            <field name="res_model">hr.employee.transfer</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_department': 1}</field>
+            <field name="search_view_id" ref="view_employee_transfer_search_form"/>
+        </record>
+
+
+
+    <menuitem id = "hr_employee_transfer_menu_hr_id"
+                  name = "Transfer"
+                  sequence="5"
+              web_icon="hr_employee_transfer,static/description/icon.png"
+                  />
+
+        <menuitem id = "employee_transfer_menu_id_parent"
+                  name = "Transfer Request"
+                  parent="hr_employee_transfer_menu_hr_id"
+                  sequence="1"
+                  />
+
+        <menuitem id = "tour_request_menu_id_draft"
+                  name = "New"
+                  action ="hremployee_action"
+                  parent="employee_transfer_menu_id_parent"
+                  />
+        <menuitem id = "tour_request_menu_id_waiting_for_approval"
+                  name = "Waiting for Approval"
+                  action ="hremployee_action_waiting"
+                  parent="employee_transfer_menu_id_parent"
+                  />
+        <menuitem id = "tour_request_menu_id_approved"
+                  name = "Approved"
+                  action ="hremployee_action_approved"
+                  parent="employee_transfer_menu_id_parent"
+                  />
+        <menuitem id = "tour_request_menu_id_rejected"
+                  name = "Rejected"
+                  action ="hremployee_action_rejected"
+                  parent="employee_transfer_menu_id_parent"
+                  />
+
+
+
+        <menuitem id = "employee_transfer_reports_menu_id_parent"
+                  name = "Reports"
+                  parent="hr_employee_transfer_menu_hr_id"
+                  sequence="1"
+                  />
+
+        <menuitem id = "tour_request_menu_id_all"
+                  name = "All Transfers"
+                  action ="hremployee_action_all"
+                  parent="employee_transfer_reports_menu_id_parent"
+                  />
+        <menuitem id = "tour_request_menu_id_employee"
+                  name = "Transfer by Employee"
+                  action ="hremployee_action_employee"
+                  parent="employee_transfer_reports_menu_id_parent"
+                  />
+        <menuitem id = "tour_request_menu_id_department"
+                  name = "Transfer by Department"
+                  action ="hremployee_action_department"
+                  parent="employee_transfer_reports_menu_id_parent"
+                  />
+
+        <menuitem id = "employee_transfer_configuration_menu_id_parent"
+                  name = "Configuration"
+                  parent="hr_employee_transfer_menu_hr_id"
+                  sequence="100"
+                  groups="base.group_no_one"
+                  />
+</odoo>

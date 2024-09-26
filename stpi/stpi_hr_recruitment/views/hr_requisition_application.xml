@@ -1,0 +1,225 @@
+<odoo>
+
+    <menuitem id="hr_recruitment.menu_hr_recruitment_configuration" groups="hr_recruitment.group_hr_recruitment_manager" name="Configuration" parent="hr_recruitment.menu_hr_recruitment_root" sequence="100"/>
+
+    <record id="requisition_application_tree" model="ir.ui.view">
+        <field name="name">advertisement.tree</field>
+        <field name="model">hr.requisition.application</field>
+        <field name ="arch" type="xml">
+            <tree string="Advertisement">
+                <field name="name"/>
+                <field name="advertisement_number"/>
+                <field name="advertisement_dated"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="hr_recruitment_stage_form_inherit_stpi" model="ir.ui.view">
+        <field name="name">hr.recruitment.stage.form.inherit_stpi</field>
+        <field name="model">hr.recruitment.stage</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_recruitment_stage_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='job_id']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_open': True, 'no_create_edit': True}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='template_id']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_open': True, 'no_create_edit': True}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="mail_activity_type_view_form_inherit_stpi" model="ir.ui.view">
+        <field name="name">mail.activity.type.view.form.inherit_stpi</field>
+        <field name="model">mail.activity.type</field>
+        <field name="inherit_id" ref="mail.mail_activity_type_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='res_model_id']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_open': True, 'no_create_edit': True}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='default_next_type_id']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_open': True, 'no_create_edit': True}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='next_type_ids']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_open': True, 'no_create_edit': True}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='mail_template_ids']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_open': True, 'no_create_edit': True}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+     <record id="view_department_form_inherit_stpi" model="ir.ui.view">
+        <field name="name">view.department.form.inherit_stpi</field>
+        <field name="model">hr.department</field>
+        <field name="inherit_id" ref="hr.view_department_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='parent_id']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_open': True, 'no_create_edit': True}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='manager_id']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_open': True, 'no_create_edit': True}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_recruitment_source_tree_inherit_stpi" model="ir.ui.view">
+        <field name="name">hr.recruitment.source.tree.inherit_stpi</field>
+        <field name="model">hr.recruitment.source</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_recruitment_source_tree" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='source_id']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_open': True, 'no_create_edit': True}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="requisition_application_form" model="ir.ui.view">
+        <field name="name">advertisement.form</field>
+        <field name="model">hr.requisition.application</field>
+        <field name ="arch" type="xml">
+            <form string="Advertisement">
+                <header>
+                    <button name="button_to_approve" string="Send for Approval" class="oe_highlight" type="object" states="draft" confirm="Are you sure to send for approval?" />
+                    <button name="button_reset_to_draft" string="Reset to draft" type="object" states="to_approve" groups="hr_recruitment.group_hr_recruitment_manager"/>
+                    <button name="button_active" string="Approve" class="oe_highlight" type="object" states="to_approve" groups="hr_recruitment.group_hr_recruitment_manager"/>
+                    <button name="button_reject" string="Reject" type="object" states="to_approve" groups="hr_recruitment.group_hr_recruitment_manager"/>
+                    <button name="action_publish_advertisement" string="Publish" type="object" states="active,unpublished" groups="hr_recruitment.group_hr_recruitment_manager"/>
+                    <button name="action_unpublish_advertisement" string="Unpublish" type="object" states="published" groups="hr_recruitment.group_hr_recruitment_manager"/>
+                    <button name = "%(hr_update_advertisement_action_view)d" type = "action" string = "Update" context="{'default_advertisement_id': id}" attrs="{'invisible': [('state', '!=', 'active')]}"/>
+                    <button name = "%(jobrecruit_create_action_view)d" type = "action" string = "Get Job Opening" states="draft" class="oe_highlight" context="{'default_advertisement_id': id,'default_branch_id':branch_id}"/>
+                    <!--<button name="button_update" string="Update" type="object" states="active"/>-->
+                    <field name="state" widget="statusbar" statusbar_visible="draft,to_approve,active,published,unpublished" />
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Employment Notice Number" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="advertisement_number" attrs="{'readonly': [('state', '=', 'draft')]}"/>
+                            <field name="branch_id" attrs="{'readonly': [('state', '=','published')]}" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}"/>
+                            <field name="contact_employee" attrs="{'readonly': [('state', '=','published')]}" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}"/>
+                            <field name="advertisement_dated" attrs="{'readonly': [('state', '=','published')]}"/>
+                            <field name="upload_advertisement" attrs="{'readonly': [('state', '=', 'draft')]}"/>
+                        </group>
+                        <group>
+                            <field name="start_date" attrs="{'readonly': [('state', '=', 'published')],'required': [('state', '!=', 'draft')]}"/>
+                            <field name="last_date" attrs="{'readonly': [('state', '=', 'published')],'required': [('state', '=', 'active')]}"/>
+                            <field name="published_date" readonly="1" attrs="{'invisible':[('state','!=','active')]}"/>
+                            <field name="remarks" attrs="{'readonly': [('state', '=', 'published')]}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="job_position" string="Job Position" invisible="1">
+                            <field name = "job_position_ids" attrs="{'readonly': [('state', '!=', 'draft')],'required': [('state', '=', 'draft')]}" domain="['|', ('branch_id', '=', branch_id),('branch_id', '=', False)]"/>
+                        </page>
+                        <page name="allowed_categories" string="Allowed Categories" invisible="1">
+                            <field name="allowed_categories_ids">
+                                <tree editable="bottom" create="0">
+                                    <field name="allowed_category_id" invisible="1"/>
+                                    <field name="state" invisible="1"/>
+                                    <field name="job_id" readonly="1"/>
+                                    <field name="vacant_post" readonly="1"/>
+                                    <field name="scpercent" attrs="{'readonly': [('state', '!=', 'to_approve')]}"/>
+                                    <field name="generalpercent" attrs="{'readonly': [('state', '!=', 'to_approve')]}"/>
+                                    <field name="stpercent" attrs="{'readonly': [('state', '!=', 'to_approve')]}"/>
+                                    <field name="obcercent" attrs="{'readonly': [('state', '!=', 'to_approve')]}"/>
+                                    <field name="ebcpercent" attrs="{'readonly': [('state', '!=', 'to_approve')]}"/>
+                                    <field name="vhpercent" attrs="{'readonly': [('state', '!=', 'to_approve')]}"/>
+                                    <field name="hhpercent" attrs="{'readonly': [('state', '!=', 'to_approve')]}"/>
+                                    <field name="phpercent" attrs="{'readonly': [('state', '!=', 'to_approve')]}"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page name="advertisement_lines" string="Job Post">
+                            <field name="advertisement_line_ids" attrs="{'readonly': [('state', '!=', 'draft')]}">
+                                <tree editable="bottom">
+                                    <field name="allowed_category_id" invisible="1"/>
+                                    <field name="job_id" required="1" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}"/>
+                                    <field name="state" required="1" domain="[('country_id.name', '=', 'India')]" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}"/>
+                                    <field name="directorate_id" required="1" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}" />
+                                    <field name="branch_id" required="1" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}"/>
+                                    <field name="category_id" required="1" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}"/>
+                                    <field name="opening" required="1"/>
+                                    <!-- <field name="branch_id" /> -->
+                                    <field name="employee_type" required="1"/>
+                                    <field name="remarks" required="1"/>
+                                    <field name="sc" invisible="1"/>
+                                    <field name="st" invisible="1"/>
+                                    <field name="general" invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page name="advertisement_lines" string="Published Advertisements">
+                            <field name="published_advertisements" readonly="1">
+                                <tree>
+                                    <field name="job_id"/>
+                                    <field name="directorate_id" />
+                                    <field name="branch_id"/>
+                                    <field name="no_of_post"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page name="report_adv" string="Report Adv.">
+                            <field name="reportadv_line_ids">
+                                <tree editable="bottom">
+                                    <field name="allowed_category_id" invisible="1"/>
+                                    <field name="publication_name" required="1"/>
+                                    <field name="published_date" required="1"/>
+                                    <field name="language" required="1"/>
+                                    <field name="attachment" required="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="requisition_application_action" model="ir.actions.act_window">
+        <field name="name">Advertisement</field>
+        <field name="res_model">hr.requisition.application</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!--=====Sequence of HR Employee Advertisement=====-->
+    <record id="seq_hr_requisition_application" model="ir.sequence">
+        <field name="name">Advertisement sequence</field>
+        <field name="code">hr.requisition.application</field>
+        <field name="padding">3</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- <menuitem id="menu_application_requisition" name="Advertisement " parent="hr_employee_requisition.menu_hr_requisition_job" groups="hr.group_hr_user,hr.group_hr_manager" sequence="100" /> -->
+
+    <!-- <menuitem id="menu_application_requisition_adv" name="Advertisement " parent="menu_application_requisition" action="requisition_application_action" /> -->
+    <menuitem id="menu_recruitment_advertisement" name="Advertisement" parent="hr_recruitment.menu_hr_recruitment_root" action="requisition_application_action" sequence="3"/>
+
+    <record id="requisition_applicatio_line_tree" model="ir.ui.view">
+        <field name="name">advertisement.line.tree</field>
+        <field name="model">advertisement.line</field>
+        <field name ="arch" type="xml">
+            <tree string="Advertisement">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="requisition_applicatio_line_action" model="ir.actions.act_window">
+        <field name="name">Advertisement line</field>
+        <field name="res_model">advertisement.line</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

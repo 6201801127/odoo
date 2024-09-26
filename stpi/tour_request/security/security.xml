@@ -1,0 +1,137 @@
+<odoo>
+    <record model="ir.module.category" id="module_tour_request_employee">
+        <field name="name">Tour Request</field>
+        <field name="description">Help You For Tour Request</field>
+        <field name="sequence">21</field>
+    </record>
+
+    <record id="group_tour_request_approvere" model="res.groups">
+        <field name="name">Tour Request Approver</field>
+        <field name="stpi">1</field>
+        <field name="category_id" ref="module_tour_request_employee"/>
+    </record>
+
+    <record model="ir.module.category" id="module_tour_request_user">
+        <field name="name">Travel and Tour</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="group_tour_claim_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="stpi">1</field>
+        <field name="category_id" ref="module_tour_request_user"/>
+    </record>
+
+    <record model="ir.module.category" id="module_tour_claim_employee">
+        <field name="name">Tour Claim</field>
+        <field name="description">Help You For Tour Claim</field>
+        <field name="sequence">22</field>
+    </record>
+
+     <record id="group_tour_claim_finance" model="res.groups">
+        <field name="name">Tour Claim Finance</field>
+        <field name="stpi">1</field>
+        <field name="category_id" ref="module_tour_claim_employee"/>
+    </record>
+
+    <record id="tour_branch_record_rule" model="ir.rule">
+        <field name="name">Tour Request Branch</field>
+        <field name="model_id" ref="tour_request.model_tour_request"/>
+        <field name="domain_force">['|', ('branch_id','=',False), ('branch_id','in',[g.id for g in user.branch_ids])]</field>
+        <field name="global" eval="True"/>
+    </record>
+
+    <record id="tour_self_branch_record_rule" model="ir.rule">
+        <field name="name">Tour Request Self Branch</field>
+        <field name="model_id" ref="tour_request.model_tour_request"/>
+        <field name="domain_force">['|', ('branch_id','=',False), ('branch_id','in',[g.id for g in user.branch_ids])]</field>
+        <field name="groups" eval="[(4, ref('tour_request.group_tour_request_approvere'))]"/>
+        
+    </record>
+
+    <record id="tour_request_own_record_rule" model="ir.rule">
+        <field name="name">Tour Request Own</field>
+        <field name="model_id" ref="tour_request.model_tour_request"/>
+        <field name="domain_force">['|',('state','=','waiting_for_approval'),('employee_id.parent_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('tour_request.group_tour_request_approvere'))]"/>
+    </record>
+
+    <record id="tour_claim_finance_approve_record_rule" model="ir.rule">
+        <field name="name">Tour Claim finance approver access</field>
+        <field name="model_id" ref="tour_request.model_tour_request"/>
+        <field name="domain_force">['|', ('branch_id','=',False), ('branch_id','in',[g.id for g in user.branch_ids])]</field>
+        <field name="groups" eval="[(4, ref('tour_request.group_tour_claim_finance'))]"/>
+    </record>
+
+    <record id="tour_self_tour_only_record_rule" model="ir.rule">
+        <field name="name">Self Tour Request Only</field>
+        <field name="model_id" ref="tour_request.model_tour_request"/>
+        <field name="domain_force">[('create_uid','=',user.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+
+
+
+    <record id="group_tour_claim_approvere" model="res.groups">
+        <field name="name">Tour Claim Approver</field>
+        <field name="stpi">1</field>
+        <field name="category_id" ref="module_tour_claim_employee"/>
+    </record>
+
+    <record id="tour_claim_approver_record_rule" model="ir.rule">
+        <field name="name">Tour Claim approver access</field>
+        <field name="model_id" ref="tour_request.model_tour_request"/>
+        <field name="domain_force">['|', ('branch_id','=',False), ('branch_id','in',[g.id for g in user.branch_ids])]</field>
+        <field name="groups" eval="[(4, ref('tour_request.group_tour_claim_approvere'))]"/>
+    </record>
+
+        <record id="tour_claim_rule_branch" model="ir.rule">
+            <field name="name">Tour Claim Branch</field>
+            <field name="model_id" ref="tour_request.model_employee_tour_claim"/>
+            <field name="domain_force">['|', ('branch_id','=',False), ('branch_id','in',[g.id for g in user.branch_ids])]</field>
+            <field name="global" eval="True"/>
+        </record>
+
+        <record id="tour_claim_rule_self_branch" model="ir.rule">
+            <field name="name">Tour Claim Self Branch</field>
+            <field name="model_id" ref="tour_request.model_employee_tour_claim"/>
+            <field name="domain_force">['|', ('branch_id','=',False), ('branch_id','in',[g.id for g in user.branch_ids])]</field>
+            <field name="groups" eval="[(4, ref('tour_request.group_tour_claim_approvere'))]"/>
+        </record>
+
+
+        <record id="tour_claim_rule" model="ir.rule">
+            <field name="name">Tour Claim Own</field>
+            <field name="model_id" ref="tour_request.model_employee_tour_claim"/>
+            <field name="domain_force">['|',('state','=','submitted'),('employee_id.parent_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('tour_request.group_tour_claim_approvere'))]"/>
+        </record>
+
+
+    <record id="tour_claim_manager_record_rule" model="ir.rule">
+        <field name="name">Tour Claim manager approver access</field>
+        <field name="model_id" ref="tour_request.model_employee_tour_claim"/>
+        <field name="domain_force">['|', ('branch_id','=',False), ('branch_id','in',[g.id for g in user.branch_ids])]</field>
+        <field name="groups" eval="[(4, ref('tour_request.group_tour_claim_finance'))]"/>
+    </record>
+
+    <record id="tour_self_tour_claim_only_record_rule" model="ir.rule">
+        <field name="name">Self Tour Claim Only</field>
+        <field name="model_id" ref="tour_request.model_employee_tour_claim"/>
+        <field name="domain_force">[('create_uid','=',user.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="groups_inherit.group_employee_type_regular" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('tour_request.group_tour_claim_user')),(3, ref('tour_request.group_tour_request_approvere')),(3, ref('tour_request.group_tour_claim_approvere'))]"/>
+    </record>
+
+    <record id="groups_inherit.group_employee_type_contractual_with_stpi" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('tour_request.group_tour_claim_user')),(3, ref('tour_request.group_tour_request_approvere')),(3, ref('tour_request.group_tour_claim_approvere'))]"/>
+    </record>
+
+    <record id="groups_inherit.group_employee_type_contractual_with_agency" model="res.groups">
+        <field name="implied_ids" eval="[(3, ref('tour_request.group_tour_claim_user')),(3, ref('tour_request.group_tour_request_approvere')),(3, ref('tour_request.group_tour_claim_approvere'))]"/>
+    </record>
+</odoo>

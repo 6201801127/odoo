@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="tour_cancel_form_view" model="ir.ui.view">
+            <field name="name">employee.tour.cancel.form</field>
+            <field name="model">employee.tour.cancel</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="button_submit" string="Submit" class="oe_highlight" type="object" states="draft"/>
+                        <button name="button_approved" string="Forward" class="oe_highlight" type="object" states="submitted" groups="tour_request.group_tour_cancel_approvere"/>
+                        <button name="button_reset_to_draft" string="Send Back" type="object" states="submitted"/>
+                        <button name="button_reject" string="Reject" type="object" states="submitted"/>
+                        <button name="button_pay" string="Pay" type="object" class="oe_highlight" states="approved" groups="tour_request.group_tour_cancel_finance"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved" />
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="employee_id" readonly="1" options="{'no_open':True}"/>
+                                <field name="branch_id" readonly="1" string="Center" options="{'no_open':True}"/>
+                                <field name="designation" readonly="1" options="{'no_open':True}"/>
+                            </group>
+                            <group>
+                                <field name="department" readonly="1" options="{'no_open':True}"/>
+                                <field name="tour_request_id" required="1" domain="[('state','=','approved'),('employee_id','=',employee_id),('claimed','=',False)]" attrs="{'readonly':[('state','!=','draft')]}" options="{'no_open':True}"/>
+                            </group>
+                        </group>
+
+                        <notebook>
+                            <page name="detailofjourney" string="Detail of journey">
+                                <separator string="Details of Journey"/>
+                                <field name="detail_of_journey" attrs="{'readonly':[('state','not in',('draft', 'rejected'))]}">
+                                    <tree editable="bottom" create="0">
+                                        <field name="employee_journey" invisible="1"/>
+                                        <field name="from_l" readonly="1"  force_save="1"/>
+                                        <field name="departure_date" readonly="1"  force_save="1"/>
+                                        <field name='departure_time' readonly="1" widget="float_time"  force_save="1"/>
+                                        <field name="to_l" readonly="1"  force_save="1"/>
+                                        <field name="arrival_date" readonly="1"  force_save="1"/>
+                                        <field name='arrival_time' readonly="1" widget="float_time"  force_save="1"/>
+                                        <field name='arranged_by' attrs="{'readonly':[('state','not in',('draft', 'rejected'))],'required':[('state','=','draft')]}"  force_save="1"/>
+                                        <field name="state" invisible="1"/>
+                                        <field name="amount_claimed" sum="Total Amount" attrs="{'required':[('arranged_by','=','self')],'invisible':[('arranged_by','!=','self')]}"  force_save="1"/>
+                                        <field name="distance" sum="Total Distance Covered" attrs="{'readonly':[('state','not in',('draft', 'rejected'))]}"  force_save="1"/>
+                                        <field name="document" filename="document_filename" attrs="{'readonly':[('state','not in',('draft', 'rejected'))]}"  force_save="1"/>
+                                        <field name="document_filename" invisible="1" />
+                                        <!-- <field name="approved_approved" sum="Total Amount Approved" attrs="{'invisible':[('state','in',('draft', 'rejected'))]}" groups="tour_request.group_tour_request_approvere"/>-->
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                        <group>
+                            <group>
+                                <field name="bank_document" filename="bank_document_filename"/>
+                                <field name="bank_document_filename" invisible="1"/>
+                                <field name="remarks" />
+                            </group>
+
+                            <group class="oe_subtotal_footer oe_right" colspan="2">
+                                <field name="advance_requested" widget="monetary" options="{'currency_field': 'currency_id'}" string="Advance Taken"/>
+                                <field name="amount_to_be_return" widget="monetary" options="{'currency_field': 'currency_id'}" />
+                                <field name="balance_left" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </group>
+                        </group>
+                    </sheet>
+
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!--===========Tree view of Tour cancel===========-->
+        <record id="tour_cancel_tree_view" model="ir.ui.view">
+            <field name="name">employee.tour.cancel.tree</field>
+            <field name="model">employee.tour.cancel</field>
+            <field name="arch" type="xml">
+                <tree string="Tour Cancel" default_order="create_date desc">
+                    <field name="employee_id"/>
+                    <field name="designation"/>
+                    <field name="department"/>
+                    <field name="branch_id" string="Center"/>
+                    <field name="state"/>
+                    <field name="__last_update"/>
+                    <field name="write_uid"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <!--Tour search view-->
+        <record id="view_tour_cancel_search_form" model="ir.ui.view">
+            <field name="name">employee.tour.cancel.search.form</field>
+            <field name="model">employee.tour.cancel</field>
+            <field name="arch" type="xml">
+                <search string="Tour Cancel">
+                    <filter string="My Tour Cancels" name="my_cancel" domain="[('employee_id.user_id.id', '=', uid)]" />
+                    <field name="employee_id" string="Employee"/>
+                    <field name="department" string="Department"/>
+                    <filter string="Employee" name="employee_id" context="{'group_by':'employee_id'}"/>
+                    <filter string="Department" name="department" context="{'group_by':'department'}"/>
+                    <filter string="Status" name="status" context="{'group_by':'state'}"/>
+                </search>
+            </field>
+        </record>
+
+        <!--===============Action view of Tour cancel===============-->
+        <record id="tour_cancel_menu_action" model="ir.actions.act_window">
+            <field name="name">Tour Cancel</field>
+            <field name="res_model">employee.tour.cancel</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,search</field>
+            <field name="context">{'search_default_status': 1,'create': False, 'delete': False}</field>
+            <field name="search_view_id" ref="view_tour_cancel_search_form"/>
+        </record>
+
+
+        <!--============Action view of employee.tour.cancel Draft============-->
+        <record id="tour_cancel_menu_action_draft" model="ir.actions.act_window">
+            <field name="name">Tour Cancel</field>
+            <field name="res_model">employee.tour.cancel</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_my_cancel': 1}</field>
+            <field name="search_view_id" ref="view_tour_cancel_search_form"/>
+            <!--<field name="search_view_id" ref="employee.tour.cancel_search_view"/>-->
+            <field name="domain">[('state','=','draft')]</field>
+        </record>
+        <!--============Action view of employee.tour.cancel Waiting============-->
+        <record id="tour_cancel_pending_action" model="ir.actions.act_window">
+            <field name="name">Tour Cancel</field>
+            <field name="res_model">employee.tour.cancel</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_tour_cancel_search_form"/>
+            <!--<field name="search_view_id" ref="employee.tour.cancel_search_view"/>-->
+            <field name="context">{'create': False, 'delete': False}</field>
+            <field name="domain">[('state','=','submitted')]</field>
+        </record>
+        <!--============Action view of employee.tour.cancel approved============-->
+        <record id="tour_cancel_approved_action" model="ir.actions.act_window">
+            <field name="name">Tour Cancel</field>
+            <field name="res_model">employee.tour.cancel</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_my_cancel': 1,'create': False, 'delete': False}</field>
+            <field name="search_view_id" ref="view_tour_cancel_search_form"/>
+            <!--<field name="search_view_id" ref="employee.tour.cancel_search_view"/>-->
+            <field name="domain">[('state','=','approved')]</field>
+        </record>
+
+        <!--============Action view of employee.tour.cancel approved============-->
+        <record id="tour_cancel_paid_action" model="ir.actions.act_window">
+            <field name="name">Tour Cancel</field>
+            <field name="res_model">employee.tour.cancel</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_my_cancel': 1,'create': False, 'delete': False}</field>
+            <field name="search_view_id" ref="view_tour_cancel_search_form"/>
+            <!--<field name="search_view_id" ref="employee.tour.cancel_search_view"/>-->
+            <field name="domain">[('state','=','paid')]</field>
+        </record>
+        <!--============Action view of employee.tour.cancel rejected============-->
+        <record id="tour_cancel_rejected_action" model="ir.actions.act_window">
+            <field name="name">Tour Cancel</field>
+            <field name="res_model">employee.tour.cancel</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_my_cancel': 1,'create': False, 'delete': False}</field>
+            <field name="search_view_id" ref="view_tour_cancel_search_form"/>
+            <field name="domain">[('state','=','rejected')]</field>
+        </record>
+
+        <menuitem id = "tour_request_cancel_id"
+                  name = "Tour Cancel" parent="tour_request_menu_hr_id" sequence="2" />
+                  
+        <menuitem id = "tour_cancel_menu_id_all"
+                    name = "All"
+                    action ="tour_cancel_menu_action" parent="tour_request_cancel_id" sequence="6" />
+
+        <menuitem id = "tour_cancel_new_menu_id_new"
+                    name = "New"
+                    parent ="tour_request_cancel_id"
+                    action ="tour_cancel_menu_action_draft" sequence="1" />
+
+        <menuitem id = "tour_cancel_pending_menu_id"
+                    name = "Pending Approvals"
+                    parent ="tour_request_cancel_id"
+                    action ="tour_cancel_pending_action"  sequence="2"/>
+        <menuitem id = "tour_cancel_approved_menu_id"
+                    name = "Approved"
+                    parent ="tour_request_cancel_id"
+                    action ="tour_cancel_approved_action"  sequence="3"/>
+        <menuitem id = "tour_cancel_paid_menu_id"
+                    name = "Paid"
+                    parent ="tour_request_cancel_id"
+                    action ="tour_cancel_paid_action"  sequence="4"/>
+
+        <menuitem id = "tour_cancel_rejected_menu_id"
+                    name = "Rejected"
+                    parent ="tour_request_cancel_id"
+                    action ="tour_cancel_rejected_action" sequence="5" />
+    </data>
+
+
+</odoo>

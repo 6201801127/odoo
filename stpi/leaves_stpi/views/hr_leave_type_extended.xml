@@ -1,0 +1,244 @@
+<odoo>
+
+    <record model="ir.ui.view" id="leave_type_tree_inherit">
+        <field name="name">hr.leave.type.inherit.tree</field>
+        <field name="model">hr.leave.type</field>
+        <field name="inherit_id" ref="hr_holidays.view_holiday_status_normal_tree"/>
+        <field name="arch" type="xml">
+    
+            <xpath expr="//tree/field[@name='display_name']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+            <xpath expr="//tree/field[@name='allocation_type']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+            <xpath expr="//tree/field[@name='validation_type']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+            <xpath expr="//tree/field[@name='double_validation']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+            <xpath expr="//tree/field[@name='validity_start']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+            <xpath expr="//tree/field[@name='validity_stop']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        
+            <xpath expr="//tree/field[@name='allocation_type']" position="after">
+                <field name="leave_type" string="Leave Type"/>
+                <field name="leave_per_year"/>
+                <field name="allow_service_leave" widget="many2many_tags"/>
+                <field name="use_balance_from_id" invisible="1"/>
+                <field name="allow_emp_stage" widget="many2many_tags"/>
+                <field name="gende" string="Gender"/>
+                
+            </xpath>
+            
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="leave_type_form_inherit">
+        <field name="name">hr.leave.type.inherit</field>
+        <field name="model">hr.leave.type</field>
+        <field name="inherit_id" ref="hr_holidays.edit_holiday_status_form"/>
+        <field name="arch" type="xml">
+        
+            <xpath expr="//form/sheet/div/button[@name='toggle_active']" position="replace">
+                <button class="oe_stat_button" type="object" name="toggle_active" 
+                    confirm="Do you want to Archive" icon="fa-archive">
+                        <field name="active" widget="boolean_button"
+                        options='{"terminology": "archive"}'/>
+                    </button>
+            </xpath>
+        
+            <xpath expr="//form//sheet" position="before">
+                <header>
+                    <button name="button_allocate_leaves" string="Allocate Leaves" type="object"/>
+                    <button name="button_expried_leaves" string="Expire Leaves" type="object"/>
+                    <!-- <button name="button_mid_year_leave_allocate" string="Mid Year Allocate Leaves" type="object"/> -->
+                </header>
+            </xpath>
+        
+            <xpath expr="//form/sheet/div/h1/field[@name='name']" position="after">
+                <field name="leave_type" string="Leave Type"  options="{'no_open': True}"/>
+            </xpath>
+            
+            <xpath expr="//form/sheet/div/h1/field[@name='name']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+            <xpath expr="//form/sheet/group/group[@name='description']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+            <xpath expr="//form/sheet/group/group[@name='validation']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+            <xpath expr="//form/sheet/group/group[@name='visibility']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+            <xpath expr="//form/sheet/group/group[@name='validity']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+            <xpath expr="//form/sheet/group/group[@name='calendar']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+            <xpath expr="//form/sheet/div/button[@name='action_see_days_allocated']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+            <xpath expr="//form/sheet/div/button[@name='action_see_group_leaves']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+            <xpath expr="//form/sheet/group" position="after">
+                <group>
+                    <group>
+                        <field name="allocation_type_allow"/>
+                        <field name="allow_service_leave" options="{'no_open': True, 'no_create_edit': True}" widget="many2many_tags"/>
+                        <field name="allow_emp_stage" options="{'no_open': True, 'no_create_edit': True}" widget="many2many_tags"/>
+                        <field name="gende"/>
+                        <field name="allowed_prefix_leave" widget="many2many_tags" invisible='0'/>
+                        <field name="leave_month" attrs="{'invisible': [('carried_forward','=',True)]}"/>
+                        <field name="maximum_allow_leave"/>
+                        <field name="minimum_allow_leave"/>
+                        <field name="max_encash_leave"/>
+                    </group>
+                    <group>
+                        <field name="leave_per_year"/>
+                        <field name="mid_year_factor"/>
+                        <field name="carried_forward"/>
+                        <field name="encash_leave"/>
+                        <field name="cerificate"/>
+                        <field name="commuted"/>
+                        <field name="sandwich_rule"/>
+                        <field name="half_pay_allowed"/>
+                        <field name="is_ltc"/>
+                        <field name="use_balance_from_id" invisible="1"/>
+                        <field name="group_id" invisible="1"/>
+                    </group>
+                </group>
+                <notebook>
+                    <page string="Credit Policy">
+                        <field name="creadit_policy_id">
+                            <tree editable="bottom">
+                                <field name="day"/>
+                                <field name="month"/>
+                                <field name="no_pf_leaves_credit"/>
+                            </tree>
+                        </field>
+                        <group class="oe_subtotal_footer oe_right">
+                            <field name="amount_total" class="oe_subtotal_footer_separator"/>
+                        </group>
+                    </page>
+                </notebook>
+            </xpath>
+        </field>
+    </record>
+    
+    <record id="button_allocate_leave_action" model="ir.actions.server">
+        <field name="name">Process Allocate Leaves</field>
+        <field name="model_id" ref="leaves_stpi.model_hr_leave_type"/>
+        <field name="binding_model_id" ref="leaves_stpi.model_hr_leave_type"/>
+        <field name="state">code</field>
+        <field name="code">records.button_allocate_leaves()</field>
+    </record>
+    
+    <record id="button_expried_leave_action" model="ir.actions.server">
+        <field name="name">Process Exprie Leaves</field>
+        <field name="model_id" ref="leaves_stpi.model_hr_leave_type"/>
+        <field name="binding_model_id" ref="leaves_stpi.model_hr_leave_type"/>
+        <field name="state">code</field>
+        <field name="code">records.button_expried_leaves()</field>
+    </record>
+
+    <record model="ir.ui.view" id="leave_group_form">
+        <field name="name">hr.leave.group.form</field>
+        <field name="model">hr.leave.group</field>
+        <field name="arch" type="xml">
+            <form string="Leave Group">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <record model="ir.ui.view" id="hr_leave_group_tree_view">
+        <field name="name">hr.leave.group.tree.view</field>
+        <field name="model">hr.leave.group</field>
+        <field name="arch" type="xml">
+            <tree string="Leave Group">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+    
+    <record id="hr_leave_group_action" model="ir.actions.act_window">
+        <field name="name">Leave Group</field>
+        <field name="res_model">hr.leave.group</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+
+    <record model="ir.ui.view" id="leave_master_form">
+        <field name="name">leave.type.master.form</field>
+        <field name="model">leave.type.master</field>
+        <field name="arch" type="xml">
+            <form string="Leave Master">
+                <sheet>
+                    <group>
+                        <field name="name" required="1"/>
+                        <field name="code" required="1"/>
+                    </group>
+                    <group>
+                        <group>
+                            <p class="text-danger">
+                            The "Code" field is for developer reference only.
+                            Changing value of this could affect the module functionality.
+                            </p>
+                        </group>
+                        <group/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <record model="ir.ui.view" id="hr_leave_master_tree_view">
+        <field name="name">leave.type.master.tree.view</field>
+        <field name="model">leave.type.master</field>
+        <field name="arch" type="xml">
+            <tree string="Leave Master">
+                <field name="name" />
+                <field name="code"/>
+            </tree>
+        </field>
+    </record>
+    
+    <record id="leave_type_master_action" model="ir.actions.act_window">
+        <field name="name">Leave Master</field>
+        <field name="res_model">leave.type.master</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="hr_holidays_leave_type_master_menu_configuration" action="leave_type_master_action" name="Leave Types Master" parent="hr_holidays.menu_hr_holidays_configuration" sequence="5" />
+
+        
+
+</odoo>

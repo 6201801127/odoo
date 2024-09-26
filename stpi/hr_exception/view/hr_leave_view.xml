@@ -1,0 +1,75 @@
+<?xml version="1.0" ?>
+<odoo>
+    <record id="action_hr_leave_test_tree" model="ir.actions.act_window">
+                  <field name="name">Hr Leave Rules</field>
+                  <field name="res_model">exception.rule</field>
+                  <field name="view_type">form</field>
+                  <field name="view_mode">tree,form</field>
+                  <field name="view_id" ref="base_exception_and_approval.view_exception_rule_tree"/>
+                  <field name="domain">[('rule_group', '=', 'hr_leave')]</field>
+                  <field name="context">{'active_test': False, 'default_rule_group' : 'hr_leave'}</field>
+              </record>
+        <menuitem
+                id="menu_hr_leave_parent"
+                parent="hr_holidays.menu_hr_holidays_configuration"
+                sequence="20"
+                name="Exceptions"
+        />
+        <menuitem
+                action="action_hr_leave_test_tree"
+                id="menu_hr_leave_test"
+                parent="menu_hr_leave_parent"
+        />
+
+        <record id="view_hr_leave_exp_form" model="ir.ui.view">
+                <field name="name">hr_leave.view_hr_leave_exp_form</field>
+                <field name="model">hr.leave</field>
+                <field name="inherit_id" ref="hr_holidays.hr_leave_view_form"/>
+                <field name="arch" type="xml">
+                   <xpath expr="//field[@name='leave_type_request_unit']" position="before">
+                        <group>
+                            <h5>
+                                <field name="main_exception_id" options='{"no_open": True}'
+                                class="oe_inline" string="Error:"
+                                attrs="{'invisible':[('main_exception_id','=', False)]}"/>
+                            </h5>
+                        </group>
+
+                   </xpath>
+                    <xpath expr="//field[@name='number_of_days_display']" position="after">
+                        <field name="ignore_exception" invisible="1"/>
+                    </xpath>
+                    <xpath expr="//sheet" position="inside">
+                        <newline />
+                        <group name="exception" colspan="2" col="2" groups="base.group_no_one">
+                            <separator string="Exception" colspan="2"/>
+                            <field name="exception_ids" colspan="2" nolabel="1" readonly="1"/>
+                        </group>
+                    </xpath>
+    
+                </field>
+        </record>
+
+        <record id="view_hr_leave_exp_tree" model="ir.ui.view">
+            <field name="name">hr_leave.view_hr_leave_exp_tree</field>
+            <field name="model">hr.leave</field>
+            <field name="inherit_id" ref="hr_holidays.hr_leave_view_tree_my"/>
+            <field name="arch" type="xml">
+                 <field name="state" position="before">
+                       <!-- <field name="main_exception_id"/> -->
+                 </field>
+            </field>
+        </record>
+
+        <record id="view_hr_leave_exp_filter" model="ir.ui.view">
+            <field name="name">hr_exception.view_hr_leave_exp_filter</field>
+            <field name="model">hr.leave</field>
+            <field name="inherit_id" ref="hr_holidays.view_hr_holidays_filter"/>
+            <field name="arch" type="xml">
+                <filter name="activities_upcoming_all" position="after">
+                    <!-- <separator orientation="vertical"/>
+                    <filter icon="terp-emblem-important" name="tofix" string="Blocked in draft" domain="[('main_exception_id','!=',False)]"/> -->
+                </filter>
+            </field>
+        </record>
+</odoo>

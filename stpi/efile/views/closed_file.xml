@@ -1,0 +1,98 @@
+<odoo>
+        <!-- ======Form View of master of Folder model====== -->
+        <record id="foldermaster_form_view" model="ir.ui.view">
+            <field name="name">folder.master.form</field>
+            <field name="model">folder.master</field>
+            <field name="arch" type="xml">
+                <form string="File">
+                    <header>
+                        <button name="button_submit" string="Submit" class="oe_highlight" type="object" states="draft"/>
+                        <button name="button_close" string="Approve" class="oe_highlight" type="object" states="in_progress"/>
+                        <button name="button_reset_to_draft" string="Reset to Draft" class="oe_highlight" type="object" states="in_progress"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,closed" />
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name = "%(folder_forward_button_wizard_action_view)d" type = "action" string = "Forward" icon = "fa-forward" context = "{'default_defid': id}"/>
+                            <button name="deal_with_file" string="Deal with File" type="object" icon="fa-pencil-square-o"/>
+                        </div>
+                        <group>
+                            <group>
+
+                                <field name="folder_name" required ="1" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                                <field name="subject" required="1" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                                <field name="date" readonly="1"/>
+                                <field name="tags" widget="many2many_tags" placeholder="Tags..." options="{'color_field': 'color', 'no_create_edit': True}" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+
+                            </group>
+                            <group>
+                                <field name="write_date"/>
+                                <field name="sequence" invisible="1"/>
+                                <field name="iframe_dashboard" invisible="1"/>
+                                <field name="number" readonly="1"/>
+                                <field name="old_file_number" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                                <field name="type" widget="many2many_tags" placeholder="Type..." options="{'color_field': 'color'}" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                                <field name="status"/>
+                                <field name="first_doc_id" invisible="1"/>
+                            </group>
+                            <field name="description" placeholder="Description" attrs="{'readonly':[('state','!=', 'draft')]}"/>
+                        </group>
+                        <notebook>
+                            <page name = "Letters" string = "Letters">
+                                <field name="file_ids" readonly="1"/>
+                            </page>
+                            <page name="File Tracking Information">
+                                <field name="folder_track_ids" readonly="1">
+                                    <tree editable="bottom">
+                                        <field name="create_let_id" invisible="1"/>
+                                        <field name="forwarded_by"/>
+                                        <field name="forwarded_date"/>
+                                        <field name="forwarded_to_user"/>
+                                        <field name="job_pos"/>
+                                        <field name="remarks"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+     <!-- ======Tree View of master of Folder model====== -->
+     <record id="foldermaster_tree_view1" model="ir.ui.view">
+            <field name="name">folder.master.tree</field>
+            <field name="model">folder.master</field>
+            <field name="arch" type="xml">
+                <tree string="Folder">
+                    <field name="folder_name"/>
+                    <field name="date"/>
+                    <field name="tags"/>
+                    <field name="write_date"/>
+                    <field name="state"/>
+                    <button name="deal_with_file" string="Deal with File" type="object"/>
+                </tree>
+            </field>
+     </record>
+
+     <!-- ==========Action View of master of Folder model=========== -->
+     <record id="foldermaster_closed_action_view" model="ir.actions.act_window">
+         <field name="name">Files</field>
+         <field name="type">ir.actions.act_window</field>
+         <field name="res_model">folder.master</field>
+         <field name="view_type">form</field>
+         <field name="view_mode">tree,form</field>
+         <field name="domain">[('state','=','closed'),('current_owner_id.id', '=', uid)]</field>
+    </record>
+
+        <menuitem id="menuitem_files_closed_add_fol"
+                  parent="menuitem_files_fol"
+                  action="foldermaster_closed_action_view"
+                  name="Closed Files"/>
+
+</odoo>

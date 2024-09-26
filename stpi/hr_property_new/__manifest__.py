@@ -1,0 +1,26 @@
+# -*- coding: utf-8 -*-
+{
+	'name': 'HR - Property - STPI',
+	'version': '12.0.1.0.0',
+	'summary': 'HR - Property - STPI',
+	'category': 'Tools',
+	'author': 'Dexciss Technologies Pvt Ltd(@ RGupta)',
+	'maintainer': 'dexciss Techno Solutions',
+	'company': 'dexciss Techno Solutions',
+	'website': 'https://www.dexciss.com',
+	'depends': ['base','hr'],
+	'data': [
+		'security/security.xml',
+		'security/ir.model.access.csv',
+        'views/hr_property_form_1.xml',
+		'views/hr_property_form_2.xml',
+		'views/modifications_immovable.xml',
+		'views/modifications_movable.xml',
+		'views/declaration_form.xml',
+	],
+	'images': [],
+	'license': 'AGPL-3',
+	'installable': True,
+	'application': False,
+	'auto_install': False,
+}

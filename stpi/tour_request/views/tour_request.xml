@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <!--=======Tree view of Employee Tour Request=======-->
+    <record id="tour_request_tree_view" model="ir.ui.view">
+        <field name="name">tour.request.tree</field>
+        <field name="model">tour.request</field>
+        <field name="arch" type="xml">
+            <tree string="Tour Request" default_order="create_date desc">
+                 <field name="tour_sequence"/>
+                 <field name="employee_id"/>
+                <field name="designation"/>
+                <field name="department"/>
+                <field name="branch_id" string="Center"/>
+                <field name="state"/>
+                <field name="__last_update"/>
+                <field name="write_uid"/>
+            </tree>
+        </field>
+    </record>
+
+    <!--=======Form view of Employee Tour Request=======-->
+    <record id="tour_request_form_view" model="ir.ui.view">
+        <field name="name">tour.request.form</field>
+        <field name="model">tour.request</field>
+        <field name="arch" type="xml">
+            <form string="Tour Request">
+                <header>
+                    <button name="button_to_approve" string="Send for Approval" class="oe_highlight" type="object" states="draft"/>
+                     <button name="button_reset_to_draft" string="Cancel" type="object"/>
+                     <button name="button_reschedule" string="Send Back" type="object" states="waiting_for_approval"/>
+<!--                    <button name="button_forwarded" string="Forward" class="oe_highlight" type="object" states="waiting_for_approval" groups="tour_request.group_employee_manager"/>-->
+                    <button name="button_approved" string="Forward" class="oe_highlight" type="object" states="waiting_for_approval" groups="tour_request.group_tour_request_approvere"/>
+<!--                    <button name="button_processed" string="Process" class="oe_highlight" type="object" states="approved" groups="tour_request.group_travel_processor"/>-->
+                    <button name="button_reject" string="Reject" type="object"  states="waiting_for_approval" groups="tour_request.group_tour_request_approvere"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,waiting_for_approval,approved" />
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="employee_id" required="1" readonly="1" options="{'no_open':True}"/>
+                            <field name="date" readonly="1"/>
+                            <field name="designation" readonly="1" options="{'no_open':True}"/>
+                            <field name="branch_id" readonly="1" string="Center" options="{'no_open':True}"/>
+                        </group>
+                        <group>
+                            <field name="department" readonly="1" options="{'no_open':True}"/>
+                            <field name="purpose" attrs="{'readonly':[('state','!=','draft')], 'required':[('state','=','draft')]}"/>
+                            <field name="advance_requested" attrs="{'readonly':[('state','!=','draft')]}" widget="monetary"/>
+                            <field name="claimed" invisible="1"/>
+
+                        </group>
+                     </group>
+                    <notebook>
+                        <page name="journey_details" string="Journey Details">
+                            <field name="employee_journey" attrs="{'readonly':[('state','!=','draft')]}">
+                                <tree editable="bottom">
+                                    <field name="from_l"/>
+                                    <field name="departure_date"/>
+                                    <field name="departure_time"/>
+                                    <field name="to_l"/>
+                                    <field name="travel_mode"/>
+                                    <field name="arrival_date"/>
+                                    <field name="arrival_time"/>
+                                    <field name="mode_detail"/>
+                                    <field name="travel_entitled" readonly="True"/>
+                                    <field name="exceptional_reason" attrs="{'readonly': [('travel_entitled','=',True)], 'required': [('travel_entitled','!=',True)]}" />
+                                    <field name="boarding"/>
+                                    <field name="lodging"/>
+                                    <field name="conveyance"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                    <group>
+                        <group>
+                            <field name="vehicle_required" widget="radio"/>
+                        </group>
+                        <group>
+                            <field name="vehicle_address" attrs="{'invisible':[('vehicle_required','!=','yes')], 'required':[('vehicle_required','=','yes')]}"/>
+                            <field name="vehicle_phone" attrs="{'invisible':[('vehicle_required','!=','yes')], 'required':[('vehicle_required','=','yes')]}"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="vehicle_date_from" attrs="{'invisible':[('vehicle_required','!=','yes')], 'required':[('vehicle_required','=','yes')]}"/>
+                            <field name="vehicle_day1" attrs="{'invisible':[('vehicle_required','!=','yes')], 'required':[('vehicle_required','=','yes')]}" widget="radio" options="{'horizontal': True}"/>
+                        </group>
+                        <group>
+                            <field name="vehicle_date_to" attrs="{'invisible':[('vehicle_required','!=','yes')], 'required':[('vehicle_required','=','yes')]}"/>
+                            <field name="vehicle_day2" attrs="{'invisible':[('vehicle_required','!=','yes')], 'required':[('vehicle_required','=','yes')]}" widget="radio" string='Day:' options="{'horizontal': True}"/>
+                        </group>
+                        <field name="vehicle_remarks" attrs="{'invisible':[('vehicle_required','!=','yes')], 'required':[('vehicle_required','=','yes')]}" placeholder="Remarks ..."/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+            </form>
+        </field>
+    </record>
+    
+        <!--Tour search view-->
+    <record id="view_tour_request_search_form" model="ir.ui.view">
+        <field name="name">tour.request.search.form</field>
+        <field name="model">tour.request</field>
+        <field name="arch" type="xml">
+           <search string="Tour Request">
+               <filter string="My Tour Requests" name="my_tour" domain="[('employee_id.user_id.id', '=', uid)]" />
+                <field name="employee_id" string="Employee"/>
+                <field name="department" string="Department"/>
+                    <filter string="Employee" name="employee_id" context="{'group_by':'employee_id'}"/>
+                    <filter string="Department" name="department" context="{'group_by':'department'}"/>
+                    <filter string="Status" name="status" context="{'group_by':'state'}"/>
+            </search>
+        </field>
+    </record>
+
+
+     <!--=====Sequence of Employee Tour Request=====-->
+     <record id="seq_ltc_sequence" model="ir.sequence">
+        <field name="name">Tour Request sequence</field>
+        <field name="code">tour.request</field>
+        <field name="padding">3</field>
+        <field name="company_id" eval="False"/>
+     </record>
+
+
+    <!--============Action view of Employee Tour Request============-->
+    <record id="tour_request_menu_action" model="ir.actions.act_window">
+        <field name="name">Tour Request</field>
+        <field name="res_model">tour.request</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form,search</field>
+        <field name="context">{'create': False, 'delete': False}</field>
+    </record>
+    <!--============Action view of tour.request Draft============-->
+    <record id="tour_request_menu_action_draft" model="ir.actions.act_window">
+        <field name="name">Tour Requests</field>
+        <field name="res_model">tour.request</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_my_tour': 1}</field>
+        <field name="search_view_id" ref="view_tour_request_search_form"/>
+        <field name="domain">[('state','=','draft')]</field>
+    </record>
+    <!--============Action view of tour.request Waiting============-->
+    <record id="tour_request_pending_action" model="ir.actions.act_window">
+        <field name="name">Tour Requests</field>
+        <field name="res_model">tour.request</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_tour_request_search_form"/>
+        <field name="context">{'create': False, 'delete': False}</field>
+        <field name="domain">[('state','=','waiting_for_approval')]</field>
+    </record>
+    <!--============Action view of tour.request approved============-->
+    <record id="tour_request_approved_action" model="ir.actions.act_window">
+        <field name="name">Tour Requests</field>
+        <field name="res_model">tour.request</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_my_tour': 1,'create': False, 'delete': False}</field>
+        <field name="search_view_id" ref="view_tour_request_search_form"/>
+        <!--<field name="search_view_id" ref="tour.request_search_view"/>-->
+        <field name="domain">[('state','=','approved')]</field>
+    </record>
+    <!--============Action view of tour.request rejected============-->
+    <record id="tour_request_rejected_action" model="ir.actions.act_window">
+        <field name="name">Tour Requests</field>
+        <field name="res_model">tour.request</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_my_tour': 1,'create': False, 'delete': False}</field>
+        <field name="search_view_id" ref="view_tour_request_search_form"/>
+        <!--<field name="search_view_id" ref="tour.request_search_view"/>-->
+        <field name="domain">[('state','=','rejected')]</field>
+    </record>
+
+
+    <!--Form view of Employee Tour Request Journey Details-->
+    <record id="tour_request_menu_form" model="ir.ui.view">
+        <field name="name">tour.request.journey.tree</field>
+        <field name="model">tour.request.journey</field>
+        <field name="arch" type="xml">
+            <tree string="LTC" editable="bottom">
+                 <field name="employee_id" invisible="1"/>
+                 <field name="tour_sequence" invisible="1"/>
+                <field name="from_l" required="1"/>
+                <field name="departure_date" required="1"/>
+                <field name='departure_time' widget='float_time'/>
+                <field name="to_l" required="1"/>
+                 <field name="travel_mode" required="1" widget="selection"/>
+                <field name="arrival_date" required="1"/>
+                <field name='arrival_time' widget='float_time' />
+                 <field name="mode_detail" required="1"/>
+                <field name="travel_entitled"/>
+                <field name="boarding"/>
+                <field name="lodging"/>
+                <field name="conveyance"/>
+            </tree>
+        </field>
+    </record>
+
+    <!--====Action view of Employee Tour Request Journey Details====-->
+    <record id="tour_request_journey_action" model="ir.actions.act_window">
+        <field name="name">Tour Request Journey</field>
+        <field name="res_model">tour.request.journey</field>
+        <field name="view_type">tree</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+
+<!--    &lt;!&ndash;===========Form view of Tour Claim===========&ndash;&gt;-->
+<!--    <record id="tour_claim_form_view" model="ir.ui.view">-->
+<!--        <field name="name">employee.tour.claim.form</field>-->
+<!--        <field name="model">employee.tour.claim</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <form string="LTC">-->
+<!--                <header>-->
+<!--                    <button name="button_submit" string="Submit" class="oe_highlight" type="object" states="draft"/>-->
+<!--                    <button name="button_approved" string="Approve" class="oe_highlight" type="object" states="submitted" groups="tour_request.group_tour_request_approvere"/>-->
+<!--                     <button name="button_reset_to_draft" string="Revert" type="object" states="submitted"/>-->
+<!--                    <button name="button_reject" string="Reject" type="object" states="submitted"/>-->
+<!--                    <button name="button_pay" string="Paid" type="object" class="oe_highlight" states="approved"/>-->
+<!--                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved" />-->
+<!--                </header>-->
+<!--                <sheet>-->
+<!--                    <group>-->
+<!--                        <group>-->
+<!--                            <field name="employee_id" readonly="1"/>-->
+<!--                            <field name="designation" readonly="1"/>-->
+
+<!--                        </group>-->
+<!--                        <group>-->
+<!--                            <field name="department" readonly="1"/>-->
+<!--                            <field name="tour_request_id"/>-->
+
+<!--                        </group>-->
+<!--                    </group>-->
+<!--                    <notebook>-->
+<!--                        <page name="detailofjourney" string="Detail of journey">-->
+<!--                            &lt;!&ndash;<button name="get_journey_details" string="Get Journey Details" class="oe_highlight" type="object" states="draft"/>&ndash;&gt;-->
+<!--                            <button type="object" name="get_journey_details" string="Get Tour Requests"  colspan="2" attrs="{'invisible':[('state','!=','draft')]}"-->
+<!--                            class="oe_stat_button"-->
+<!--                            icon="fa-clock-o"/>-->
+<!--                            <div class="oe_clear"/>-->
+<!--                            <br/>-->
+<!--                            <separator string="Details of Journey"/>-->
+<!--                            <field name="detail_of_journey">-->
+<!--                                    <tree editable="bottom" create="0">-->
+<!--                                        <field name="tour_sequence" readonly="1"/>-->
+<!--                                        <field name="employee_journey" invisible="1"/>-->
+<!--                                         <field name="from_l" readonly="1"/>-->
+<!--                                        <field name="departure_date" readonly="1"/>-->
+<!--                                        <field name='departure_time' readonly="1"/>-->
+<!--                                        <field name="to_l" readonly="1"/>-->
+<!--                                         <field name="travel_mode" readonly="1"/>-->
+<!--                                        <field name="arrival_date" readonly="1"/>-->
+<!--                                        <field name='arrival_time' readonly='1' />-->
+<!--                                         <field name="mode_detail" readonly="1"/>-->
+<!--                                        <field name="travel_entitled" readonly="1"/>-->
+<!--                                        <field name="boarding" readonly="1"/>-->
+<!--                                        <field name="lodging" readonly="1"/>-->
+<!--                                        <field name="conveyance" readonly="1"/>-->
+<!--&lt;!&ndash;                                        <field name="amount_claimed" sum="Total Amount" attrs="{'readonly':[('state','not in',('draft', 'rejected'))]}"/>&ndash;&gt;-->
+<!--                                        <field name="distance" sum="Total Distance Covered" attrs="{'readonly':[('state','not in',('draft', 'rejected'))]}"/>-->
+<!--&lt;!&ndash;                                        <field name="approved_approved" sum="Total Amount Approved" attrs="{'invisible':[('state','in',('draft', 'rejected'))]}" groups="tour_request.group_tour_request_approvere"/>&ndash;&gt;-->
+<!--                                        <field name="state" invisible="1"/>-->
+<!--                                    </tree>-->
+<!--                            </field>-->
+<!--                            <separator string="Date of absence from place to halt"/>-->
+<!--                            <field name="detail_of_journey_leave">-->
+<!--                                    <tree editable="bottom" create="0">-->
+<!--                                        <field name="tour_sequence" readonly="1"/>-->
+<!--                                        <field name="employee_journey" invisible="1"/>-->
+<!--                                        <field name="employee_id" invisible="1"/>-->
+<!--                                        <field name="departure_date" invisible="1"/>-->
+<!--                                        <field name="arrival_date" invisible="1"/>-->
+<!--                                        <field name="from_l" readonly="1"/>-->
+<!--                                        <field name="to_l" readonly="1"/>-->
+<!--                                        <field name="leave_taken"/>-->
+<!--                                        <field name="from_date_camp"/>-->
+<!--                                        <field name="to_date_camp"/>-->
+<!--                                        <field name="state" invisible="1"/>-->
+<!--                                    </tree>-->
+<!--                            </field>-->
+<!--&lt;!&ndash;                            <separator string="Date of absence from place to halt"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <group>&ndash;&gt;-->
+<!--&lt;!&ndash;                                <group>&ndash;&gt;-->
+<!--&lt;!&ndash;                                    <field name="leave_taken" domain="[('state','=','approved')]" attrs="{'readonly':[('state','not in',('draft', 'rejected'))],'required':[('state','=','draft')]}"/>&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                                    <field name="to_date_camp"/>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                                </group>&ndash;&gt;-->
+<!--&lt;!&ndash;                            </group>&ndash;&gt;-->
+<!--                            <separator string="Not being actually in camp on Sunday"/>-->
+<!--                            <group>-->
+<!--                                <group>-->
+<!--                                    <field name="from_date_camp" attrs="{'readonly':[('state','not in',('draft', 'rejected'))]}"/>-->
+<!--                                    <field name="to_date_camp" attrs="{'readonly':[('state','not in',('draft', 'rejected'))]}"/>-->
+<!--                                </group>-->
+<!--                            </group>-->
+<!--                            <separator string="Lodging and Boarding"/>-->
+<!--                            <field name="detail_of_journey_lodging">-->
+<!--                                    <tree editable="bottom" create="0">-->
+<!--                                        <field name="tour_sequence" readonly="1"/>-->
+<!--                                        <field name="employee_journey" invisible="1"/>-->
+<!--                                        <field name="arranged_by" attrs="{'readonly':[('state','not in',('draft', 'rejected'))],'required':[('state','=','draft')]}"/>-->
+<!--                                        <field name="from_date" attrs="{'readonly':[('state','not in',('draft', 'rejected'))],'required':[('state','=','draft')]}"/>-->
+<!--                                        <field name="to_date" attrs="{'readonly':[('state','not in',('draft', 'rejected'))],'required':[('state','=','draft')]}"/>-->
+<!--                                        <field name="no_of_days" readonly="1"/>-->
+<!--                                        <field name="name_of_hotel" attrs="{'readonly':[('state','not in',('draft', 'rejected'))]}"/>-->
+<!--                                        <field name="daily_lodging_charge" attrs="{'readonly':[('state','not in',('draft', 'rejected'))],'invisible':[('arranged_by','!=','self')]}"/>-->
+<!--                                        <field name="daily_boarding_charge" attrs="{'readonly':[('state','not in',('draft', 'rejected'))],'invisible':[('arranged_by','!=','self')]}"/>-->
+<!--                                        <field name="daily_boarding_lodginf_charge" attrs="{'readonly':[('state','not in',('draft', 'rejected'))],'invisible':[('arranged_by','!=','self')]}"/>-->
+<!--                                        <field name="total_amount_paid" readonly="1"/>-->
+<!--                                        <field name="other_details" attrs="{'readonly':[('state','not in',('draft', 'rejected'))]}"/>-->
+<!--                                        <field name="state" invisible="1"/>-->
+<!--                                    </tree>-->
+<!--                            </field>-->
+<!--                             <group class="oe_subtotal_footer oe_right" colspan="2" >-->
+<!--                                <field name="total_claimed_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>-->
+<!--                                <field name="advance_requested" widget="monetary" options="{'currency_field': 'currency_id'}"/>-->
+<!--                                <field name="amount_paid" widget="monetary" options="{'currency_field': 'currency_id'}" readonly="1"/>-->
+<!--                                <field name="balance_left" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>-->
+<!--                            </group>-->
+
+<!--                        </page>-->
+<!--                    </notebook>-->
+<!--                </sheet>-->
+<!--            </form>-->
+<!--        </field>-->
+<!--    </record>-->
+
+<!--    &lt;!&ndash;===========Tree view of Tour Claim===========&ndash;&gt;-->
+<!--    <record id="tour_claim_tree_view" model="ir.ui.view">-->
+<!--        <field name="name">employee.tour.claim.tree</field>-->
+<!--        <field name="model">employee.tour.claim</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <tree string="LTC">-->
+<!--                <field name="employee_id"/>-->
+<!--                <field name="tour_sequence"/>-->
+<!--                <field name="state"/>-->
+<!--            </tree>-->
+<!--        </field>-->
+<!--    </record>-->
+
+
+<!--        &lt;!&ndash;Tour search view&ndash;&gt;-->
+<!--    <record id="view_tour_claim_search_form" model="ir.ui.view">-->
+<!--        <field name="name">employee.tour.claim.search.form</field>-->
+<!--        <field name="model">employee.tour.claim</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--           <search string="Tour Claim">-->
+<!--               <filter string="My Tour Claims" name="my_claim" domain="[('employee_id.user_id.id', '=', uid)]" />-->
+<!--                <field name="employee_id" string="Employee"/>-->
+<!--                <field name="department" string="Department"/>-->
+<!--                    <filter string="Employee" name="employee_id" context="{'group_by':'employee_id'}"/>-->
+<!--                    <filter string="Department" name="department" context="{'group_by':'department'}"/>-->
+<!--                    <filter string="Status" name="status" context="{'group_by':'state'}"/>-->
+<!--            </search>-->
+<!--        </field>-->
+<!--    </record>-->
+
+<!--    &lt;!&ndash;===============Action view of Tour Claim===============&ndash;&gt;-->
+<!--    <record id="tour_claim_menu_action" model="ir.actions.act_window">-->
+<!--        <field name="name">Tour Claim</field>-->
+<!--        <field name="res_model">employee.tour.claim</field>-->
+<!--        <field name="view_type">form</field>-->
+<!--        <field name="view_mode">tree,form,search</field>-->
+<!--        <field name="context">{'search_default_status': 1}</field>-->
+<!--        <field name="search_view_id" ref="view_tour_claim_search_form"/>-->
+<!--    </record>-->
+
+
+<!--    &lt;!&ndash;============Action view of employee.tour.claim Draft============&ndash;&gt;-->
+<!--    <record id="tour_claim_menu_action_draft" model="ir.actions.act_window">-->
+<!--        <field name="name">Tour claims</field>-->
+<!--        <field name="res_model">employee.tour.claim</field>-->
+<!--        <field name="view_type">form</field>-->
+<!--        <field name="view_mode">tree,form</field>-->
+<!--        <field name="context">{'search_default_my_claim': 1}</field>-->
+<!--        <field name="search_view_id" ref="view_tour_claim_search_form"/>-->
+<!--        &lt;!&ndash;<field name="search_view_id" ref="employee.tour.claim_search_view"/>&ndash;&gt;-->
+<!--        <field name="domain">[('state','=','draft')]</field>-->
+<!--    </record>-->
+<!--    &lt;!&ndash;============Action view of employee.tour.claim Waiting============&ndash;&gt;-->
+<!--    <record id="tour_claim_pending_action" model="ir.actions.act_window">-->
+<!--        <field name="name">Tour claims</field>-->
+<!--        <field name="res_model">employee.tour.claim</field>-->
+<!--        <field name="view_type">form</field>-->
+<!--        <field name="view_mode">tree,form</field>-->
+<!--        <field name="search_view_id" ref="view_tour_claim_search_form"/>-->
+<!--        &lt;!&ndash;<field name="search_view_id" ref="employee.tour.claim_search_view"/>&ndash;&gt;-->
+<!--        <field name="domain">[('state','=','submitted')]</field>-->
+<!--    </record>-->
+<!--    &lt;!&ndash;============Action view of employee.tour.claim approved============&ndash;&gt;-->
+<!--    <record id="tour_claim_approved_action" model="ir.actions.act_window">-->
+<!--        <field name="name">Tour claims</field>-->
+<!--        <field name="res_model">employee.tour.claim</field>-->
+<!--        <field name="view_type">form</field>-->
+<!--        <field name="view_mode">tree,form</field>-->
+<!--        <field name="context">{'search_default_my_claim': 1}</field>-->
+<!--        <field name="search_view_id" ref="view_tour_claim_search_form"/>-->
+<!--        &lt;!&ndash;<field name="search_view_id" ref="employee.tour.claim_search_view"/>&ndash;&gt;-->
+<!--        <field name="domain">[('state','=','approved')]</field>-->
+<!--    </record>-->
+
+<!--    &lt;!&ndash;============Action view of employee.tour.claim approved============&ndash;&gt;-->
+<!--    <record id="tour_claim_paid_action" model="ir.actions.act_window">-->
+<!--        <field name="name">Tour claims</field>-->
+<!--        <field name="res_model">employee.tour.claim</field>-->
+<!--        <field name="view_type">form</field>-->
+<!--        <field name="view_mode">tree,form</field>-->
+<!--        <field name="context">{'search_default_my_claim': 1}</field>-->
+<!--        <field name="search_view_id" ref="view_tour_claim_search_form"/>-->
+<!--        &lt;!&ndash;<field name="search_view_id" ref="employee.tour.claim_search_view"/>&ndash;&gt;-->
+<!--        <field name="domain">[('state','=','paid')]</field>-->
+<!--    </record>-->
+<!--    &lt;!&ndash;============Action view of employee.tour.claim rejected============&ndash;&gt;-->
+<!--    <record id="tour_claim_rejected_action" model="ir.actions.act_window">-->
+<!--        <field name="name">Tour claims</field>-->
+<!--        <field name="res_model">employee.tour.claim</field>-->
+<!--        <field name="view_type">form</field>-->
+<!--        <field name="view_mode">tree,form</field>-->
+<!--        <field name="context">{'search_default_my_claim': 1}</field>-->
+<!--        <field name="search_view_id" ref="view_tour_claim_search_form"/>-->
+<!--        <field name="domain">[('state','=','rejected')]</field>-->
+<!--    </record>-->
+
+    
+    <!-- <record model="ir.ui.menu" id="fleet.menu_root">
+        <field name="groups_id" eval="[[6,0,[ref('base.group_no_one')]]]"/>
+    </record> -->
+
+    <menuitem id = "tour_request_menu_hr_id"
+                  name = "Travel and Tour"
+                groups="tour_request.group_tour_claim_user"
+                web_icon="tour_request,static/description/icon.png"
+                  sequence="14"
+                  />
+
+        <menuitem id = "tour_request_menu_id_parent"
+                  name = "Tour Request"
+                  parent="tour_request_menu_hr_id"
+                  sequence="1"
+                  />
+
+        <menuitem id = "tour_request_menu_id"
+                  name = "All"
+                  action ="tour_request_menu_action"
+                  parent="tour_request_menu_id_parent"  sequence="5"
+                  />
+
+    <menuitem id = "tour_request_new_menu_id"
+                  name = "New"
+                  parent ="tour_request_menu_id_parent"
+                  action ="tour_request_menu_action_draft" sequence="1"
+                  />
+
+        <menuitem id = "tour_request_pending_menu_id"
+                  name = "Pending Approvals"
+                  parent ="tour_request_menu_id_parent"
+                  action ="tour_request_pending_action" sequence="2"
+                  />
+        <menuitem id = "tour_request_approved_menu_id"
+                  name = "Approved"
+                  parent ="tour_request_menu_id_parent"
+                  action ="tour_request_approved_action" sequence="3"
+                  />
+        <menuitem id = "tour_request_rejected_menu_id"
+                  name = "Rejected"
+                  parent ="tour_request_menu_id_parent"
+                  action ="tour_request_rejected_action" sequence="4"
+                  />
+
+
+
+
+<!--        <menuitem id = "tour_request_claim_id"-->
+<!--                  name = "Tour Claim"-->
+<!--                  parent="tour_request_menu_hr_id"-->
+<!--                  sequence="2"-->
+<!--                  />-->
+<!--        <menuitem id = "tour_claim_menu_id_all"-->
+<!--                  name = "All"-->
+<!--                  action ="tour_claim_menu_action"-->
+<!--                  parent="tour_request_claim_id"-->
+<!--                  />-->
+
+<!--    <menuitem id = "tour_claim_new_menu_id_new"-->
+<!--                  name = "New"-->
+<!--                  parent ="tour_request_claim_id"-->
+<!--                  action ="tour_claim_menu_action_draft"-->
+<!--                  />-->
+
+<!--        <menuitem id = "tour_claim_pending_menu_id"-->
+<!--                  name = "Pending Approvals"-->
+<!--                  parent ="tour_request_claim_id"-->
+<!--                  action ="tour_claim_pending_action"-->
+<!--                  />-->
+<!--        <menuitem id = "tour_claim_approved_menu_id"-->
+<!--                  name = "Approved"-->
+<!--                  parent ="tour_request_claim_id"-->
+<!--                  action ="tour_claim_approved_action"-->
+<!--                  />-->
+<!--    <menuitem id = "tour_claim_paid_menu_id"-->
+<!--                  name = "Paid"-->
+<!--                  parent ="tour_request_claim_id"-->
+<!--                  action ="tour_claim_paid_action"-->
+<!--                  />-->
+
+<!--        <menuitem id = "tour_claim_rejected_menu_id"-->
+<!--                  name = "Rejected"-->
+<!--                  parent ="tour_request_claim_id"-->
+<!--                  action ="tour_request_rejected_action"-->
+<!--                  />-->
+
+
+        <menuitem id = "tour_request_configuration_id"
+                  name = "Configuration"
+                  parent="tour_request_menu_hr_id"
+                   groups="base.group_no_one"
+                  sequence="3"
+                  />
+
+        <record id="tour_request_configuration_id" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+        </record>
+    
+    
+    <record model="ir.ui.view" id="tour_pay_level_form_inherit">
+        <field name="name">tour_hr.payslip.paylevel.inherit</field>
+        <field name="model">hr.payslip.paylevel</field>
+        <field name="inherit_id" ref="stpi_contract_pr.pay_level_form_view_id"/>
+        <field name="arch" type="xml">
+            <xpath expr = "//group/group[last()]" position="after">
+                <group string="Travel">
+                    <field name="tour_travel_modes" widget="many2many_tags"/>
+                </group>
+                <group string="Tour">
+                    <field name="tour_advance_cost" widget="monetary"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+
+</odoo>

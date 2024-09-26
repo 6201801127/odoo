@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="fleet_vehicle_inherit_form_view">
+            <field name="name">fleet.vehicle.form.inherit.view</field>
+            <field name="model">fleet.vehicle</field>
+            <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+            <field name="arch" type="xml">
+                <field name="car_value" position="after">
+                    <field name="check_availability" invisible="0"/>
+                    <field name="reserved_time" invisible="0"/>
+                </field>
+            </field>
+        </record>
+
+        <record model='ir.ui.view' id='employee_fleet_form_view'>
+            <field name="name">employee.fleet.form</field>
+            <field name="model">employee.fleet</field>
+            <field name="arch" type="xml">
+                <form string="Employee Fleet Request">
+                    <header>
+                        <button name='send' string="Send Request" class="oe_highlight" type="object" states="draft"/>
+                        <!--<button name="button_forwarded" string="Forward" class="oe_highlight" type="object" states="waiting" groups="employee_vehicle_request.group_employee_manager_v"/>-->
+                        <button name='approve' string="Forward" type="object" states="waiting" class="oe_highlight" groups="employee_vehicle_request.group_employee_manager_v"/>
+                        <!--<button name="button_processed" string="Process" class="oe_highlight" type="object" states="confirm" groups="employee_vehicle_request.group_travel_processor_v"/>-->
+                        <button name='reject' string="Reject" type="object" states="waiting," groups="employee_vehicle_request.group_employee_manager_v"/>
+                        <button name='cancel' string="Revert" type="object" states="waiting"/>
+                        <button name='returned' string="Return" type="object" states="confirm" groups="hr.group_hr_manager,hr.group_hr_user"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,waiting,confirm,return"/>
+                    </header>
+                    <sheet>
+                        <h1>
+                            <field name="name" invisible="1"/>
+                        </h1>
+                        <group>
+                            <group>
+                                <field name="employee" options="{'no_create': True}"/>
+                                <field name="branch_id" readonly="1"/>
+                                <field name="department_id" readonly="1" invisible="1"/>
+                                <field name="date_from" invisible="1"/>
+                                <field name="date_to" invisible="1"/>
+                                <field name="requested_date" required="1"/>
+                                <field name="half_day"/>
+                                <field name="driver_name" attrs="{'invisible': [('state','=','draft')],'required': [('state','!=','draft')]}" groups="employee_vehicle_request.group_employee_manager_v"/>
+                                <field name="driver_mobile" attrs="{'invisible': [('state','=','draft')],'required': [('state','!=','draft')]}" groups="employee_vehicle_request.group_employee_manager_v"/>
+                                <field name="agency_id" attrs="{'invisible': [('state','=','draft')],'required': [('state','!=','draft')]}" options="{'no_create': True}" groups="employee_vehicle_request.group_employee_manager_v"/>
+                                <field name="returned_date" attrs="{'invisible': [('state','!=','return')]}"/>
+                                <field name="via"/>
+                            </group>
+                            <group>
+                                <field name="req_date"/>
+                                <field name="created_by" invisible="1"/>
+                                <field name="fleet" attrs="{'invisible': [('state','=','draft')],'required': [('state','!=','draft')]}" options="{'no_create': True}"/>
+                                <field name="driver_id" invisible="1"/>
+                                <field name="purpose"/>
+                                <field name="from_location"/>
+                                <field name="to_location"/>
+                                
+                            </group>
+                            <field name="remark" attrs="{'invisible': [('state','!=','waiting')]}"/>
+                            <field name="remark_date_to" attrs="{'invisible': [('state','!=','waiting')]}" readonly="1" />
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record model='ir.ui.view' id='employee_fleet_tree_view'>
+            <field name="name">employee.fleet.tree</field>
+            <field name="model">employee.fleet</field>
+            <field name="arch" type="xml">
+                <tree decoration-info="state == 'draft'" colors="grey:state == 'cancel';green:state == 'confirm';
+                red:state == 'reject';grey:state == 'return';">
+                    <field name="name"/>
+                    <field name="employee"/>
+                    <field name="branch_id"/>
+                    <field name="department_id"/>
+                    <field name="req_date"/>
+                    <field name="created_by" invisible="1"/>
+                    <field name="fleet"/>
+                    <field name="driver_id"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="employee_fleet_search_view" model="ir.ui.view">
+            <field name="name">hr.employee.fleet.search</field>
+            <field name="model">employee.fleet</field>
+            <field name="arch" type="xml">
+               <search string="Employee Fleet">
+                    <filter string="My Vehicle" name="my_vehicle" domain="[('employee.user_id.id', '=', uid)]" />
+                    <field name="employee" string="Employee"/>
+                    <field name="branch_id" string="Center"/>
+                    <field name="fleet" string="Vehicle"/>
+                    <field name="department_id" string="Department"/>
+                        <filter string="Employee" name="employee" context="{'group_by':'employee'}"/>
+                        <filter string="Center" name="branch_id" context="{'group_by':'branch_id'}"/>
+                        <filter string="Status" name="status" context="{'group_by':'state'}"/>
+                        <filter string="Department" name="department" context="{'group_by':'department_id'}"/>
+                        <filter string="Vehicel" name="vahical" domain="[]" context="{'group_by':'fleet'}"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_employee_fleet" model="ir.actions.act_window">
+            <field name="name">Vehicle Request</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">employee.fleet</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="employee_fleet_search_view"/>
+            <field name="domain">[('state','in',('draft','cancel'))]</field>
+             <field name="context">{'search_default_status_fil': 1}</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to create a New Vehicle Request.
+                </p>
+            </field>
+        </record>
+
+        <record id="action_employee_waiting_approval" model="ir.actions.act_window">
+            <field name="name">Vehicle Request</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">employee.fleet</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="employee_fleet_search_view"/>
+            <field name="domain">[('state','=','waiting')]</field>
+        </record>
+
+        <record id="action_employee_waiting_approved" model="ir.actions.act_window">
+            <field name="name">Vehicle Request</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">employee.fleet</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="employee_fleet_search_view"/>
+            <field name="domain">[('state','=','confirm')]</field>
+        </record>
+
+        <record id="action_employee_waiting_rejected" model="ir.actions.act_window">
+            <field name="name">Vehicle Request</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">employee.fleet</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="employee_fleet_search_view"/>
+            <field name="domain">[('state','=','rejected')]</field>
+        </record>
+
+        <record id="action_employee_waiting_returned" model="ir.actions.act_window">
+            <field name="name">Vehicle Request</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">employee.fleet</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="employee_fleet_search_view"/>
+            <field name="domain">[('state','=','return')]</field>
+        </record>
+        
+        <!--vehicle request by employee-->
+
+        <record id="groupby_employee_action_employee" model="ir.actions.act_window">
+            <field name="name">Employee Fleet</field>
+            <field name="res_model">employee.fleet</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','=','confirm')]</field>
+            <field name="context">{'search_default_employee': 1}</field>
+            <field name="search_view_id" ref="employee_fleet_search_view"/>
+        </record>
+        
+        <!--vehicle request by department-->
+        <record id="groupby_department_action_employee" model="ir.actions.act_window">
+            <field name="name">Employee Fleet</field>
+            <field name="res_model">employee.fleet</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','=','confirm')]</field>
+            <field name="context">{'search_default_department': 1}</field>
+            <field name="search_view_id" ref="employee_fleet_search_view"/>
+        </record>
+        
+        <!--vehicle request by branch-->
+        <record id="groupby_branch_action_employee" model="ir.actions.act_window">
+            <field name="name">Employee Fleet</field>
+            <field name="res_model">employee.fleet</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','=','confirm')]</field>
+            <field name="context">{'search_default_branch_id': 1}</field>
+            <field name="search_view_id" ref="employee_fleet_search_view"/>
+        </record>
+        
+        <!--vehicle request by status-->
+        <record id="groupby_status_action_employee" model="ir.actions.act_window">
+            <field name="name">Employee Fleet</field>
+            <field name="res_model">employee.fleet</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_status': 1}</field>
+            <field name="search_view_id" ref="employee_fleet_search_view"/>
+        </record>
+        
+        <!--vehicle request by all-->
+        <record id="groupby_all_action_employee" model="ir.actions.act_window">
+            <field name="name">Employee Fleet</field>
+            <field name="res_model">employee.fleet</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','=','confirm')]</field>
+            <field name="context">{'search_default_my_vehicle': 1}</field>
+            <field name="search_view_id" ref="employee_fleet_search_view"/>
+        </record>
+        
+        
+        <menuitem id = "employee_fleet_menu"
+                  name = "Vehicle Request"
+                  web_icon="employee_vehicle_request,static/description/icon.png"
+                  sequence="15"
+                  />
+                  
+        <menuitem id ="employee_fleet_menu_id" 
+                    name="Vehicle Request"  
+                    parent="employee_fleet_menu" 
+                    sequence="1"
+                  />
+        
+        <menuitem id ="emplyee_fleet_new" name="New"  parent="employee_fleet_menu_id" sequence="1"
+                  action="action_employee_fleet"/>
+                  
+        <menuitem id ="emplyee_fleet_approval" name="To Approve"  parent="employee_fleet_menu_id" sequence="2"
+                  action="action_employee_waiting_approval"/>
+                  
+        <menuitem id="employee_fleet_sub_approved" name="Approved" parent="employee_fleet_menu_id" sequence="3"
+                  action="action_employee_waiting_approved"/>
+
+        <menuitem id="employee_fleet_sub_rejected" name="Rejected" parent="employee_fleet_menu_id" sequence="4"
+                  action="action_employee_waiting_rejected"/>
+
+        <menuitem id="employee_fleet_sub_returned" name="Returned" parent="employee_fleet_menu_id" sequence="5"
+                  action="action_employee_waiting_returned"/>
+
+       <menuitem id = "employee_fleet_report_menu_id"
+                  name = "Report"
+                  parent="employee_fleet_menu"
+                  sequence="2"
+                  />
+                  
+        <menuitem id ="vehicle_by_employee_new" 
+                name="Vehicle Request by Employee"  
+                parent="employee_fleet_report_menu_id" sequence="1"
+                action="groupby_employee_action_employee"/>
+        
+        <menuitem id ="vehicle_request_by_department" 
+                    action="groupby_department_action_employee"
+                    name="Vehicle Request By Department"  
+                    parent="employee_fleet_report_menu_id" 
+                  />
+        
+        <menuitem id ="vehicle_request_by_branch" 
+                    action="groupby_branch_action_employee"
+                    name="Vehicle Request By Center"
+                    parent="employee_fleet_report_menu_id" 
+                  />
+        
+        <menuitem id ="vehicle_request_by_status" 
+                    action="groupby_status_action_employee"
+                    name="Vehicle Request By Status"  
+                    parent="employee_fleet_report_menu_id" 
+                  />
+                  
+        <menuitem id ="vehicle_request_by_all" 
+                    action="groupby_all_action_employee"
+                    name="Vehicle Request By All"  
+                    parent="employee_fleet_report_menu_id" 
+                  />
+                  
+                  
+        <menuitem id = "employee_fleet_configuration_menu_id"
+                  name = "Configuration"
+                  parent="employee_fleet_menu"
+                  sequence="3"
+                  />
+    </data>
+</odoo>
