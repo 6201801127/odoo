@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <!-- Risk Incident -->
+    <record id="view_risk_incident_menu" model="ir.ui.view">
+        <field name="name">project.task.form</field>
+        <field name="model">project.task</field>
+        <field eval="2" name="priority"/>
+        <field name="arch" type="xml">
+            <form string="Task" class="o_form_project_tasks">
+                <header>
+                    <button name="action_assign_to_me" string="Assign to Me" type="object" class="oe_highlight"
+                            attrs="{'invisible' : [('user_id', '!=', False)]}"/>
+                    <!--<button name="%(portal.portal_share_action)d" string="Share" type="action"-->
+                            <!--class="oe_highlight oe_read_only"/>-->
+                    <!--<button name="%(create_task_incident_action)d" string="Create Incident" type="action"-->
+                    <!--class="btn-primary"/>-->
+                    <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}"/>
+                </header>
+                <sheet string="Task">
+                    <!--<div class="oe_button_box" name="button_box">-->
+                        <!--<button name="toggle_active" type="object" groups="base.group_user"-->
+                        <!--class="oe_stat_button" icon="fa-archive">-->
+                        <!--<field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>-->
+                        <!--</button>-->
+                        <!--<button name="open_risk_incident_task" type="object" class="oe_stat_button" icon="fa-tasks">-->
+                            <!--<field string="Task" name="risk_incident_count" widget="statinfo"/>-->
+                        <!--</button>-->
+                    <!--</div>-->
+                    <div class="oe_title pr-0">
+                        <h1 class="d-flex flex-row justify-content-between">
+                            <field name="priority" widget="priority" class="mr-3"/>
+                            <field name="name" class="o_task_name text-truncate" placeholder="Risk Incident Title..."/>
+                            <field name="kanban_state" widget="state_selection" class="ml-auto"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="is_from_project" invisible="1"/>
+                            <field name="project_id" domain="[('active', '=', True)]"
+                                   attrs="{'readonly': [('is_from_project', '=', True)]}"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="project_stakeholder_ids" invisible="1"/>
+                            <field name="user_id" class="o_task_user_field"
+                                   domain="[('id', 'in', project_stakeholder_ids)]"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="legend_blocked" invisible="1"/>
+                            <field name="legend_normal" invisible="1"/>
+                            <field name="legend_done" invisible="1"/>
+                            <div class="o_td_label">
+                                <label for="planned_hours" string="Initially Planned Hours"
+                                       attrs="{'invisible': [('encode_uom_in_days', '=', True)]}"/>
+                                <label for="planned_hours" string="Initially Planned Days"
+                                       attrs="{'invisible': [('encode_uom_in_days', '=', False)]}"/>
+                            </div>
+                            <field name="planned_hours" widget="timesheet_uom_no_toggle" nolabel="1"/>
+                            <div class="o_td_label" groups="project.group_subtask_project"
+                                 attrs="{'invisible': [('allow_subtasks', '=', False)]}">
+                                <label for="subtask_planned_hours" string="Sub-tasks Planned Hours"
+                                       attrs="{'invisible': [('encode_uom_in_days', '=', True)]}"/>
+                                <label for="subtask_planned_hours" string="Sub-tasks Planned Days"
+                                       attrs="{'invisible': [('encode_uom_in_days', '=', False)]}"/>
+                            </div>
+                            <field name="subtask_planned_hours" widget="timesheet_uom_no_toggle" nolabel="1"
+                                   groups="project.group_subtask_project"
+                                   attrs="{'invisible': [('allow_subtasks', '=', False)]}"/>
+                        </group>
+                        <group>
+                            <field name="date_deadline" required="1"/>
+                            <label for="activity_reminder_days"/>
+                            <div>
+                                <field name="activity_reminder_days" class="oe_inline"/>Day(s)
+                            </div>
+                            <field name="tag_ids" widget="many2many_tags"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True, 'color_field': 'color'}"/>
+                            <field name="progress" widget="progressbar"/>
+                            <field name="stakeholder_employee_ids" widget="many2many_tags" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="description_page" string="Description">
+                            <field name="description" type="html"/>
+                            <div class="oe_clear"/>
+                        </page>
+                        <field name="analytic_account_active" invisible="1"/>
+                        <field name="allow_timesheets" invisible="1"/>
+                        <field name="allow_subtasks" invisible="1"/>
+                        <field name="encode_uom_in_days" invisible="1"/>
+                        <page string="Timesheets" id="timesheets_tab"
+                              attrs="{'invisible': [('allow_timesheets', '=', False)]}">
+                            <field name="incident_timesheet_ids" mode="tree,kanban"
+                                   attrs="{'invisible': [('analytic_account_active', '=', False)]}"
+                                   context="{'default_project_id': project_id, 'default_name':''}">
+                                <tree editable="bottom" string="Timesheet Activities" default_order="date">
+                                    <field name="date"/>
+                                    <field name="user_id" invisible="1"/>
+                                    <field name="employee_id" required="1" widget="many2one_avatar_employee"
+                                           domain="[('id', 'in', parent.stakeholder_employee_ids)]"/>
+                                    <field name="name" required="0"/>
+                                    <field name="estimated_hours" widget="timesheet_uom"
+                                           decoration-danger="estimated_hours &gt; 24"/>
+                                    <field name="unit_amount" widget="timesheet_uom" string="Actual Hours"
+                                           decoration-danger="unit_amount &gt; 24"/>
+                                    <field name="project_id" invisible="1"/>
+                                    <field name="incident_id" invisible="1"/>
+                                    <field name="company_id" invisible="1"/>
+                                </tree>
+                                <kanban class="o_kanban_mobile">
+                                    <field name="date"/>
+                                    <field name="user_id"/>
+                                    <field name="employee_id" widget="many2one_avatar_employee"/>
+                                    <field name="name"/>
+                                    <field name="unit_amount" decoration-danger="unit_amount &gt; 24"/>
+                                    <field name="project_id"/>
+                                    <field name="incident_id" invisible="1"/>
+                                    <templates>
+                                        <t t-name="kanban-box">
+                                            <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <strong>
+                                                            <span>
+                                                                <t t-esc="record.employee_id.value"/>
+                                                            </span>
+                                                        </strong>
+                                                    </div>
+                                                    <div class="col-6 pull-right text-right">
+                                                        <strong>
+                                                            <t t-esc="record.date.value"/>
+                                                        </strong>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-6 text-muted">
+                                                        <span>
+                                                            <t t-esc="record.name.value"/>
+                                                        </span>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <span class="pull-right text-right">
+                                                            <field name="unit_amount" widget="float_time"/>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </templates>
+                                </kanban>
+                                <form string="Timesheet Activities">
+                                    <sheet>
+                                        <group>
+                                            <field name="date"/>
+                                            <field name="user_id" invisible="1"/>
+                                            <field name="employee_id" required="1" widget="many2one_avatar_employee"/>
+                                            <field name="name"/>
+                                            <field name="unit_amount" string="Duration" widget="float_time"
+                                                   decoration-danger="unit_amount &gt; 24"/>
+                                            <field name="project_id" invisible="1"/>
+                                            <field name="incident_id" invisible="1"/>
+                                            <field name="company_id" invisible="1"/>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                        <page name="extra_info" string="Extra Info">
+                            <group>
+                                <group>
+                                    <field name="sequence" groups="base.group_no_one"/>
+                                    <field name="partner_id" attrs="{'readonly': [('parent_id', '!=', False)]}"
+                                           options="{'no_create': True, 'no_edit': True, 'no_open': True}"
+                                           readonly="1"/>
+                                    <field name="email_from" attrs="{'readonly': [('parent_id', '!=', False)]}" invisible="1"/>
+                                    <field name="email_cc" groups="base.group_no_one" invisible="1"/>
+                                    <field name="parent_id"
+                                           domain="[('parent_id', '=', False), ('risk_incident', '=', True)]"
+                                           groups="project.group_subtask_project"
+                                           options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                                    <field name="child_ids" invisible="1"/>
+                                    <field name="subtask_project_id" invisible="1"/>
+                                    <field name="company_id" groups="base.group_multi_company"
+                                           options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                                    <field name="displayed_image_id" groups="base.group_no_one"
+                                           options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                                </group>
+                                <group>
+                                    <field name="date_assign" groups="base.group_no_one"/>
+                                    <field name="date_last_stage_update" groups="base.group_no_one"/>
+                                </group>
+                                <group string="Working Time to Assign"
+                                       attrs="{'invisible': [('working_hours_open', '=', 0.0)]}">
+                                    <field name="working_hours_open" string="Hours"/>
+                                    <field name="working_days_open" string="Days"/>
+                                </group>
+                                <group string="Working Time to Close"
+                                       attrs="{'invisible': [('working_hours_close', '=', 0.0)]}">
+                                    <field name="working_hours_close" string="Hours"/>
+                                    <field name="working_days_close" string="Days"/>
+                                </group>
+                            </group>
+                        </page>
+                        <!-- PAGE RISK MANAGE-->
+                        <page string="Management For Risk">
+                            <group>
+                                <group>
+                                    <field name="risk_line"/>
+                                    <!--<field name="original_task"-->
+                                    <!--options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>-->
+                                </group>
+                                <group>
+                                    <field name="risk_incident" invisible="1"/>
+                                    <field name="incident_photo" widget='image' class="oe_left oe_avatar"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_risk_incident_tree" model="ir.ui.view">
+        <field name="name">project.task.tree</field>
+        <field name="model">project.task</field>
+        <field eval="2" name="priority"/>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="user_id"/>
+                <field name="stage_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_risk_incident" model="ir.actions.act_window">
+        <field name="name">Risk Incident</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">tree,kanban,form,calendar,graph</field>
+        <field name="domain">[('risk_incident','=', True)]</field>
+        <field name="context">{'default_risk_incident': True}</field>
+        <field name="view_id" ref="project.view_task_tree2"/>
+    </record>
+
+    <record id="action_risk_incident_tree" model="ir.actions.act_window.view">
+        <field eval="1" name="sequence"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="view_risk_incident_tree"/>
+        <field name="act_window_id" ref="action_risk_incident"/>
+    </record>
+
+
+    <!-- 	<record id="action_risk_incident_kanban" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">kanban</field>
+            <field name="view_id" ref="project.view_task_kanban"/>
+            <field name="act_window_id" ref="action_risk_incident"/>
+        </record>
+     -->
+
+    <record id="action_risk_incident_form" model="ir.actions.act_window.view">
+        <!-- <field eval="3" name="sequence"/> -->
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_risk_incident_menu"/>
+        <field name="act_window_id" ref="action_risk_incident"/>
+    </record>
+
+    <record id="action_risk_incident_calendar" model="ir.actions.act_window.view">
+        <!-- <field eval="4" name="sequence"/> -->
+        <field name="view_mode">calendar</field>
+        <field name="view_id" ref="project.view_task_calendar"/>
+        <field name="act_window_id" ref="action_risk_incident"/>
+    </record>
+
+    <record id="action_risk_incident_graph" model="ir.actions.act_window.view">
+        <!-- <field eval="6" name="sequence"/> -->
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="project.view_project_task_graph"/>
+        <field name="act_window_id" ref="action_risk_incident"/>
+    </record>
+
+    <!--<record id="view_risk_incident_smart_button" model="ir.ui.view">-->
+        <!--<field name="name">project.task.tree</field>-->
+        <!--<field name="model">project.task</field>-->
+        <!--<field eval="2" name="priority"/>-->
+        <!--<field name="arch" type="xml">-->
+            <!--<tree>-->
+                <!--<field name="name"/>-->
+                <!--<field name="project_id"/>-->
+                <!--<field name="user_id"/>-->
+                <!--<field name="stage_id"/>-->
+            <!--</tree>-->
+        <!--</field>-->
+    <!--</record>-->
+
+    <!--<record id="action_risk_incident_smart_button" model="ir.actions.act_window">-->
+        <!--<field name="name">Risk incident</field>-->
+        <!--<field name="res_model">project.task</field>-->
+        <!--<field name="view_mode">tree</field>-->
+        <!--<field name="view_id" ref="project.view_task_tree2"/>-->
+    <!--</record>-->
+
+    <!--<record id="risk_incident_smart_button" model="ir.actions.act_window.view">-->
+        <!--<field name="view_mode">tree</field>-->
+        <!--<field name="view_id" ref="view_risk_incident_smart_button"/>-->
+        <!--<field name="act_window_id" ref="action_risk_incident_smart_button"/>-->
+    <!--</record>-->
+
+
+    <!-- parent="roject_risk_management_app.menu_project_risk_task" -->
+    <menuitem action="action_risk_incident"
+              id="menu_action_risk_incident"
+              name="Risk Incident"
+              sequence="2"
+              parent="project_risk_management_app.menu_main_risk_management"/>
+
+</odoo>

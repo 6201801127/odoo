@@ -1,0 +1,290 @@
+<odoo>
+
+    <record id="view_partner_contract_form" model="ir.ui.view">
+        <field name="name">partner.contract.form.view</field>
+        <field name="model">partner.contract</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="has_contract_create_group" invisible="1"/>
+                    <button name="%(contract.action_approval_email_contract)d" string="Submit for Approval"
+                            type="action" class="oe_highlight"
+                            attrs="{'invisible' : [('state', 'not in', ('draft', 'rejected'))]}"/>
+                    <button name="button_approve" string="Approve" type="object" class="oe_highlight"
+                            attrs="{'invisible' : [('state', '!=', 'waiting_for_approval')]}"
+                            groups="contract.group_contract_approver"/>
+                    <button name="%(contract.action_reject_contract_wizard)d" string="Reject" type="action"
+                            class="oe_highlight" attrs="{'invisible' : [('state', '!=', 'waiting_for_approval')]}"
+                            groups="contract.group_contract_approver"/>
+                    <button name="button_send_by_email" string="Send Unsigned Contract by Email" type="object"
+                            class="oe_highlight"
+                            attrs="{'invisible' : [('state', '!=', 'approved')]}"/>
+                    <button name="button_signed" string="Signed" type="object"
+                            class="oe_highlight" attrs="{'invisible' : [('state', '!=', 'unsigned')]}"/>
+                    <button name="%(contract.action_close_contract_wizard_contract)d" string="Request to Close"
+                            type="action" class="oe_highlight"
+                            attrs="{'invisible' : ['|', '|', ('state', '!=', 'signed'), ('is_request_to_close', '=', True), ('has_contract_create_group', '=', False)]}"/>
+                    <button name="button_approve_to_close" string="Approve to Close" type="object" class="oe_highlight"
+                            groups="contract.group_contract_close_approval_access"
+                            attrs="{'invisible' : ['|', ('state', '!=', 'signed'), ('is_request_to_close', '=', False)]}"/>
+                    <button name="%(contract.action_reject_contract_close_wizard)d" string="Reject" type="action"
+                            class="oe_highlight" groups="contract.group_contract_close_approval_access"
+                            attrs="{'invisible' : ['|', ('state', '!=', 'signed'), ('is_request_to_close', '=', False)]}"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,waiting_for_approval,approved,unsigned,signed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="subject"/>
+                        <h1>
+                            <field name="subject" required="1"
+                                   attrs="{'readonly' : [('state', 'in', ('approved', 'unsigned', 'signed', 'closed'))]}"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="is_from_project" invisible="1"/>
+                            <field name="related_project" required="1"
+                                   attrs="{'readonly' : ['|', ('state', 'in', ('approved', 'unsigned', 'signed', 'closed')), ('is_from_project', '=', True)]}"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="partner_id" required="1" readonly="1" force_save="1"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <!--<field name="description"-->
+                            <!--attrs="{'readonly' : [('state', 'in', ('approved', 'unsigned', 'signed', 'closed'))]}"/>-->
+                            <!--                            <field name="linked_contract_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>-->
+                        </group>
+                        <group>
+                            <field name="initiated_date" required="1"
+                                   attrs="{'readonly' : [('state', 'in', ('approved', 'unsigned', 'signed', 'closed'))]}"/>
+                            <label for="start_date" string="Contract Start &amp; End Date"/>
+                            <div class="o_row">
+                                <field name="start_date" class="oe_inline" required="1"
+                                       attrs="{'readonly' : [('state', 'in', ('approved', 'unsigned', 'signed', 'closed'))]}"/>
+                                -
+                                <field name="end_date" class="oe_inline" required="1"
+                                       attrs="{'readonly' : [('state', 'in', ('approved', 'unsigned', 'signed', 'closed'))]}"/>
+                            </div>
+                            <field name="approval_due_date" readonly="1"
+                                   attrs="{'invisible': [('approval_due_date', '=', False)]}"/>
+                            <field name="closure_due_date" readonly="1"
+                                   attrs="{'invisible': [('closure_due_date', '=', False)]}"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="stakeholders_ids" invisible="1"/>
+                            <field name="point_of_contact_from_client_id"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"
+                                   domain="['|', ('id', '=', partner_id), ('parent_id', '=', partner_id), ('type', '=', 'contact')]"
+                                   attrs="{'readonly' : [('state', 'in', ('approved', 'unsigned', 'signed', 'closed'))]}"/>
+                            <field name="point_of_contact_from_us_id" domain="[('id', 'in', stakeholders_ids)]"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"
+                                   attrs="{'readonly' : [('state', 'in', ('approved', 'unsigned', 'signed', 'closed'))]}"/>
+                            <field name="attach_draft_contract" filename="attach_draft_contract_filename"
+                                   attrs="{'readonly' : [('state', 'in', ('approved', 'unsigned', 'signed', 'closed'))]}"/>
+                            <field name="attach_draft_contract_filename" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="contract_approved_by_client"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"
+                                   domain="['|', ('id', '=', partner_id), ('parent_id', '=', partner_id), ('type', '=', 'contact')]"
+                                   attrs="{'readonly' : [('state', 'in', ('approved', 'unsigned', 'signed', 'closed'))]}"/>
+                            <field name="contract_approved_by_ourside" readonly="1"
+                                   domain="[('id', 'in', stakeholders_ids)]"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"
+                                   attrs="{'invisible': [('contract_approved_by_ourside', '=', False)]}"/>
+                            <field name="attach_sign_contract" filename="attach_sign_contract_filename"
+                                   attrs="{'readonly' : [('state', 'not in', ('unsigned'))]}"/>
+                            <field name="attach_sign_contract_filename" invisible="1"/>
+                            <field name="user_id" invisible="1"/>
+                            <field name="closure_reason" invisible="1"/>
+                            <field name="contract_closed_by" invisible="1"/>
+                            <field name="is_request_to_close" invisible="1"/>
+                            <field name="contract_rejected_by" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description" widget="html"/>
+                        </page>
+                        <page string="Documents">
+                            <field name="ir_attachment_ids" required="True" force_save="1"
+                                   attrs="{'readonly' : [('state', 'in', ('approved', 'unsigned', 'signed', 'closed'))]}"
+                                   context="{'default_res_model': 'partner.contract', 'default_res_id': id}">
+                                <tree editable="bottom">
+                                    <field name="res_model" force_save="1" invisible="1"/>
+                                    <field name="res_id" force_save="1" invisible="1"/>
+                                    <field name="name"/>
+                                    <field name="document_type_id" string='Document'
+                                           options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                                    <field name="type"/>
+                                    <field name="datas" string="Attachment"
+                                           attrs="{'invisible': [('type', '=', 'url')]}"/>
+                                    <field name="url" widget="url" string="URL"
+                                           attrs="{'invisible': [('type', '=', 'binary')]}"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Unsigned Contract Version">
+                            <field name="attach_unsigned_ids" force_save="1"
+                                   context="{'default_res_model': 'partner.contract', 'default_res_id': id}">
+                                <tree editable="false" create="false" edit="false" delete="true">
+                                    <field name="res_model" force_save="1" invisible="1"/>
+                                    <field name="res_id" force_save="1" invisible="1"/>
+                                    <field name="create_date" readonly="1" string="Date"/>
+                                    <field name="create_uid" readonly="1" string="Uploaded by"/>
+                                    <field name="name" force_save="1" readonly="1"/>
+                                    <field name="datas" string="Attachment" force_save="1" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Signed Contract Version">
+                            <field name="attach_signed_ids" force_save="1"
+                                   context="{'default_res_model': 'partner.contract', 'default_res_id': id}">
+                                <tree editable="false" create="false" edit="false" delete="true">
+                                    <field name="res_model" force_save="1" invisible="1"/>
+                                    <field name="res_id" force_save="1" invisible="1"/>
+                                    <field name="create_date" readonly="1" string="Date"/>
+                                    <field name="create_uid" readonly="1" string="Uploaded by"/>
+                                    <field name="name" force_save="1" readonly="1"/>
+                                    <field name="datas" string="Attachment" force_save="1" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Rejection History" readonly="1" force_save="1"
+                              attrs="{'invisible': [('contract_rejected_by', '=', False)]}">
+                            <field name="contract_rejection_ids">
+                                <tree create="false" edit="false" delete="false">
+                                    <field name="create_date" string="Date" readonly="1"/>
+                                    <field name="rejected_by" readonly="1"
+                                           options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                                    <field name="reason" readonly="1"/>
+                                </tree>
+                                <form>
+                                    <group>
+                                        <group>
+                                            <field name="create_date" string="Date" readonly="1"/>
+                                            <field name="rejected_by" readonly="1"
+                                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                                        </group>
+                                        <group>
+                                            <field name="reason" readonly="1"/>
+                                        </group>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_partner_contract_tree" model="ir.ui.view">
+        <field name="name">partner.contract.tree.view</field>
+        <field name="model">partner.contract</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="subject"/>
+                <field name="partner_id"/>
+                <field name="initiated_date"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="related_project"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_partner_contract_kanban" model="ir.ui.view">
+        <field name="name">partner.contract.kanban.view</field>
+        <field name="model">partner.contract</field>
+        <field name="arch" type="xml">
+            <kanban quick_create="false" default_group_by="state">
+                <field name="state" readonly="1"/>
+                <field name="color"/>
+                <field name="subject"/>
+                <field name="partner_id"/>
+                <field name="initiated_date"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="related_project"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+                            <div class="o_kanban_record_top mb16">
+                                <div class="o_kanban_record_headings mt4">
+                                    <strong class="o_kanban_record_title">
+                                        <span style="font-size:16px">
+                                            <t t-esc="record.subject.value"/>
+                                        </span>
+                                    </strong>
+                                </div>
+                                <strong>
+                                    <field name="partner_id"/>
+                                </strong>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left text-muted">
+                                    <span>
+                                        <t t-esc="record.start_date.value"/>
+                                        -
+                                        <t t-esc="record.end_date.value"/>
+                                    </span>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <field name="related_project"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_partner_contract_pivot" model="ir.ui.view">
+        <field name="name">partner.contract.pivot.view</field>
+        <field name="model">partner.contract</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="partner_id" type="row"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_partner_contract_activity" model="ir.ui.view">
+        <field name="name">partner.contract.activity.view</field>
+        <field name="model">partner.contract</field>
+        <field name="arch" type="xml">
+            <activity string="Contracts">
+                <templates>
+                    <div t-name="activity-box">
+                        <div>
+                            <field name="subject" display="full"/>
+                            <field name="partner_id" muted="1" display="full"/>
+                        </div>
+                    </div>
+                </templates>
+            </activity>
+        </field>
+    </record>
+
+    <record id="action_partner_contract_view" model="ir.actions.act_window">
+        <field name="name">Contract</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">partner.contract</field>
+        <field name="view_mode">tree,kanban,form,pivot,activity</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Contract
+            </p>
+        </field>
+    </record>
+
+</odoo>

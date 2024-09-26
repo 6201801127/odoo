@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="view_project_form_inherit_risk" model="ir.ui.view">
+        <field name="name">project.task.inherit.form.views</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='project_id']" position="before">
+                <field name="is_from_project" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_edit': True, 'no_open': True}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='project_id']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_edit': True, 'no_open': True}</attribute>
+                <attribute name="attrs">{'readonly': [('is_from_project', '=', True)]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='user_id']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_edit': True, 'no_open': True}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='parent_id']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_edit': True, 'no_open': True}</attribute>
+                <attribute name="domain">[('project_id', '=', project_id), ('is_issue', '=', False), ('risk_incident',
+                    '=', False)]
+                </attribute>
+            </xpath>
+            <xpath expr="//field[@name='tag_ids']" position="attributes">
+                <attribute name="options">{'no_create': True, 'no_edit': True, 'no_open': True}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="is_issue" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='recurring_task']" position="attributes">
+                <attribute name="attrs">{'invisible': ['|', ('allow_recurring_tasks', '=', False), ('is_issue', '=',
+                    True)]}
+                </attribute>
+            </xpath>
+            <xpath expr="//notebook//page[@name='extra_info']" position="after">
+                <page string="Risk Register">
+                    <field name="risk_lines_ids" nolabel="1">
+                        <tree editable="bottom">
+                            <field name="project_risk_id" required="1" string="Risk"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="risk_impact"/>
+                            <field name="description"/>
+                            <field name="category_id" required="1"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="response_id" required="1"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="type_id" required="1"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="mitigation_type_id" required="1"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="probability"/>
+                            <field name="status"/>
+                        </tree>
+                    </field>
+                </page>
+                <!--<page string="Issue Risk Register" attrs="{'invisible': [('is_issue', '=', False)]}">-->
+                    <!--<field name="risk_lines_ids" nolabel="1">-->
+                        <!--<tree editable="bottom">-->
+                            <!--<field name="project_risk_id" required="1"-->
+                                   <!--options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>-->
+                            <!--<field name="risk_impact"/>-->
+                            <!--<field name="description"/>-->
+                            <!--<field name="category_id" required="1"-->
+                                   <!--options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>-->
+                            <!--<field name="response_id" required="1"-->
+                                   <!--options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>-->
+                            <!--<field name="type_id" required="1"-->
+                                   <!--options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>-->
+                            <!--<field name="probability"/>-->
+                        <!--</tree>-->
+                    <!--</field>-->
+                <!--</page>-->
+            </xpath>
+            <xpath expr="//notebook//page[@name='extra_info']//group[1]//group[1]//field[@name='sequence']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//notebook//page[@name='extra_info']//group[1]//group[1]//field[@name='analytic_account_id']" position="attributes">
+                <attribute name="string">Project Account</attribute>
+                <attribute name="options">{'no_create': True, 'no_edit': True, 'no_open': True}</attribute>
+                <attribute name="attrs">{'invisible': [('analytic_account_id', '=', False)]}</attribute>
+            </xpath>
+
+        </field>
+    </record>
+    <!-- added by ajay-->
+    <record id="view_project_forms_inherit" model="ir.ui.view">
+        <field name="name">view.project.form.inherit</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <header>
+                <button name="submit_for_review" string="Submit For Review" class="btn-primary" type="object" attrs="{'invisible': ['|',('reviewer_boolean','=',True),('approver_boolean','=',True)],
+                                                                                                                      'invisible': [('state','!=','draft')]}"/>
+                <button name="cancel" string="Cancel" class="btn-primary" type="object" attrs="{'invisible': ['|',('reviewer_boolean','=',True),('approver_boolean','=',True)],
+                                                                                                'invisible': [('state','!=','draft')]}"/>
+                <button name="review" string="Review" class="btn-primary" type="object" attrs="{'invisible': ['|',('reviewer_boolean','!=',True),('state','!=','waiting for review')]}"/>
+                <button name="%(set_draft_wizard_action)d" string="Set To Draft" class="btn-primary" type="action" attrs="{'invisible': ['|',('reviewer_boolean','!=',True),('state','!=','waiting for review')]}"/>
+                <button name="approve" string="Approve" class="btn-primary" type="object" attrs="{'invisible': ['|',('approver_boolean','!=',True),('state','!=','waiting for approve')]}"/>
+                <button name="%(reject_wizard_action)d" string="Reject" class="btn-primary" type="action" attrs="{'invisible': ['|',('approver_boolean','!=',True),('state','!=','waiting for approve')]}"/>
+
+                <field name="state" widget="statusbar"/>
+            </header>
+            <xpath expr="//header" position="inside">
+                <field name="stage_id" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='outgoing_email']" position="after">
+                <field name="project_id"/>
+                <field name="wbs"/>
+                    <td class="o_td_label">
+                        <label class="o_form_label" for="feasibility_study" data-original-title="" title="">Feasibility Study</label>
+                        <span style="color: #ff0000" class="mandatory">*</span>
+                    </td>
+                    <field name="feasibility_study" required="1" nolabel="1"/>
+                    <field name="reviewer_remarks" readonly="1"/>
+                    <field name="approver_remarks" readonly="1"/>
+
+            </xpath>
+            <xpath expr="//field[@name='name']" position="before">
+                <field name="priority" widget="priority"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="before">
+                <field name="analytics_account" options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                <td class="o_td_label">
+                    <label class="o_form_label" for="project_category" data-original-title="" title="">Project Category
+
+                    </label>
+                    <span style="color: #ff0000" class="mandatory">*</span>
+                </td>
+                <field name="project_category" domain="[('fixed', '=', False)]" required="1" nolabel="1" options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                <field name="project_sub_category" domain="[('fixed', '=', True)]" options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="replace">
+                <td class="o_td_label">
+                    <label class="o_form_label" for="partner_id" data-original-title="" title="">Customer
+
+                    </label>
+                    <span style="color: #ff0000" class="mandatory">*</span>
+                </td>
+                <field name="partner_id" required="1" nolabel="1" options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                <field name="reviewer_id" options="{'no_create': True, 'no_edit': True, 'no_open': True}" />
+                <field name="approver_id" options="{'no_create': True, 'no_edit': True, 'no_open': True}" />
+                <field name="reviewer_boolean" invisible="1" />
+                <field name="approver_boolean" invisible="1"/>
+
+            </xpath>
+            <xpath expr="//field[@name='end_date']" position="after">
+                <field name="project_duration" readonly="1" force_save="1" style="margin-left: 30px" required="1"/>days
+            </xpath>
+
+            <xpath expr="//notebook//page[@name='settings']//group[1]//group[1]//field[@name='user_id']"
+                   position="after">
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="address"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- added by ajay-->
+    <record id="view_project_form_inherit" model="ir.ui.view">
+        <field name="name">view.project.task.inherit</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='progress']" position="before">
+                <field name="physical_milestone" widget="progressbar" options="{'editable':true}" optional="show"/>
+                <field name="payment_milestone" widget="progressbar" options="{'editable':true}" optional="show"/>
+                <field name="project_completion" widget="progressbar" options="{'editable':true}" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!--     added by ajay-->
+    <record id="view_project_kanban_inherit_ak" model="ir.ui.view">
+        <field name="name">view.project.kanban.inherit</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban/templates/t/div/div/span/field[@name='is_favorite']" position="replace">
+                <field name="priority" widget="priority"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- added by ajay form view-->
+    <record id="project_category_form1" model="ir.ui.view">
+        <field name="name">project category form</field>
+        <field name="model">project.category</field>
+        <field name="arch" type="xml">
+            <form string="Project Category">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Category name" class="oe_edit_only"/>
+                            <field name="name" placeholder="e.g. Lamps" class="oe_inline"/>
+                    </div>
+                    <group name="first" col="2">
+                        <field name="parent_id" class="oe_inline"/>
+                        <field name="fixed" invisible="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!--tree view-->
+    <record id="project_category_tree1" model="ir.ui.view">
+        <field name="name">project category tree</field>
+        <field name="model">project.category</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <tree string="Product Categories">
+                <field name="completes_name" string="Product Category"/>
+            </tree>
+        </field>
+    </record>
+    <!--action added by ajay-->
+    <record id="project_category_action" model="ir.actions.act_window">
+        <field name="name">project category action</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">project.category</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <!--menu added by ajay-->
+    <menuitem id="sub_menu_project_category"
+              name="Project Category"
+              parent="project.menu_project_config"
+              action="project_category_action"/>
+
+
+
+
+    <record id="action_open_project_tasks" model="ir.actions.act_window">
+        <field name="name">Tasks</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">kanban,tree,form,calendar,pivot,graph,activity</field>
+        <field name="domain">[('project_id', '=', active_id), ('is_issue', '=', False), ('risk_incident', '=', False)]
+        </field>
+        <field name="context">{
+            'pivot_row_groupby': ['user_id'],
+            'default_project_id': active_id,
+            'default_is_from_project': True,
+            }
+        </field>
+        <field name="search_view_id" ref="project.view_task_search_form"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No tasks found. Let's create one!
+            </p>
+            <p>
+                To get things done, use activities and status on tasks.
+                <br/>
+                Chat in real time or by email to collaborate efficiently.
+            </p>
+        </field>
+    </record>
+
+    <record id="risk_incident_smart_button_view" model="ir.ui.view">
+        <field name="name">project.risk.incident.smart.button</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="gts_change_request.view_project_project_inherit_form_change_request"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='open_change_requests']" position="after">
+                <button name="open_rist_incident_project" type="object" class="oe_stat_button" icon="fa-tasks"
+                        groups="project_risk_management_app.group_risk_user,project_risk_management_app.group_risk_manager">
+                    <field string="Risk Incident" name="risk_incident_count" widget="statinfo"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- project.task create button and  Risk register page -->
+    <record id="view_create_wizard_fields" model="ir.ui.view">
+        <field name="name">project.risk.incident</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <!--            <header>-->
+            <!--                <button name="%(create_project_incident_action)d" string="Create Risk Incident" type="action"-->
+            <!--                        class="btn-primary"/>-->
+            <!--            </header>-->
+            <xpath expr="//div[@name='button_box']//button[2]" position="replace">
+                <button class="oe_stat_button" type="action" name="%(action_open_project_tasks)d" icon="fa-tasks">
+                    <field string="Tasks In Progress" name="task_count" widget="statinfo"
+                           options="{'label_field': 'label_tasks'}"/>
+                </button>
+            </xpath>
+            <notebook>
+                <page string="Risk Register">
+                    <field name="risk_lines_ids" nolabel="1">
+                        <tree editable="bottom">
+                            <field name="project_risk_id" required="1"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="risk_impact"/>
+                            <field name="description"/>
+                            <field name="category_id" required="1"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="response_id" required="1"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="type_id" required="1"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="probability"/>
+                            <field name="status"/>
+                        </tree>
+                    </field>
+                </page>
+            </notebook>
+            <xpath expr="//sheet" position="after">
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_project_view_kanban" model="ir.actions.act_window">
+        <field name="name">Projects</field>
+        <field name="res_model">project.project</field>
+        <field name="domain">[]</field>
+        <field name="view_mode">kanban,form</field>
+        <field name="target">main</field>
+        <field name="view_id" ref="project.view_project_kanban"/>
+    </record>
+
+    <record id="view_project_form_inherit_timesheet" model="ir.ui.view">
+        <field name="name">project.task.inherit.timesheet.form.views</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="hr_timesheet.view_task_form2_inherited"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@id='timesheets_tab']//field[@name='timesheet_ids']//tree//field[@name='employee_id']"
+                   position="attributes">
+                <attribute name="options">{'no_create': True, 'no_edit': True, 'no_open': True}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+
+    <!--<record id="view_risk_manager_notebook_project_task" model="ir.ui.view">-->
+    <!--<field name="name">project.task</field>-->
+    <!--<field name="model">project.task</field>-->
+    <!--<field eval="2" name="priority"/>-->
+    <!--<field name="arch" type="xml">-->
+    <!--<form string="Task" class="o_form_project_tasks">-->
+    <!--<header>-->
+    <!--<button name="action_assign_to_me" string="Assign to Me" type="object" class="oe_highlight" attrs="{'invisible' : [('user_id', '!=', False)]}"/>-->
+    <!--<button name="%(portal.portal_share_action)d" string="Share" type="action" class="oe_highlight oe_read_only"/>-->
+    <!--<field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}"/>-->
+    <!--<button name="%(create_task_incident_action)d" string="Create Risk Incident" type="action" class="btn-primary" />-->
+    <!--</header>-->
+
+    <!--<sheet string="Task">-->
+    <!--<div class="oe_button_box" name="button_box">-->
+    <!--<button name="toggle_active" type="object" groups="base.group_user"-->
+    <!--class="oe_stat_button" icon="fa-archive">-->
+    <!--<field name="active" widget="boolean_button"-->
+    <!--options='{"terminology": "archive"}'/>-->
+    <!--</button>-->
+    <!---->
+    <!--<button name="open_risk_incident_task" type="object" class="oe_stat_button" icon="fa-tasks">-->
+    <!--<field string="Task" name="risk_incident_count" widget="statinfo"/>-->
+    <!--</button>-->
+    <!--</div>-->
+
+    <!---->
+    <!--<div class="oe_title pr-0">-->
+    <!--<h1 class="d-flex flex-row justify-content-between">-->
+    <!--<field name="priority" widget="priority" class="mr-3"/>-->
+    <!--<field name="name" class="o_task_name text-truncate" placeholder="Task Title..."/>-->
+    <!--<field name="kanban_state" widget="state_selection" class="ml-auto"/>-->
+    <!--</h1>-->
+    <!--</div>-->
+
+    <!--<group>-->
+    <!--<group>-->
+    <!--<field name="project_id" domain="[('active', '=', True)]"/>-->
+    <!--<field name="user_id"-->
+    <!--class="o_task_user_field"-->
+    <!--options='{"no_open": True}'/>-->
+    <!--<field name="legend_blocked" invisible="1"/>-->
+    <!--<field name="legend_normal" invisible="1"/>-->
+    <!--<field name="legend_done" invisible="1"/>-->
+    <!--</group>-->
+
+    <!--<group>-->
+    <!--<field name="date_deadline"/>-->
+    <!--<field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>-->
+    <!--</group>-->
+    <!--</group>-->
+
+    <!--<notebook>-->
+    <!--<page name="description_page" string="Description">-->
+    <!--<field name="description" type="html"/>-->
+    <!--<div class="oe_clear"/>-->
+    <!--</page>-->
+    <!---->
+    <!--<page name="extra_info" string="Extra Info">-->
+    <!--<group>-->
+    <!--<group>-->
+    <!--<field name="sequence" groups="base.group_no_one"/>-->
+    <!--<field name="partner_id" attrs="{'readonly': [('parent_id', '!=', False)]}"/>-->
+    <!--<field name="email_from" attrs="{'readonly': [('parent_id', '!=', False)]}"/>-->
+    <!--<field name="email_cc" groups="base.group_no_one"/>-->
+    <!--<field-->
+    <!--name="parent_id"-->
+    <!--domain="[('parent_id', '=', False)]"-->
+    <!--groups="project.group_subtask_project"-->
+    <!--/>-->
+    <!--<field name="child_ids" invisible="1" />-->
+    <!--<field name="subtask_project_id" invisible="1" />-->
+    <!--<field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>-->
+    <!--<field name="displayed_image_id" groups="base.group_no_one"/>-->
+    <!--</group>-->
+
+    <!--<group>-->
+    <!--<field name="date_assign" groups="base.group_no_one"/>-->
+    <!--<field name="date_last_stage_update" groups="base.group_no_one"/>-->
+    <!--</group>-->
+    <!---->
+    <!--<group string="Working Time to Assign" attrs="{'invisible': [('working_hours_open', '=', 0.0)]}">-->
+    <!--<field name="working_hours_open" string="Hours"/>-->
+    <!--<field name="working_days_open" string="Days"/>-->
+    <!--</group>-->
+    <!---->
+    <!--<group string="Working Time to Close" attrs="{'invisible': [('working_hours_close', '=', 0.0)]}">-->
+    <!--<field name="working_hours_close" string="Hours"/>-->
+    <!--<field name="working_days_close" string="Days"/>-->
+    <!--</group>-->
+    <!--</group>-->
+    <!--</page>-->
+
+
+    <!--<page string="Task Risk Register">-->
+    <!--<field name="risk_lines_ids" nolabel="1">-->
+    <!--<tree editable="bottom">-->
+    <!--<field name="project_risk_id" required="1" />-->
+    <!--<field name="description" />-->
+    <!--<field name="category_id" required="1" />-->
+    <!--<field name="response_id" required="1" />-->
+    <!--<field name="type_id" required="1" />-->
+    <!--<field name="probability"/>-->
+    <!--</tree>-->
+    <!--</field>-->
+    <!--</page>-->
+    <!--</notebook>-->
+    <!--</sheet>-->
+    <!---->
+    <!--<div class="oe_chatter">-->
+    <!--<field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>-->
+    <!--<field name="activity_ids" widget="mail_activity"/>-->
+    <!--<field name="message_ids" widget="mail_thread"/>-->
+    <!--</div>-->
+    <!--</form>-->
+    <!--</field>-->
+    <!--</record>-->
+
+    <!--<record id="view_task_tree" model="ir.ui.view">-->
+    <!--<field name="name">project.task.tree</field>-->
+    <!--<field name="model">project.task</field>-->
+    <!--<field eval="2" name="priority"/>-->
+    <!--<field name="arch" type="xml">-->
+    <!--<tree>-->
+    <!--<field name="name"/>-->
+    <!--<field name="project_id"/>-->
+    <!--<field name="user_id"/>-->
+    <!--<field name="stage_id"/>-->
+    <!--</tree>-->
+    <!--</field>-->
+    <!--</record>-->
+
+    <!--<record id="action_risk_management_notebook" model="ir.actions.act_window">-->
+    <!--<field name="name">Task</field>-->
+    <!--<field name="res_model">project.task</field>-->
+    <!--<field name="view_mode">tree,kanban,form,calendar,graph</field>-->
+    <!--<field name="view_id" ref="project.view_task_tree2"/>-->
+    <!--</record>-->
+
+    <!--<record id="action_risk_management_notebook_kanban" model="ir.actions.act_window.view">-->
+
+    <!--<field name="view_mode">kanban</field>-->
+    <!--<field name="view_id" ref="project.view_task_kanban"/>-->
+    <!--<field name="act_window_id" ref="action_risk_management_notebook"/>-->
+    <!--</record>-->
+
+    <!--<record id="action_risk_management_notebook_tree" model="ir.actions.act_window.view">-->
+
+    <!--<field name="view_mode">tree</field>-->
+    <!--<field name="view_id" ref="view_task_tree"/>-->
+    <!--<field name="act_window_id" ref="action_risk_management_notebook"/>-->
+    <!--</record>-->
+
+    <!--<record id="action_risk_management_notebook_form" model="ir.actions.act_window.view">-->
+
+    <!--<field name="view_mode">form</field>-->
+    <!--<field name="view_id" ref="view_risk_manager_notebook_project_task"/>-->
+    <!--<field name="act_window_id" ref="action_risk_management_notebook"/>-->
+    <!--</record>-->
+
+    <!--<record id="action_risk_management_notebook_calendar" model="ir.actions.act_window.view">-->
+    <!--<field name="view_mode">calendar</field>-->
+    <!--<field name="view_id" ref="project.view_task_calendar"/>-->
+    <!--<field name="act_window_id" ref="action_risk_management_notebook"/>-->
+    <!--</record>-->
+
+    <!--<record id="action_risk_management_notebookgraph" model="ir.actions.act_window.view">-->
+    <!--<field name="view_mode">graph</field>-->
+    <!--<field name="view_id" ref="project.view_project_task_graph"/>-->
+    <!--<field name="act_window_id" ref="action_risk_management_notebook"/>-->
+    <!--</record>-->
+
+
+    <!--<menuitem id="menu_project_risk_task" name="Risk Management App" parent="project_risk_management_app.menu_main_risk_management"/>-->
+    <!--<menuitem action="action_project_view_kanban"-->
+    <!--id="main_menu_action"-->
+    <!--name="Projects &amp; Tasks"-->
+    <!--parent="project_risk_management_app.menu_main_risk_management"/>-->
+
+    <!--<menuitem id="sub_menu_project"-->
+    <!--name="Projects"-->
+    <!--parent="main_menu_action"-->
+    <!--action="action_project_view_kanban"/>-->
+
+    <!--<menuitem id="sub_menu_task"-->
+    <!--name="Tasks"-->
+    <!--parent="main_menu_action"-->
+    <!--action="project.action_view_all_task"/>-->
+
+</odoo>

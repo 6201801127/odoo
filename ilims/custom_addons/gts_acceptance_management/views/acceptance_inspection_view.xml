@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record model="ir.ui.view" id="acceptance_inspection_form_view">
+        <field name="name">acceptance.inspection.form</field>
+        <field name="model">acceptance.inspection</field>
+        <field name="arch" type="xml">
+            <form string="Inspection">
+                <header>
+                    <!--<button name="action_draft" type="object" string="Reset to Draft"-->
+                            <!--attrs="{'invisible': [('state', '!=', 'canceled')]}"/>-->
+                    <button name="action_todo" type="object" class="oe_highlight" states="draft" string="Mark Todo"/>
+                    <!--<button name="action_confirm" type="object" class="oe_highlight" states="approved" string="Confirm"-->
+                            <!--icon="fa-check"/>-->
+                    <button name="%(gts_acceptance_management.action_approval_wizard_acceptance)d"
+                            string="Submit for Approval" type="action"
+                            class="oe_highlight" states="ready,failed"/>
+                    <button name="button_approve" string="Accepted" type="object" class="oe_highlight"
+                            states="waiting_for_approval" groups="gts_groups.group_acceptance_management_can_approve"/>
+                    <button name="%(gts_acceptance_management.action_reject_acceptance_wizard)d" string="Not Accepted"
+                            type="action" class="oe_highlight" states="waiting_for_approval"
+                            groups="gts_groups.group_acceptance_management_can_approve"/>
+                    <!--<button name="action_approve" type="object" states="waiting" class="oe_highlight"-->
+                            <!--groups="gts_acceptance_management.group_acceptance_manager" string="Approve"/>-->
+                    <!--<button name="action_cancel" type="object"-->
+                            <!--attrs="{'invisible': [('state', 'not in', ['waiting', 'approved', 'failed', 'success'])]}"-->
+                            <!--string="Cancel" icon="fa-ban"/>-->
+                    <field name="state" widget="statusbar" statusbar_visible="draft"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="action"
+                                name="%(action_acceptance_inspection_set_check_list)d"
+                                icon="fa-bookmark-o" attrs="{'invisible': [('check_list', '!=', False)]}">
+                            <field name="acceptance_ch" string="Set Acceptance Criteria" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <h1>
+                        <!--<label string="Inspection " for="name" />-->
+                        <field name="name" class="oe_inline" readonly="1" force_save="1"
+                               attrs="{'readonly': [('state', '=', 'success')]}"/>
+                    </h1>
+                    <group>
+                        <group>
+                            <field name="subject" required="1" attrs="{'readonly': [('state', '=', 'success')]}"/>
+                            <field name="project_acceptance_definition" attrs="{'readonly': [('state', '=', 'success')]}"/>
+                            <field name="check_list" attrs="{'invisible': [('check_list', '=', False)]}"
+                                   options="{'no_create_edit': True, 'no_create': True, 'no_open': True}"/>
+                            <!--<field name="object_id" />-->
+                            <field name="qty" required="1" invisible="1"/>
+                            <!--<field name="product_id" />-->
+                            <field name="is_from_project" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="date" attrs="{'readonly': [('state', '=', 'success')]}"/>
+                            <field name="due_date" readonly="1" attrs="{'invisible': [('due_date', '=', False)]}"/>
+                            <field name="success" invisible="1"/>
+                            <field name="auto_generated" invisible="1"/>
+                            <field name="project_id" required="1"
+                                   attrs="{'readonly': ['|', ('state', '!=', 'draft'), ('is_from_project', '=', True)]}"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="stakeholders_ids" invisible="1"/>
+                            <field name="user" required="1" domain="[('id', 'in', stakeholders_ids)]"
+                                   attrs="{'readonly': [('state', '=', 'success')]}"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="project_stage_id" domain="[('project_ids', 'in', project_id)]"
+                                   attrs="{'readonly': [('state', '=', 'success')]}"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Acceptance Criteria">
+                            <field name="inspection_lines" nolabel="1">
+                                <tree string="Acceptance Criteria" editable="top" delete="false" create="false">
+                                    <field name="name" readonly="1"/>
+                                    <field name="remarks" attrs="{'readonly': [('parent.state', '=', 'success')]}"/>
+                                    <field name="criteria_status"
+                                           attrs="{'readonly': [('parent.state', '=', 'success')]}"/>
+                                    <!--<field name="question_type" readonly="1"/>-->
+                                    <!--<field name="possible_ql_values" invisible="1"/>-->
+                                    <!--<field name="qualitative_value"-->
+                                           <!--options="{'no_create': True, 'no_edit': True, 'no_open': True}"-->
+                                           <!--attrs="{'readonly': ['|', ('question_type', '=', 'quantitative'), ('parent.state', '=', 'success')]}"/>-->
+                                    <!--<field name="quantitative_value"-->
+                                           <!--attrs="{'readonly': ['|', ('question_type', '=', 'qualitative'), ('parent.state', '=', 'success')]}"/>-->
+                                    <!--<field name="uom_id" groups="uom.group_uom"-->
+                                           <!--attrs="{'readonly': ['|', ('question_type', '=', 'qualitative'), ('parent.state', '=', 'success')]}"/>-->
+                                    <!--<field name="check_list_uom_category" invisible="1"/>-->
+                                    <!--<field name="min_value" invisible="1"/>-->
+                                    <!--<field name="max_value" invisible="1"/>-->
+                                    <!--<field name="valid_values" readonly="1"/>-->
+                                    <!--<field name="weightage" readonly="1" force_save="1"/>-->
+                                    <!--<field name="deadline"-->
+                                           <!--attrs="{'readonly': [('parent.state', '=', 'success')]}"/>-->
+                                    <!--<field name="remarks" attrs="{'readonly': [('parent.state', '=', 'success')]}"/>-->
+                                    <!--<field name="success" readonly="1" force_save="1"/>-->
+                                </tree>
+                            </field>
+                        </page>
+                        <!--<page string="Deliverables and Acceptance Criteria">-->
+                            <!--<field name="deliverables_ids" attrs="{'readonly': [('state', '=', 'success')]}">-->
+                                <!--<tree editable="bottom">-->
+                                    <!--<field name="acceptance_inspection_id" invisible="1"/>-->
+                                    <!--<field name="deliverables" required="1"/>-->
+                                    <!--<field name="accept_criteria_situation" required="1"/>-->
+                                    <!--<field name="remarks"/>-->
+                                <!--</tree>-->
+                            <!--</field>-->
+                        <!--</page>-->
+                        <!--<page string="Acceptance Assurance Activities">-->
+                            <!--<field name="assurance_activity_ids" attrs="{'readonly': [('state', '=', 'success')]}">-->
+                                <!--<tree editable="bottom">-->
+                                    <!--<field name="acceptance_inspection_id" invisible="1"/>-->
+                                    <!--<field name="activity_name" required="1"/>-->
+                                    <!--<field name="resource" required="1"/>-->
+                                    <!--<field name="remarks"/>-->
+                                <!--</tree>-->
+                            <!--</field>-->
+                        <!--</page>-->
+                        <page string="Notes">
+                            <group string="Internal notes">
+                                <field name="internal_notes" nolabel="1" attrs="{'readonly': [('state', '=', 'success')]}"/>
+                            </group>
+                            <group string="External notes">
+                                <field name="external_notes" nolabel="1" attrs="{'readonly': [('state', '=', 'success')]}"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="acceptance_inspection_tree_view">
+        <field name="name">acceptance.inspection.tree</field>
+        <field name="model">acceptance.inspection</field>
+        <field name="arch" type="xml">
+            <tree string="Inspections">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="user"/>
+                <field name="check_list"/>
+                <!--<field name="qty"/>-->
+                <!--<field name="product_id"/>-->
+                <field name="project_id"/>
+                <!--<field name="success"/>-->
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="acceptance_inspection_search_view">
+        <field name="name">acceptance.inspection.search</field>
+        <field name="model">acceptance.inspection</field>
+        <field name="arch" type="xml">
+            <search string="Search inspection">
+                <group>
+                    <field name="name"/>
+                    <field name="user"/>
+                    <field name="object_id"/>
+                    <!--<field name="product_id" />-->
+                    <field name="project_id"/>
+                    <field name="check_list"/>
+                </group>
+                <newline/>
+                <filter string="Correct" name="correct" domain="[('success', '=', True)]"/>
+                <filter string="Incorrect" name="incorrect" domain="[('success', '=', False)]"/>
+                <newline/>
+                <group expand="0" string="Group by...">
+                    <filter string="Reference" name="group_by_object_id" domain="[]"
+                            context="{'group_by': 'object_id'}"/>
+                    <filter string="Checklist" name="group_by_check_list" domain="[]"
+                            context="{'group_by': 'check_list'}"/>
+                    <filter string="Responsible" name="group_by_user" domain="[]" context="{'group_by': 'user'}"/>
+                    <!--<filter-->
+                    <!--string="Product"-->
+                    <!--name="group_by_product_id"-->
+                    <!--domain="[]"-->
+                    <!--context="{'group_by': 'product_id'}"-->
+                    <!--/>-->
+                    <filter string="Project" name="group_by_project_id" domain="[]"
+                            context="{'group_by': 'project_id'}"/>
+                    <filter string="State" name="group_by_state" domain="[]" context="{'group_by': 'state'}"/>
+                    <filter string="Success" name="group_by_success" domain="[]" context="{'group_by': 'success'}"/>
+                    <filter string="Auto-generated" name="group_by_auto_generated" domain="[]"
+                            context="{'group_by': 'auto_generated'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="acceptance_inspection_kanban_view">
+        <field name="name">acceptance.inspection.kanban</field>
+        <field name="model">acceptance.inspection</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" quick_create="false"
+                    class="oe_background_grey o_kanban_dashboard o_project_kanban o_emphasize_colors">
+                <field name="state" readonly="1"/>
+                <field name="color"/>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="user"/>
+                <field name="check_list"/>
+                <field name="project_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click o_has_icon">
+                            <div class="o_project_kanban_main">
+                                <div class="o_kanban_card_content">
+                                    <div class="o_kanban_primary_left">
+                                        <div class="o_primary">
+                                            <span>
+                                                <t t-esc="record.name.value"/>
+                                            </span>
+                                            <span t-if="record.user.value">
+                                                <strong>
+                                                    <t t-esc="record.user.value"/>
+                                                </strong>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_card_manage_pane dropdown-menu" role="menu">
+                                    <div class="o_kanban_card_manage_section o_kanban_manage_reports">
+                                        <!--<div role="menuitem">-->
+                                            <!--<a name="135" type="action">Share</a>-->
+                                        <!--</div>-->
+                                        <div role="menuitem">
+                                            <a type="edit">Edit</a>
+                                        </div>
+                                    </div>
+                                    <div role="menuitem" aria-haspopup="true" class="o_no_padding_kanban_colorpicker">
+                                        <ul class="oe_kanban_colorpicker" data-field="color" role="popup"/>
+                                    </div>
+                                </div>
+                                <a class="o_kanban_manage_toggle_button o_left" href="#"
+                                   groups="project.group_project_manager">
+                                    <i class="fa fa-ellipsis-v" role="img" aria-label="Manage" title="Manage"/>
+                                </a>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left text-muted">
+                                        <span>
+                                            <t t-esc="record.date.value"/>
+                                        </span>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="project_id"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="acceptance_inspection_pivot_view">
+        <field name="name">acceptance.inspection.pivot</field>
+        <field name="model">acceptance.inspection</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="name" type="row"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="acceptance_inspection_graph_view">
+        <field name="name">acceptance.inspection.graph</field>
+        <field name="model">acceptance.inspection</field>
+        <field name="arch" type="xml">
+            <graph sample="1">
+                <field name="user"/>
+                <field name="name"/>
+            </graph>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="acceptance_inspection_calendar_view">
+        <field name="name">acceptance.inspection.calendar</field>
+        <field name="model">acceptance.inspection</field>
+        <field name="arch" type="xml">
+            <calendar date_start="date" color="state" hide_time="true" event_limit="5">
+                <field name="name"/>
+                <field name="user" avatar_field="image_128"/>
+                <field name="qty" widget="monetary"/>
+                <field name="project_id"/>
+                <field name="state" filters="1" invisible="1"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="acceptance_inspection_activity_view">
+        <field name="name">acceptance.inspection.activity</field>
+        <field name="model">acceptance.inspection</field>
+        <field name="arch" type="xml">
+            <activity string="Contracts">
+                <templates>
+                    <div t-name="activity-box">
+                        <div>
+                            <field name="name" display="full"/>
+                            <field name="user" muted="1" display="full"/>
+                        </div>
+                    </div>
+                </templates>
+            </activity>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_acceptance_inspection">
+        <field name="name">Acceptance</field>
+        <field name="res_model">acceptance.inspection</field>
+        <field name="view_mode">kanban,tree,form,pivot,calendar,graph,activity</field>
+    </record>
+
+    <menuitem name="Acceptance Plan"
+              parent="acceptance_inspection_menu_parent"
+              id="acceptance_inspection_menu"
+              action="action_acceptance_inspection"/>
+
+    <!--******************** Inspection Lines ******************************-->
+    <record model="ir.ui.view" id="acceptance_inspection_line_tree_view">
+        <field name="name">acceptance.inspection.line.tree</field>
+        <field name="model">acceptance.inspection.line</field>
+        <field name="arch" type="xml">
+            <tree string="Inspection lines"
+                  delete="false" create="false">
+                <field name="inspection_id"/>
+                <field name="subject"/>
+                <!--<field name="product_id"/>-->
+                <field name="name"/>
+                <field name="remarks"/>
+                <field name="criteria_status"/>
+                <!--<field name="question_type"/>-->
+                <!--<field name="possible_ql_values" invisible="1"/>-->
+                <!--<field name="qualitative_value" attrs="{'readonly': [('question_type', '=', 'quantitative')]}"/>-->
+                <!--<field name="quantitative_value" attrs="{'readonly': [('question_type', '=', 'qualitative')]}"/>-->
+                <!--<field name="uom_id" groups="uom.group_uom"-->
+                       <!--attrs="{'readonly': [('question_type', '=', 'qualitative')]}"/>-->
+                <!--<field name="check_list_uom_category" invisible="1"/>-->
+                <!--<field name="valid_values"/>-->
+                <!--<field name="success"/>-->
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="acceptance_inspection_line_search_view">
+        <field name="name">acceptance.inspection.line.search</field>
+        <field name="model">acceptance.inspection.line</field>
+        <field name="arch" type="xml">
+            <search string="Search inspection line">
+                <group>
+                    <field name="name"/>
+                    <field name="inspection_id"/>
+                    <field name="criteria_status"/>
+                    <!--<field name="product_id"/>-->
+                    <!--<field name="success"/>-->
+                </group>
+                <!--<newline/>-->
+                <!--<filter string="Correct" name="correct" domain="[('success', '=', True)]"/>-->
+                <!--<filter string="Incorrect" name="incorrect" domain="[('success', '=', False)]"/>-->
+                <!--<newline/>-->
+                <group expand="0" string="Group by...">
+                    <filter string="Inspection" name="group_by_inspection_id" domain="[]"
+                            context="{'group_by': 'inspection_id'}"/>
+                    <filter string="Criteria Line" name="group_by_name" domain="[]" context="{'group_by': 'name'}"/>
+                    <filter string="Status" name="group_by_criteria_status" domain="[]"
+                            context="{'group_by': 'criteria_status'}"/>
+                    <!--<filter string="Success" name="group_by_success" domain="[]" context="{'group_by': 'success'}"/>-->
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="acceptance_inspection_line_kanban_view">
+        <field name="name">acceptance.inspection.line.kanban</field>
+        <field name="model">acceptance.inspection.line</field>
+        <field name="arch" type="xml">
+            <kanban quick_create="false">
+                <field name="inspection_id"/>
+                <!--<field name="product_id"/>-->
+                <field name="name"/>
+                <!--<field name="question_type"/>-->
+                <!--<field name="qualitative_value"/>-->
+                <!--<field name="quantitative_value"/>-->
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+                            <div class="o_kanban_record_top mb16">
+                                <div class="o_kanban_record_headings mt4">
+                                    <strong class="o_kanban_record_title">
+                                        <span style="font-size:16px">
+                                            <t t-esc="record.name.value"/>
+                                        </span>
+                                    </strong>
+                                </div>
+                                <!--<strong>-->
+                                    <!--<field name="product_id"/>-->
+                                <!--</strong>-->
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <span>
+                                        <t t-esc="record.name.value"/>
+                                    </span>
+                                    <!--<span>-->
+                                        <!--<t t-esc="record.question_type.value"/>-->
+                                    <!--</span>-->
+                                </div>
+                                <!--<div class="oe_kanban_bottom_right">-->
+                                    <!--<field name="qualitative_value"/>-->
+                                    <!--<field name="quantitative_value"/>-->
+                                <!--</div>-->
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="acceptance_inspection_line_pivot_view">
+        <field name="name">acceptance.inspection.line.pivot</field>
+        <field name="model">acceptance.inspection.line</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="name" type="row"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="acceptance_inspection_line_graph_view">
+        <field name="name">acceptance.inspection.line.graph</field>
+        <field name="model">acceptance.inspection.line</field>
+        <field name="arch" type="xml">
+            <graph sample="1">
+                <field name="inspection_id"/>
+                <field name="name"/>
+            </graph>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_acceptance_inspection_line">
+        <field name="name">Acceptance Criteria</field>
+        <field name="res_model">acceptance.inspection.line</field>
+        <field name="view_mode">tree,kanban,pivot,graph</field>
+        <field name="view_id" ref="acceptance_inspection_line_tree_view"/>
+    </record>
+
+    <menuitem name="Acceptance Criteria"
+              parent="acceptance_inspection_menu_parent"
+              id="acceptance_inspection_lines_menu"
+              action="action_acceptance_inspection_line"/>
+
+</odoo>

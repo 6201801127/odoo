@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2016-Present Webkul Software Pvt. Ltd. (<https://webkul.com/>) -->
+<!-- See LICENSE file for full copyright and licensing details. -->
+<!-- License URL : https://store.webkul.com/license.html/ -->
+<odoo>
+    <data>
+        <record id="view_pwa_push_notifications_search" model="ir.ui.view">
+            <field name="name">PWA Push Notifiactions Search</field>
+            <field name="model">pwa.push.notifications</field>
+            <field name="arch" type="xml">
+                <search string="Push Notifications Search">
+                    <filter string="Validated Templates" name="state" domain="[('state','=','validate')]"/>
+                </search>
+            </field>
+        </record>
+        <record id="view_pwa_push_notifications_tree" model="ir.ui.view">
+            <field name="name">PWA Push Notifiactions</field>
+            <field name="model">pwa.push.notifications</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree decoration-success="state=='sent'" decoration-primary="state=='validate'" decoration-muted="state=='cancel'" decoration-danger="state=='error'">
+                    <field name="name" />
+                    <field name="message"/>
+                    <field name="redirect_url"/>
+                    <field name="is_scheduled" string="Scheduled"/>
+                    <field name="create_date" string="Created Date"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        <record id="view_pwa_push_notifications_form" model="ir.ui.view">
+            <field name="name">PWA Push Notifiactions</field>
+            <field name="model">pwa.push.notifications</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Web Push Notifications">
+                    <header>
+                        <button name="validate_template_data" type="object" string="Validate"  attrs="{'invisible':[('state','!=','draft')]}" class="oe_highlight"/>
+                        <button name="send_pwa_push_notification" string="Send Now" type="object" attrs="{'invisible':[('state','!=','validate')]}" class="oe_highlight"/>
+                        <button name="set_to_draft" type="object" string="Set To Draft"  attrs="{'invisible':[('state','=','draft')]}" class="oe_highlight"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name" placeholder="Title of the notification" attrs="{'readonly':[('state','!=','draft')]}"/>
+                                <field name="image_type" attrs="{'readonly':[('state','!=','draft')]}"/>
+                            </group>
+                            <group>
+                                <field name="create_date" string="Created Date" attrs="{'invisible':[('id','=',False)]}"/>
+                                <field name="image_url" attrs="{'invisible':[('image_type','!=','url')],'readonly':[('state','!=','draft')],'required':[('image_type','=','url')]}"/>
+                                <field name="image" widget="image"  class="oe_avatar" attrs="{'invisible':[('image_type','!=','base_64')],'readonly':[('state','!=','draft')],'required':[('image_type','=','base_64')]}"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="redirect_url" palceholder="Redirect Link" attrs="{'readonly':[('state','!=','draft')]}"/>
+                            <field name="message" placeholder="Message to be displayed in notification"  attrs="{'readonly':[('state','!=','draft')]}"/>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="send_to" attrs="{'readonly':[('state','!=','draft')]}"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="last_sent_date" readonly="1" attrs="{'invisible':[('last_sent_date', '=', False)]}"/>
+                                <field name="summary" readonly="1" attrs="{'invisible':[('last_sent_date', '=', False)]}"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="is_scheduled" widget="radio" options="{'horizontal': true}" attrs="{'readonly':[('state','!=','draft')]}"/>
+                        </group>
+                        <group attrs="{'invisible':[('is_scheduled', '!=', 'y')]}">
+                            <group>
+                                <field name="schedule_date"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="action_id_pwa_push_notifications" model="ir.actions.act_window">
+            <field name="name">Notification Templates</field>
+            <field name="res_model">pwa.push.notifications</field>
+            <field name="view_mode">search,tree,form</field>
+            <field name="view_id" ref="view_pwa_push_notifications_search"/>
+        </record>
+
+        <record id="view_pwa_user_registration_tree" model="ir.ui.view">
+            <field name="name">PWA User Registrations</field>
+            <field name="model">pwa.user.registrations</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree >
+                    <field name="user_id"/>
+                    <field name="create_date" string="Registration On"/>
+                    <field name="registration_key"/>
+                </tree>
+            </field>
+        </record>
+        <record id="view_pwa_user_registration_form" model="ir.ui.view">
+            <field name="name">PWA User Registrations</field>
+            <field name="model">pwa.user.registrations</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form >
+                    <sheet>
+                        <group>
+                            <field name="user_id" readonly="1"/>
+                            <field name="create_date" readonly="1" string="Registration On"/>
+                        </group>
+                        <group>
+                            <field name="registration_key"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="action_id_view_pwa_user_registration" model="ir.actions.act_window">
+            <field name="name">User Registrations</field>
+            <field name="res_model">pwa.user.registrations</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_pwa_user_registration_tree"/>
+        </record>
+
+        <menuitem
+            id="pwa_main_menu"
+            name="PWA"
+            parent="website.menu_website_configuration"
+            sequence="99"
+            />
+        <menuitem
+            id="pwa_notification_template_menu"
+            name="Notification Templates"
+            parent="pwa_main_menu"
+            sequence="1"
+            action="action_id_pwa_push_notifications"
+            />
+        <menuitem
+            id="pwa_register_browser_menu"
+            name="Registered Browsers"
+            sequence="2"
+            parent="pwa_main_menu"
+            action="action_id_view_pwa_user_registration"
+            />
+    </data>
+</odoo>

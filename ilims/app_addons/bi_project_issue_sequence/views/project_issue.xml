@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="bi_project_issue_inherit_field_sequence_name" model="ir.ui.view">
+            <field name="name">project.task.form.inherit</field>
+            <field name="model">project.task</field>
+            <field name="inherit_id" ref="project.view_task_form2"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@class='oe_title pr-0']" position="before">
+                    <group>
+                        <h1>
+                            <field name="sequence_name" nolabel="1"
+                                   attrs="{'invisible': [('sequence_name', '=', False)]}"/>
+                        </h1>
+                    </group>
+                </xpath>
+                <xpath expr="//field[@name='project_id']" position="before">
+                    <field name="is_from_project" invisible="1"/>
+                    <field name="is_issue" invisible="1"/>
+                    <field name="date" attrs="{'invisible' : [('is_issue', '=', False)]}"/>
+                    <field name="resolved_date"
+                           attrs="{'invisible' : ['|', ('is_issue', '=', False), ('resolved_date', '=', False)]}"/>
+                </xpath>
+                <xpath expr="//field[@name='project_id']" position="attributes">
+                    <attribute name="attrs">{'readonly': [('is_from_project', '=', True)]}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='name']" position="attributes">
+                    <attribute name="attrs">{'invisible': [('is_issue', '=', True)]}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="name" class="o_task_name text-truncate" placeholder="Issue Title..."
+                           attrs="{'invisible': [('is_issue', '=', False)]}"/>
+                </xpath>
+                <xpath expr="//sheet//div[@name='button_box']" position="attributes">
+                    <attribute name="attrs">{'invisible' : [('is_issue', '=', True)]}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='parent_id']" position="attributes">
+                    <attribute name="attrs">{'invisible' : ['|', ('allow_subtasks', '=', True), ('is_issue', '=',
+                        True)]}
+                    </attribute>
+                </xpath>
+                <xpath expr="//field[@name='tag_ids']" position="after">
+                    <field name="issue_priority" attrs="{'invisible' : [('is_issue', '=', False)]}"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="timesheet_inherit_issue_form_task" model="ir.ui.view">
+            <field name="name">project.task.timesheet.issue.views</field>
+            <field name="model">project.task</field>
+            <field name="inherit_id" ref="hr_timesheet.view_task_form2_inherited"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@id='timesheets_tab']" position="attributes">
+                    <attribute name="attrs">{'invisible': ['|', ('allow_timesheets', '=', False), ('is_issue', '=',
+                        True)]}
+                    </attribute>
+                </xpath>
+                <xpath expr="//page[@id='timesheets_tab']" position="after">
+                    <field name="stakeholder_employee_ids" invisible="1"/>
+                    <page string="Timesheets" id="issue_timesheets_tab"
+                          attrs="{'invisible': ['|', ('allow_timesheets', '=', False), ('is_issue', '=', False)]}">
+                        <field name="issue_timesheet_ids" mode="tree,kanban"
+                               attrs="{'invisible': [('analytic_account_active', '=', False)]}"
+                               context="{'default_project_id': project_id, 'default_name':''}">
+                            <tree editable="bottom" string="Timesheet Activities" default_order="date">
+                                <field name="date"/>
+                                <field name="user_id" invisible="1"/>
+                                <field name="employee_id" required="1" widget="many2one_avatar_employee"
+                                       domain="[('id', 'in', parent.stakeholder_employee_ids)]"/>
+                                <field name="name" required="0"/>
+                                <field name="estimated_hours" widget="timesheet_uom"
+                                       decoration-danger="estimated_hours &gt; 24"/>
+                                <field name="unit_amount" widget="timesheet_uom"
+                                       decoration-danger="unit_amount &gt; 24"/>
+                                <field name="project_id" invisible="1"/>
+                                <field name="issue_id" invisible="1"/>
+                                <field name="company_id" invisible="1"/>
+                            </tree>
+                            <kanban class="o_kanban_mobile">
+                                <field name="date"/>
+                                <field name="user_id"/>
+                                <field name="employee_id" widget="many2one_avatar_employee"/>
+                                <field name="name"/>
+                                <field name="unit_amount" decoration-danger="unit_amount &gt; 24"/>
+                                <field name="project_id"/>
+                                <field name="issue_id" invisible="1"/>
+                                <templates>
+                                    <t t-name="kanban-box">
+                                        <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <strong>
+                                                        <span>
+                                                            <t t-esc="record.employee_id.value"/>
+                                                        </span>
+                                                    </strong>
+                                                </div>
+                                                <div class="col-6 pull-right text-right">
+                                                    <strong>
+                                                        <t t-esc="record.date.value"/>
+                                                    </strong>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-6 text-muted">
+                                                    <span>
+                                                        <t t-esc="record.name.value"/>
+                                                    </span>
+                                                </div>
+                                                <div class="col-6">
+                                                    <span class="pull-right text-right">
+                                                        <field name="unit_amount" widget="float_time"/>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </templates>
+                            </kanban>
+                            <form string="Timesheet Activities">
+                                <sheet>
+                                    <group>
+                                        <field name="date"/>
+                                        <field name="user_id" invisible="1"/>
+                                        <field name="employee_id" required="1" widget="many2one_avatar_employee"/>
+                                        <field name="name"/>
+                                        <field name="unit_amount" string="Actual Hours" widget="float_time"
+                                               decoration-danger="unit_amount &gt; 24"/>
+                                        <field name="project_id" invisible="1"/>
+                                        <field name="issue_id" invisible="1"/>
+                                        <field name="company_id" invisible="1"/>
+                                    </group>
+                                </sheet>
+                            </form>
+                        </field>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="action_task_issue" model="ir.actions.act_window">
+            <field name="name">Project Issues</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">project.task</field>
+            <field name="domain">[('is_issue', '=', True)]</field>
+            <field name="context">{'default_is_issue': True}</field>
+            <field name="binding_view_types">form</field>
+            <field name="view_mode">tree,kanban,form,calendar,pivot,graph,activity</field>
+        </record>
+
+        <menuitem id="menu_project_issue"
+                  name="Project Issues"
+                  parent="project.menu_main_pm"
+                  action="action_task_issue"/>
+
+        <!--<menuitem action="action_task_issue"-->
+        <!--id="menu_sub_support_issue"-->
+        <!--name="Issue"-->
+        <!--parent="menu_project_issue" />-->
+
+    </data>
+</odoo>

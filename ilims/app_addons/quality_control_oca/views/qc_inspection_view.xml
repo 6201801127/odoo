@@ -1,0 +1,561 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Copyright 2010 NaN Projectes de Programari Lliure, S.L.
+    Copyright 2014 Serv. Tec. Avanzados - Pedro M. Baeza
+    Copyright 2014 Oihane Crucelaegui - AvanzOSC
+    Copyright 2017 ForgeFlow S.L.
+    Copyright 2017 Simone Rubino - Agile Business Group
+    License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
+<odoo>
+
+    <record model="ir.ui.view" id="qc_inspection_form_view">
+        <field name="name">qc.inspection.form</field>
+        <field name="model">qc.inspection</field>
+        <field name="arch" type="xml">
+            <form string="Inspection">
+                <header>
+                    <!--<button name="action_draft" type="object" attrs="{'invisible': [('state', '!=', 'canceled')]}"-->
+                    <!--string="Draft"/>-->
+                    <button name="action_todo" type="object" class="oe_highlight" states="draft" string="Mark Todo"/>
+                    <button name="%(quality_control_oca.action_approval_email_quality_inspection)d" type="action"
+                            class="oe_highlight" states="ready,rejected" string="Submit for Approval"/>
+                    <!--<button name="action_confirm" type="object" class="oe_highlight" states="ready" string="Confirm"-->
+                    <!--icon="fa-check"/>-->
+                    <button name="action_approve" type="object" states="waiting" class="oe_highlight"
+                            groups="gts_groups.group_quality_management_can_approve" string="Approve"/>
+                    <button name="%(quality_control_oca.action_reject_quality_wizard)d" string="Reject" type="action"
+                            class="oe_highlight" states="waiting"
+                            groups="gts_groups.group_quality_management_can_approve"/>
+                    <button name="action_close" type="object" states="audit_in_progress" class="oe_highlight"
+                            string="Close"
+                            groups="gts_groups.group_quality_control_auditor,quality_control_oca.group_quality_control_manager"/>
+                    <!--<button name="action_cancel" type="object"-->
+                    <!--attrs="{'invisible': [('state', 'not in', ['waiting', 'ready', 'failed', 'success'])]}"-->
+                    <!--string="Cancel" icon="fa-ban"/>-->
+                    <field name="state" widget="statusbar" statusbar_visible="draft"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="action" name="%(action_qc_inspection_set_test)d"
+                                icon="fa-bookmark-o" string="Set Quality Test"
+                                attrs="{'invisible': [('test', '!=', False)]}"/>
+                    </div>
+                    <h1>
+                        <!--<label string="Inspection " for="name" />-->
+                        <field name="name" class="oe_inline" readonly="1" force_save="1"/>
+                    </h1>
+                    <group>
+                        <group>
+                            <field name="subject" required="1"
+                                   attrs="{'readonly': [('state', 'in', ('audit_in_progress', 'success', 'failed'))]}"/>
+                            <field name="project_quality_definition"/>
+                            <field name="test" attrs="{'invisible': [('test', '=', False)]}" readonly="1"
+                                   options="{'no_create_edit': True, 'no_create': True, 'no_open': True}"/>
+                            <!--<field name="object_id" />-->
+                            <field name="qty" required="1" invisible="1"/>
+                            <!--<field name="product_id" />-->
+                            <field name="is_from_project" invisible="1"/>
+                            <field name="project_id" required="1"
+                                   attrs="{'readonly': ['|', ('state', 'not in', ('draft', 'ready')), ('is_from_project', '=', True)]}"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="project_stage_id" domain="[('project_ids', 'in', project_id)]"
+                                   attrs="{'readonly': [('state', 'in', ('audit_in_progress', 'success', 'failed'))]}"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="attach_qc_plan" filename="attach_qc_plan_filename"
+                                   attrs="{'readonly': [('state', 'not in', ('draft', 'ready'))]}"/>
+                            <field name="attach_qc_plan_filename" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="date"
+                                   attrs="{'readonly': [('state', 'in', ('audit_in_progress', 'success', 'failed'))]}"/>
+                            <field name="due_date" attrs="{'invisible': [('due_date', '=', False)]}" readonly="1"
+                                   force_save="1"/>
+                            <field name="success" invisible="1"/>
+                            <field name="auto_generated" invisible="1"/>
+                            <field name="stakeholders_ids" invisible="1"/>
+                            <field name="user" required="1" domain="[('id', 'in', stakeholders_ids)]"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"
+                                   attrs="{'readonly': [('state', 'in', ('audit_in_progress', 'success', 'failed'))]}"/>
+                            <field name="inspection_team_id"
+                                   attrs="{'readonly': [('state', 'in', ('audit_in_progress', 'success', 'failed'))]}"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="attach_qc_report" filename="attach_qc_report_filename"
+                                   attrs="{'readonly': [('state', 'in', ('audit_in_progress', 'success', 'failed'))]}"/>
+                            <field name="attach_qc_report_filename" invisible="1"/>
+                            <field name="priority" widget="priority"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Questions">
+                            <field name="inspection_lines" nolabel="1">
+                                <tree string="Inspection lines" editable="top" delete="false" create="false">
+                                    <field name="name" readonly="1"/>
+                                    <field name="question_type" readonly="1"/>
+                                    <field name="possible_ql_values" invisible="1"/>
+                                    <field name="qualitative_value"
+                                           options="{'no_create': True, 'no_edit': True, 'no_open': True}"
+                                           attrs="{'readonly': ['|', ('question_type', '=', 'quantitative'), ('parent.state', 'not in', ['audit_in_progress'])]}"/>
+                                    <field name="quantitative_value"
+                                           attrs="{'readonly': ['|', ('question_type', '=', 'qualitative'), ('parent.state', 'not in', ['audit_in_progress'])]}"/>
+                                    <field name="uom_id" groups="uom.group_uom"
+                                           attrs="{'readonly': ['|', ('question_type', '=', 'qualitative'), ('parent.state', 'not in', ['audit_in_progress'])]}"/>
+                                    <field name="test_uom_category" invisible="1"/>
+                                    <field name="min_value" invisible="1"/>
+                                    <field name="max_value" invisible="1"/>
+                                    <field name="valid_values" readonly="1"/>
+                                    <field name="weightage" readonly="1" force_save="1"/>
+                                    <field name="deadline" attrs="{'readonly': [('parent.state', '!=', 'draft')]}"/>
+                                    <field name="remarks"
+                                           attrs="{'readonly': [('parent.state', 'not in', ['audit_in_progress'])]}"/>
+                                    <field name="success" readonly="1" force_save="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Deliverables and Acceptance Criteria">
+                            <field name="deliverables_ids"
+                                   attrs="{'readonly': [('state', 'in', ('audit_in_progress', 'success', 'failed'))]}">
+                                <tree editable="bottom">
+                                    <field name="qc_inspection_id" invisible="1"/>
+                                    <field name="deliverables" required="1"
+                                           attrs="{'readonly': [('parent.state', '!=', 'draft')]}"/>
+                                    <field name="accept_criteria_situation" required="1"
+                                           attrs="{'readonly': [('parent.state', '!=', 'draft')]}"/>
+                                    <field name="remarks"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Quality Assurance Activities">
+                            <field name="assurance_activity_ids"
+                                   attrs="{'readonly': [('state', 'in', ('audit_in_progress', 'success', 'failed'))]}">
+                                <tree editable="bottom">
+                                    <field name="qc_inspection_id" invisible="1"/>
+                                    <field name="activity_name" required="1"
+                                           attrs="{'readonly': [('parent.state', '!=', 'draft')]}"/>
+                                    <field name="resource" required="1"
+                                           attrs="{'readonly': [('parent.state', '!=', 'draft')]}"/>
+                                    <field name="remarks"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Notes">
+                            <group string="Internal notes">
+                                <field name="internal_notes" nolabel="1"
+                                       attrs="{'readonly': [('state', 'in', ('audit_in_progress', 'success', 'failed'))]}"/>
+                            </group>
+                            <group string="External notes">
+                                <field name="external_notes" nolabel="1"
+                                       attrs="{'readonly': [('state', 'in', ('audit_in_progress', 'success', 'failed'))]}"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="qc_inspection_approver_view" model="ir.ui.view">
+        <field name="name">qc.inspection.form.inherit.approver</field>
+        <field name="model">qc.inspection</field>
+        <field name="inherit_id" ref="quality_control_oca.qc_inspection_form_view"/>
+        <field name="groups_id" eval="[(4, ref('gts_groups.group_quality_management_can_approve'))]"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook//page[1]//field[@name='inspection_lines']//tree//field[@name='qualitative_value']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//notebook//page[1]//field[@name='inspection_lines']//tree//field[@name='quantitative_value']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//notebook//page[1]//field[@name='inspection_lines']//tree//field[@name='remarks']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="qc_inspection_creator_view" model="ir.ui.view">
+        <field name="name">qc.inspection.form.inherit.creator</field>
+        <field name="model">qc.inspection</field>
+        <field name="inherit_id" ref="quality_control_oca.qc_inspection_form_view"/>
+        <field name="groups_id" eval="[(4, ref('gts_groups.group_quality_management_can_create'))]"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook//page[1]//field[@name='inspection_lines']//tree//field[@name='qualitative_value']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//notebook//page[1]//field[@name='inspection_lines']//tree//field[@name='quantitative_value']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//notebook//page[1]//field[@name='inspection_lines']//tree//field[@name='remarks']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="qc_inspection_auditor_view" model="ir.ui.view">
+        <field name="name">qc.inspection.form.inherit.auditor</field>
+        <field name="model">qc.inspection</field>
+        <field name="inherit_id" ref="quality_control_oca.qc_inspection_form_view"/>
+        <field name="groups_id" eval="[(4, ref('gts_groups.group_quality_control_auditor'))]"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='subject']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='project_quality_definition']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='project_stage_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='attach_qc_plan']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='date']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='user']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='attach_qc_report']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='priority']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//notebook//page[1]//field[@name='inspection_lines']//tree//field[@name='deadline']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//notebook//page[2]//field[@name='deliverables_ids']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//notebook//page[3]//field[@name='assurance_activity_ids']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//notebook//page[4]//field[@name='internal_notes']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//notebook//page[4]//field[@name='external_notes']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="qc_inspection_tree_view">
+        <field name="name">qc.inspection.tree</field>
+        <field name="model">qc.inspection</field>
+        <field name="arch" type="xml">
+            <tree string="Inspections">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="user"/>
+                <field name="test"/>
+                <field name="qty"/>
+                <!--<field name="product_id"/>-->
+                <field name="project_id"/>
+                <!--<field name="success"/>-->
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="qc_inspection_search_view">
+        <field name="name">qc.inspection.search</field>
+        <field name="model">qc.inspection</field>
+        <field name="arch" type="xml">
+            <search string="Search inspection">
+                <group>
+                    <field name="name"/>
+                    <field name="user"/>
+                    <field name="object_id"/>
+                    <!--<field name="product_id" />-->
+                    <field name="project_id"/>
+                    <field name="test"/>
+                </group>
+                <newline/>
+                <filter string="Correct" name="correct" domain="[('success', '=', True)]"/>
+                <filter string="Incorrect" name="incorrect" domain="[('success', '=', False)]"/>
+                <newline/>
+                <group expand="0" string="Group by...">
+                    <filter string="Reference" name="group_by_object_id" domain="[]"
+                            context="{'group_by': 'object_id'}"/>
+                    <filter string="Test" name="group_by_test" domain="[]" context="{'group_by': 'test'}"/>
+                    <filter string="Responsible" name="group_by_user" domain="[]" context="{'group_by': 'user'}"/>
+                    <!--<filter-->
+                    <!--string="Product"-->
+                    <!--name="group_by_product_id"-->
+                    <!--domain="[]"-->
+                    <!--context="{'group_by': 'product_id'}"-->
+                    <!--/>-->
+                    <filter string="Project" name="group_by_project_id" domain="[]"
+                            context="{'group_by': 'project_id'}"/>
+                    <filter string="State" name="group_by_state" domain="[]" context="{'group_by': 'state'}"/>
+                    <filter string="Success" name="group_by_success" domain="[]" context="{'group_by': 'success'}"/>
+                    <filter string="Auto-generated" name="group_by_auto_generated" domain="[]"
+                            context="{'group_by': 'auto_generated'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="qc_inspection_kanban_view">
+        <field name="name">qc.inspection.kanban</field>
+        <field name="model">qc.inspection</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" quick_create="false"
+                    class="oe_background_grey o_kanban_dashboard o_project_kanban o_emphasize_colors">
+                <field name="state" readonly="1"/>
+                <field name="color"/>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="user"/>
+                <field name="test"/>
+                <field name="project_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click o_has_icon">
+                            <div class="o_project_kanban_main">
+                                <div class="o_kanban_card_content">
+                                    <div class="o_kanban_primary_left">
+                                        <div class="o_primary">
+                                            <span>
+                                                <t t-esc="record.name.value"/>
+                                            </span>
+                                            <span t-if="record.user.value">
+                                                <strong>
+                                                    <t t-esc="record.user.value"/>
+                                                </strong>
+                                            </span>
+                                            <field name="priority" widget="priority"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_card_manage_pane dropdown-menu" role="menu">
+                                    <div class="o_kanban_card_manage_section o_kanban_manage_reports">
+                                        <!--<div role="menuitem">-->
+                                        <!--<a name="135" type="action">Share</a>-->
+                                        <!--</div>-->
+                                        <div role="menuitem">
+                                            <a type="edit">Edit</a>
+                                        </div>
+                                    </div>
+                                    <div role="menuitem" aria-haspopup="true" class="o_no_padding_kanban_colorpicker">
+                                        <ul class="oe_kanban_colorpicker" data-field="color" role="popup"/>
+                                    </div>
+                                </div>
+                                <a class="o_kanban_manage_toggle_button o_left" href="#"
+                                   groups="project.group_project_manager">
+                                    <i class="fa fa-ellipsis-v" role="img" aria-label="Manage" title="Manage"/>
+                                </a>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left text-muted">
+                                        <span>
+                                            <t t-esc="record.date.value"/>
+                                        </span>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="project_id"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="qc_inspection_pivot_view">
+        <field name="name">qc.inspection.pivot</field>
+        <field name="model">qc.inspection</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="name" type="row"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="qc_inspection_graph_view">
+        <field name="name">qc.inspection.graph</field>
+        <field name="model">qc.inspection</field>
+        <field name="arch" type="xml">
+            <graph sample="1">
+                <field name="user"/>
+                <field name="name"/>
+            </graph>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="qc_inspection_calendar_view">
+        <field name="name">qc.inspection.calendar</field>
+        <field name="model">qc.inspection</field>
+        <field name="arch" type="xml">
+            <calendar date_start="date" color="state" hide_time="true" event_limit="5">
+                <field name="name"/>
+                <field name="user" avatar_field="image_128"/>
+                <field name="qty" widget="monetary"/>
+                <field name="project_id"/>
+                <field name="state" filters="1" invisible="1"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="qc_inspection_activity_view">
+        <field name="name">qc.inspection.activity</field>
+        <field name="model">qc.inspection</field>
+        <field name="arch" type="xml">
+            <activity string="Contracts">
+                <templates>
+                    <div t-name="activity-box">
+                        <div>
+                            <field name="name" display="full"/>
+                            <field name="user" muted="1" display="full"/>
+                        </div>
+                    </div>
+                </templates>
+            </activity>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_qc_inspection">
+        <field name="name">Inspections</field>
+        <field name="res_model">qc.inspection</field>
+        <field name="view_mode">kanban,tree,form,pivot,calendar,graph,activity</field>
+    </record>
+
+    <menuitem name="Inspections"
+              parent="qc_inspection_menu_parent"
+              id="qc_inspection_menu"
+              action="action_qc_inspection"/>
+
+    <!--******************** Inspection Lines ******************************-->
+    <record model="ir.ui.view" id="qc_inspection_line_tree_view">
+        <field name="name">qc.inspection.line.tree</field>
+        <field name="model">qc.inspection.line</field>
+        <field name="arch" type="xml">
+            <tree decoration-danger="success==False" decoration-info="success==True" string="Inspection lines"
+                  delete="false" create="false">
+                <field name="inspection_id"/>
+                <!--<field name="product_id"/>-->
+                <field name="name"/>
+                <field name="question_type"/>
+                <field name="possible_ql_values" invisible="1"/>
+                <field name="qualitative_value" attrs="{'readonly': [('question_type', '=', 'quantitative')]}"/>
+                <field name="quantitative_value" attrs="{'readonly': [('question_type', '=', 'qualitative')]}"/>
+                <field name="uom_id" groups="uom.group_uom"
+                       attrs="{'readonly': [('question_type', '=', 'qualitative')]}"/>
+                <field name="test_uom_category" invisible="1"/>
+                <field name="valid_values"/>
+                <field name="success"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="qc_inspection_line_search_view">
+        <field name="name">qc.inspection.line.search</field>
+        <field name="model">qc.inspection.line</field>
+        <field name="arch" type="xml">
+            <search string="Search inspection line">
+                <group>
+                    <field name="name"/>
+                    <field name="inspection_id"/>
+                    <!--<field name="product_id"/>-->
+                    <field name="success"/>
+                </group>
+                <newline/>
+                <filter string="Correct" name="correct" domain="[('success', '=', True)]"/>
+                <filter string="Incorrect" name="incorrect" domain="[('success', '=', False)]"/>
+                <newline/>
+                <group expand="0" string="Group by...">
+                    <filter string="Inspection" name="group_by_inspection_id" domain="[]"
+                            context="{'group_by': 'inspection_id'}"/>
+                    <!--<filter string="Product" name="group_by_product_id" domain="[]"-->
+                            <!--context="{'group_by': 'product_id'}"/>-->
+                    <filter string="Question" name="group_by_name" domain="[]" context="{'group_by': 'name'}"/>
+                    <filter string="Success" name="group_by_success" domain="[]" context="{'group_by': 'success'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="qc_inspection_line_kanban_view">
+        <field name="name">qc.inspection.line.kanban</field>
+        <field name="model">qc.inspection.line</field>
+        <field name="arch" type="xml">
+            <kanban quick_create="false">
+                <field name="inspection_id"/>
+                <!--<field name="product_id"/>-->
+                <field name="name"/>
+                <field name="question_type"/>
+                <field name="qualitative_value"/>
+                <field name="quantitative_value"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+                            <div class="o_kanban_record_top mb16">
+                                <div class="o_kanban_record_headings mt4">
+                                    <strong class="o_kanban_record_title">
+                                        <span style="font-size:16px">
+                                            <t t-esc="record.name.value"/>
+                                        </span>
+                                    </strong>
+                                </div>
+                                <!--<strong>-->
+                                    <!--<field name="product_id"/>-->
+                                <!--</strong>-->
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <span>
+                                        <t t-esc="record.name.value"/>
+                                    </span>
+                                    <span>
+                                        <t t-esc="record.question_type.value"/>
+                                    </span>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <field name="qualitative_value"/>
+                                    <field name="quantitative_value"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="qc_inspection_line_pivot_view">
+        <field name="name">qc.inspection.line.pivot</field>
+        <field name="model">qc.inspection.line</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="name" type="row"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="qc_inspection_line_graph_view">
+        <field name="name">qc.inspection.line.graph</field>
+        <field name="model">qc.inspection.line</field>
+        <field name="arch" type="xml">
+            <graph sample="1">
+                <field name="inspection_id"/>
+                <field name="name"/>
+            </graph>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_qc_inspection_line">
+        <field name="name">Inspection Lines</field>
+        <field name="res_model">qc.inspection.line</field>
+        <field name="view_mode">tree,kanban,pivot,graph</field>
+        <field name="view_id" ref="qc_inspection_line_tree_view"/>
+    </record>
+
+    <menuitem name="Inspection Lines"
+              parent="qc_inspection_menu_parent"
+              id="qc_inspection_lines_menu"
+              action="action_qc_inspection_line"/>
+
+</odoo>

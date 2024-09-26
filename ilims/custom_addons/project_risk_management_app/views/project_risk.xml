@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Create tree of risk object -->
+    <record id="view_risk_menu_tree" model="ir.ui.view">
+        <field name="name">project.risk.tree</field>
+        <field name="model">project.risk</field>
+        <field name="arch" type="xml">
+            <tree string="project risk line">
+                <field name="code"/>
+                <field name="risk_name"/>
+                <field name="risk_quantification"/>
+                <field name="risk_category_id"/>
+                <field name="risk_type_id"/>
+                <field name="risk_response_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Create form of risk object -->
+    <record id="view_risk_menu_form" model="ir.ui.view">
+        <field name="name">project.risk.form</field>
+        <field name="model">project.risk</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <h1>
+                        <field name="code" class="oe_inline" readonly="1"
+                               attrs="{'invisible' : [('code', '=', False)]}"/>
+                    </h1>
+                    <group>
+                        <group>
+                            <field name="risk_name"/>
+                            <field name="risk_quantification"/>
+                            <field name="risk_impact"/>
+                        </group>
+                        <group>
+                            <field name="risk_category_id"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="risk_type_id" options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                            <field name="risk_response_id"
+                                   options="{'no_create': True, 'no_edit': True, 'no_open': True}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="internal_page" string="Notes">
+                            <field name="internal_note"/>
+                            <div class="oe_clear"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- create action of risk -->
+    <record id="action_project_task" model="ir.actions.act_window">
+        <field name="name">Risk</field>
+        <field name="res_model">project.risk</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- project Risk Line -->
+    <!-- Project Risk Analysis  Tree View-->
+    <record id="project_risk_line_tree_view" model="ir.ui.view">
+        <field name="name">project.risk.line.tree</field>
+        <field name="model">project.risk.line</field>
+        <field eval="2" name="priority"/>
+        <field name="arch" type="xml">
+            <tree create="false">
+                <field name="project_id"/>
+                <field name="project_risk_id"/>
+                <field name="category_id"/>
+                <field name="type_id"/>
+                <field name="response_id"/>
+                <field name="probability"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Project Risk Analysis  Form View-->
+    <record id="view_project_risk_analysis_form" model="ir.ui.view">
+        <field name="name">Project.Risk.form</field>
+        <field name="model">project.risk.line</field>
+        <field name="arch" type="xml">
+            <form>
+
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="project_id" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="project_id"/>
+                            <field name="project_risk_id"/>
+                            <field name="category_id"/>
+                        </group>
+                        <group>
+                            <field name="type_id"/>
+                            <field name="response_id"/>
+                            <field name="probability"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Project Risk Analysis  Graph View-->
+    <record id="view_project_risk_analysis_graph" model="ir.ui.view">
+        <field name="name">Project.Risk.graph</field>
+        <field name="model">project.risk.line</field>
+        <field name="arch" type="xml">
+            <graph string="project Risk Analysis">
+                <field name="probability" type="measure"/>
+                <field name="project_risk_id"/>
+                <field name="category_id"/>
+                <field name="response_id"/>
+                <field name="project_risk_id"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Project Risk Analysis  Pivot View-->
+    <record id="view_project_risk_analysis_pivot" model="ir.ui.view">
+        <field name="name">Project.Risk.pivot</field>
+        <field name="model">project.risk.line</field>
+        <field name="arch" type="xml">
+            <pivot string="Project Risk Analysis">
+                <field name="probability" type="measure"/>
+                <field name="project_risk_id" type="row"/>
+                <field name="category_id" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_project_analysis_group" model="ir.ui.view">
+        <field name="name">project.task.analysis.group</field>
+        <field name="model">project.risk.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="project_id"/>
+                <group expand="1" string="Group By">
+                    <filter name="project_risk_id" string="Risk" domain="[]" context="{'group_by':'project_risk_id'}"/>
+                    <filter name="category_id" string="Risk category" domain="[]" context="{'group_by':'category_id'}"/>
+                    <filter name="response_id" string="Risk Responce" domain="[]" context="{'group_by':'response_id'}"/>
+                    <filter name="project_risk_id" string="Project" domain="[]"
+                            context="{'group_by':'project_risk_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_project_risk_line" model="ir.actions.act_window">
+        <field name="name">Project Risk Analysis</field>
+        <field name="res_model">project.risk.line</field>
+        <field name="view_mode">form,tree,pivot,graph</field>
+        <field name="view_id" ref="project_risk_line_tree_view"/>
+    </record>
+
+    <!-- Task Risk Line -->
+    <!-- Task Risk Analysis  Tree View-->
+    <record id="task_risk_line_tree_view" model="ir.ui.view">
+        <field name="name">task.risk.line.tree</field>
+        <field name="model">task.risk.line</field>
+        <field eval="2" name="priority"/>
+        <field name="arch" type="xml">
+            <tree create="false">
+                <field name="project_id"/>
+                <field name="task_id"/>
+                <field name="project_risk_id"/>
+                <field name="category_id"/>
+                <field name="type_id"/>
+                <field name="response_id"/>
+                <field name="probability"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Project Risk Analysis  form View-->
+    <record id="task_risk_line_form_view" model="ir.ui.view">
+        <field name="name">Task.Risk.form</field>
+        <field name="model">task.risk.line</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="task_id" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="task_id"/>
+                            <field name="project_id"/>
+                            <field name="project_risk_id"/>
+                            <field name="category_id"/>
+                        </group>
+                        <group>
+                            <field name="type_id"/>
+                            <field name="response_id"/>
+                            <field name="probability"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Project Risk Analysis  Pivot View-->
+    <record id="view_task_risk_line_pivot" model="ir.ui.view">
+        <field name="name">task.risk.line.pivot</field>
+        <field name="model">task.risk.line</field>
+        <field name="arch" type="xml">
+            <pivot string="Task Risk Analysis">
+                <field name="project_risk_id" type="row"/>
+                <field name="task_id" type="col"/>
+                <field name="probability" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Project Risk Analysis  Graph View-->
+    <record id="view_task_risk_line_graph" model="ir.ui.view">
+        <field name="name">task.risk.line.graph</field>
+        <field name="model">task.risk.line</field>
+        <field name="arch" type="xml">
+            <graph string="Project Risk Analysis">
+                <field name="task_id"/>
+                <field name="project_risk_id"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_task_analysis_group" model="ir.ui.view">
+        <field name="name">task.risk.line.group</field>
+        <field name="model">task.risk.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="project_id"/>
+                <group expand="1" string="Group By">
+                    <filter name="project_risk_id" string="Risk" domain="[]" context="{'group_by':'project_risk_id'}"/>
+                    <filter name="category_id" string="Risk category" domain="[]" context="{'group_by':'category_id'}"/>
+                    <filter name="response_id" string="Risk Responce" domain="[]" context="{'group_by':'response_id'}"/>
+                    <filter name="task_id" string="Task" domain="[]" context="{'group_by':'task_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_task_risk_line" model="ir.actions.act_window">
+        <field name="name">Task Risk Analysis</field>
+        <field name="res_model">task.risk.line</field>
+        <field name="view_mode">form,tree,pivot,graph</field>
+        <field name="view_id" ref="task_risk_line_tree_view"/>
+    </record>
+
+
+    <!--<menuitem action="action_project_task"-->
+              <!--id="menu_action_project_task"-->
+              <!--name="Risk"-->
+              <!--parent="project_risk_management_app.menu_main_risk_management"/>-->
+
+    <!-- parent="project_risk_management_app.menu_project_risk_task" -->
+
+    <menuitem id="menu_risk_of_risk"
+              name="Risk"
+              sequence="1"
+              parent="project_risk_management_app.menu_main_risk_management"
+              action="action_project_task"/>
+
+    <menuitem id="main_menu_reporting"
+              name="Reporting"
+              sequence="3"
+              groups="project_risk_management_app.group_risk_manager"
+              parent="project_risk_management_app.menu_main_risk_management"/>
+
+    <!-- parent="project_risk_management_app.menu_project_risk_task" -->
+
+    <menuitem id="menu_project_risk_line"
+              name="Project Risk Analysis"
+              parent="main_menu_reporting"
+              action="action_project_risk_line"/>
+
+    <menuitem id="menu_task_risk_line"
+              name="Task Risk Analysis"
+              parent="main_menu_reporting"
+              action="action_task_risk_line"/>
+
+</odoo>
