@@ -1,0 +1,612 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <template id="kw_accounting.account_print_invoice">
+            <t t-call="web.external_layout">
+                <style>
+                    td,th { text-align: left; padding: 0.75rem; } table,th,tr, td { border: 1px solid #000; page-break-inside: always; }
+                </style>
+                <t t-set="o" t-value="o.with_context(lang=lang)" />
+                <div class="container">
+                    <div class="alert alert-info text-center" role="alert">
+                        <a class="alert-link h3"> 
+                            <span t-if="o.type == 'out_invoice'">Sales Voucher</span>
+                            <span t-if="o.type == 'out_refund'">Credit Note</span>
+                            <span t-if="o.type == 'in_refund'">Debit Note Voucher</span>
+                            <span t-if="o.type == 'in_invoice'">Purchase Voucher</span>
+                        </a>
+                    </div>
+                    <div class="text-center">
+                        
+                        <h3><t t-esc="o.company_id.name" /></h3>
+                        <h4> <t t-esc="o.unit_id.name" /> / <t t-if="o.type in ('out_invoice','out_refund')"><t t-esc="o.state_gstin_id.state_name" /></t> <t t-else=""> <t t-esc="o.state_bill_id" /></t></h4>
+                    </div>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <t t-if="o.type in ('out_invoice','out_refund')">
+                                    <th  class="h4" style="color: #fff;text-align: center;background: teal;border-radius: 3px;">Customer Details</th>
+                                </t>
+                                <t t-else="">
+                                    <th  class="h4" style="color: #fff;text-align: center;background: teal;border-radius: 3px;">Vendor Details</th>
+                                </t>
+                                <th  class="h4" style="color: #fff;text-align: center;background: teal;border-radius: 3px;">Voucher Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <t t-if="o.type in ('out_invoice','out_refund')">
+                                    <td>
+                                        <p class="h3" style="color: #fff;text-align: center;background: teal;border-radius: 3px;">  </p>
+                                        <p class="mb-1"><b>Customer </b>: <t t-esc="o.partner_id.name" /></p>
+                                        <p class="mb-1"><b>GST Treatment </b>: <t t-esc="o.l10n_in_gst_treatment" /></p>
+                                        <p class="mb-1"><b>GSTIN </b>: <t t-esc="o.partner_id.vat" /> </p>
+                                        <p class="mb-1"><b>MSME Reg No. </b>: <t t-esc="o.partner_id.msme_reg_no" /></p>
+                                        <p class="mb-1"><b>PAN </b>: <t t-esc="o.partner_id.pan" /></p>
+                                        <p class="mb-1"><b>TAN </b>: <t t-esc="o.partner_id.tan" /></p>
+                                        <p class="mb-1"><b>State </b>: <t t-esc="o.partner_id.state_id.name" /> </p>
+                                    </td>
+                                </t>
+                                <t t-else="">
+                                    <td>
+                                        <p class="h3" style="color: #fff;text-align: center;background: teal;border-radius: 3px;">  </p>
+                                        <p class="mb-1"><b>Vendor </b>: <t t-esc="o.partner_id.name" /></p>
+                                        <p class="mb-1"><b>GST Treatment </b>: <t t-esc="o.l10n_in_gst_treatment" /></p>
+                                        <p class="mb-1"><b>GSTIN </b>: <t t-esc="o.partner_id.vat" /> </p>
+                                        <p class="mb-1"><b>MSME Reg No. </b>: <t t-esc="o.partner_id.msme_reg_no" /></p>
+                                        <p class="mb-1"><b>PAN </b>: <t t-esc="o.partner_id.pan" /></p>
+                                        <p class="mb-1"><b>TAN </b>: <t t-esc="o.partner_id.tan" /></p>
+                                        <p class="mb-1"><b>State </b>: <t t-esc="o.partner_id.state_id.name" /> </p>
+                                    </td>
+                                </t>
+                                <td>
+                                    <p class="mb-1"><b>Voucher No : </b> <t t-esc="o.number" /></p>
+                                    <t t-if="o.type in ('out_invoice','out_refund')">
+                                        <p class="mb-1"><b>Invoice No : </b> <t t-esc="o.reference_number" /></p>
+                                        <p class="mb-1"><b>Date : </b><t t-esc="o.date.strftime('%d-%b-%Y')" /> </p>
+                                        <p class="mb-1"><b>Invoice Date : </b><t t-esc="o.date_invoice.strftime('%d-%b-%Y')" /> </p>
+                                    </t>
+                                    <t t-else="">
+                                        <p class="mb-1"><b>Bill No : </b> <t t-esc="o.reference_number" /></p>
+                                        <p class="mb-1"><b>Date : </b><t t-esc="o.date.strftime('%d-%b-%Y')" /> </p>
+                                        <p class="mb-1"><b>Invoice Date : </b><t t-esc="o.date_invoice.strftime('%d-%b-%Y')" /> </p>
+                                    </t>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <table class="table table-sm table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th style="background: teal; color: white; width:40%">Ledger Head</th>
+                                <th class="text-right" style="background: teal; color: white;">Amount</th>
+                                <th style="background: teal; color: white;">Project</th>
+                                <th style="background: teal; color: white;">Department</th>
+                                <th style="background: teal; color: white;">Division</th>
+                                <th style="background: teal; color: white;">Section</th>
+                                <th style="background: teal; color: white;">Employee</th>
+                                <th style="background: teal; color: white;">Capital Budget</th>
+                                <th style="background: teal; color: white;">Budget Line</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="9" class="text-left" style="background:#00808047;"><strong>Debit</strong></td>
+                            </tr>
+                            <t t-set="debit_amount" t-value="0"/>
+                            <t t-set="credit_amount" t-value="0"/>
+                            <t t-foreach="o.invoice_line_ids" t-as="ledger">
+                                <t t-if="ledger.mode == 'debit'">
+                                    <tr>
+                                        <td> <t t-esc="ledger.account_id.group_type.name" /> - <t t-esc="ledger.account_id.user_type_id.name" /> - <t t-esc="ledger.account_id.group_name.name" /> - <t t-esc="ledger.account_id.account_head_id.name" /> - <t t-esc="ledger.account_id.account_sub_head_id.name" />                                               
+                                            - <span class="text-danger font-weight-bold" t-esc="ledger.account_id.name" /> - <t t-esc="ledger.account_id.code" /> </td>
+                                        <td class="text-right"> <t t-esc="ledger.transaction_amount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}" /> </td>
+                                        <td> <t t-esc="ledger.project_wo_id.wo_code" /> - <t t-esc="ledger.project_wo_id.wo_name" /> </td>
+                                        <td> <t t-esc="ledger.department_id.name" /> </td>
+                                        <td> <t t-esc="ledger.division_id.name" /> </td>
+                                        <td> <t t-esc="ledger.section_id.name" /> </td>
+                                        <td> <t t-esc="ledger.employee_id.name" /> </td>
+                                        <td> <t t-if="ledger.budget_update == True">Yes</t><t t-else=""></t> </td>
+                                        <td>
+                                            <t t-esc="ledger.budget_line.name_of_expenses" /> 
+                                            <t t-esc="ledger.project_line.head_of_expense" /> 
+                                            <t t-esc="ledger.capital_line.name_of_expenses" /> 
+                                        </td>
+                                        <t t-set="debit_amount" t-value="debit_amount + ledger.transaction_amount"/>
+                                    </tr>
+                                </t>
+                            </t>
+                            <t t-if="o.type == 'out_invoice' or o.type == 'in_refund'">
+                                <tr>
+                                    <td> <t t-esc="o.account_id.group_type.name" /> - <t t-esc="o.account_id.user_type_id.name" /> - <t t-esc="o.account_id.group_name.name" /> - <t t-esc="o.account_id.account_head_id.name" /> - <t t-esc="o.account_id.account_sub_head_id.name" />                                               
+                                        - <span class="text-danger font-weight-bold" t-esc="o.account_id.name" /> - <t t-esc="o.account_id.code" /> </td>
+                                    <td class="text-right"> <t t-esc="o.amount_untaxed" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}" /> </td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <t t-set="debit_amount" t-value="debit_amount + o.amount_untaxed"/>
+                                </tr>
+                            </t>
+                            <tr>
+                                <td class="text-right">Total</td>
+                                <td class="text-right"><t t-esc="debit_amount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td colspan="9">&amp;emsp;</td>
+                            </tr>
+                            <tr>
+                                <td colspan="9" class="text-left" style="background: #00808047;"><strong>Credit</strong></td>
+                            </tr>
+                            <t t-foreach="o.invoice_line_ids" t-as="ledger">
+                                <t t-if="ledger.mode == 'credit'">
+                                    <tr>
+                                        <td> <t t-esc="ledger.account_id.group_type.name" /> - <t t-esc="ledger.account_id.user_type_id.name" /> - <t t-esc="ledger.account_id.group_name.name" /> - <t t-esc="ledger.account_id.account_head_id.name" /> - <t t-esc="ledger.account_id.account_sub_head_id.name" />                                               
+                                        - <span class="text-danger font-weight-bold" t-esc="ledger.account_id.name" /> - <t t-esc="ledger.account_id.code" /> </td>
+                                        <td class="text-right"> <t t-esc="ledger.transaction_amount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}" /> </td>
+                                        <td> <t t-esc="ledger.project_wo_id.wo_code" /> - <t t-esc="ledger.project_wo_id.wo_name" /> </td>
+                                        <td> <t t-esc="ledger.department_id.name" /> </td>
+                                        <td> <t t-esc="ledger.division_id.name" /> </td>
+                                        <td> <t t-esc="ledger.section_id.name" /> </td>
+                                        <td> <t t-esc="ledger.employee_id.name" /> </td>
+                                        <td> <t t-if="ledger.budget_update == True">Yes</t><t t-else=""></t> </td>
+                                        <td>
+                                            <t t-esc="ledger.budget_line.name_of_expenses" /> 
+                                            <t t-esc="ledger.project_line.head_of_expense" /> 
+                                            <t t-esc="ledger.capital_line.name_of_expenses" /> 
+                                        </td>
+                                        <t t-set="credit_amount" t-value="credit_amount + ledger.transaction_amount"/>
+                                    </tr>
+                                </t>
+                            </t>
+                            <t t-if="o.type == 'in_invoice' or o.type == 'out_refund'">
+                                <tr>
+                                    <td> <t t-esc="o.account_id.group_type.name" /> - <t t-esc="o.account_id.user_type_id.name" /> - <t t-esc="o.account_id.group_name.name" /> - <t t-esc="o.account_id.account_head_id.name" /> - <t t-esc="o.account_id.account_sub_head_id.name" />                                               
+                                        - <span class="text-danger font-weight-bold" t-esc="o.account_id.name" /> - <t t-esc="o.account_id.code" /> </td>
+                                    <td class="text-right"> <t t-esc="o.amount_untaxed" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}" /> </td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <t t-set="credit_amount" t-value="credit_amount + o.amount_untaxed"/>
+                                </tr>
+                            </t>
+                            <tr>
+                                <td class="text-right">Total</td>
+                                <td class="text-right"><t t-esc="credit_amount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="h5" style="color:teal;">TDS Line:</p>
+                    <table class="table table-sm table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th style="background: teal; color: white;">
+                                    <t t-if="o.type in ('out_invoice','out_refund')">Customer</t>
+                                    <t t-else="">Vendor</t>
+                                </th>
+                                <th style="background: teal; color: white;">Nature of Payment</th>
+                                <th style="background: teal; color: white;">Under Section</th>
+                                <th style="background: teal; color: white;">Base Amount</th>
+                                <th style="background: teal; color: white;">Percentage</th>
+                                <th style="background: teal; color: white;">TDS Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="base_amount" t-value="0.0" />
+                            <t t-set="ds_amount" t-value="0.0" />
+                            <t t-foreach="o.tds_line_ids" t-as="line">
+                                <tr>
+                                    <td><t t-esc="o.partner_id.name" /></td>
+                                    <td><t t-esc="line.account_id.nature_of_payment" /></td>
+                                    <td><t t-esc="line.account_id.under_section" /></td>
+                                    <td class="text-right"><t t-esc="line.base_amount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}" /></td>
+                                    <td class="text-right"><t t-esc="line.percentage" /></td>
+                                    <td class="text-right"><t t-esc="line.ds_amount"  t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/></td>
+                                    <t t-set="base_amount" t-value="base_amount + line.base_amount"/>
+                                    <t t-set="ds_amount" t-value="ds_amount + line.ds_amount"/>
+                                </tr>
+                            </t>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td class="text-right">Total</td>
+                                <td class="text-right"><t t-esc="base_amount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/></td>
+                                <td></td>
+                                <td class="text-right"><t t-esc="ds_amount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="h5" style="color:teal;">Product Line:</p>
+                    <!-- <div class="table-responsive"> -->
+                    <table class="table table-sm table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th style="background: teal; color: white;" scope="col">Sl No.</th>
+                                <th style="background: teal; color: white;" scope="col">Item Name</th>
+                                <th style="background: teal; color: white;" scope="col">HSN Code</th>
+                                <th class="text-right" style="background: teal; color: white;" scope="col">Qty</th>
+                                <th class="text-right" style="background: teal; color: white;" scope="col">Rate</th>
+                                <th style="background: teal; color: white;" scope="col">Type</th>
+                                <th class="text-right" style="background: teal; color: white;" scope="col">Base Amount</th>
+                                <th class="text-right" style="background: teal; color: white;" scope="col">CGST (%)</th>
+                                <th class="text-right" style="background: teal; color: white;" scope="col">CGST (Rs.)</th>
+                                <th class="text-right" style="background: teal; color: white;" scope="col">SGST (%)</th>
+                                <th class="text-right" style="background: teal; color: white;" scope="col">SGST (Rs.)</th>
+                                <th class="text-right" style="background: teal; color: white;" scope="col">IGST (%)</th>
+                                <th class="text-right" style="background: teal; color: white;" scope="col">IGST (Rs.)</th>
+                                <t t-if="o.type not in ('out_invoice','out_refund')">
+                                    <th class="text-right" style="background: teal; color: white;" scope="col">RCM Applicable</th>
+                                    <th class="text-right" style="background: teal; color: white;" scope="col">ITC Applicable</th>
+                                </t>
+                                <th class="text-right" style="background: teal; color: white;" scope="col">Taxable Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="rate" t-value="0.0" />
+                            <t t-set="baseAmount" t-value="0.0" />
+                            <t t-set="CGST" t-value="0.0" />
+                            <t t-set="SGST" t-value="0.0" />
+                            <t t-set="IGST" t-value="0.0" />
+                            <t t-set="taxableAmount" t-value="0.0" />
+                            <t t-set="column_index" t-value="1"/>
+                            <t t-foreach="o.product_line_ids" t-as="product">
+                                <tr>
+                                    <td> <t t-esc="column_index"/>
+                                        <t t-set="column_index" t-value="column_index + 1"/> 
+                                    </td>
+                                        <td> <t t-esc="product.product_id.name" /> </td>
+                                    <td> <t t-esc="product.hsn_code" /> </td>
+                                    <td class="text-right"> <t t-esc="product.quantity" /> </td>
+                                    <td class="text-right"> <t t-esc="product.rate" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/> </td>
+                                    <td> <t t-esc="product.product_category" /> </td>
+                                    <td class="text-right"> <t t-esc="product.price_unit" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/> </td>
+                                    <td class="text-right"> <t t-esc="product.cgst_per" /> </td>
+                                    <td class="text-right"> <t t-esc="product.cgst_amount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}" /> </td>
+                                    <td class="text-right"> <t t-esc="product.sgst_per" /> </td>
+                                    <td class="text-right"> <t t-esc="product.sgst_amount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}" /> </td>
+                                    <td class="text-right"> <t t-esc="product.igst_per" /> </td>
+                                    <td class="text-right"> <t t-esc="product.igst_amount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}" /> </td> 
+                                    <t t-if="o.type not in ('out_invoice','out_refund')">
+                                        <td><t t-if="product.rcm_applicable">Yes</t><t t-else="">No</t></td>
+                                        <td><t t-if="product.itc_applicable">Yes</t><t t-else="">No</t></td>
+                                    </t>
+                                    <td class="text-right"> <t t-esc="product.amount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}" /> </td> 
+                                    <t t-set="rate" t-value="rate + product.rate"/>
+                                    <t t-set="baseAmount" t-value="baseAmount + product.price_unit"/>
+                                    <t t-set="CGST" t-value="CGST + product.cgst_amount"/>
+                                    <t t-set="SGST" t-value="SGST + product.sgst_amount"/>
+                                    <t t-set="IGST" t-value="IGST + product.igst_amount"/>
+                                    <t t-set="taxableAmount" t-value="taxableAmount + product.amount"/>
+                                </tr>
+                            </t>
+                            <tr>
+                                <td colspan="4" class="text-right">Total</td> 
+                                <td><t t-esc="rate" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/></td>
+                                <td></td>
+                                <td><t t-esc="baseAmount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/></td>
+                                <td></td>
+                                <td><t t-esc="CGST" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/></td>
+                                <td></td>
+                                <td><t t-esc="SGST" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/></td>
+                                <td></td>
+                                <td><t t-esc="IGST" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/></td>
+                                <t t-if="o.type not in ('out_invoice','out_refund')">
+                                    <td></td>
+                                    <td></td>
+                                </t>
+                                <td><t t-esc="taxableAmount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- </div> -->
+                    <div class="d-flex mt-5">
+                        <p><b>Narration :</b> <t t-esc="o.comment" /></p>
+                    </div>
+                </div>
+            </t>
+        </template>
+        <template id="print_invoice">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-set="lang" t-value="o.user_id.sudo().lang if o.type in ('in_invoice', 'in_refund') else o.partner_id.lang"/>
+                    <t t-call="kw_accounting.account_print_invoice" t-lang="lang"/>
+                </t>
+            </t>
+        </template>
+
+        <template id="kw_accounting.account_print_voucherss">
+            <t t-call="web.external_layout">
+                <style>
+                    td,th { text-align: left; padding: 0.75rem; } table,th,tr, td { border: 1px solid #000; page-break-inside: always; }
+                </style>
+                <t t-set="o" t-value="o.with_context(lang=lang)" />
+                <div class="container">
+                    <div class="alert alert-info text-center" role="alert">
+                        <a class="alert-link h4"> 
+                            <span t-if="o.move_type == 'receipt'">Receipt Voucher</span>
+                            <span t-if="o.move_type == 'payment'">Payment Voucher</span>
+                            <span t-if="o.move_type == 'general'">General Voucher</span>
+                            <span t-if="o.move_type == 'contra'">Contra Voucher</span>
+                        </a>
+                    </div>
+                    <div class="text-center">
+                        <h4><t t-esc="o.company_id.name" /> / <t t-esc="o.branch_id.name" /></h4>
+                    </div>
+
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <t t-if="o.move_type == 'payment'">
+                                    <th class="h3" style="color: #fff;text-align: center;background: teal;border-radius: 3px;"> Payment To</th>
+                                    <th class="h3" style="color: #fff;text-align: center;background: teal;border-radius: 3px;"> Payment From </th>
+                                </t>
+                                <t t-if="o.move_type == 'receipt'">
+                                    <th class="h3" style="color: #fff;text-align: center;background: teal;border-radius: 3px;"> Receipt To </th>
+                                    <th class="h3" style="color: #fff;text-align: center;background: teal;border-radius: 3px;"> Receipt From</th>
+                                </t>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <t t-if="o.move_type == 'payment'">
+                                    <td style="width: 50%;">
+                                        <p class="mb-1">
+                                            <b>
+                                                <t t-if="o.partner_id.supplier and o.partner_id.customer">
+                                                    Customer/Vendor
+                                                </t>
+                                                <t t-elif="o.partner_id.customer">
+                                                    Customer
+                                                </t>
+                                                <t t-else="">
+                                                    Vendor
+                                                </t>
+                                            </b>: <t t-esc="o.partner_id.name" /></p>
+                                        <p class="mb-1"><b>GST Treatment </b>: <t t-esc="o.partner_id.l10n_in_gst_treatment" /></p>
+                                        <p class="mb-1"><b>GSTIN </b>: <t t-esc="o.partner_id.vat" /> </p>
+                                        <p class="mb-1"><b>PAN </b>: <t t-esc="o.partner_id.pan" /></p>
+                                        <p class="mb-1"><b>State </b>: <t t-esc="o.partner_id.state_id.name" /> </p>
+                                    </td>
+                                    <td style="width: 50%;">
+                                        <t t-set="payment_from" t-value="o.line_ids.mapped('account_id').filtered(lambda x: x.ledger_type == 'bank')" />
+                                        <p class="mb-1"><b>Bank : </b> <t t-esc="payment_from.name" /></p>
+                                        <p class="mb-1"><b>Mode Of Payment : </b> <t t-esc="o.payment_method_type" /></p>
+                                        <p class="mb-1"><b>Cheque No.\Draft No.\RTGS No.\NEFT No. : </b> <t t-esc="o.cheque_reference" /></p>
+                                        <p class="mb-1"><b>Cheque Date : </b><t t-if="o.cheque_date"><t t-esc="o.cheque_date.strftime('%d-%b-%Y')" /></t> </p>
+                                    </td>
+                                </t>
+                                <t t-if="o.move_type == 'receipt'">
+                                    <td style="width: 50%;">
+                                        <t t-set="payment_from" t-value="o.line_ids.mapped('account_id').filtered(lambda x: x.ledger_type == 'bank')" />
+                                        <p class="mb-1"><b>Bank : </b> <t t-esc="payment_from.name" /></p>
+                                        <p class="mb-1"><b>Mode Of Payment : </b> <t t-esc="o.payment_method_type" /></p>
+                                        <p class="mb-1"><b>Cheque No.\Draft No.\RTGS No.\NEFT No. : </b> <t t-esc="o.cheque_reference" /></p>
+                                        <p class="mb-1"><b>Cheque Date : </b><t t-if="o.cheque_date"><t t-esc="o.cheque_date.strftime('%d-%b-%Y')" /></t>  </p>
+                                    </td>
+                                    <td style="width: 50%;">
+                                        <p class="mb-1">
+                                            <b>
+                                                <t t-if="o.partner_id.supplier and o.partner_id.customer">
+                                                    Customer/Vendor
+                                                </t>
+                                                <t t-elif="o.partner_id.customer">
+                                                    Customer
+                                                </t>
+                                                <t t-else="">
+                                                    Vendor
+                                                </t>
+                                            </b>: <t t-esc="o.partner_id.name" /></p>
+                                            <p class="mb-1"><b>GST Treatment </b>: <t t-esc="o.partner_id.l10n_in_gst_treatment" /></p>
+                                            <p class="mb-1"><b>GSTIN </b>: <t t-esc="o.partner_id.vat" /> </p>
+                                            <p class="mb-1"><b>PAN </b>: <t t-esc="o.partner_id.pan" /></p>
+                                            <p class="mb-1"><b>State </b>: <t t-esc="o.partner_id.state_id.name" /> </p>
+                                    </td>
+                                </t>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <table class="table table-bordered table-sm table-striped">
+                        <tr>
+                            <td style="border-right:0; vertical-align:middle;"><h5>Voucher No: <t t-esc="o.name" /></h5></td>
+                            <td class="text-right" style="border-left:0"><h5>Date: <t t-esc="o.date.strftime('%d-%b-%Y')" /></h5></td>
+                        </tr>
+                    </table>
+                    <table class="table table-bordered table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th style="color: #fff;text-align: center;background: teal;border-radius: 3px; width: 50%;">Ledger (Activity) Head</th>
+                                <th style="color: #fff;text-align: center;background: teal;border-radius: 3px;">Employee</th>
+                                <th style="color: #fff;text-align: right;background: teal;border-radius: 3px;">Amount</th>
+                                <th style="color: #fff;text-align: center;background: teal;border-radius: 3px;">Project</th>
+                                <th style="color: #fff;text-align: center;background: teal;border-radius: 3px;">Department</th>
+                                <th style="color: #fff;text-align: center;background: teal;border-radius: 3px;">Division</th>
+                                <th style="color: #fff;text-align: center;background: teal;border-radius: 3px;">Section</th>
+                                <th style="color: #fff;text-align: center;background: teal;border-radius: 3px;">Capital Budget</th>
+                                <th style="color: #fff;text-align: center;background: teal;border-radius: 3px;">Budget Line</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="9" style="background: #fff;" >
+                                    Debit
+                                </td>
+                            </tr>
+                            <tr>
+                                <t t-set="debit_amount" t-value="0"/>
+                                <t t-foreach="o.line_ids" t-as="ledger">
+                                    <t t-if="ledger.debit > 0">
+                                        <tr>
+                                            <td> <t t-esc="ledger.account_id.group_type.name" /> - <t t-esc="ledger.account_id.user_type_id.name" /> - <t t-esc="ledger.account_id.group_name.name" /> - <t t-esc="ledger.account_id.account_head_id.name" /> - <t t-esc="ledger.account_id.account_sub_head_id.name" />                                               
+                                                - <span class="text-danger font-weight-bold" t-esc="ledger.account_id.name" /> - <t t-esc="ledger.account_id.code" />  </td>
+                                            <td> <t t-esc="ledger.employee_id.name" /> </td>
+                                            <td class="text-right"> <t t-esc="ledger.debit" t-options="{'widget': 'monetary', 'display_currency':  o.company_id.currency_id}" /> </td>
+                                            <td> <t t-esc="ledger.project_wo_id.wo_code"/> - <t t-esc="ledger.project_wo_id.wo_name" /> </td>
+                                            <td> <t t-esc="ledger.department_id.name" /> </td>
+                                            <td> <t t-esc="ledger.division_id.name" /> </td>
+                                            <td> <t t-esc="ledger.section_id.name" /> </td>
+                                            <td> <t t-if="ledger.budget_update == True">Yes</t><t t-else=""></t> </td>
+                                            <td>
+                                                <t t-esc="ledger.budget_line.name_of_expenses" /> 
+                                                <t t-esc="ledger.project_line.head_of_expense" /> 
+                                                <t t-esc="ledger.capital_line.name_of_expenses" /> 
+                                            </td>
+                                            <t t-set="debit_amount" t-value="debit_amount + ledger.debit"/>
+                                        </tr>
+                                    </t>  
+                                </t>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td class="text-right">Total</td>
+                                <td class="text-right"><t t-esc="debit_amount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/> </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td colspan="9" style="background: #fff;" >
+                                    Credit
+                                </td>
+                            </tr>
+                            <tr>
+                                <t t-set="credit_amount" t-value="0"/>
+                                <t t-foreach="o.line_ids" t-as="ledger">
+                                    <t t-if="ledger.credit > 0">
+                                        <tr>
+                                            <td> <t t-esc="ledger.account_id.group_type.name" /> - <t t-esc="ledger.account_id.user_type_id.name" /> - <t t-esc="ledger.account_id.group_name.name" /> - <t t-esc="ledger.account_id.account_head_id.name" /> - <t t-esc="ledger.account_id.account_sub_head_id.name" />                                               
+                                                - <span class="text-danger font-weight-bold" t-esc="ledger.account_id.name" /> - <t t-esc="ledger.account_id.code" /> </td>
+                                            <td> <t t-esc="ledger.employee_id.name" /> </td>
+                                            <td class="text-right"> <t t-esc="ledger.credit" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}" /> </td>
+                                            <td> <t t-esc="ledger.project_wo_id.wo_code"/> - <t t-esc="ledger.project_wo_id.wo_name" /> </td>
+                                            <td> <t t-esc="ledger.department_id.name" /> </td>
+                                            <td> <t t-esc="ledger.division_id.name" /> </td>
+                                            <td> <t t-esc="ledger.section_id.name" /> </td>
+                                            <td> <t t-if="ledger.budget_update == True">Yes</t><t t-else=""></t> </td>
+                                            <td>
+                                                <t t-esc="ledger.budget_line.name_of_expenses" /> 
+                                                <t t-esc="ledger.project_line.head_of_expense" /> 
+                                                <t t-esc="ledger.capital_line.name_of_expenses" /> 
+                                            </td>
+                                            <t t-set="credit_amount" t-value="credit_amount + ledger.credit"/>
+                                        </tr>
+                                    </t>  
+                                </t>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td class="text-right">Total</td>
+                                <td class="text-right"><t t-esc="credit_amount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/> </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="9" style="font-weight: bold; background: #fff; color: teal;" >
+                                    TDS Line
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="background: teal; color: white; width: 20% !important;">Partner</th>
+                                <th style="background: teal; color: white; width: 20% !important;">Nature of Payment</th>
+                                <th style="background: teal; color: white; width: 20% !important;">Under Section</th>
+                                <th style="background: teal; color: white; width: 20% !important;" colspan="2">Base Amount</th>
+                                <th style="background: teal; color: white; width: 20% !important;">Percentage</th>
+                                <th style="background: teal; color: white; width: 20% !important;" colspan="3">TDS Amount</th>
+                            </tr>
+                            <t t-set="base_amount" t-value="0.0" />
+                            <t t-set="ds_amount" t-value="0.0" />
+                            <t t-foreach="o.tds_line_ids" t-as="line">
+                                <tr>
+                                    <td><t t-esc="line.partner_id.name" /></td>
+                                    <td><t t-esc="line.account_id.nature_of_payment" /></td>
+                                    <td><t t-esc="line.account_id.under_section" /></td>
+                                    <td class="text-right" colspan="2"><t t-esc="line.base_amount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}" /></td>
+                                    <td class="text-right"><t t-esc="line.percentage" /></td>
+                                    <td class="text-right" colspan="3"><t t-esc="line.ds_amount"  t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/></td>
+                                    <t t-set="base_amount" t-value="base_amount + line.base_amount"/>
+                                    <t t-set="ds_amount" t-value="ds_amount + line.ds_amount"/>
+                                </tr>
+                            </t>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td class="text-right">Total</td>
+                                <td class="text-right" colspan="2"><t t-esc="base_amount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/></td>
+                                <td></td>
+                                <td class="text-right" colspan="3"><t t-esc="ds_amount" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/></td>
+                            </tr>
+                            <tr>
+                                <td colspan="9" style="font-weight: bold; background: #fff; color: teal;" >
+                                    &amp;emsp;
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="1" class="font-weight-bold">Narration:</td>
+                                <td colspan="8"><t t-esc="o.narration" /></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </template>
+
+        <template id="print_voucher">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-set="lang" t-value="o.create_uid.sudo().lang"/>
+                    <t t-call="kw_accounting.account_print_voucherss"/>
+                </t>
+            </t>
+        </template>
+
+
+        <template id="kw_accounting.brs_print_report">
+            <t t-call="web.external_layout">
+                <style>
+                    td,th { text-align: left; padding: 0.75rem; } table,th,tr, td { border: 1px solid #000; page-break-inside: always; }
+                </style>
+                <t t-set="o" t-value="o.with_context(lang=lang)" />
+                
+            </t>
+        </template>
+
+        <template id="brs_print">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-set="lang" t-value="o.create_uid.sudo().lang"/>
+                    <t t-call="kw_accounting.brs_print_report"/>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

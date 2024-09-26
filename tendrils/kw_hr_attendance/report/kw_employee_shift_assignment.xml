@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="view_kw_employee_shift_assignment_tree" model="ir.ui.view">
+            <field name="name">view.kw_employee_shift_assignment.tree</field>
+            <field name="model">hr.employee</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="kw_employee_shift_assignment_tree" create="false" edit="false" delete="false" import="false">
+                    <field name="name" />
+                    <field name="emp_code" />
+                    <field name="department_id" />
+                    <field name="job_branch_id" />
+                    <field name="resource_calendar_id" string="Shift" />
+                    <field name="attendance_mode" string="Attendance Mode"/>
+                </tree>
+            </field>
+        </record>
+
+     
+        <record id="view_kw_employee_shift_assignment_search" model="ir.ui.view">
+            <field name="name">view.kw_employee_shift_assignment.search</field>
+            <field name="model">hr.employee</field>
+            <field name="arch" type="xml">
+                <search string="">
+                    <field name="name" string="Employee Name"/>
+                    <field name="job_branch_id" />
+                    <field name="resource_calendar_id" string="Shift" />
+                    <field name="attendance_mode_ids" />
+                    <filter name="portal_mode_filter" string="Only Portal" domain="[('attendance_mode_ids','!=',False),('attendance_mode_ids','not ilike','manual'),('attendance_mode_ids','not ilike','bio'),('attendance_mode_ids','ilike','portal')]" />
+                    <filter name="manual_mode_filter" string="Only Manual" domain="[('attendance_mode_ids','!=',False),('attendance_mode_ids','not ilike','portal'),('attendance_mode_ids','not ilike','bio'),('attendance_mode_ids','ilike','manual')]" />
+                    <filter name="bio_metric_mode_filter" string="Only Bio-Metric" domain="[('attendance_mode_ids','!=',False),('attendance_mode_ids','not ilike','portal'),('attendance_mode_ids','not ilike','manual'),('attendance_mode_ids','ilike','bio')]" />
+
+                    <filter name="portal_bio_metric_mode_filter" string="Portal + Bio-Metric" domain="[('attendance_mode_ids','!=',False),('attendance_mode_ids','not ilike','manual'),('attendance_mode_ids','ilike','portal'),('attendance_mode_ids','ilike','bio')]" />
+
+                    <filter name="no_attendance_mode_filter" string="No Attendance" domain="[('no_attendance','=',True)]" />
+
+                    <filter name="no_attendance_mode_config_filter" string="No Shift Configuration" domain="[('no_attendance','=',False),('attendance_mode_ids','=',False)]" />
+                    
+                    <group expand="0" string="Group By">
+                        <filter name="my_shift_and_sub_ordinate_shift" string="My &amp; Sub-Ordinates Shift" domain="['|',('user_id','=',uid),('parent_id.user_id','=',uid)]" />
+                        <!-- <filter name="branch_id" string="Branch/SBU" context="{'group_by':'branch_id'}"/> -->
+                        <!-- <filter name="branch_location" string="Location" context="{'group_by':'branch_location'}" /> -->
+                        <filter name="resource_calendar_id" string="Shift" context="{'group_by':'resource_calendar_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_kw_employee_shift_assignment_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Employee Shift Report</field>
+            <field name="res_model">hr.employee</field>
+            <field name="view_mode">tree</field>
+            <field name="context">{"search_default_my_shift_and_sub_ordinate_shift":1}</field>
+            <field name="domain">[]</field>
+            <field name="view_ids" eval="[(5, 0, 0), 
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('view_kw_employee_shift_assignment_tree')})]"/>
+            <field name="search_view_id" ref="view_kw_employee_shift_assignment_search" />
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No record found
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

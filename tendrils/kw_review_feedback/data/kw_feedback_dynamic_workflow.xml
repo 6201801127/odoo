@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="kw_feedback_dynamic_workflow_main" model="odoo.workflow">
+            <field name="name">Feedback Workflow</field>
+            <field name="activities_add" eval="True"/>
+            <field name="followers_add" eval="False"/>
+            <field name="mail_thread_add" eval="True"/>
+            <field name="remove_default_attrs_mod" eval="False"/>
+            <field name="model_id" ref="kw_review_feedback.model_kw_feedback"/>
+        </record>
+
+        <!-- <record id="kw_feedback_dynamic_workflow_node_1" model="odoo.workflow.node">
+            <field name="name">Draft</field>
+            <field name="workflow_id" ref="kw_feedback_dynamic_workflow_main"/>
+            <field name="node_name">draft</field>
+            <field name="sequence" eval="1"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_start" eval="True"/>
+        </record> -->
+        <record id="kw_feedback_dynamic_workflow_node_2" model="odoo.workflow.node">
+            <field name="name">InProgress</field>
+            <field name="workflow_id" ref="kw_feedback_dynamic_workflow_main"/>
+            <field name="node_name">inprogress</field>
+            <field name="sequence" eval="1"/>
+            <field name="is_visible" eval="True"/>
+        </record>
+        <record id="kw_feedback_dynamic_workflow_node_3" model="odoo.workflow.node">
+            <field name="name">Close</field>
+            <field name="workflow_id" ref="kw_feedback_dynamic_workflow_main"/>
+            <field name="node_name">close</field>
+            <field name="sequence" eval="2"/>
+            <field name="is_visible" eval="True"/>
+        </record>
+        
+        <record id="kw_feedback_dynamic_workflow_link_1" model="odoo.workflow.link">
+            <field name="name">InProgress -> Close</field>
+            <field name="node_from" ref="kw_feedback_dynamic_workflow_node_2"/>
+            <field name="node_to" ref="kw_feedback_dynamic_workflow_node_3"/>
+        </record>
+
+        <!-- <record id="kw_feedback_dynamic_workflow_button_1" model="odoo.workflow.node.button">
+            <field name="sequence" eval="1"/>
+            <field name="workflow_id" ref="kw_feedback_dynamic_workflow_main"/>
+            <field name="name">Confirm</field>
+            <field name="node_id" ref="kw_feedback_dynamic_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="btn_hide_domain" eval="[('state', '!=', 'draft')]"/>
+            <field name="action_type">link</field>
+            <field name="link_id" ref="kw_feedback_dynamic_workflow_link_1"/>
+            <field name="action_type">code</field>
+            <field name="code">
+obj.write({'state':'inprogress'})
+rec = env['temp_kanban'].sudo().search([('rel_name','=',obj.module_name.id)])
+if not rec:
+    env['temp_kanban'].create({
+        'rel_name':obj.module_name.id,
+        'c_appreciation':1 if obj.feedback_type=='Appreciation' else 0,
+        'c_issue':1 if obj.feedback_type=='Issue' else 0,
+        'c_suggestion':1 if obj.feedback_type=='Suggestion' else 0,
+    })
+else:
+    rec.write({'c_appreciation':rec.c_appreciation+1 if obj.feedback_type=='Appreciation' else rec.c_appreciation,
+    'c_issue':rec.c_issue+1 if obj.feedback_type=='Issue' else rec.c_issue,
+    'c_suggestion':rec.c_suggestion+1 if obj.feedback_type=='Suggestion' else rec.c_suggestion,
+    'c_feedback':rec.c_feedback+1})
+
+user.notify_success(message='Feedback submitted successfully.')
+
+            </field>
+        </record>  -->
+    </data>
+</odoo>

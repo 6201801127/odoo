@@ -1,0 +1,61 @@
+{
+    'name': "Canteen Management",
+
+    'summary': '',
+
+    'description': """
+        
+    """,
+
+    'author': "CSM Technology",
+    'website': "https://www.csm.tech",
+    'depends': ['base', 'mail','kw_employee','kw_onboarding_integration'],
+
+    'data': [
+        'security/security.xml',
+        'security/ir.model.access.csv',
+        'data/ir_cron_data.xml',
+        'data/kw_canteen_sms.xml',
+        'data/kw_canteen_meal_type_master.xml',
+        'data/kw_price_master_data.xml',
+        'data/data_kw_whatsapp_template.xml',
+        'data/beverage_data.xml',
+        'data/meal_expire_cron.xml',
+        'data/canteen_expense_head_type.xml',
+        'views/beverage_price_report.xml',
+        'views/kw_canteen_meal_exclusion.xml',
+        'views/canteen_collection_from_employee_wizard.xml',
+        'views/baverage_bio_log.xml',
+        'views/meal_bio_log.xml',
+        'views/canteen_regular_meal.xml',
+        'views/canteen_request_response_view.xml',
+        'views/canteen_guest_meal.xml',
+        'views/weekly_meal_configuration.xml',
+        'views/price_master_configuration.xml',
+        'views/kw_canteen_meal_type.xml',
+        'views/canteen_expense_type_view.xml',
+        'views/canteen_expense_type_mater_view.xml',
+        'views/beverage_type_master_view.xml',
+        'views/canteen_meal_feedback_view.xml',
+        'views/canteen_beverage_feedback_view.xml',
+        'views/meal_price_report.xml',
+        'views/current_date_meal_report_view.xml',
+        'views/res_config_settings.xml',
+        'views/regular_meal_apply_mail_template.xml',
+        'views/kw_meal_exclusion_mail_template.xml',
+        'views/special_meal_configuration_view.xml',
+        'views/kw_canteen_correction_request.xml',
+        'views/kw_canteen_total_food_price_mail.xml',
+        'views/manual_special_meal_cancellation_view.xml',
+        'views/canteen_bev_meal_report.xml',
+        'views/update_meal_report_view.xml',
+        'views/remove_meal_report_log.xml',
+        'views/menu.xml',
+    ],
+    'demo': [
+
+    ],
+    'application': True,
+    'installable': True,
+    'auto_install': False,
+}

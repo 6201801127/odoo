@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="kw_quotation_consolidation_view_tree" model="ir.ui.view">
+            <field name="name">Quotation Consolidation Tree</field>
+            <field name="model">kw_quotation_consolidation</field>
+            <field name="arch" type="xml">
+                <tree create="0" delete="0">
+                    <!-- Add your fields here -->
+                    <field name="qo_consolidation_no" string="Quotation Consolidation No" />
+                    <field name="quotation" string="Quotation" widget="many2many_tags"/>
+                    <field name="date" string="QC Date"/>
+                    <field name="requisition_ids" string="Requisition No" widget="many2many_tags"/>
+                    <field name="pr_date" string="PR Date" invisible="1"/>
+                    <field name="state" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_negotiation_view_form_popup" model="ir.ui.view">
+            <field name="name">kw_negotiation_view_form</field>
+            <field name="priority" eval="1"/>
+            <field name="model">kw_negotiation</field>
+            <field name="arch" type="xml">
+               <form>
+					<sheet>
+						<group>
+							<group>
+                                <field name="file_name" invisible="1"/>
+                                <field name="state" invisible="1"/>
+                                <field name="invisible_boolean" invisible="1"/>
+                                <field name="consolidation_id" options="{'no_create': True, 'no_create_edit':True}" invisible="1" />
+                                <field name="product" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" attrs="{'readonly':[('id','>', 0)]}" force_save='1'/>
+                                <field name="product_name" string="Description" options="{'no_create': True, 'no_create_edit':True}" attrs="{'readonly':[('id','>', 0)]}" force_save='1'/>
+                                <field name="quantity" readonly="1" attrs="{'readonly':[('id','>', 0)]}" force_save='1'/>
+                                <field name="vendor_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" attrs="{'readonly':[('id','>', 0)]}" force_save='1'/>
+                                <field name="payment_terms" attrs="{'readonly':[('id','>', 0)]}" options="{'no_create': True, 'no_create_edit':True,'no_open': True,}" force_save='1'/>
+                                <field name="schedule_date" attrs="{'readonly':[('id','>', 0)]}" force_save='1'/>
+                                <field name="unit_price" string="Quoted Price" attrs="{'readonly':[('id','>', 0)]}" force_save='1'/>
+                                <field name="price_tax" readonly='1'/>
+                                <field name="price_total" readonly='1'/>
+                                <field name="negotiation_mode" string="Mode Of Negotiation" options="{'no_create': True, 'no_create_edit':True,'no_open': True}" attrs="{'readonly':[('id','>', 0)]}"  force_save='1'/>
+                                <field name="description" string="Remark" attrs="{'readonly':[('id','>', 0)]}" force_save='1'/>
+                                <field name="attachment" filename="file_name" widget="FieldBinary" string="Attachment" attrs="{'readonly':[('id','>', 0)]}" force_save='1'/>
+                                <field name="cs"/>
+                                <field name="final_price" string="Final Price" attrs="{'readonly':[('state','=', 'approve')]}" force_save='1'/>
+							</group>
+						</group>
+					</sheet>
+				</form>
+            </field>
+        </record>
+
+        <record id="kw_quotation_consolidation_view_form" model="ir.ui.view">
+            <field name="name">Quotation Consolidation And Negotiation</field>
+            <field name="model">kw_quotation_consolidation</field>
+            <field name="arch" type="xml">
+                <form string="Quotation Consolidation" create="false" delete="0">
+                    <script>
+                        $(document).ready(function() {
+                            // Get the text content of the button
+                            var state = $("button[aria-checked=true]").text().trim();
+                            var states=  $("button[aria-pressed=true]").text().trim();
+
+
+                            // Check if the state is 'Issued'
+                            if (state === 'approved' || state === 'QC Updated' || states === 'approved' || states === 'QC Updated') {
+                                // Hide the edit button
+                                $('.o_form_button_edit').hide();
+                            }
+                        });
+
+                    </script>
+                    <header>
+                        <button name="move_to_quotation" attrs="{'invisible': ['|',('boolean_button', '=', True),('state', '!=', 'draft')]}" string="Move to Quotation" type="object" class="oe_highlight"/>
+                        <button name="approve" attrs="{'invisible': ['|',('boolean_button', '=', False),('state', '!=', 'draft')]}" string="Update QC" type="object" class="oe_highlight"/>
+                        <!-- <button string="Ready For PO" states="readyforpo" name="btn_ready_for_po" type="object" class="oe_highlight" attrs="{'invisible': [('state', 'not in', 'approved')]}"/> -->
+                        <field name="state" widget="statusbar" statusbar_visible="draft,approved" readonly="1"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <!-- Add your fields here -->
+                                <field name="qo_consolidation_no" string="QC No"/>
+                                <field name="requisition_ids" readonly='1' string="Requisition No" options="{'no_create': True, 'no_create_edit':True}" widget='many2many_tags'/>
+                                <!-- <field name="pr_no" string="PR No"/> -->
+                                <!-- <field name="pr_date" string="PR Date"/> -->
+                            </group>
+                            <group>
+                                <field name="quotation" readonly='1' string="Quotation No" widget='many2many_tags' style="pointer-events:none;"/>
+                                <field name="date" string="QC Date" readonly='1'/>
+                                <field name="boolean_button" invisible="1"/>
+                                <!-- <field name="boolean_button"/> -->
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Products">
+                                <field name="order_line" string="Products">
+                                    <tree editable="bottom" delete="false" create="false" options="{ 'no_open': True}" default_order='partner_id,price_total,date_planned'>
+                                        <field name="currency_id" invisible="1"/>
+                                        <field name="product_id" string="Item Code" style="pointer-events:none;" />
+                                        <field name="name" string="Item Name" style="pointer-events:none;" invisible='1'
+                                        />
+                                        <field name="date_planned" string="Date" style="pointer-events:none;"/>
+                                        <field name="partner_id" string="Vendor" style="pointer-events:none;"/>
+                                        <field name="product_qty" string="Quantity" style="pointer-events:none;"/>
+                                        <field name="product_uom" string="UoM" style="pointer-events:none;" />
+                                        <field name="price_unit" string="Quoted Price" style="pointer-events:none;"/>
+                                        <field name="last_pp" string="Last Procurement Price" style="pointer-events:none;"/>
+                                        <field name="taxes_id" string="Taxes" widget="many2many_tags" domain="[('type_tax_use','=','purchase')]" context="{'default_type_tax_use': 'purchase', 'search_view_ref': 'account.account_tax_view_search'}" options="{'no_create': True}" style="pointer-events:none;"/>
+                                        <field name="price_tax" widget="monetary"/>
+                                        <field name="price_subtotal" string="Price Subtotal" widget="monetary" />
+                                        <field name="price_total" widget="monetary"/>
+                                        <field name="file_name" invisible="1"/>
+                                        <field name="prd_attachment" filename="file_name" widget="FieldBinary" string="Attachment" invisible="1"/>
+                                    </tree>
+                                </field>
+                                <!-- <group class="oe_subtotal_footer oe_right">
+                                    <field name="amount_untaxed" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    <field name="amount_tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    <div class="oe_subtotal_footer_separator oe_inline">
+                                        <label for="amount_total"/>
+                                    </div>
+                                    <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                </group> -->
+                                <!-- <field name="remark" class="oe_inline" attrs="{'readonly':[('state','=','approved')]}"/>
+                                <div class="oe_clear"/> -->
+                            </page>
+                            <page string="Negotiation">
+                                <field name="negotiation_ids" context="{'form_view_ref': 'kw_inventory.kw_negotiation_view_form_popup'}" string="Negotiate" default_order='vendor_id,schedule_date,unit_price' attrs="{'readonly': [('state', '=','approved')]}">
+                                    <tree editable="bottom" options="{ 'no_open': True}"  decoration-success="final_price==True" delete="false">
+                                        <field name="file_name" invisible="1"/>
+                                        <field name="state" invisible="1"/>
+                                        <field name="invisible_boolean" invisible="1"/>
+                                        <field name="consolidation_id" options="{'no_create': True, 'no_create_edit':True}" invisible="1" />
+                                        <field name="product" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" attrs="{'readonly':[('id','>', 0)]}" force_save='1'/>
+                                        <field name="product_name" invisible='1' string="Description" options="{'no_create': True, 'no_create_edit':True}" attrs="{'readonly':[('id','>', 0)]}" force_save='1'/>
+                                        <field name="quantity" readonly="1" attrs="{'readonly':[('id','>', 0)]}" force_save='1'/>
+                                        <field name="product_uom" string='UoM' readonly="1" attrs="{'readonly':[('id','>', 0)]}" force_save='1'/>
+                                        <field name="vendor_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" attrs="{'readonly':[('id','>', 0)]}" force_save='1'/>
+                                        <field name="payment_terms" attrs="{'readonly':[('id','>', 0)]}" options="{'no_create': True, 'no_create_edit':True,'no_open': True,}" force_save='1'/>
+                                        <field name="schedule_date" attrs="{'readonly':[('id','>', 0)]}" force_save='1'/>
+                                        <field name="unit_price" string="Quoted Price" attrs="{'readonly':[('id','>', 0)]}" force_save='1'/>
+                                        <field name="price_subtotal" string="Price Subtotal" widget="monetary" />
+                                        <field name="price_tax" readonly='1'/>
+                                        <field name="price_total" readonly='1'/>
+                                        <field name="negotiation_mode" string="Mode Of Negotiation" options="{'no_create': True, 'no_create_edit':True,'no_open': True}" attrs="{'readonly':[('id','>', 0)]}"  force_save='1'/>
+                                        <field name="description" string="Remark" attrs="{'readonly':[('id','>', 0)]}" force_save='1'/>
+                                        <field name="attachment" filename="file_name" widget="FieldBinary" string="Attachment" attrs="{'readonly':[('id','>', 0)]}" force_save='1'/>
+                                        <field name="cs"/>
+                                        <field name="final_price" string="Final Price" attrs="{'readonly':[('state','=', 'approve')]}" force_save='1'/>
+                                        <!-- <field name="readonly_field" string="Readonly Field" /> -->
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                    </div>
+                    <footer>
+                        <button string="Save" class="btn-primary" invisible='1'/>
+                        <button string="Discard" class="btn-secondary" special="cancel" invisible='1'/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <record id="kw_quotation_consolidation_view_search" model="ir.ui.view">
+            <field name="name">kw_quotation_consolidation.search</field>
+            <field name="model">kw_quotation_consolidation</field>
+            <field name="arch" type="xml">
+                <search string="Search">
+                    <group expand="0" string="Group By">                                                                                 
+                        <filter name="group_state" string="Status" context="{'group_by':'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        <record id="kw_quotation_consolidation_action_window" model="ir.actions.act_window">
+            <field name="name">Negotiation &amp; Quotation Consolidation</field>
+            <field name="res_model">kw_quotation_consolidation</field>
+            <field name="view_mode">tree,form,pivot,graph</field>
+            <field name="view_type">form</field>
+            <field name="search_view_id" ref="kw_quotation_consolidation_view_search"></field>
+            <field name="context">{'search_default_group_state': 1}</field>
+        </record>
+    </data>
+    <data>
+        <record id="kw_quotation_consolidation_wizard_view" model="ir.ui.view">
+            <field name="name">Remark</field>
+            <field name="model">kw_quotation_consolidation_wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                        $(document).ready(function(){
+                            $(".modal-footer").hide();
+                            $(".modal-title").show();
+                            $(".o_form_statusbar").hide();
+                        });
+                    </script>
+                    <div class="row">
+                        <div class="text-center col-sm-12 mx-auto">
+                            <p class="h6 font-weight-light text-left text-justify">
+                                <field name="remark" />
+                            </p>
+                            <button type="object" name="submit" class="btn-success mr-2" style="float:left;">Submit</button>
+                            <button string="Cancel" class="btn-danger" special="cancel" style="float:left;"/>
+                        </div>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,90 @@
+<odoo>
+    <data>
+        <!-- payroll_increment tree view -->
+        <record id="payroll_increment_view_tree" model="ir.ui.view">
+            <field name="name">payroll_increment.view.tree</field>
+            <field name="model">payroll_increment</field>
+            <field name="arch" type="xml">
+                <tree editable='top' delete ='1'>
+                    <!-- Add your fields here -->
+                    <field name="employee_id" required='1' attrs="{'readonly':[('state','=','close')]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="company_id" options="{'no_open': True,'no_create':True,'no_edit':True}" required='1'/>
+                    <field name="increment_date" required='1' attrs="{'readonly':[('state','=','close')]}"/>
+                    <field name="remark" required='1' attrs="{'readonly':[('state','=','close')]}"/>
+                    <field name="state" readonly='1'/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="payroll_increment_tree_search" model="ir.ui.view">
+            <field name="name">payroll_increment_search</field>
+            <field name="model">payroll_increment</field>
+            <field name="arch" type="xml">
+                <search string="payroll_increment_search">
+                    <field name="employee_id"/>
+                    <field name="increment_date"/>
+                    <field name="remark"/>
+                    <field name="company_id"/>
+                    <filter string="This Month" domain="[('increment_date', 'like',context_today().strftime('%Y-%m'))]" name="this_month_salary"/>
+                    <filter string="Last Month" domain="[('increment_date','&gt;',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('increment_date','&lt;',(context_today()).strftime('%Y-%m-01'))]" name="last_month_salary"/>
+                    <separator/>
+                    <filter string="January" domain="[('increment_date','&gt;=',time.strftime('%%Y-01-01')),('increment_date','&lt;',time.strftime('%%Y-02-01'))]" name="january_report"/>
+                    <filter string="February" domain="[('increment_date','&gt;=',time.strftime('%%Y-02-01')),('increment_date','&lt;',time.strftime('%%Y-03-01'))]" name="february_report"/>
+                    <filter string="March" domain="[('increment_date','&gt;=',time.strftime('%%Y-03-01')),('increment_date','&lt;',time.strftime('%%Y-04-01'))]" name="march_report"/>
+                    <filter string="April" domain="[('increment_date','&gt;=',time.strftime('%%Y-04-01')),('increment_date','&lt;',time.strftime('%%Y-05-01'))]" name="april_report"/>
+                    <filter string="May" domain="[('increment_date','&gt;=',time.strftime('%%Y-05-01')),('increment_date','&lt;',time.strftime('%%Y-06-01'))]" name="may_report"/>
+                    <filter string="June" domain="[('increment_date','&gt;=',time.strftime('%%Y-06-01')),('increment_date','&lt;',time.strftime('%%Y-07-01'))]" name="june_report"/>
+                    <filter string="July" domain="[('increment_date','&gt;=',time.strftime('%%Y-07-01')),('increment_date','&lt;',time.strftime('%%Y-08-01'))]" name="july_report"/>
+                    <filter string="August" domain="[('increment_date','&gt;=',time.strftime('%%Y-08-01')),('increment_date','&lt;',time.strftime('%%Y-09-01'))]" name="august_report"/>
+                    <filter string="September" domain="[('increment_date','&gt;=',time.strftime('%%Y-09-01')),('increment_date','&lt;',time.strftime('%%Y-10-01'))]" name="september_report"/>
+                    <filter string="October" domain="[('increment_date','&gt;=',time.strftime('%%Y-10-01')),('increment_date','&lt;',time.strftime('%%Y-11-01'))]" name="october_report"/>
+                    <filter string="November" domain="[('increment_date','&gt;=',time.strftime('%%Y-11-01')),('increment_date','&lt;',time.strftime('%%Y-12-01'))]" name="november_report"/>
+                    <filter string="December" domain="[('increment_date','&gt;=',time.strftime('%%Y-12-01')),('increment_date','&lt;=',time.strftime('%%Y-12-31'))]" name="december_report"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Employee" name="employee" context="{'group_by':'employee_id'}"/>
+                        <filter string="Company" name="company" context="{'group_by':'company_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        <!-- payroll_increment action window -->
+        <record id="payroll_increment_action" model="ir.actions.act_window">
+            <field name="name">Increment</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">payroll_increment</field>
+            <field name="view_mode">tree</field>
+            <field name="view_type">form</field>
+        </record>
+
+        <record id="payroll_increment_wizard_form" model="ir.ui.view">
+            <field name="name">payroll_increment_wizard.view.form</field>
+            <field name="model">payroll_increment_wizard</field>
+            <field name="arch" type="xml">
+                <form string="">
+                    <sheet>
+                        <group>
+                            <!-- Add your fields here -->
+                            <field name="increment_ids" create='0' delete='0'>
+                            <tree>
+                                    <field name="employee_id"/>
+                                    <field name="increment_date"/>
+                                    <field name="remark"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="btn_update_contract" string="Update Contract" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <act_window id="action_update_increment" name="Update Contract" src_model="payroll_increment" res_model="payroll_increment_wizard" view_type="form" view_mode="form" view_id="payroll_increment_wizard_form" key2="client_action_multi" target="new" context="{'selected_active_ids':active_ids}" groups="kw_employee.group_payroll_manager"/>
+        <!-- This Menu Item must have a parent and an action -->
+        <menuitem id="payroll_increment_menu_act" name="Increment"
+            parent="payroll_inherit.process_payroll_menu" action="payroll_increment_action" sequence="99" />
+    </data>
+</odoo>

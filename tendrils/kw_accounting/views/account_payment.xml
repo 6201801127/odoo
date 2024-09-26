@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Account Payment Form View -->
+        <record id="account_payment_view_form" model="ir.ui.view">
+            <field name="name">account.payment.view.form.inherit</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_form" />
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='payment_type']" position="attributes">
+                    <attribute name="options">{'horizontal':True}</attribute>
+                </xpath>
+                <xpath expr="//form/header/field[@name='state']" position="replace">
+                    <field name="state" widget="statusbar" nolabel="1" statusbar_visible="draft,to_approve,posted,reconciled,cancelled" />
+                </xpath>
+                <xpath expr="//form/header/button[@name='post']" position="attributes">
+                    <attribute name="states">to_approve</attribute>
+                </xpath>
+                <xpath expr="//form/header/button[@name='post']" position="before">
+                    <button name="apply_account_payment" type="object" states="draft" string="Send for Approval" class="btn btn-success" />
+                </xpath>
+                <xpath expr="//form/sheet/group" position="after">
+                    <group>
+                        <field name="narration" attrs="{'readonly': [('state', 'not in', ['draft','to_approve'])]}"/>
+                    </group>
+                </xpath>
+
+                <field name="journal_id" position="replace" />
+                <field name="partner_id" position="attributes">
+                    <attribute name="options">{'no_create': True, 'no_open': True}</attribute>
+                </field>
+
+                <field name="partner_id" position="after">
+                    <field name="journal_id" widget="radio" string="Mode of Payment" options="{'horizontal':True}" domain="[('type', 'in', ('bank', 'cash')),('code','in',['PVBNK','PVCSH'])]" attrs="{'invisible':[('payment_type','!=','outbound')],'readonly': [('state', 'not in', ['draft','to_approve'])]}"/>
+                    <field name="journal_id" widget="radio" string="Mode of Payment" options="{'horizontal':True}" domain="[('type', 'in', ('bank', 'cash')),('code','in',['RVBNK','RVCSH'])]" attrs="{'invisible':[('payment_type','!=','inbound')],'readonly': [('state', 'not in', ['draft','to_approve'])]}"/>
+                    <!-- <field name="analytic_account_id" options='{"no_open": True, "no_create":
+                    True}' domain="[('partner_id', '=', partner_id)]"/> -->
+                    <field name="outstanding_payment_account_id" options='{"no_open": True, "no_create": True"}' attrs="{'invisible':[('payment_type','=','outbound')],'readonly': [('state', 'not in', ['draft','to_approve'])]}" readonly="False" required="1" string="Debit Account" />
+                    <field name="destination_account_id" options='{"no_open": True, "no_create": True"}' attrs="{'invisible':[('payment_type','=','outbound')],'readonly': [('state', 'not in', ['draft','to_approve'])]}" force_save="1" readonly="False" required="1" string="Credit Account" />
+
+                    <field name="outstanding_payment_account_id" options='{"no_open": True, "no_create": True"}' attrs="{'invisible':[('payment_type','=','inbound')],'readonly': [('state', 'not in', ['draft','to_approve'])]}"  readonly="False" required="1" string="Credit Account" />
+                    <field name="destination_account_id" options='{"no_open": True, "no_create": True"}'  attrs="{'invisible':[('payment_type','=','inbound')],'readonly': [('state', 'not in', ['draft','to_approve'])]}" force_save="1" readonly="False" required="1" string="Debit Account" />
+
+                    <field name="company_id" options='{"no_open": True, "no_create": True"}' readonly="True" />
+                </field>
+                <label for="amount" position="replace" />
+                <xpath expr="//div[@name='amount_div']" position="replace" />
+                <field name="payment_date" position="after">
+                    <label for="amount" string="Amount" />
+                    <div name="amount_div" class="o_row">
+                        <field name="amount" attrs="{'readonly': [('state', 'not in', ['draft','to_approve'])]}" />
+                        <field name="currency_id" options="{'no_create': True, 'no_open': True}" groups="base.group_multi_currency" attrs="{'readonly': [('state', 'not in', ['draft','to_approve'])]}" />
+                    </div>
+                    <field name="payment_method_type" string="Payment Method" attrs="{'readonly': [('state', 'not in', ['draft','to_approve'])]}" />
+                </field>
+
+                <field name="company_id" position="after">
+                    <!-- <field name="branch_id" options='{"no_open": True, "no_create": True}'/> -->
+                    <field name="unit_id" options='{"no_open": True, "no_create": True}' />
+                    <field name="department_id" options='{"no_open": True, "no_create": True}' />
+                </field>
+                
+                <field name="payment_transaction_id" position="after">
+                    <!-- <field name="branch_id" options='{"no_open": True, "no_create": True}'/> -->
+                    <field name="cheque_date"  attrs="{'invisible':[('payment_method_type','!=','Cheque')]}" />
+                    <field name="cheque_reference"  attrs="{'invisible':[('payment_method_type','!=','Cheque')]}" />
+                    <field name="move_id" invisible="1"/>
+                </field>
+                <field name="payment_transaction_id" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+                
+            </field>
+        </record>
+        <record id="account_payment_invoice_view_form" model="ir.ui.view">
+            <field name="name">account.payment.invoice.view.form.inherit</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_invoice_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//footer/button[1]" position="replace">
+                    <button string='Validate' name="action_validate_invoice_payment" type="object" class="btn-primary"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

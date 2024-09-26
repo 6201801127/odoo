@@ -1,0 +1,92 @@
+<odoo>
+    <data>
+        <record id="kw_tour_send_email_for_passport_update_template" model="mail.template">
+            <field name="name">Remainder for Passport Expiry e-mail</field>
+            <field name="email_from">tendrils@csm.tech</field>
+            <field name="subject">Passport Updation Reminder</field>
+            <field name="email_to">${(ctx.get('to_mail') or ''|safe)}</field>
+            <field name="model_id" ref="kw_tour.model_kw_tour_passport"/>
+            <field name="auto_delete" eval="False"/>
+              <field name="body_html">
+                  <![CDATA[
+                    <div style="padding-left: 20px;">
+                        <h5 style="font-weight: 400;margin-bottom: 0;font-size: 18px;color:#676767;">
+                            <small style="color:rgb(22, 123, 158);font-size: 18px;margin-right: 2px;font-weight: 600;">Hi</small>
+                            All,
+                        </h5>
+                        <p style="font-size: 17px;">
+                            Below is the list of employees whose passports are going to expire soon.
+                        </p>
+                    </div>
+                    &nbsp;
+                    <table border="1" cellpadding="5" cellspacing="0" style="width:100%;border-collapse: collapse;font-size: 14px; margin-top:1rem; ">
+
+                            <tr>
+                                <th style="border: 1px solid #000;">Sl#</th>
+                                <th style="border: 1px solid #000;text-align:left;">Name</th>
+                                <th style="border: 1px solid #000;">Emp Code</th>
+                                <th style="border: 1px solid #000;">Department</th>
+                                <th style="border: 1px solid #000;">Passport Number</th>
+                                <th style="border: 1px solid #000;">Expiry Date</th>
+                            </tr>
+
+                            % for row in ctx['emp_list']:
+                            <tr>
+                                <td style="color:#676767;height: 34px;width:03%;">
+                                    ${loop.index}
+                                </td>
+                                <td style="color:#676767;height: 34px;">
+                                    % if row.emp_name:
+                                        ${row.emp_name}
+                                    % endif
+                                </td>
+                                <td style="color:#676767;height: 34px;">
+                                    % if row.emp_code:
+                                        ${row.emp_code}
+                                    % endif
+                                </td>
+                                <td style="color:#676767;height: 34px;">
+                                    % if row.department:
+                                        ${row.department}
+                                    % endif
+                                </td>
+                                <td style="color:#676767;height: 34px;">
+                                    % if row.pass_num:
+                                        ${row.pass_num}
+                                    % endif
+                                </td>
+                                <td style="color:#676767;height: 34px;">
+                                    % if row.pass_ex:
+                                        ${row.pass_ex}
+                                    % endif
+                                </td>
+                            </tr>
+                        % endfor
+                    </table>
+                    <br/>
+                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 17px;">
+                        This is a system generated mail, Please do not reply to this email.
+                    </p>
+                    <br/>
+                  ]]>
+              </field>
+          </record>
+    </data>
+
+    <data noupdate="1">
+        <record id="mail_for_passport_expairy" model="ir.cron">
+            <field name="name">Send Mail For Passport Expiry</field>
+            <field name="model_id" ref="model_kw_tour_passport"/>
+            <field name="state">code</field>
+            <field name="code">model._scheduling_mail_for_passport_expairy()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">weeks</field>
+            <field name="numbercall">-1</field>
+<!--            <field name="nextcall" eval="(DateTime.now() + timedelta(days=7))" /> -->
+            <field name="doall" eval="True"/>
+            <field name="priority">9</field>
+            <field name="active" eval="False"/>
+        </record>
+    </data>
+</odoo>

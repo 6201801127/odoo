@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <record id="kw_end_of_service_dynamic_workflow_main" model="odoo.workflow">
+            <field name="name">End of Service Approval</field>
+            <field name="activities_add" eval="True"/>
+            <field name="followers_add" eval="False"/>
+            <field name="mail_thread_add" eval="True"/>
+            <field name="remove_default_attrs_mod" eval="False"/>
+            <field name="model_id" ref="kw_eos.model_kw_end_of_service"/>
+        </record>
+
+        
+        <record id="kw_end_of_service_dynamic_workflow_node_1" model="odoo.workflow.node">
+            <field name="name">Applied</field>
+            <field name="workflow_id" ref="kw_end_of_service_dynamic_workflow_main"/>
+            <field name="node_name">apply</field>
+            <field name="sequence" eval="1"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_start" eval="True"/>
+        </record>
+
+
+        <record id="kw_end_of_service_dynamic_workflow_node_2" model="odoo.workflow.node">
+            <field name="name">Forwarded</field>
+            <field name="workflow_id" ref="kw_end_of_service_dynamic_workflow_main"/>
+            <field name="node_name">forward</field>
+            <field name="sequence" eval="3"/>
+            <field name="is_visible" eval="True"/>
+        </record>
+
+        <record id="kw_end_of_service_dynamic_workflow_node_3" model="odoo.workflow.node">
+            <field name="name">Hold</field>
+            <field name="workflow_id" ref="kw_end_of_service_dynamic_workflow_main"/>
+            <field name="node_name">hold</field>
+            <field name="sequence" eval="3"/>
+            <field name="is_visible" eval="True"/>
+        </record>
+
+        <record id="kw_end_of_service_dynamic_workflow_node_4" model="odoo.workflow.node">
+            <field name="name">Approved</field>
+            <field name="workflow_id" ref="kw_end_of_service_dynamic_workflow_main"/>
+            <field name="node_name">confirm</field>
+            <field name="sequence" eval="3"/>
+            <field name="is_visible" eval="True"/>
+        </record>
+
+        <record id="kw_end_of_service_dynamic_workflow_node_5" model="odoo.workflow.node">
+            <field name="name">Rejected</field>
+            <field name="workflow_id" ref="kw_end_of_service_dynamic_workflow_main"/>
+            <field name="node_name">reject</field>
+            <field name="sequence" eval="5"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+        <!--Buttons on State=='Apply' -->
+        <record id="kw_end_of_service_dynamic_workflow_button_1" model="odoo.workflow.node.button">
+            <field name="sequence" eval="1"/>
+            <field name="workflow_id" ref="kw_end_of_service_dynamic_workflow_main"/>
+            <field name="name">Approve</field>
+            <field name="node_id" ref="kw_end_of_service_dynamic_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="[('show_btn_apply','=',False)]"/>
+            <field name="action_type">code</field>
+            <field name="code">
+wizard_form = env.ref('kw_eos.remark_eos_view', False)
+action = {
+    'type': 'ir.actions.act_window',
+    'view_type': 'form',
+    'view_mode': 'form',
+    'view_id': wizard_form.id,
+    'res_model': 'kw_eos_remark_wizard',
+    'target': 'new',
+    'context': {'default_eos_id': obj.id,'ra_approve':True}
+}
+            </field>
+            <field name="btn_class">btn-success</field>
+        </record> 
+        <record id="kw_end_of_service_dynamic_workflow_button_2" model="odoo.workflow.node.button">
+            <field name="sequence" eval="2"/>
+            <field name="workflow_id" ref="kw_end_of_service_dynamic_workflow_main"/>
+            <field name="name">Forward</field>
+            <field name="node_id" ref="kw_end_of_service_dynamic_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="[('show_btn_apply','=',False)]"/>
+            <field name="action_type">code</field>
+            <field name="code">
+wizard_form = env.ref('kw_eos.forward_eos_view', False)
+action =  {
+    'type': 'ir.actions.act_window',
+    'view_type': 'form',
+    'view_mode': 'form',
+    'view_id': wizard_form.id,
+    'res_model': 'kw_eos_forward_wizard',
+    'target': 'new',
+    'context': {'default_eos_id': obj.id, 'default_forward_to': obj.action_to_be_taken_by.id}
+}
+            </field>
+            <field name="btn_class">btn-warning</field>
+        </record> 
+        <record id="kw_end_of_service_dynamic_workflow_button_3" model="odoo.workflow.node.button">
+            <field name="sequence" eval="3"/>
+            <field name="workflow_id" ref="kw_end_of_service_dynamic_workflow_main"/>
+            <field name="name">Hold</field>
+            <field name="node_id" ref="kw_end_of_service_dynamic_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="[('show_btn_apply','=',False)]"/>
+            <field name="action_type">code</field>
+            <field name="code">
+wizard_form = env.ref('kw_eos.remark_eos_view', False)
+action = {
+    'type': 'ir.actions.act_window',
+    'view_type': 'form',
+    'view_mode': 'form',
+    'view_id': wizard_form.id,
+    'res_model': 'kw_eos_remark_wizard',
+    'target': 'new',
+    'context': {'default_eos_id': obj.id,'hold':True}
+}
+            </field>
+            <field name="btn_class">btn-primary</field> 
+        </record> 
+        <record id="kw_end_of_service_dynamic_workflow_button_4" model="odoo.workflow.node.button">
+            <field name="sequence" eval="1"/>
+            <field name="workflow_id" ref="kw_end_of_service_dynamic_workflow_main"/>
+            <field name="name">Unhold</field>
+            <field name="node_id" ref="kw_end_of_service_dynamic_workflow_node_3"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="[('show_btn_hold','=', False)]"/>
+            <field name="action_type">code</field>
+            <field name="code">
+wizard_form = env.ref('kw_eos.remark_resignation_view', False)
+action = {
+    'type': 'ir.actions.act_window',
+    'view_type': 'form',
+    'view_mode': 'form',
+    'view_id': wizard_form.id,
+    'res_model': 'kw_resignation_remark_wizard',
+    'target': 'new',
+    'context': {'default_resignation_id': obj.id,'unhold':True}
+}
+            </field>
+            <field name="btn_class">btn-primary</field>
+        </record> 
+        <record id="kw_end_of_service_dynamic_workflow_button_5" model="odoo.workflow.node.button">
+            <field name="sequence" eval="4"/>
+            <field name="workflow_id" ref="kw_end_of_service_dynamic_workflow_main"/>
+            <field name="name">Reject</field>
+            <field name="node_id" ref="kw_end_of_service_dynamic_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="[('show_btn_apply','=',False)]"/>
+            <field name="action_type">code</field>
+            <field name="code">
+wizard_form = env.ref('kw_eos.remark_resignation_view', False)
+action = {
+    'type': 'ir.actions.act_window',
+    'view_type': 'form',
+    'view_mode': 'form',
+    'view_id': wizard_form.id,
+    'res_model': 'kw_resignation_remark_wizard',
+    'target': 'new',
+    'context': {'default_resignation_id': obj.id, 'reject':True}
+}
+            </field>
+            <field name="btn_class">btn-danger</field>
+        </record>
+
+        
+
+        <!--Buttons on State=='Forward' -->
+        <record id="kw_end_of_service_dynamic_workflow_button_7" model="odoo.workflow.node.button">
+            <field name="sequence" eval="1"/>
+            <field name="workflow_id" ref="kw_end_of_service_dynamic_workflow_main"/>
+            <field name="name">Approve</field>
+            <field name="node_id" ref="kw_end_of_service_dynamic_workflow_node_2"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="[('show_btn_foward','=',False)]"/>
+            <field name="action_type">code</field>
+            <field name="code">
+wizard_form = env.ref('kw_eos.remark_eos_view', False)
+action = {
+    'type': 'ir.actions.act_window',
+    'view_type': 'form',
+    'view_mode': 'form',
+    'view_id': wizard_form.id,
+    'res_model': 'kw_eos_remark_wizard',
+    'target': 'new',
+    'context': {'default_eos_id': obj.id,'ra_approve':True}
+}
+            </field>
+            <field name="btn_class">btn-success</field>
+        </record> 
+        <record id="kw_end_of_service_dynamic_workflow_button_8" model="odoo.workflow.node.button">
+            <field name="sequence" eval="2"/>
+            <field name="workflow_id" ref="kw_end_of_service_dynamic_workflow_main"/>
+            <field name="name">Forward</field>
+            <field name="node_id" ref="kw_end_of_service_dynamic_workflow_node_2"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="[('show_btn_foward','=',False)]"/>
+            <field name="action_type">code</field>
+            <field name="code">
+wizard_form = env.ref('kw_eos.forward_eos_view', False)
+action = {
+    'type': 'ir.actions.act_window',
+    'view_type': 'form',
+    'view_mode': 'form',
+    'view_id': wizard_form.id,
+    'res_model': 'kw_eos_forward_wizard',
+    'target': 'new',
+    'context': {'default_eos_id': obj.id}
+        }
+            </field>
+            <field name="btn_class">btn-warning</field>
+        </record> 
+        <record id="kw_end_of_service_dynamic_workflow_button_9" model="odoo.workflow.node.button">
+            <field name="sequence" eval="3"/>
+            <field name="workflow_id" ref="kw_end_of_service_dynamic_workflow_main"/>
+            <field name="name">Hold</field>
+            <field name="node_id" ref="kw_end_of_service_dynamic_workflow_node_2"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="[('show_btn_foward','=',False)]"/>
+            <field name="action_type">code</field>
+            <field name="code">
+wizard_form = env.ref('kw_eos.remark_eos_view', False)
+action = {
+    'type': 'ir.actions.act_window',
+    'view_type': 'form',
+    'view_mode': 'form',
+    'view_id': wizard_form.id,
+    'res_model': 'kw_eos_remark_wizard',
+    'target': 'new',
+    'context': {'default_eos_id': obj.id,'hold':True}
+}
+            </field>
+            <field name="btn_class">btn-primary</field> 
+        </record> 
+        <record id="kw_end_of_service_dynamic_workflow_button_10" model="odoo.workflow.node.button">
+            <field name="sequence" eval="4"/>
+            <field name="workflow_id" ref="kw_end_of_service_dynamic_workflow_main"/>
+            <field name="name">Reject</field>
+            <field name="node_id" ref="kw_end_of_service_dynamic_workflow_node_2"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="[('show_btn_foward','=',False)]"/>
+            <field name="action_type">code</field>
+            <field name="code">
+wizard_form = env.ref('kw_eos.remark_eos_view', False)
+action = {
+    'type': 'ir.actions.act_window',
+    'view_type': 'form',
+    'view_mode': 'form',
+    'view_id': wizard_form.id,
+    'res_model': 'kw_eos_remark_wizard',
+    'target': 'new',
+    'context': {'default_eos_id': obj.id, 'reject':True}
+}
+            </field>
+            <field name="btn_class">btn-danger</field>
+        </record>       
+    </data>
+</odoo>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record model="ir.module.category" id="module_category_kw_grievance">
+            <field name="name">Employee Grievance</field>
+            <field name="description">User access level for Employee Grievance</field>
+            <field name="sequence">4</field>
+        </record>
+
+        <record id="griev_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="category_id" ref="kw_grievance.module_category_kw_grievance" />
+        </record>
+
+        <record id="griev_spoc_committee_group" model="res.groups">
+            <field name="name">SPOC committee</field>
+            <field name="category_id" ref="kw_grievance.module_category_kw_grievance" />
+        </record>
+
+        <record id="kw_griev_manager_group" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="category_id" ref="kw_grievance.module_category_kw_grievance" />
+        </record>
+
+        <!-- <record id="griev_section_officer" model="res.groups">
+            <field name="name">Section Officer</field>
+            <field name="category_id" ref="kw_grievance.module_category_kw_grievance" />
+        </record> -->
+       <record id="ir_rule_user_security" model="ir.rule">
+            <field name="model_id" ref="model_kw_grievance"/>
+            <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+            <field name="name">User Security Rule</field>
+            <field name="groups" eval="[(4, ref('kw_grievance.griev_user'))]"/>
+        </record>
+        <record id="ir_rule_manager_security" model="ir.rule">
+            <field name="name">Manager Security Rule</field>
+            <field name="model_id" ref="model_kw_grievance"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('kw_grievance.kw_griev_manager_group'))]"/>
+        </record>
+        <record id="ir_rule_manager_security" model="ir.rule">
+            <field name="name">Comittee Security Rule</field>
+            <field name="model_id" ref="model_kw_grievance"/>
+            <field name="domain_force">[('grievance_type_id.concerned_person_ids.id','in',[user.employee_ids.id])]</field>
+            <field name="groups" eval="[(4, ref('kw_grievance.griev_spoc_committee_group'))]"/>
+        </record>
+
+        <record id="base.default_user" model="res.users">
+            <field name="groups_id" eval="[(4,ref('kw_grievance.griev_user'))]"/>
+        </record>
+
+ <!-- 
+        <record id="ir_rule_coy_commander_security" model="ir.rule">
+            <field name="model_id" ref="model_kw_grievance"/>
+            <field name="domain_force">['|', ('employee_id.user_id', '=', user.id),'&amp;',('employee_id.parent_id.user_id', '=', user.id)]</field>
+            <field name="name">Coy Commander Security Rule</field>
+            <field name="groups" eval="[(4, ref('kw_grievance.griev_spoc_committee_group'))]"/>
+        </record>
+        
+        <record id="ir_rule_commandant_security" model="ir.rule">
+            <field name="model_id" ref="model_kw_grievance"/>
+            <field name="domain_force">['|','|',('employee_id.job_branch_id.id','in',[g.id for g in user.branch_ids]),('employee_id.user_id', '=', user.id),('employee_id.parent_id.user_id', '=', user.id)]</field>
+            <field name="name">Commandant Security Rule</field>
+            <field name="groups" eval="[(4, ref('kw_grievance.griev_commandant'))]"/>
+        </record>
+
+
+        <record id="hq_cmd_direct_forward" model="ir.rule">
+            <field name="model_id" ref="model_kw_grievance"/>
+            <field name="domain_force">[('forwarded_section_id.so_user_ids','in',[user.id])]</field>
+            <field name="name">SO Security Rule</field>
+            <field name="groups" eval="[(4, ref('kw_grievance.griev_section_officer'))]"/>
+        </record>
+
+        <record id="ir_rule_so_hq_security" model="ir.rule">
+            <field name="model_id" ref="model_kw_grievance"/>
+            <field name="domain_force">['&amp;','&amp;',('grievance_type_id.department_id.so_user_ids','in',[user.id]),('so_forward_boolean','=',False)]</field>
+            <field name="name">SO Hq Security Rule</field>
+            <field name="groups" eval="[(4, ref('kw_grievance.griev_section_officer'))]"/>
+        </record>
+
+        <record id="ir_rule_after_forward_security" model="ir.rule">
+            <field name="model_id" ref="model_kw_grievance"/>
+            <field name="domain_force">[('forward_section.so_user_ids','in',[user.id]),('so_forward_boolean','=',True)]</field>
+            <field name="name">SO Forwarded Security Rule</field>
+            <field name="groups" eval="[(4, ref('kw_grievance.griev_section_officer'))]"/>
+        </record>
+
+        <record id="minor_type_fo_generation_for_so_grievance" model="ir.rule">
+            <field name="model_id" ref="model_kw_grievance"/>
+            <field name="domain_force">[('fo_creation_section_id.so_user_ids','in',[user.id])]</field>
+            <field name="name">SO Security Rule FO Generation of Minor Case Type</field>
+            <field name="groups" eval="[(4, ref('kw_grievance.griev_section_officer'))]"/>
+        </record> -->
+
+
+    </data>
+</odoo>

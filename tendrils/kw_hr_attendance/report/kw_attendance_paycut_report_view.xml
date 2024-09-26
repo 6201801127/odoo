@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    
+    
+        <record id="view_kw_attendance_paycut_report_tree" model="ir.ui.view">
+            <field name="name">view.kw_attendance_paycut_report.tree</field>
+            <field name="model">kw_attendance_paycut_report</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <tree string="Paycut Report"  create="false" import="false" delete="false">
+                    <field name="employee_id" />
+                    <field name="department_id" />
+                    <field name="branch_id" />
+                    <field name="attendance_recorded_date"/>
+                    <field name="shift_name" />
+                    <field name="shift_in" />
+                    <field name="shift_out" />
+                    <field name="day_status" />
+                    <field name="check_in_time" />
+                    <field name="check_out_time" />
+                    <field name="check_in_status" />
+                    <field name="check_out_status" />
+                    <field name="state" string="Status"/>
+                    <field name="paycut"/>
+                    <field name="description" />
+
+                </tree>
+            </field>
+        </record>
+
+        
+        <record id="view_kw_attendance_paycut_report_search" model="ir.ui.view">
+            <field name="name">view.kw_attendance_paycut_report.search</field>
+            <field name="model">kw_attendance_paycut_report</field>
+            <field name="type">search</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <search string="kw_attendance_paycut_report_search">
+                    <field name="is_on_tour"/>
+                    <field name="employee_id"/>
+                    <field name="branch_id"/>
+                    <field name="department_id"/>
+                    <field name="designation"/>
+                    <field name="employement_type"/>
+                    <filter string="Date" name="filter_attendance_date" date="attendance_recorded_date"/>
+
+
+                    <filter string="Last Month Payroll" domain="[('attendance_recorded_date','&gt;',(context_today()-relativedelta(months=2)).strftime('%Y-%m-25')),('attendance_recorded_date','&lt;',(context_today()-relativedelta(months=1)).strftime('%Y-%m-26'))]" name="filter_last_month_payroll"/>
+
+                    <filter string="This Month Payroll" domain="[('attendance_recorded_date','&gt;',(context_today()-relativedelta(months=1)).strftime('%Y-%m-25')),('attendance_recorded_date','&lt;',(context_today()).strftime('%Y-%m-26')),('attendance_recorded_date','!=',context_today().strftime('%Y-%m-%d'))]" name="filter_this_month_payroll"/>
+                    <group>
+                        <filter name="group_by_employee_id" string="Employee" context="{'group_by':'employee_id'}" /> 
+                        <filter name="group_by_branch_id" string="Branch" context="{'group_by':'branch_id'}" />
+                        <filter name="group_by_department" string="Department" context="{'group_by':'department_id'}" />
+                        <filter name="group_by_employement_type" string="Employement Type" context="{'group_by':'employement_type'}" /> 
+                    </group>   
+                </search>
+            </field>
+        </record>
+
+        <record id="view_kw_attendance_paycut_report_pivot" model="ir.ui.view">
+            <field name="name">view.kw_attendance_paycut_report.pivot</field>
+            <field name="model">kw_attendance_paycut_report</field>
+            <field name="arch" type="xml">
+                <pivot string="Pivot Description">
+                    <field name="emp_name" type="row"/>
+                    <field name="attendance_recorded_date" interval="month" type="col"/>
+                    <!-- <field name="paycut" type="col"/> -->
+                    <field name="paycut_value" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+        
+        <record id="action_kw_attendance_paycut_reports_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Paycut Report</field>
+            <field name="res_model">kw_attendance_paycut_report</field>
+            <field name="view_mode">pivot,tree</field>
+        <!--  <field name="view_type">form</field> -->
+            <field name="target">current</field>
+            <field name="domain">[('attendance_recorded_date','&gt;',(context_today()-relativedelta(months=2)).strftime('%Y-%m-25')),('attendance_recorded_date','&lt;',(context_today()).strftime('%Y-%m-26')),('employement_type.code', 'in',['P','S','C'])]</field>
+            <field name="context">{'search_default_filter_this_month_payroll':1}</field>
+            <field name="search_view_id" ref="view_kw_attendance_paycut_report_search" />       
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No request found
+                </p>
+            </field>
+        </record>
+        
+    </data>
+</odoo>
+

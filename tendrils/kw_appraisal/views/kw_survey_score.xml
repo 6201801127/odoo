@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data noupdate="0">
+		<template id="kw_survey_score" name="Tendrils | Survey Score">
+			<t t-call="website.layout">
+				<div class="wrap">
+					<div class="container">
+						<div class="bg-light">
+							<h3 t-esc="self_employee_id" class='text-uppercase font-weight-bold text-dark float-left'/>
+							<button onclick='window.history.go(-1);' class="btn btn-secondary btn-sm float-right">
+                                Back to appraisal
+							</button>
+						</div>
+						<div class='clearfix'/>
+						<div role="form" class="js_surveyform" t-att-name="'%s' % (survey.id)" t-att-data-prefill="'/kw/survey/prefill/%s/%s' % (slug(survey), token)">
+
+							<table t-foreach="survey.page_ids" t-as="page" id="survey_table"
+							       class="table container auto-index" border="1px">
+								<t t-set="i" t-value="0"/>
+								<t t-set="k" t-value="0"/>
+								<h4 t-field="page.title" class='text-uppercase font-weight-bold text-success'/>
+								<thead class="thead-orange">
+									<tr>
+										<th scope="col">Behaviour Indicators</th>
+										<th scope="col">Score</th>
+										<th scope="col">Mark</th>
+										<th scope="col">Justify/Quote an Instance</th>
+										<th t-if='manager_inputs_vals' scope="col">LM Score</th>
+										<th t-if='manager_inputs_vals' scope="col">LM Mark</th>
+										<th t-if='manager_inputs_vals' scope="col">LM Remarks</th>
+										<th t-if='collaborator_input_vals' scope="col">ULM Remarks</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr t-foreach="page.question_ids" t-as="question">
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)"/>
+										<t class="js_question-wrapper" t-att-id="prefix"/>
+										<td scope="col" width="40%">
+											<span t-field="question.question"/>
+										</td>
+										<td scope="col" width="20%">
+											<select class="form-control drp" id="score" t-att-name="prefix" style='background:None;border:None'>
+												<option disabled="1" selected="1" value="">Select</option>
+												<t t-foreach="question.labels_ids" t-as="label">
+													<option t-att-value="label.id"><t t-esc="label.value"/></option>
+												</t>
+											</select>
+										</td>
+										<td t-if='employee_data_vals' scope="col" width="10%">
+											<span t-foreach="employee_data_vals" t-as="employee">
+												<p t-if="employee.question_id.id == question.id" t-esc='int(employee.quizz_mark)'/>
+												<t t-set="k" t-value="int(employee.quizz_mark)"/>
+											</span>
+										</td>
+										<td scope="col" width="30%">
+											<textarea style='background:None;border:None;resize:none;overflow:hidden'
+											          type="text" class="form-control"
+											          t-att-name="'%s_%s' % (prefix, 'comment')"
+											          data-oe-survey-othert="1"/>
+										</td>
+										<!-- LM datas -->
+										<td t-if='manager_inputs_vals' scope="col" width="20%">
+											<span t-foreach="manager_inputs_vals" t-as="manager">
+												<p t-if="manager.question_id.id == question.id" t-esc='manager.value_suggested.value'/>
+											</span>
+										</td>
+										<td t-if='manager_inputs_vals' scope="col" width="10%">
+											<span t-foreach="manager_inputs_vals" t-as="manager">
+												<p t-if="manager.question_id.id == question.id" t-esc='int(manager.quizz_mark)'/>
+											</span>
+										</td>
+										<td t-if='manager_inputs_vals' scope="col" width="30%">
+											<span t-foreach="manager_inputs_vals" t-as="manager">
+												<p t-if="manager.question_id.id == question.id" t-esc='manager.value_text'/>
+											</span>
+										</td>
+										<!-- ULM datas -->
+										<td t-if='collaborator_input_vals' scope="col" width="30%">
+											<span t-foreach="collaborator_input_vals" t-as="collaborators">
+												<p t-if="collaborators.question_id.id == question.id" t-esc='collaborators.value_text'/>
+											</span>
+										</td>
+										<t t-set='i' t-value="i+k"/>
+									</tr>
+									<!-- <t t-set='j' t-value="i+k"/> -->
+									<hr/>
+									<!-- <span t-esc='i' /> -->
+								</tbody>
+								<!-- <span t-esc='j' /> -->
+
+								<!-- <t t-set="j" t-value="0"/> -->
+							</table>
+
+						</div>
+					</div>
+				</div>
+			</t>
+		</template>
+		<template id="kw_survey_assets_score" inherit_id="kw_appraisal.kw_survey_score">
+			<xpath expr="." position="inside">
+				<link href="/kwantify_theme/static/src/mdb/css/mdb.min.css" rel="stylesheet"/>
+				<link href="/kw_appraisal/static/src/css/front_style.css" rel="stylesheet"/>
+				<link href="/kw_appraisal/static/src/css/selection_box_arrow.css" rel="stylesheet"/>
+				<script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js"/>
+			</xpath>
+		</template>
+	</data>
+</odoo>

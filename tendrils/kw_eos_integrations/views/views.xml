@@ -1,0 +1,1106 @@
+<odoo>
+    <data>
+        <record id="kw_eos_checklist_view_tree" model="ir.ui.view">
+            <field name="name">view.kw_eos_checklist_tree</field>
+            <field name="model">kw_eos_checklist</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <tree string="EOS Checklist" import="false" delete='false'>
+                    <field name="offboarding_type"/>
+                    <field name="applicant_id" string="Applied For"/>
+                    <field name="department_id"/>
+                    <field name="division"/>
+                    <field name="section"/>
+                    <field name="practise"/>
+                    <field name="job_id"/>
+                    <field name="date_of_joining"/>
+                    <field name="create_date" widget='date' string='EOS Applied On'/>
+                    <field name="effective_from" widget="date"/>
+                    <field name="last_working_date" widget="date"/>
+                    <field name="action_to_be_taken_by"/>
+                    <field name="approved_by"/>
+                    <field name="state"/>
+                    <field name="check_clearance_existance" invisible='1'/>
+                    <button name="update_clearance_record" type="object" string="Create Clearance"
+                                attrs="{'invisible': [('check_clearance_existance','=',False)]}"
+                                class="btn btn-primary"
+                                groups='kw_eos.group_kw_eos_manager'/>
+                    </tree>
+            </field>
+        </record>
+        <!-- Form view for "model" -->
+        <record id="kw_eos.kw_eos_checklist_view_form" model="ir.ui.view">
+            <field name="name">view.kw_eos_checklist.form</field>
+            <field name="model">kw_eos_checklist</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="246"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <form string="EOS Checklist" delete='false' edit='false' create='false' duplicate="false">
+                    <script>
+                    $(document).ready(function(){
+                        $(".modal-title").show();
+                    });
+                </script>
+                    <header>
+                        <field name="base_branch_id" invisible='1'/>
+                        <field name="is_manager" invisible='1'/>
+                        <field name="is_applicant" invisible='1'/>
+                        <field name="demise_check" invisible='1'/>
+                        <field name="is_feedback_submit" invisible='1'/>
+                        <field name="is_all_checklist_completed" invisible='1'/>
+                        <field name="eos_takeaction_check" invisible='1'/>
+                        <field name="check_advance" invisible='1'/>
+                        <field name="check_clearance_existance" invisible='1'/>
+
+                        <button name="action_eos_submit" type="object"
+                                attrs="{'invisible': [('state','=','Draft'),('is_all_checklist_completed','=',False)]}"
+                                string="Apply EOS" class="oe_highlight"/>
+                        <button name="pending_checklist_validation" type="object" string="Apply EOS"
+                                attrs="{'invisible': [('state','=','Draft'),('is_all_checklist_completed','!=',False)]}"
+                                class="btn btn-disabled"/>
+                        
+                        <button name="update_clearance_record" type="object" string="Create Clearance"
+                                class="btn btn-disabled"
+                                groups='kw_eos.group_kw_eos_manager'/>
+
+                        <!-- <button name="action_eos_submit" type="object" string="Apply nEOS" attrs="{'invisible': ['|','|',('is_applicant','=', False),('is_manager','=', False),('state','!=','Draft')]}" class="oe_highlight" />
+
+                        <button name="action_eos_submit_by_hr" type="object" string="Apply EOS" attrs="{'invisible': ['|','|',('is_applicant','=', True),('is_manager','=', True),('state','!=','Draft')]}" class="oe_highlight" />
+                        -->
+                        <!-- <button name="action_eos_submit" type="object" string="Apply nEOS" attrs="{'invisible': ['|',('state','!=','Draft'),('is_all_checklist_completed','!=',True)]}" class="oe_highlight" groups='kw_eos.group_kw_eos_user'/>
+                        <button name="action_eos_submit_by_hr" type="object" string="Apply EOS" attrs="{'invisible': [('eos_apply_for','=', 'self'),('state','!=','Draft'),('is_all_checklist_completed','!=',True)]}" class="oe_highlight"  groups='kw_eos.group_kw_eos_manager,kw_eos.group_kw_eos_officer'/> -->
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="eos_apply_for" widget='radio' options="{'horizontal': true}"
+                                       attrs="{'readonly':[('id','!=', False)]}"
+                                       groups='kw_eos.group_kw_eos_manager,kw_eos.group_kw_eos_officer'/>
+                                <field name="applicant_id" options="{'no_open': True,'no_create': True}"
+                                       attrs="{'readonly':[('eos_apply_for','=', 'self')]}"/>
+                                <field name="offboarding_type" options="{'no_open': True,'no_create': True}"
+                                       attrs="{'invisible':[('eos_apply_for','=', 'self')]}" readonly='1'/>
+                            </group>
+                        </group>
+                        <group string="EOS Checklist">
+                        <group>
+                            <!-- <label for="" class="col-md-5 o_light_label" nolabel="1" /> -->
+                            <table class="" style="width:100%; margin-top: 14px;">
+                                <tbody>
+                                    <tr style='border-left: 1px solid #eee;'>
+                                        <td style="width:100%;">
+                                            <div class="o_x2m_control_panel">
+                                                <nav aria-label="Control panel toolbar" class="o_cp_buttons" role="toolbar"></nav>
+                                                <nav aria-label="Pager" class="o_cp_pager" role="toolbar">
+                                                    <div class="o_hidden">
+                                                        <span class="o_pager_counter">
+                                                            <span class="o_pager_value"></span> /
+                                                            <span class="o_pager_limit"></span>
+                                                        </span>
+                                                        <!-- <span aria-atomic="true" class="btn-group">
+                                                            <button aria-label="Previous"
+                                                                    class="fa fa-chevron-left btn btn-secondary o_pager_previous"
+                                                                    tabindex="-1" title="Previous"
+                                                                    type="button"></button>
+                                                            <button aria-label="Next"
+                                                                    class="fa fa-chevron-right btn btn-secondary o_pager_next"
+                                                                    tabindex="-1" title="Next" type="button"></button>
+                                                        </span> -->
+                                                    </div>
+                                                </nav>
+                                            </div>
+                                            <div class=" table-responsive">
+                                                <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="o_column_sortable">Reason</th>
+                                                            <th class="o_column_sortable">Status</th>
+                                                            
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="ui-sortable">
+                                                        <tr  attrs="{'invisible': [('demise_check','=',True)]}">
+                                                            <td scope="row">Offboarding Type</td>
+                                                            <td>
+                                                                <field name="reg_process_status"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row">KT Process</td>
+                                                            <td>
+                                                                <field name="kt_process_status"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                                <button name="view_kt_details" type="object"
+                                                                        string="View Details"
+                                                                        class="oe_highlight pull-right"/>
+                                                            </td>
+                                                        </tr>
+                                                        <!-- <tr>
+                                                            <td scope="row" >EOS Process</td>
+                                                            <td>
+                                                                <field name="eos_process_status" options="{'always_reload': True}" style="margin-bottom: 0px !important;"/>
+                                                                <button name="view_eos_form" type="object" string="Submit Feedback" class="oe_highlight pull-right" attrs="{'invisible':[('is_feedback_submit','=', True)]}"/>
+                                                            </td>
+                                                            
+                                                        </tr> -->
+                                                        <tr>
+                                                            <td scope="row" >RA Change</td>
+                                                            <td>
+                                                                <field name="ra_details_status"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                                <button name="view_ra_details" type="object"
+                                                                        string="Take Action"
+                                                                        class="oe_highlight pull-right"
+                                                                        groups='kw_eos.group_kw_eos_manager'
+                                                                        attrs="{'invisible':[('ra_details_status','=', 'Completed')]}"/>
+                                                            </td>
+                                                        </tr>
+                                                        <!-- <tr>
+                                                                <td scope="row" >Other Action</td>
+                                                                <td >
+                                                                    <field name="other_action_status" style="margin-bottom: 0px !important;"/>
+                                                                </td>
+                                                            </tr> -->
+                                                        <!-- <tr>
+                                                            <td scope="row" >Project Task Reporting</td>
+                                                            <td >
+                                                                <field name="project_task_reporting_status" style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr> -->
+                                                        <tr>
+                                                            <td scope="row">Task Review Status</td>
+                                                            <td>
+                                                                <field name="task_review_pending_status"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row">Active Project Team Member</td>
+                                                            <td>
+                                                                <field name="active_project_team_member_status"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <!-- <tr>
+                                                            <td scope="row" >Independent Task Pending</td>
+                                                            <td >
+                                                                <field name="independent_task_pending_status" style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr> -->
+                                                        <tr><td></td><td></td></tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                            <!-- <label for="" class="col-md-5 o_light_label" nolabel="1" /> -->
+                            <table class="" style="width:100%; margin-top: 14px;">
+                                <tbody>
+                                    <tr style='border-left: 1px solid #eee;'>
+                                        <td style="width:100%;">
+                                            <div class="o_x2m_control_panel">
+                                                <nav aria-label="Control panel toolbar" class="o_cp_buttons" role="toolbar"></nav>
+                                                <nav aria-label="Pager" class="o_cp_pager" role="toolbar">
+                                                    <div class="o_hidden">
+                                                        <span class="o_pager_counter">
+                                                            <span class="o_pager_value"></span> /
+                                                            <span class="o_pager_limit"></span>
+                                                        </span>
+                                                        <!-- <span aria-atomic="true" class="btn-group">
+                                                            <button aria-label="Previous"
+                                                                    class="fa fa-chevron-left btn btn-secondary o_pager_previous"
+                                                                    tabindex="-1" title="Previous"
+                                                                    type="button"></button>
+                                                            <button aria-label="Next"
+                                                                    class="fa fa-chevron-right btn btn-secondary o_pager_next"
+                                                                    tabindex="-1" title="Next" type="button"></button>
+                                                        </span> -->
+                                                    </div>
+                                                </nav>
+                                            </div>
+                                            <div class=" table-responsive">
+                                                <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="o_column_sortable">Activity Name</th>
+                                                            <th class="o_column_sortable text-center">Applied</th>
+                                                            <th class="o_column_sortable text-center">Request Pending</th>
+                                                            <th class="o_column_sortable text-center">Take Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="ui-sortable">
+                                                        <tr>
+                                                            <td scope="row">Assets</td>
+                                                            <td class='text-center'>
+                                                                <field name="assets_applied"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="assets_pending"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row">Attendance Correction Apply</td>
+                                                            <td class='text-center'>
+                                                                <field name="att_correction_apply"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="att_correction_pending"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <button name="view_att_correction_pending" type="object"
+                                                                        string="Take Action"
+                                                                        class="oe_highlight pull-right"
+                                                                        attrs="{'invisible':['|',('att_correction_pending','=',0),('eos_takeaction_check','=',False)]}"
+                                                                        groups='kw_eos.group_kw_eos_manager,kw_employee.group_hr_ra'/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row">Late Entry Apply</td>
+                                                            <td class='text-center'>
+                                                                <field name="att_late_entry_apply"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="att_late_entry_pending"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <button name="view_late_entry_pending_details"
+                                                                        type="object" string="Take Action"
+                                                                        class="oe_highlight pull-right"
+                                                                        attrs="{'invisible':['|',('att_late_entry_pending','=',0),('eos_takeaction_check','=',False)]}"
+                                                                        groups='kw_eos.group_kw_eos_manager,kw_employee.group_hr_ra'/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row">Comp off Apply</td>
+                                                            <td class='text-center'>
+                                                                <field name="att_comp_off_apply"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="att_comp_off_pending"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <button name="view_comp_off_pending" type="object"
+                                                                        string="Take Action"
+                                                                        class="oe_highlight pull-right"
+                                                                        attrs="{'invisible':['|',('att_comp_off_pending','=',0),('eos_takeaction_check','=',False)]}"
+                                                                        groups='kw_eos.group_kw_eos_manager,kw_employee.group_hr_ra'/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row">Leave Apply</td>
+                                                            <td class='text-center'>
+                                                                <field name="leave_applied"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="leave_pending"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td>
+                                                                <button name="view_leave_pending" type="object"
+                                                                        string="Take Action"
+                                                                        class="oe_highlight pull-right"
+                                                                        attrs="{'invisible':['|',('leave_pending','=',0),('eos_takeaction_check','=',False)]}"
+                                                                        groups='kw_eos.group_kw_eos_manager,kw_employee.group_hr_ra'/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row" >Leave Cancellation</td>
+                                                            <td class='text-center'>
+                                                                <field name="leave_cancellation_applied"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="leave_cancellation_pending"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td>
+                                                                <button name="view_leave_cancellation" type="object"
+                                                                        string="Take Action"
+                                                                        class="oe_highlight pull-right"
+                                                                        attrs="{'invisible':['|',('leave_cancellation_pending','=',0),('eos_takeaction_check','=',False)]}"
+                                                                        groups='kw_eos.group_kw_eos_manager,kw_employee.group_hr_ra'/>
+                                                            </td>
+                                                        </tr>
+                                                        <!-- attrs="{'invisible':[('check_advance','=',False)]}" -->
+                                                        <tr>
+                                                            <td scope="row" >Salary Advance</td>
+                                                            <td class='text-center'>
+                                                                <field name="salary_advance_applied"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="salary_advance_pending"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td>
+                                                                <button name="view_salary_advance_details" type="object"
+                                                                        string="Take Action"
+                                                                        class="oe_highlight pull-right"
+                                                                        attrs="{'invisible':['|',('salary_advance_pending','=',0),('eos_takeaction_check','=',False)]}"
+                                                                        groups='kw_eos.group_kw_eos_manager,kw_employee.group_hr_ra'/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr attrs="{'invisible':[('check_advance','=',False)]}">
+                                                            <td scope="row" >Petty Cash</td>
+                                                            <td class='text-center'>
+                                                                <field name="petty_cash_applied"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="petty_cash_pending"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td>
+                                                                <button name="view_petty_cash_details" type="object"
+                                                                        string="Take Action"
+                                                                        class="oe_highlight pull-right"
+                                                                        attrs="{'invisible':['|',('petty_cash_pending','=',0),('eos_takeaction_check','=',False)]}"
+                                                                        groups='kw_eos.group_kw_eos_manager,kw_employee.group_hr_ra'/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr attrs="{'invisible':[('check_advance','=',False)]}">
+                                                            <td scope="row" >Claim Settlement</td>
+                                                            <td class='text-center'>
+                                                                <field name="claim_settlement_applied"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="claim_settlement_pending"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td>
+                                                                <button name="view_claim_settlement_details"
+                                                                        type="object" string="Take Action"
+                                                                        class="oe_highlight pull-right"
+                                                                        attrs="{'invisible':['|',('claim_settlement_pending','=',0),('eos_takeaction_check','=',False)]}"
+                                                                        groups='kw_eos.group_kw_eos_manager,kw_employee.group_hr_ra'/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row" >Stationary</td>
+                                                            <td class='text-center'>
+                                                                <field name="stationary_applied"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="stationary_pending"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row" >Tour Cancellation Request</td>
+                                                            <td class='text-center'>
+                                                                <field name="tour_cancellation_pending_for_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="tour_cancellation_pending_at_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td>
+                                                                <button name="view_tour_cancellation_details"
+                                                                        type="object" string="Take Action"
+                                                                        class="oe_highlight pull-right"
+                                                                        groups='kw_eos.group_kw_eos_manager,kw_employee.group_hr_ra'
+                                                                        attrs="{'invisible':['|',('tour_cancellation_pending_at_user','=',0),('eos_takeaction_check','=',False)]}"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row" >Tour Request</td>
+                                                            <td class='text-center'>
+                                                                <field name="tour_apply_pending_for_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="tour_apply_pending_at_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td>
+                                                                <button name="tour_request_details" type="object"
+                                                                        string="Take Action"
+                                                                        class="oe_highlight pull-right"
+                                                                        groups='kw_eos.group_kw_eos_manager,kw_employee.group_hr_ra'
+                                                                        attrs="{'invisible':['|',('tour_apply_pending_at_user','=',0),('eos_takeaction_check','=',False)]}"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row" >Tour Advance Request</td>
+                                                            <td class='text-center'>
+                                                                <field name="tour_advance_pending_for_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="tour_advance_pending_at_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td>
+                                                                <button name="tour_advance_pending_details"
+                                                                        type="object" string="Take Action"
+                                                                        class="oe_highlight pull-right"
+                                                                        groups='kw_eos.group_kw_eos_manager,kw_employee.group_hr_ra'
+                                                                        attrs="{'invisible':['|',('tour_advance_pending_at_user','=',0),('eos_takeaction_check','=',False)]}"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row" >Tour Settlement Request</td>
+                                                            <td class='text-center'>
+                                                                <field name="toursettlement_pending_for_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="tour_settlement_pending_at_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <button name="tour_settlement_pending_details"
+                                                                        type="object" string="Take Action"
+                                                                        class="oe_highlight pull-right"
+                                                                        groups='kw_eos.group_kw_eos_manager,kw_employee.group_hr_ra'
+                                                                        attrs="{'invisible':['|',('tour_settlement_pending_at_user','=',0),('eos_takeaction_check','=',False)]}"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row" >Work From Home Request</td>
+                                                            <td class='text-center'>
+                                                                <field name="wfh_request_pending_for_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="wfh_request_pending_at_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td>
+                                                                <button name="wfh_request_pending_details" type="object"
+                                                                        string="Take Action"
+                                                                        class="oe_highlight pull-right"
+                                                                        groups='kw_eos.group_kw_eos_manager,kw_employee.group_hr_ra'
+                                                                        attrs="{'invisible':['|',('wfh_request_pending_at_user','=',0),('eos_takeaction_check','=',False)]}"/>
+                                                            </td>
+                                                        </tr>
+                                                         <tr>
+                                                             <td scope="row">Assessment feedback</td>
+                                                             <td class='text-center'>
+                                                                 <field name="assesment_pending_for_user"
+                                                                        style="margin-bottom: 0px !important;"/>
+                                                             </td>
+                                                             <td class='text-center'>
+                                                                 <field name="assesment_pending_at_user"
+                                                                        style="margin-bottom: 0px !important;"/>
+                                                             </td>
+                                                             <td>
+                                                                 <button name="assesment_pending_details" type="object"
+                                                                         string="Take Action"
+                                                                         class="oe_highlight pull-right"
+                                                                         groups='kw_eos.group_kw_eos_manager,kw_employee.group_hr_ra'
+                                                                         attrs="{'invisible':['|',('assesment_pending_at_user','=',0),('eos_takeaction_check','=',False)]}"/>
+                                                             </td>
+                                                        </tr>
+                                                        <tr>
+                                                             <td scope="row">Active Workorders</td>
+                                                             <td class='text-center'>
+                                                                 <field name="workorder_active_for_user"
+                                                                        style="margin-bottom: 0px !important;"/>
+                                                             </td>
+                                                             <td class='text-center'>
+                                                                 <field name="workorder_active_at_user"
+                                                                        style="margin-bottom: 0px !important;"/>
+                                                             </td>
+                                                             <td></td>
+                                                        </tr>
+                                                        <tr>
+                                                             <td scope="row">Active Opportunities</td>
+                                                             <td class='text-center'>
+                                                                 <field name="opportunity_active_for_user"
+                                                                        style="margin-bottom: 0px !important;"/>
+                                                             </td>
+                                                             <td class='text-center'>
+                                                                 <field name="opportunity_active_at_user"
+                                                                        style="margin-bottom: 0px !important;"/>
+                                                             </td>
+                                                             <td></td>
+                                                        </tr>
+                                                        <tr>
+                                                             <td scope="row">Active Leads</td>
+                                                             <td class='text-center'>
+                                                                 <field name="lead_active_for_user"
+                                                                        style="margin-bottom: 0px !important;"/>
+                                                             </td>
+                                                             <td class='text-center'>
+                                                                 <field name="lead_active_at_user"
+                                                                        style="margin-bottom: 0px !important;"/>
+                                                             </td>
+                                                             <td></td>
+                                                        </tr>
+                                                            <tr><td></td><td></td><td></td><td></td></tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <br/><br/><br/>
+                                <field name="eos_log_ids">
+                                    <tree create='0' edit='0' delete='0'>
+                                        <field name="applicant_id"/>
+                                        <field name="state"/>
+                                        <field name="date"/>
+                                        <field name="remark"/>
+                                        <field name="last_working_date"/>
+                                    </tree>
+                                    <form create='0' edit='0' delete='0'>
+                                        <field name="applicant_id" options="{'no_open': True,'no_create': True}"/>
+                                        <field name="state"/>
+                                        <field name="date"/>
+                                        <field name="remark"/>
+                                        <field name="last_working_date"/>
+                                    </form>
+                                </field>
+                            </table>
+                        </group>
+                            </group>
+                        <!-- </group> -->
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <!-- kw_eos_checklist action window -->
+        <record id="kw_eos.eos_checklist_action" model="ir.actions.act_window">
+            <field name="name">Apply EOS</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kw_eos_checklist</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+    (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_eos_checklist_view_tree')}),
+    (0, 0, {'view_mode': 'form', 'view_id': ref('kw_eos.kw_eos_checklist_view_form')})]"/>
+            <field name="domain">[]</field>
+            <field name="context">{'eos':True}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No records available
+                </p>
+            </field>
+        </record>
+        <!-- EOS Take Action Tree view -->
+        <record id="kw_eos.eos_take_action_tree_view" model="ir.ui.view">
+            <field name="name">view.kw_eos_checklist_tree</field>
+            <field name="model">kw_eos_checklist</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <tree string="EOS Checklist" import="false" create='false' edit='false' delete='false'>
+                    <field name="offboarding_type"/>
+                    <field name="applicant_id"/>
+                    <field name="department_id"/>
+                    <!-- <field name="division" />
+                    <field name="section" />
+                    <field name="date_of _joining"/> -->
+                    <field name="job_id" />
+                    <field name="date_of_joining"/> 
+                    <field name="create_date" widget="date" string='EOS Applied On'/>
+                    <field name="effective_from" widget="date"/>
+                    <field name="last_working_date" widget="date"/>
+                    <field name="state"/>
+                    <field name="approved_by"/>
+                    <field name="action_to_be_taken_by"/>
+                    <button name="btn_ra_take_action" type="object" string="Take Action" class="text-center btn btn-primary" />
+                </tree>
+            </field>
+        </record>
+        <!-- EOS Take Action Form view -->
+        <record id="kw_eos.eos_take_action_form_view" model="ir.ui.view">
+            <field name="name">view.kw_eos_checklist.form</field>
+            <field name="model">kw_eos_checklist</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="191"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <form string="EOS Checklist" create='false' edit='false' delete='false'>
+                    <script>
+                    $(document).ready(function(){
+                        $(".modal-title").show();
+                    });
+                </script>
+                    <header>
+                        <field name="demise_check" invisible='1'/>
+                        <field name="is_all_checklist_completed" invisible='1'/>
+                        <field name="is_ra" invisible='1'/>
+                        <field name="is_dept_head" invisible='1'/>
+                        <button name="action_eos_approve" type="object" string="Approve"
+                                attrs="{'invisible': ['|',('state','!=','Applied'),('is_ra','=',False)]}"
+                                class="btn btn-success"/>
+                        <button name="action_eos_grant" type="object" string="Grant"
+                                attrs="{'invisible': ['|',('state','!=','Approved'),('is_dept_head','=',False)]}"
+                                class="btn btn-success"/>
+                        <!-- <button name="action_eos_reject" type="object" string="Reject" attrs="{'invisible': [('state','in',['Rejected'])]}" class="btn btn-danger"/> -->
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <!-- <field name="eos_apply_for" widget='radio' options="{'horizontal': true}"/> -->
+                            <field name="offboarding_type" options="{'no_open': True,'no_create': True}"/>
+                            <field name="applicant_id" options="{'no_open': True,'no_create': True}" readonly='1'/>
+                            <field name="department_id" options="{'no_create': True, 'no_edit':True, 'no_open':True}" readonly="1"/>
+                            <!-- <field name="division" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1"/>
+                            <field name="section" options="{'no_open': True,'no_create':True,'no_edit':True}"  readonly="1"/>
+                            <field name="practise" options="{'no_open': True,'no_create':True,'no_edit':True}"  readonly="1"/> -->
+                            <field name="job_id" options="{'no_create': True, 'no_edit':True, 'no_open':True}" readonly="1"/>
+                            <field name="create_date" widget="date"/>
+                            <field name="effective_from" />
+                            <field name="last_working_date" />
+                            <field name="date_of_joining" />
+                        </group>
+                        <group string="EOS Checklist">
+                        <group>
+                            <!-- <label for="" class="col-md-5 o_light_label" nolabel="1" /> -->
+                            <table class="" style="width:100%; margin-top: 14px;">
+                                <tbody>
+                                    <tr style='border-left: 1px solid #eee;'>
+                                        <td style="width:100%;">
+                                            <div class="o_x2m_control_panel">
+                                                <nav aria-label="Control panel toolbar" class="o_cp_buttons" role="toolbar"></nav>
+                                                <nav aria-label="Pager" class="o_cp_pager" role="toolbar">
+                                                    <div class="o_hidden">
+                                                        <span class="o_pager_counter">
+                                                            <span class="o_pager_value"></span> /
+                                                            <span class="o_pager_limit"></span>
+                                                        </span>
+                                                        <!-- <span aria-atomic="true" class="btn-group">
+                                                            <button aria-label="Previous"
+                                                                    class="fa fa-chevron-left btn btn-secondary o_pager_previous"
+                                                                    tabindex="-1" title="Previous"
+                                                                    type="button"></button>
+                                                            <button aria-label="Next"
+                                                                    class="fa fa-chevron-right btn btn-secondary o_pager_next"
+                                                                    tabindex="-1" title="Next" type="button"></button>
+                                                        </span> -->
+                                                    </div>
+                                                </nav>
+                                            </div>
+                                            <div class=" table-responsive">
+                                                <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="o_column_sortable">Reason</th>
+                                                            <th class="o_column_sortable">Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="ui-sortable">
+                                                        <tr attrs="{'invisible': [('demise_check','=',True)]}">
+                                                            <td scope="row">Offboarding Process</td>
+                                                            <td>
+                                                                <field name="reg_process_status"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row">KT Process</td>
+                                                            <td>
+                                                                <field name="eos_process_status"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <!-- <tr>
+                                                            <td scope="row" >EOS Process</td>
+                                                            <td>
+                                                                <field name="eos_process_status" options="{'always_reload': True}" style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr> -->
+                                                        <tr>
+                                                            <td scope="row" >RA Change</td>
+                                                            <td >
+                                                                <field name="ra_details_status" style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <!-- <tr>
+                                                                <td scope="row" >Other Action</td>
+                                                                <td >
+                                                                    <field name="other_action_status" style="margin-bottom: 0px !important;"/>
+                                                                </td>
+                                                            </tr> -->
+                                                        <tr>
+                                                            <td scope="row" >Task Review Status</td>
+                                                            <td>
+                                                                <field name="task_review_pending_status"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <!-- <tr>
+                                                            <td scope="row" >Project Task Reporting</td>
+                                                            <td >
+                                                                <field name="project_task_reporting_status" style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr> -->
+                                                        <!-- <tr>
+                                                            <td scope="row" >Task Review Pending</td>
+                                                            <td >
+                                                                <field name="task_review_pending_status" style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr> -->
+                                                        <tr>
+                                                            <td scope="row" >Active Project Team Member</td>
+                                                            <td>
+                                                                <field name="active_project_team_member_status"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <!-- <tr>
+                                                            <td scope="row" >Independent Task Pending</td>
+                                                            <td >
+                                                                <field name="independent_task_pending_status" style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr> -->
+                                                        <tr><td></td><td></td></tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </group>
+                        </group>
+                        <group>
+                        <group>
+                            <!-- <label for="" class="col-md-5 o_light_label" nolabel="1" /> -->
+                            <table class="" style="width:100%; margin-top: 14px;">
+                                <tbody>
+                                    <tr style='border-left: 1px solid #eee;'>
+                                        <td style="width:100%;">
+                                            <div class="o_x2m_control_panel">
+                                                <nav aria-label="Control panel toolbar" class="o_cp_buttons" role="toolbar"></nav>
+                                                <nav aria-label="Pager" class="o_cp_pager" role="toolbar">
+                                                    <div class="o_hidden">
+                                                        <span class="o_pager_counter">
+                                                            <span class="o_pager_value"></span> /
+                                                            <span class="o_pager_limit"></span>
+                                                        </span>
+                                                        <!-- <span aria-atomic="true" class="btn-group">
+                                                            <button aria-label="Previous"
+                                                                    class="fa fa-chevron-left btn btn-secondary o_pager_previous"
+                                                                    tabindex="-1" title="Previous"
+                                                                    type="button"></button>
+                                                            <button aria-label="Next"
+                                                                    class="fa fa-chevron-right btn btn-secondary o_pager_next"
+                                                                    tabindex="-1" title="Next" type="button"></button>
+                                                        </span> -->
+                                                    </div>
+                                                </nav>
+                                            </div>
+                                            <div class=" table-responsive">
+                                                <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="o_column_sortable">Activity Name</th>
+                                                            <th class="o_column_sortable text-center">Apply</th>
+                                                            <th class="o_column_sortable text-center">Request Pending</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="ui-sortable">
+                                                        <tr>
+                                                            <td scope="row">Assets</td>
+                                                            <td class="text-center">
+                                                                <field name="assets_applied"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <field name="assets_pending"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row">Attendance Correction Apply</td>
+                                                            <td class='text-center'>
+                                                                <field name="att_correction_apply"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="att_correction_pending"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row">Late Entry Apply</td>
+                                                            <td class='text-center'>
+                                                                <field name="att_late_entry_apply"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="att_late_entry_pending"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row">Comp off Apply</td>
+                                                            <td class='text-center'>
+                                                                <field name="att_comp_off_apply"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="att_comp_off_pending"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row">Leave Apply</td>
+                                                            <td class="text-center">
+                                                                <field name="leave_applied"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <field name="leave_pending"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row" >Leave Cancellation</td>
+                                                            <td class="text-center">
+                                                                <field name="leave_cancellation_applied"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <field name="leave_cancellation_pending"
+                                                                       options="{'always_reload': True}"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row" >Salary Advance</td>
+                                                            <td class="text-center">
+                                                                <field name="salary_advance_applied"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <field name="salary_advance_pending"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row" >Stationary</td>
+                                                            <td class="text-center">
+                                                                <field name="stationary_applied"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <field name="stationary_pending"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row" >Tour Cancellation Request</td>
+                                                            <td class="text-center">
+                                                                <field name="tour_cancellation_pending_for_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <field name="tour_cancellation_pending_at_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row" >Tour Request</td>
+                                                            <td class="text-center">
+                                                                <field name="tour_apply_pending_for_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <field name="tour_apply_pending_at_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row" >Tour Advance Request</td>
+                                                            <td class="text-center">
+                                                                <field name="tour_advance_pending_for_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <field name="tour_advance_pending_at_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row" >Tour Settlement Request</td>
+                                                            <td class="text-center">
+                                                                <field name="toursettlement_pending_for_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <field name="tour_settlement_pending_at_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row" >Work From Home Request</td>
+                                                            <td class='text-center'>
+                                                                <field name="wfh_request_pending_for_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="wfh_request_pending_at_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td scope="row" >Assesment feedback</td>
+                                                            <td class='text-center'>
+                                                                <field name="assesment_pending_for_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td class='text-center'>
+                                                                <field name="assesment_pending_at_user"
+                                                                       style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                             <td scope="row">Active Workorders</td>
+                                                             <td class='text-center'>
+                                                                 <field name="workorder_active_for_user"
+                                                                        style="margin-bottom: 0px !important;"/>
+                                                             </td>
+                                                             <td class='text-center'>
+                                                                 <field name="workorder_active_at_user"
+                                                                        style="margin-bottom: 0px !important;"/>
+                                                             </td>
+                                                             <td></td>
+                                                        </tr>
+
+                                                        <tr>
+                                                             <td scope="row">Active Opportunities</td>
+                                                             <td class='text-center'>
+                                                                 <field name="opportunity_active_for_user"
+                                                                        style="margin-bottom: 0px !important;"/>
+                                                             </td>
+                                                             <td class='text-center'>
+                                                                 <field name="opportunity_active_at_user"
+                                                                        style="margin-bottom: 0px !important;"/>
+                                                             </td>
+                                                             <td></td>
+
+                                                        </tr>
+                                                        <tr>
+                                                             <td scope="row">Active Leads</td>
+                                                             <td class='text-center'>
+                                                                 <field name="lead_active_for_user"
+                                                                        style="margin-bottom: 0px !important;"/>
+                                                             </td>
+                                                             <td class='text-center'>
+                                                                 <field name="lead_active_at_user"
+                                                                        style="margin-bottom: 0px !important;"/>
+                                                             </td>
+                                                             <td></td>
+                                                        </tr>
+                                                        
+                                                        <tr><td></td><td></td><td></td></tr>
+                                                        <!-- <tr>
+                                                            <td scope="row" >Visiting Card</td>
+                                                            <td >
+                                                                <field name="tour_apply_pending_at_user" style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                            <td >
+                                                                <field name="tour_apply_pending_at_user" style="margin-bottom: 0px !important;"/>
+                                                            </td>
+                                                        </tr> -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <br/><br/><br/>
+                                <field name="eos_log_ids">
+                                    <tree create='0' edit='0' delete='0'>
+                                        <field name="applicant_id"/>
+                                        <field name="state"/>
+                                        <field name="date"/>
+                                        <field name="remark"/>
+                                        <field name="last_working_date"/>
+                                    </tree>
+                                    <form create='0' edit='0' delete='0'>
+                                        <field name="applicant_id" options="{'no_open': True,'no_create': True}"/>
+                                        <field name="state"/>
+                                        <field name="date"/>
+                                        <field name="remark"/>
+                                        <field name="last_working_date"/>
+                                    </form>
+                                </field>
+                            </table>
+                        </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <!-- kw_eos_checklist action window Take Action-->
+        <record id="kw_eos.eos_take_action_action" model="ir.actions.act_window">
+            <field name="name">EOS Take Action</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kw_eos_checklist</field>
+            <field name="view_mode">tree</field>
+            <field name="view_type">form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+    (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_eos.eos_take_action_tree_view')})]"/>
+            <field name="domain">[('action_to_be_taken_by.user_id','=',uid)]</field>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No records available
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,472 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<template id='consultancy_add_applicant' name='Add Applicant'>
+		<t t-call="website.layout">
+			<div class='container'>
+				<div class="application-tab">
+					<div class="d-flex">
+						<h3 class="flex-grow-1">
+							<t t-esc="jobs.title"/>
+							<small>
+								(<t t-esc="jobs.job_code"/>)
+							</small>
+						</h3>
+
+						<!--						<a class="btn btn-info ml-4" t-attf-href="/c/applicants?{{keep_query(job_id=jobs.id)}}">-->
+						<a class="btn btn-info ml-4" onclick="javascript:window.history.back();" href="#">
+							<span class="fa fa-arrow-circle-left mr-1"/>
+							Go Back
+						</a>
+						<!--						<a class="btn btn-info ml-4 pull-right" href="/c/job-openings">-->
+						<!--							<span class="fa fa-arrow-circle-left mr-1"/>-->
+						<!--							Go Back-->
+						<!--						</a>-->
+
+					</div>
+					<div class="job-application-form">
+						<div class="row">
+<!--							job details-->
+							<div class="col-lg-5 col-12 pr-0">
+								<div class="mb-4">
+									<h4>Job Description</h4>
+								</div>
+								<div class="">
+									<div class="job-info">
+										<span class="job-icon">
+											<span class="fa fa-map-marker mr-2"/>
+										</span>
+										<span>
+											<t t-esc="', '.join(jobs.address_id.mapped('name')) or 'N/A'"/>
+										</span>
+									</div>
+									<div class="job-info">
+										<span class="job-icon">
+											<span class="fa fa-clock-o mr-2"/>
+											<span class="ml-2">Experience:</span>
+										</span>
+										<span>
+											<t t-esc="jobs.min_exp_year"/>
+											to
+											<t t-esc="jobs.max_exp_year"/>
+											years
+										</span>
+									</div>
+								</div>
+
+								<div class="job-description">
+									<div class="news__item">
+										<h5 class="font-weight-bold mb-3">Job Profile</h5>
+										<div class="new-jobdata">
+											<t t-raw="jobs.description"/>
+										</div>
+										<br/>
+										<h5 class="font-weight-bold mb-3">Candidate Profile</h5>
+										<div class="new-jobdata">
+											<t t-raw="jobs.candidate_profile"/>
+										</div>
+										<h5 class="font-weight-bold mt-3 mb-3">Qualification:
+											<span t-esc="' / '.join(map(lambda x: ( x.name), jobs.qualification))"
+											      class="font-weight-normal"/>
+										</h5>
+									</div>
+								</div>
+							</div>
+<!--							applicant form-->
+							<div class="col-lg-6 col-12 offset-lg-1">
+								<div class="job-application-box">
+									<form action="/c/applicant/create"
+									      method="post"
+									      class="s_website_form"
+									      enctype="multipart/form-data"
+									      id="CareerForm"
+									      autocomplete="off">
+										<input type="hidden" name="job_position" t-att-value="jobs.id"/>
+										<input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+										<div class="form-section py-lg-0">
+											<div class="row">
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant else 'control-group'">
+															<label>
+																Applicant Name
+																<span class="text-red">*</span>
+															</label>
+															<input 
+															type="text" name="partner_name" id="cname"
+															       class='form-control' t-att-value="applicant.partner_name if applicant else ''" autocomplete="off"
+															       />
+															<p id='name_message' class='text-danger' style='font-weight:bold;'>Applicant Name is required! </p>
+														</div>
+													</div>
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant else 'control-group'">
+															<label>
+																Applicant Email
+																<span class="text-red">*</span>
+															</label>
+															<input type="text" name="email_from" id="cemail" t-att-value="applicant.email_from if applicant else ''"
+															       class="form-control " autocomplete="off"
+															       />
+															<p id='email_message' class='text-danger' style='font-weight:bold;'> Invalid Email! </p>
+
+														</div>
+													</div>
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant else 'control-group'">
+															<label>
+																Phone Number
+																<span class="text-red">*</span>
+															</label>
+
+															<input type="number" name="partner_mobile" id="cmobile"
+															       class="form-control clear"
+															       autocomplete="off"
+																   t-att-value="applicant.partner_mobile if applicant else ''"
+															       />
+															<p id='mobile_message' class='text-danger' style='font-weight:bold;'> Mobile number is required!</p>
+														</div>
+													</div>
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div class="row">
+															<div class="col-sm-6 col-md-6 col-lg-6">
+																<div t-att-class="'control-group focused' if applicant else 'control-group'">
+																	<label>
+																		Alternate Phone Number (Optional)
+																	</label>
+																	<input type="text" name="partner_phone" id="cphone"
+																			class="form-control "
+																   			t-att-value="applicant.partner_phone if applicant else ''"
+																			autocomplete="off"
+																	/>
+																	<p id='phone_message' class='text-danger'
+																	   style='font-weight:bold;'/>
+
+																</div>
+															</div>
+															<div class="col-sm-6 col-md-6 col-lg-6">
+																<div t-att-class="'control-group focused' if applicant else 'control-group'">
+																	<label>Gender</label>
+																	<select class="form-control clear" id="FormControlSelectGender"
+																	        name="gender" >
+																		<option></option>
+																		<option value='male' t-att-selected='applicant.gender == "male" if applicant else None'>Male</option>
+																		<option value='female' t-att-selected='applicant.gender == "female" if applicant else None'>Female</option>
+																		<option value='other' t-att-selected='applicant.gender == "other" if applicant else None'>Others</option>
+																	</select>
+																	<!-- <p id='gender_message' class='text-danger' style='font-weight:bold;'>Please Choose Your Gender!</p> -->
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div class="row">
+															<div class="col-sm-6 col-md-6 col-lg-6">
+																<div t-att-class="'control-group focused' if applicant else 'control-group'">
+																	<label>
+																		Current Location
+																		<span class="text-red"></span>
+																	</label>
+																	<input type="text" name="current_location"
+																	       id="curr_location"
+																	       class="form-control clear" value=""
+																	       autocomplete="off"
+																		   t-att-value='applicant.current_location if applicant else ""'
+																	/>
+																</div>
+															</div>
+															<div class="col-sm-6 col-md-6 col-lg-6">
+																<div t-att-class="'control-group focused' if applicant else 'control-group'">
+
+																	<label>
+																		Job Location
+																		<span class="text-red">*</span>
+																	</label>
+																	<input type="hidden" id="lastJobLocId" value=""
+																	       name="lastJobLocId"/>
+																	<select class="form-control class"
+																	        id="FormControlSelectJobLocation"
+																	        name="job_location_id" >
+																		<option></option>
+																		<t t-foreach='jobs.address_id' t-as='loc'>
+																			<option t-att-value="loc.id" t-att-selected='applicant.job_location_id.id == loc.id if applicant else None'>
+																				<t t-esc="loc.name"/>
+																			</option>
+																		</t>
+																	</select>
+																	<p id='job_location_message' class='text-danger'
+																	   style='font-weight:bold;'>Please Select The Job
+																		Location!
+																	</p>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<label class="mb-4">
+															Experience
+															<span class="text-red"></span>
+														</label>
+														<div class="row">
+															<div class="col-sm-12 col-md-6 col-lg-6">
+																<div class="control-group margin-bottom-3">
+																	<select class="form-control class" name="exp_year" 
+																	        id="cYears" >
+
+																		<t t-foreach='years' t-as='year'>
+																			<option t-att-value="year[0]" t-att-selected='str(applicant.exp_year) == str(year[0]) if applicant else None'><t t-esc="year[1]"/> Years</option>
+																		</t>
+																	</select>
+																</div>
+															</div>
+
+															<div class="col-sm-12 col-md-6 col-lg-6">
+																<div t-att-class="'control-group focused' if applicant else 'control-group'">
+																	<select class="form-control" name="exp_month"
+																	        id="cMonths" >
+
+																		<t t-foreach='months' t-as='month'>
+																			<option t-att-value="month[0]" t-att-selected='str(applicant.exp_month) == str(month[0]) if applicant else None'>
+																			<t t-esc="month[1]"/> Months</option>
+																		</t>
+																	</select>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant else 'control-group'">
+															<label>Qualification*</label>
+															<!-- <span class="text-red">*</span> -->
+															<select class="form-control clear" id="FormControlSelectQuali"
+															        name="qualification_ids" >
+																<option></option>
+																<t t-foreach='qualifications' t-as='qualification'>
+																	<option t-att-value="qualification.id" 
+																		t-att-selected='qualification.id in applicant.qualification_ids.ids if applicant else None'>
+																		<t t-esc="qualification.name"/>
+																	</option>
+																</t>
+															</select>
+															<p id='qualification_message' class='text-danger' style='font-weight:bold;'>Please Mention Your Qualification! </p>
+														</div>
+													</div>
+												</div>
+
+												<div class="col-12" id="txtQualification" t-att-style="'' if applicant.other_qualification else 'display:none;'">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant else 'control-group'">
+															<label>
+																Other Qualification
+																<span class="text-red">*</span>
+															</label>
+															<input type="text" name="other_qualification"
+															       id="cQualificationT" maxlength="50"
+															       class="form-control" t-att-value="applicant.other_qualification if applicant else ''" autocomplete="off"
+																   
+																/>
+															<p id='required_message' class='text-danger' style='font-weight:bold;display:none;' >Please Mention Your Other Qualification Details! </p>
+														</div>
+													</div>
+												</div>
+
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant else 'control-group'">
+															<label>
+																Certifications <span class="text-red"></span>
+															</label>
+															<input type="text" name="certification" id="certification"
+															       class="form-control " t-att-value="applicant.certification if applicant else ''" autocomplete="off"
+															       />
+															<!-- <p id='certificate_message' class='text-danger' style='font-weight:bold;'>Please Mention Your Certification Details! </p> -->
+														</div>
+													</div>
+
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant else 'control-group'">
+															<label for='SelectTechSkills'>Technical Skills</label>
+															<input type="hidden" id="tech_skills" value="" name="tech_skills"/>
+															<select class="form-control clear" id="SelectTechSkills"
+															       multiple="multiple" >
+																<option></option>
+																<t t-foreach='tech_skills' t-as='tech_skill'>
+																	<option t-att-value="tech_skill.id" t-att-selected='tech_skill.id in applicant.skill_ids.ids if applicant else None'>
+																		<t t-esc="tech_skill.name"/>
+																	</option>
+																</t>
+															</select>
+															<input type="hidden" name="applicant_id" t-att-value="applicant.id if applicant else None" id="editapplicant"/>
+															<input name="skill_ids"  id="skill_id" class="form-control"
+														       style="display:none;" t-att-value='",".join([str(elem) for elem in applicant.skill_ids.ids]) if applicant and applicant.skill_ids else ""'/>
+															<p id='tech_skill_message' class='text-danger' style='font-weight:bold;'>Please Mention Your Technical Skills! </p>
+														</div>
+													</div>
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div class="row">
+															<div class="col-sm-6 col-md-6 col-lg-6">
+																<div t-att-class="'control-group focused' if applicant else 'control-group'">
+																	<label>Current CTC (Annum)
+																		<span class="text-red"></span>
+																	</label>
+																	<input type="number" name="current_ctc" id="curr_ctc"
+																	       maxlength="15" class="form-control clear"
+																	       autocomplete="off"
+																		   t-att-value='int(applicant.current_ctc) if applicant else ""'
+																	/>
+																	<!-- <p id='curr_ctc_message' class='text-danger' style='font-weight:bold;'>Please Mention Your Current CTC Details! </p> -->
+																</div>
+															</div>
+															<div class="col-sm-6 col-md-6 col-lg-6">
+																<div t-att-class="'control-group focused' if applicant else 'control-group'">
+																	<label>Expected CTC (Annum)
+																		<span class="text-red"></span>
+																	</label>
+																	<input type="number" name="salary_expected"
+																	       id="expected_ctc"
+																	       maxlength="15" class="form-control clear"
+																	       autocomplete="off"
+																		   t-att-value='int(applicant.salary_expected) if applicant else ""'
+																	/>
+																	<!-- <p id='exp_ctc_message' class='text-danger' style='font-weight:bold;'>Please Mention Your Expected CTC! </p> -->
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant else 'control-group'">
+															<label>Notice Period (days)
+																<span class="text-red"></span>
+															</label>
+															<input type="number" name="notice_period" id="notice_period" value=""
+															       maxlength="500" class="form-control clear"
+															       autocomplete="off"
+																   t-att-value='applicant.notice_period if applicant else ""'
+															       />
+															<!-- <p id='notice_period_message' class='text-danger' style='font-weight:bold;'>Please Mention Your Notice Period Details! </p> -->
+														</div>
+													</div>
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant else 'control-group'">
+															<label>Description
+																<span class="text-red"></span>
+															</label>
+															<input type="text" name="description" id="cDesc" value=""
+															       maxlength="500" class="form-control "
+															       autocomplete="off"
+																   t-att-value='applicant.description if applicant else ""'
+															       />
+															<!-- <p id='description_message' class='text-danger' style='font-weight:bold;'>This Field is Required! </p> -->
+														</div>
+													</div>
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<label class="mb-1">
+															Upload Resume
+															<span class="text-red">*</span>
+														</label>
+														<div class="row">
+															<div id="mainfileele" t-att-style="'max-width:22.9%' if applicant.document_ids.file_name else ''" t-att-class="'col-sm-3 col-md-3 col-lg-3' if applicant.document_ids.file_name else 'col-sm-12 col-md-12 col-lg-12'">
+																<div class="control-group ">
+																	<div class="form-group">
+																		<input type="file"
+																		       class="form-control-file form-control clear"
+																		       name="filename" id="fileDocument"
+																		       t-att-data-applicant-id = "applicant.id if applicant else None"
+																		       aria-describedby="fileDocumentHelpInline"
+																		       accept=".doc, .docx, .pdf" 
+																		       />
+																		
+																	</div>
+																</div>
+																
+															</div>
+															
+															<!-- - To Do for file edit -->
+															<div id="namefileelm" class="col-sm-9 col-md-9 col-lg-9" t-att-style="'' if applicant.document_ids.file_name else 'display:none;'">
+																<div class="control-group ">
+																	<div class="form-group" t-att-style="'margin-left: -30px;' if applicant else ''">
+																		<input type="text" t-att-value="applicant.document_ids.file_name if applicant else None" class="form-control-file form-control clear"/>
+																	</div>
+																</div>
+															</div>
+														</div>
+														<div class='row mt-0'>
+															<div id="" class="col-sm-12 col-md-12 col-lg-12">
+														
+																<small id="fileDocumentHelpInline" class="text-muted">
+																	Upload pdf/doc/docx format only.
+																</small>
+							
+																<p id='resume_message' class='text-danger' style='font-weight:bold;'> This field is required! </p>										
+															</div>
+														</div>
+													</div>
+												</div>
+
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div class="control-group">
+															<label for="mathgroup">Are you human?
+																<strong class="pl-3">
+																	<t t-esc='random_number[0]'/>
+																	<t t-esc='operator'/>
+																	<t t-esc='random_number[1]'/>
+																</strong>
+															</label>
+
+															<input type="hidden" t-att-value="result" name='answer' id='answer'/>
+															<input type="text" maxlength="50" class="form-control"
+															       value="" onfocus="this.select();" id="mathcaptcha"
+															       name="mathcaptcha" placeholder=""
+															       autocomplete="off"
+															       />
+															<p id='errorCaptcha' class='text-danger'/>
+
+														</div>
+													</div>
+												</div>
+												<div class="col-lg-12 col-md-4">
+													<button id='verifyCaptcha' type="button" class="btn px-4 btn-info">
+														Submit
+													</button>
+													<button type="button" class="btn px-4 ml-3 btn-outline-danger"
+												       value="Reset" name="reset" id='reset_applicant'>Reset</button>
+												</div>
+											</div>
+										</div>
+									</form>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</t>
+	</template>
+</odoo>

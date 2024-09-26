@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="view_kw_surveys_result_tree" model="ir.ui.view">
+            <field name="name">view.kw_surveys_result.tree</field>
+            <field name="model">kw_surveys</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <tree default_order="id desc" import="false" create="false" delete="false">
+                    <field name="name"/>
+                    <field name="survey_id"/>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+                    <field name="total_employee"/>
+                    <field name="completed"/>
+                    <field name="pending"/>
+                    <button name="view_survey_records" string="View Result" class="oe_highlight " type="object"/>
+                    <button name="view_survey_data" string="View Result" class="oe_highlight " type="object" groups="base.group_no_one"/>
+                    <button name="view_survey_result" string="Export Result" class="oe_highlight " type="object"/>
+                    <button name="action_result_survey" string="View Report" type="object" class="oe_highlight" />
+                </tree>
+            </field>
+        </record>
+        
+		<record id="survey_user_input_inherit" model="ir.ui.view">
+			<field name="name">kw_survey_user_input_form</field>
+			<field name="model">survey.user_input</field>
+			<field name="inherit_id" ref="kw_appraisal.kw_survey_user_input_form_inherits"/>
+			<field name="priority" eval="8"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='write_date']" position="before">
+                    <field name="start_time" />
+				</xpath>
+                <xpath expr="//field[@name='write_date']" position="after">
+					<field name="duration"/>
+				</xpath>
+                <!-- <xpath expr="//field[@name='write_date']" position="after">
+					<field name="quizz_score"/>
+				</xpath> -->
+
+                <!-- <xpath expr="//field[@name='user_input_line_ids']/tree" position="attributes">
+                    <attribute name="decoration-success">"quizz_mark &lt;0"</attribute>
+				</xpath> -->
+			</field>
+		</record>
+
+        <!-- Main window action for "kw_tour" -->
+        <record id="action_kw_surveys_result_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Report</field>
+            <field name="res_model">kw_surveys</field>
+            <field name="view_mode">tree</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>
+            <field name="domain">[]</field>
+            <!-- <field name="context">{'filter_tour':1}</field> -->
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_surveys.view_kw_surveys_result_tree')}),
+                ]"/>
+            <!-- <field name="search_view_id" ref="view_kw_tour_search"/> -->
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    No survey found.
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_kw_surveys_result" name="Report" sequence="99" groups='survey.group_survey_manager'
+                  parent="kwantify_survey_menu_root" action="action_kw_surveys_result_act_window"/>
+
+    </data>
+</odoo>

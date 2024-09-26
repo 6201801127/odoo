@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="kw_cpd_certification_tree" model="ir.ui.view">
+            <field name="name">kw_cpd_certification_tree</field>
+            <field name="model">kw_cpd_certification</field>
+            <field name="arch" type="xml">
+                <tree class='cpd_applications_tree'>
+                    <field name="employee_id"/>
+                    <field name="cpd_application_ids"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_cpd_certification_form" model="ir.ui.view">
+            <field name="name">kw_cpd_certification_form</field>
+            <field name="model">kw_cpd_certification</field>
+            <field name="arch" type="xml">
+                <form duplicate='0' delete='0'>
+                    <header>
+                        <button name="cpd_certificate_verification" string=" VERIFIED" type="object" class="fa fa-check kw_cpd_green" attrs="{'invisible': [('state', '!=', 1)]}" groups="kw_cpd.group_kw_cpd_lnk_manager" context="{'ctx_val':'LNK_VERIFICATION','record':active_id}"/>
+                        <button name="cpd_certificate_verification" string=" VERIFIED" type="object" class="fa fa-check kw_cpd_green" attrs="{'invisible': [('state', '!=', 2)]}" groups="kw_cpd.group_kw_cpd_core_hr" context="{'ctx_val':'CORE_HR_VERIFICATION','record':active_id}"/>
+                        <button name="cpd_certificate_verification" string=" DISBURSE" type="object" class="fa fa-usd kw_cpd_green" attrs="{'invisible': [('state', '!=', 3)]}" groups="kw_cpd.group_kw_cpd_finance" context="{'ctx_val':'FINANCE_DISBURSEMENT','record':active_id}"/>
+                        <button name="cpd_certificate_verification" string=" REJECT" type="object" class="fa fa-times reject_cpd" attrs="{'invisible': [('show_reject_button', '=', False)]}" context="{'ctx_val':'REJECTED','record':active_id}"/>
+                        <field name="state" widget='statusbar'/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="employee_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                                <field name="show_reject_button" invisible='1'/>
+                                <field name="is_user_core_hr" invisible='1'/>
+                            </group>
+                            <div>
+                            <group>
+                                <field name="agreement_file" widget="binary" attrs="{'readonly': ['|',('is_user_core_hr', '=', False),'&amp;',('is_user_core_hr', '=', True),('state', '!=', 2)],'invisible': [('is_user_core_hr', '=', False),('agreement_file', '=', False)]}"/>
+                                <field name="agreement_remark" attrs="{'required': [('state', '=', 2)],'readonly': [('state', '!=', 2)],'invisible': [('is_user_core_hr', '=', False),('agreement_remark', '=', False)]}"/>
+                            </group>
+                            </div>
+                        </group>
+                        <group string='Approved Certified Professonal Drives'>
+                            <div>
+                                <field name="cpd_application_ids" attrs="{'readonly': [('state', '!=', 0)]}">
+                                    <tree create="0" editable='top' class='cpd_applications_log_tree'>
+                                        <field name="employee_id" readonly='1' options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="institute_id" readonly='1' options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="course_id" readonly='1' options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="course_duration" readonly='1'/>
+                                        <field name="course_fee" readonly='1' sum='Total'/>
+                                        <field name="to_disburse_course_fee" readonly='1' sum='Total'/>
+                                        <field name="state" readonly='1'/>
+                                        <field name="certificate_file" widget="binary"/>
+                                        <field name="invoice_file" widget="binary"/>
+                                    </tree>
+                                </field>
+                            </div>
+                        </group>
+                        <group>
+                            <group string='Post Approval Details'>
+                                <div>
+                                    <field name="approval_log_ids" readonly='1' style="pointer-events:none;"/>
+                                </div>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+
+        <record id="kw_cpd_certification_apply_act_window" model="ir.actions.act_window">
+            <field name="name">Employee Certifications</field>
+            <field name="res_model">kw_cpd_certification</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                     (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_cpd_certification_tree')}),
+                     (0, 0, {'view_mode': 'form', 'view_id': ref('kw_cpd_certification_form')})]"/>
+            <field name="context">{'delete':False,'import':False,'duplicate':False}</field>
+            <field name="domain">['|', ('employee_id.user_id','=',uid), ('employee_id.parent_id.user_id', '=', uid)]</field>
+        </record>
+        <record id="kw_cpd_certification_lnk_approval_act_window" model="ir.actions.act_window">
+            <field name="name">L &amp; K Verification</field>
+            <field name="res_model">kw_cpd_certification</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="context">{'create':False,'delete':False,'import':False,'duplicate':False}</field>
+            <field name="domain">[('state', '=', 1)]</field>
+        </record>
+        <record id="kw_cpd_certification_corehr_approval_act_window" model="ir.actions.act_window">
+            <field name="name">CORE HR Verification</field>
+            <field name="res_model">kw_cpd_certification</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="context">{'create':False,'delete':False,'import':False,'duplicate':False}</field>
+            <field name="domain">[('state', '=', 2)]</field>
+        </record>
+        <record id="kw_cpd_certification_finance_approval_act_window" model="ir.actions.act_window">
+            <field name="name">Finance Approval</field>
+            <field name="res_model">kw_cpd_certification</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="context">{'create':False,'delete':False,'import':False,'duplicate':False}</field>
+            <field name="domain">[('state', '=', 3)]</field>
+        </record>
+
+
+        <menuitem name="Employee Certification" id="menu_kw_cpd_certification" parent="main_menu_kw_cpd" sequence="50"/>
+        <menuitem name="Apply" id="menu_kw_cpd_certification_apply" parent="menu_kw_cpd_certification" action="kw_cpd_certification_apply_act_window" sequence="1"/>
+        <menuitem name="Approvals" id="menu_kw_cpd_certification_approvals" parent="menu_kw_cpd_certification" sequence="10"/>
+        <menuitem name="L &amp; K Verification" id="menu_kw_cpd_certification_lnk_approval" parent="menu_kw_cpd_certification_approvals" action="kw_cpd_certification_lnk_approval_act_window" sequence="1" groups="kw_cpd.group_kw_cpd_lnk_manager"/>
+        <menuitem name="CORE HR Verification" id="menu_kw_cpd_certification_corehr_approval" parent="menu_kw_cpd_certification_approvals" action="kw_cpd_certification_corehr_approval_act_window" sequence="10" groups="kw_cpd.group_kw_cpd_core_hr"/>
+        <menuitem name="Finance" id="menu_kw_cpd_certification_finance_approval" parent="menu_kw_cpd_certification_approvals" action="kw_cpd_certification_finance_approval_act_window" sequence="20" groups="kw_cpd.group_kw_cpd_finance"/>
+
+
+
+
+
+
+    </data>
+</odoo>

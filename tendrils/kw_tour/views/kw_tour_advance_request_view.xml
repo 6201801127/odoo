@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="view_kw_tour_advance_request_tree" model="ir.ui.view">
+            <field name="name">view.kw_tour_advance_request.tree</field>
+            <field name="model">kw_tour_advance_request</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <tree create="false" import="false" delete="false">
+                    <field name="state" invisible="1"/>
+                    <field name="code" />
+                    <!-- <field name="tour_id"/> -->
+                    <field name="create_date" string="Applied On" widget="date"/>
+                    <field name="job_id"/>
+                    <field name="dept_id"/>
+                    <field name="tour_type_id"/>
+                    <field name="date_travel"/>
+                    <field name="date_return"/>
+                    <field name="city_id"/>
+                    <field name="request_inr"/>
+                    <field name="request_usd"/>
+                    <!-- <field name="pending_at"/> -->
+                    <button name="take_action" string="Take Action" class="oe_highlight " type="object"/>
+                </tree>
+            </field>
+        </record>
+
+        
+        <record id="view_kw_tour_advance_request_form" model="ir.ui.view">
+            <field name="name">view.kw_tour_advance_request.form</field>
+            <field name="model">kw_tour_advance_request</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <form create="false" import="false" delete="false" duplicate="false" >
+                <script>
+                    $(document).ready(function(){
+                        $(".modal-title").show();
+                        $(".o_statusbar_buttons").hide();
+                    });
+                </script>
+                    <header>
+                        <field name="state"/>
+                    </header>
+                    <sheet>
+                        <group>
+                        <group>
+                            <field name="ra_access" invisible="1"/>
+                            <field name="code" />
+                            <field name="tour_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" readonly="1"/>
+                            <field name="tour_type_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                            <field name="purpose"/>
+                            <field name="date_travel"/>
+                            <field name="city_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                            <field name="date_return"/>
+                            <field name="travel_arrangement"/>
+                        </group>
+                        <group >
+                            <field name="tour_detail_ids">
+                                <tree>
+                                    <field name="from_date"/>
+                                    <field name="from_city_id"/>
+                                    <field name="to_date" />
+                                    <field name="to_city_id"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <group>
+                            <field name="travel_expense_details_ids" >
+                                <tree editable="bottom" delete="false" create="false">
+                                    <field name="expense_id" style="pointer-events:none;"/>
+                                    <field name="no_of_night_inr" style="pointer-events:none;"/>
+                                    <field name="amount_domestic" style="pointer-events:none;" sum="Total(INR)"/>
+                                    <field name="no_of_night_usd" style="pointer-events:none;"/>
+                                    <field name="amount_international" style="pointer-events:none;" sum="Total(USD)"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <group >
+                            <field name="ancillary_expense_ids" >
+                                <tree>
+                                    <field name="ancillary_expense_id"/>
+                                    <field name="amount"/>
+                                    <field name="currency_id"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <group  string="Advance Disbursed Log">
+                            <field name="advance_ids" readonly="1" nolabel="1">
+                            <tree >
+                                <field name="create_date" string="Date"/>
+                                <field name="create_uid" string="Disbursed By"/>
+                                <field name="disbursed_amount_inr"/>
+                                   
+                                <field name="disbursed_amount_usd"/>
+                                    
+                                <field name="exchange_rate"/>
+                            </tree>
+                            </field>
+                        </group>
+                        <group string="Advance Deatils">
+                            <field name="can_apply_inr" invisible="1"/>
+                            <field name="can_apply_usd" invisible="1"/>
+                            <!-- <field name="advance"  attrs="{'invisible':[('can_apply_inr','=',False)]}"/>
+                            <field name="advance_usd"  attrs="{'invisible':[('can_apply_usd','=',False)]}"/> -->
+
+                            <field name="disbursed_inr"     attrs="{'invisible':[('can_apply_inr','=',False)]}"/>
+                            <field name="disbursed_usd" attrs="{'invisible':[('can_apply_usd','=',False)]}"/>
+
+                            <field name="request_inr"       attrs="{'invisible':[('can_apply_inr','=',False)],
+                            'required':[('can_apply_inr','=',True),('state','=','Applied')],'readonly':[('state','=','Approved')]}"/>
+                            
+                            <field name="request_usd"       attrs="{'invisible':[('can_apply_usd','=',False)],
+                            'required':[('can_apply_usd','=',True),('state','=','Applied')],'readonly':[('state','=','Approved')]}"/>
+                            
+                            <field name="to_be_given_inr"   
+                            attrs="{'invisible':['|',('state','in',['Applied','Approved']),('can_apply_inr','=',False)],
+                            'required':[('can_apply_inr','=',True),('state','=','Approved')]}"/>
+
+                            <field name="to_be_given_usd"   
+                            attrs="{'invisible':['|',('state','in',['Applied','Approved']),('can_apply_usd','=',False)],
+                            'required':[('can_apply_usd','=',True),('state','=','Approved')]}"/>
+
+                            <field name="exchange_rate" attrs="{'invisible':['|',('state','in',['Applied','Approved']),('can_apply_usd','=',False)],
+                                        'required':[('can_apply_usd','=',True),('state','=','Approved')]}" />
+
+                        </group>
+                        
+                    </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        
+        
+
+        <!-- Remark form -->
+        <record id="view_kw_tour_advance_request_approve_remark_form" model="ir.ui.view">
+            <field name="name">view.kw_tour_advance_request.approve_remark.form</field>
+            <field name="model">kw_tour_advance_request</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="99"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                        $(document).ready(function(){
+                            $(".modal-footer").hide();
+                            $(".modal-title").show();
+                            $(".o_form_statusbar").hide();
+                        });
+                    </script>
+                    <field name="state" invisible="1"/>
+                    <field name="ra_access" invisible="1"/>
+                    <field name="tour_id" invisible="1"/>
+                    <div class="row">
+                        <div class="text-center col-sm-12 mx-auto">
+                            <p class="h6 font-weight-light text-left text-justify">
+                                <field name="remark" required="1"/>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="text-center mx-auto">
+                        <button type="object" name="action_approve_advance_request" 
+                        class="text-center btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_kw_tour_advance_request_grant_remark_form" model="ir.ui.view">
+            <field name="name">view.kw_tour_advance_request.grant_remark.form</field>
+            <field name="model">kw_tour_advance_request</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="99"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                        $(document).ready(function(){
+                            $(".modal-footer").hide();
+                            $(".modal-title").show();
+                            $(".o_form_statusbar").hide();
+                        });
+                    </script>
+                    <field name="state" invisible="1"/>
+                    <field name="ra_access" invisible="1"/>
+                    <field name="tour_id" invisible="1"/>
+                    <!-- <field name="can_apply_inr" invisible="1"/>
+                    <field name="can_apply_usd" invisible="1"/> -->
+<!-- 
+                    <group>
+                        <group>
+                            <field name="request_inr" attrs="{'required':[('can_apply_inr','=',True)],'invisible':[('can_apply_inr','=',False)]}"/>
+                            <field name="request_usd" attrs="{'required':[('can_apply_usd','=',True)],'invisible':[('can_apply_usd','=',False)]}"/>
+                        </group>
+                        <group>
+                           
+                        </group>
+                    </group> -->
+                    <!-- <group> -->
+                        <field name="remark" required="1"/>
+                    <!-- </group> -->
+                        
+                    <div class="text-center">
+                        <button type="object" name="action_grant_advance_request" 
+                        class="text-center btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </field>
+        </record>
+        
+        <record id="view_kw_tour_advance_request_reject_remark_form" model="ir.ui.view">
+            <field name="name">view.kw_tour_advance_request.reject_remark.form</field>
+            <field name="model">kw_tour_advance_request</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="99"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                        $(document).ready(function(){
+                            $(".modal-footer").hide();
+                            $(".modal-title").show();
+                            $(".o_form_statusbar").hide();
+                        });
+                    </script>
+                    <field name="state" invisible="1"/>
+                    <field name="ra_access" invisible="1"/>
+                    <field name="tour_id" invisible="1"/>
+
+                    <div class="row">
+                        <div class="text-center col-sm-12 mx-auto">
+                            <p class="h6 font-weight-light text-left text-justify">
+                                <field name="remark" required="1"/>
+                            </p>
+                            <button type="object" name="action_reject_advance_request" 
+                            class="text-center btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </field>
+        </record>
+        
+    </data>
+</odoo>

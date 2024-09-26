@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <report id="kw_tour_settlement_claim_report" string="Download PDF" model="kw_tour_settlement_report" report_type="qweb-pdf"
+            name="kw_tour.kw_tour_settlement_claim_pdf_report_template" file="kw_tour.kw_tour_settlement_claim_pdf_report_template"
+            print_report_name="'Tour Settlement  '+ str(object.tour_id.employee_id.name)"/>
+
+    <record id="kw_tour_paperformat" model="report.paperformat">
+        <field name="name">Tour Settlement : Page</field>
+        <field name="default" eval="False"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">10</field>
+        <field name="margin_right">10</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">35</field>
+        <field name="dpi">90</field>
+        <field name="report_ids" eval="[(4, ref('kw_tour.kw_tour_settlement_claim_report'))]"></field>
+    </record>
+
+    <template id="kw_tour_settlement_claim_pdf_report_template">
+        <t t-call="web.html_container">
+            <t t-call="web.internal_layout">
+                <t t-foreach="docs" t-as="report">
+                    <style>
+                        body{
+                        font-family:OpenSans;
+                        }
+                        .page{
+                        margin-top:0;
+                        }
+                        table{
+                        width:100%;
+                        }
+                        table, th, td {
+                        border: 1px solid black;
+                        border-collapse: collapse;
+                        padding:0.1rem;
+                        font-size:1rem;
+                        }
+                        .basic_details tr td:nth-child(2){
+                        font-weight:bold;
+                        padding-left:0.3rem;
+                        }
+                        th{
+                        text-align:center;
+                        }
+
+                        h5{
+                        margin-top:1rem;
+                        margin-bottom:0.3rem;
+                        }
+                        .logo_section,.footer_section,.logo_section td,.footer_section td{
+                        border: 0;
+                        }
+                        .claim_detail tr {
+                        padding-left:0.5rem;
+                        }
+
+                        .footer_section td:nth-child(2){
+                        text-align:right;
+                        font-weight:bold;
+                        }
+                        .red{
+                        color:red;
+                        }
+                        .green{
+                        color:green;
+                        }
+                        .footer_section{
+                        margin-top:1.5rem;
+                        }
+                    </style>
+                    <div class="page">
+
+                        <table class="logo_section">
+                            <tr>
+                                <td width="40%">
+                                    <img src="kwantify_theme/static/img/csmlogobtb.png" width="150px" alt="CSM Logo"/>
+                                </td>
+                                <td>
+                                    <h4>Settlement (<t t-esc="report.tour_id.code"/>)</h4>
+                                </td>
+                            </tr>
+
+                        </table>
+
+                        <h5>Tour Settlement</h5>
+                        <table class="basic_details">
+                            <tbody>
+                                <tr>
+                                    <td width="30%">Tour For Claim Settlement</td>
+                                    <td width="70%">
+                                        <t t-esc="report.tour_id.date_travel.strftime('%d-%b-%Y')+ '  To  '+report.tour_id.date_return.strftime('%d-%b-%Y')"/>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>Date</td>
+                                    <td>
+                                        <t t-esc="report.settlement_id.applied_date.strftime('%d-%b-%Y')"/>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>Status</td>
+                                    <td><t t-esc="report.settlement_id.state"/></td>
+                                </tr>
+
+
+                                <tr>
+                                    <td>Applied By</td>
+                                    <td><t t-esc="report.name"/></td>
+                                </tr>
+
+                                <tr t-if="report.department">
+                                    <td>Department</td>
+                                    <td><t t-esc="report.department"/></td>
+                                </tr>
+
+                                <tr t-if="report.division">
+                                    <td>Division</td>
+                                    <td><t t-esc="report.division"/></td>
+                                </tr>
+
+                                <tr t-if="report.section">
+                                    <td>Section</td>
+                                    <td><t t-esc="report.section"/></td>
+                                </tr>
+
+                                <tr>
+                                    <td>Type Of Tour</td>
+                                    <td><t t-esc="report.tour_id.tour_type_id.name"/></td>
+                                </tr>
+
+                                <tr t-if="report.tour_id.project_id">
+                                    <td>Project Name</td>
+                                    <td><t t-esc="report.tour_id.project_id.name"/></td>
+                                </tr>
+
+                                <tr t-if="report.tour_id.travel_arrangement">
+                                    <td>Travel Arrangement</td>
+                                    <td><t t-esc="report.tour_id.travel_arrangement"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h5>Tour Detail</h5>
+                        <table class="tour_detail">
+                            <tbody>
+                                <tr>
+                                    <th>SL#</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Travel Mode</th>
+                                    <th>Departure Date &amp; Time</th>
+                                    <th>Arrival Date &amp; Time</th>
+                                    <!--                                    <th>Ticket Cost</th>-->
+                                    <th>Status</th>
+                                </tr>
+                                <t t-set="count" t-value="1"/>
+                                <tr t-foreach="report.tour_id.tour_detail_ids" t-as="detail">
+                                    <td><t t-esc="count"/></td>
+                                    <td><t t-esc="detail.from_city_id.name"/></td>
+                                    <td><t t-esc="detail.to_city_id.name"/></td>
+                                    <td><t t-esc="detail.travel_mode_id and detail.travel_mode_id.name or '--'"/></td>
+                                    <td><t t-esc="detail.from_date.strftime('%d-%b-%Y')"/>
+                                        <t t-if="detail.from_time">
+                                            <t t-esc="datetime.datetime.strptime(detail.from_time,'%H:%M:%S').strftime('%I:%M %p')"/>
+                                        </t>
+                                    </td>
+                                    <td><t t-esc="detail.to_date.strftime('%d-%b-%Y')"/>
+                                        <t t-if="detail.to_time">
+                                            <t t-esc="datetime.datetime.strptime(detail.to_time,'%H:%M:%S').strftime('%I:%M %p')"/>
+                                        </t>
+                                    </td>
+                                    <!--                                    <td><t t-esc="detail.cost or '&#45;&#45;'"/></td>-->
+                                    <td>--</td>
+                                    <t t-set="count" t-value="count+1"/>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!--                        <t t-if="report.tour_id.travel_arrangement == 'Self'">-->
+                        <h5>Ticket Detail</h5>
+                        <table class="ticket_detail">
+                            <tbody>
+                                <tr>
+                                    <th>SL#</th>
+                                    <th>Booking Date</th>
+                                    <th>Travel Mode</th>
+                                    <th>Currency</th>
+                                    <th>Ticket Cost</th>
+                                </tr>
+                                <t t-set="count" t-value="1"/>
+                                <tr t-foreach="report.settlement_id.travel_ticket_ids" t-as="ticket">
+                                    <td><t t-esc="count"/></td>
+                                    <td><t t-esc="ticket.booking_date"/></td>
+                                    <td><t t-esc="ticket.travel_mode_id and ticket.travel_mode_id.name or '--'"/></td>
+                                    <td><t t-esc="ticket.currency_id and ticket.currency_id.name or '--'"/></td>
+                                    <td><t t-esc="ticket.cost or '--'"/></td>
+                                    <t t-set="count" t-value="count+1"/>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <!--                        </t>-->
+
+                      
+
+
+                        <h5>Expenditure Detail</h5>
+                        <table class="expenditure_detail">
+                            <tbody>
+                                <tr>
+                                    <th>SL#</th>
+                                    <th>From Date</th>
+                                    <th>To Date</th>
+                                    <th>Place Of Expense</th>
+                                    <th>Type Of Expense</th>
+                                    <th>Description</th>
+                                    <th>Currency</th>
+                                    <th>Eligible Amount</th>
+                                    <th>Current Amount</th>
+                                </tr>
+                                <t t-set="count" t-value="1"/>
+                                <tr t-foreach="report.settlement_id.settlement_detail_ids" t-as="settlement">
+                                    <td><t t-esc="count"/></td>
+                                    <td><t t-esc="settlement.from_date.strftime('%d-%b-%Y')"/></td>
+                                    <td><t t-esc="settlement.to_date.strftime('%d-%b-%Y')"/></td>
+                                    <td><t t-esc="settlement.city_id.name"/></td>
+                                    <td>
+                                        <t t-if="settlement.expense_id.code == 'misc'">
+                                            <t t-esc="settlement.expense_id.name"/><t t-if="settlement.misc_expense">(<t t-esc="settlement.misc_expense"/>)</t>
+
+                                        </t>
+                                        <t t-else="">
+                                            <t t-esc="settlement.expense_id.name"/><t t-if="settlement.expense_id.code == 'da'"> (<t t-esc="settlement.da_percentage"/>%)</t>
+                                        </t>
+                                    </td>
+                                    <td><t t-esc="settlement.description"/></td>
+                                    <td><t t-esc="settlement.currency_id.name"/></td>
+                                    <td><t t-esc="settlement.amount_actual"/></td>
+                                    <td><t t-esc="settlement.amount_claiming"/></td>
+                                    <t t-set="count" t-value="count+1"/>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <t t-if="report.settlement_id.travel_prerequisite_ids">
+                            <h5>Travel Prerequisite</h5>
+                            <table class="ticket_detail">
+                                <tbody>
+                                    <tr>
+                                        <th>SL#</th>
+                                        <th>Travel Prerequisite</th>
+                                        <th>Amount</th>
+                                        <th>Currency</th>
+                                    </tr>
+                                    <t t-set="count" t-value="1"/>
+                                    <tr t-foreach="report.settlement_id.travel_prerequisite_ids" t-as="prerequisite">
+                                        <td><t t-esc="count"/></td>
+                                        <td><t t-esc="prerequisite.travel_prerequisite_id and prerequisite.travel_prerequisite_id.name or '--'"/></td>
+                                        <td><t t-esc="prerequisite.amount or '--'"/></td>
+                                        <td><t t-esc="prerequisite.currency_id and prerequisite.currency_id.name or '--'"/></td>
+                                        <t t-set="count" t-value="count+1"/>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                            <!--  <t t-if="report.tour_id.travel_arrangement == 'Self'">-->
+                        <h5>Additional Settlement Expenses</h5>
+                        <table class="additional_detail">
+                            <tbody>
+                                <tr>
+                                    <th>SL#</th>
+                                    <th>Additional Expenses</th>
+                                    <th>Amount</th>
+                                    <th>Currency</th>
+                                    <th>Valid Reason</th>
+                                </tr>
+                                <t t-set="count" t-value="1"/>
+                                <tr t-foreach="report.settlement_id.additional_expenses_ids" t-as="additional">
+                                    <td><t t-esc="count"/></td>
+                                    <td><t t-esc="additional.additional_expense"/></td>
+                                    <td><t t-esc="additional.amount or '--'"/></td>
+                                    <td><t t-esc="additional.currency_id and additional.currency_id.name or '--'"/></td>
+                                    <td><t t-esc="additional.remarks"/></td>
+                                    <t t-set="count" t-value="count+1"/>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <!--                        </t>-->
+
+                        <h5>Claim Detail</h5>
+                        <table class="claim_detail">
+                            <tr>
+                                <td width="20%"></td>
+                                <th width="40%">Domestic</th>
+                                <th width="40%">USD</th>
+                            </tr>
+                            <tr>
+                                <td>Advance Amount</td>
+                                <td><t t-esc="report.settlement_id.advance_inr"  t-options='{"widget": "monetary", "display_currency": report.settlement_id.domestic_currency_id}'/></td>
+                                <td><t t-esc="report.settlement_id.advance_usd" t-options='{"widget": "monetary", "display_currency": report.settlement_id.usd_currency_id}'/></td>
+                            </tr>
+                            <tr>
+                                <td>Total Expenditure</td>
+                                <td><t t-esc="report.settlement_id.total_domestic"  t-options='{"widget": "monetary", "display_currency": report.settlement_id.domestic_currency_id}'/></td>
+                                <td><t t-esc="report.settlement_id.total_international" t-options='{"widget": "monetary", "display_currency": report.settlement_id.usd_currency_id}'/></td>
+                            </tr>
+                            <tr class="red">
+                                <td>Amount Payable</td>
+                                <td><t t-esc="report.settlement_id.paid_domestic" t-options='{"widget": "monetary", "display_currency": report.settlement_id.domestic_currency_id}'/></td>
+                                <td><t t-esc="report.settlement_id.paid_international" t-options='{"widget": "monetary", "display_currency": report.settlement_id.usd_currency_id}'/></td>
+                            </tr>
+                            <tr class="green">
+                                <td>Amount Receivable</td>
+                                <td><t t-esc="report.settlement_id.receivable_inr"  t-options='{"widget": "monetary", "display_currency": report.settlement_id.domestic_currency_id}'/></td>
+                                <td><t t-esc="report.settlement_id.receivable_usd" t-options='{"widget": "monetary", "display_currency": report.settlement_id.usd_currency_id}'/></td>
+                            </tr>
+                        </table>
+
+                        <h5>Approval Log</h5>
+                        <table>
+                            <tr>
+                                <th>Action Taken By</th>
+                                <th>Action</th>
+                                <th>Action Taken On</th>
+                                <th>Remark</th>
+                            </tr>
+                            <tr t-foreach="report.settlement_id.action_log_ids" t-as="log">
+                                <td><t t-esc="log.create_uid.name"/></td>
+                                <td><t t-esc="log.state"/></td>
+                                <td><t t-esc="log.date"/></td>
+                                <td><t t-esc="log.remark"/></td>
+                            </tr>
+
+                        </table>
+
+                        <table class="footer_section">
+                            <tr>
+                                <td>
+                                    <b>Date</b> : <t t-esc="datetime.date.today().strftime('%d-%b-%Y')"/>
+                                </td>
+                                <td>
+                                    Authorised Signature
+                                </td>
+                            </tr>
+                        </table>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+
+		<record model="ir.ui.view" id="kw_rfq_form_inherited">
+			<field name="name">kw_rfq.form.view.inherit</field>
+			<field name="model">purchase.order</field>
+			<field name="inherit_id" ref="purchase.purchase_order_form"/>
+			<field name="arch" type="xml">
+				<xpath expr="//header/button[@name='action_view_invoice'][1]" position="replace">
+					<button name="action_view_invoice" string="Create Bill" type="object" class="btn btn-success"
+							context="{'create_bill':True}"
+							attrs="{'invisible': ['|', ('state', 'not in', ('purchase', 'done')), ('invoice_status', 'in', ('no', 'invoiced'))]}"/>
+				</xpath>
+				<xpath expr="//field[@name='state']" position="replace">
+					<field name="state" widget="statusbar" statusbar_visible="draft,approved,sent,purchase" readonly="1"/>
+				</xpath>
+
+				<xpath expr="//header/button[@name='action_view_invoice'][2]" position="replace">
+					<button name="action_view_invoice" string="Create Bill" type="object" context="{'create_bill':True}"
+							attrs="{'invisible': ['|', '|', ('state', 'not in', ('purchase', 'done')), ('invoice_status', 'not in', ('no', 'invoiced')), ('order_line', '=', [])]}"
+							class="btn btn-success"/>
+				</xpath>
+				<xpath expr="//header/button[@name='action_view_invoice'][2]" position="after">
+					<button name="action_ceo_approve" string="Approve" type="object"
+							attrs="{'invisible': [('state', '!=', 'sent')]}"
+							class="btn btn-success" group='kw_inventory.group_chief_executive'/>
+				</xpath>
+				<xpath expr="//header/button[@name='button_confirm'][1]" position="replace">
+					<button name="button_confirm" type="object" states="approved" string="Confirm Order"
+							class="btn btn-success" id="bid_confirm" groups='kw_inventory.group_po_approver'/>
+				</xpath>
+
+				<xpath expr="//header/button[@name='button_confirm'][2]" position="replace">
+					<button name="button_confirm" type="object" states="draft" string="Confirm Order" id="draft_confirm"
+							class="btn btn-success" groups='kw_inventory.group_po_approver'/>
+					<!-- <button name="button_receipt" type="object" string="Reset To Draft" class="btn btn-warning"/> -->
+				</xpath>
+
+				<xpath expr="//header/button[@name='button_done']" position="replace">
+					<!-- <button name="button_done" type="object" string="Lock" states="purchase" class="btn btn-warning"/> -->
+				</xpath>
+				<xpath expr="//header/button[@name='button_unlock']" position="replace">
+					<!-- <button name="button_unlock" type="object" string="Unlock" states="done"
+							groups="purchase.group_purchase_manager" class="btn btn-warning"/> -->
+				</xpath>
+				<xpath expr="//button[@name='action_rfq_send'][3]" position="replace">
+					<button name="action_rfq_send" states="purchase" string="Send PO by Email" type="object"
+							context="{'send_rfq':False}" class="btn btn-warning"/>
+				</xpath>
+				<xpath expr="//header/button[@name='action_view_picking']" position="replace">
+					<button name="action_view_picking" string="Receive Products" class="btn btn-success" type="object"
+							attrs="{'invisible': ['|', '|' , ('is_shipped', '=', True), ('state','not in', ('purchase','done')), ('picking_count', '=', 0)]}"/>
+
+					<button name="action_view_service" string="Receive Services" class="btn btn-success" type="object"
+							attrs="{'invisible': [('check_service', '!=', True)]}"/>
+				</xpath>
+				<xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+					<field name="check_service" invisible='1'/>
+					<button type="object"
+						name="action_view_service" string='Service Sheet'
+						attrs="{'invisible': [('check_service', '!=', True)]}"
+						class="oe_stat_button"
+						icon="fa-list" >
+						<!-- <field name="picking_count" widget="statinfo" string="Receipt" help="Incoming Shipments"/>
+						<field name="picking_ids" invisible="0"/> -->
+					</button>
+				</xpath>
+				<xpath expr="//form/sheet/div/span" position="replace">
+					<span class="o_form_label" attrs="{'invisible': [('state','not in',('draft','sent'))]}">Request for
+						Purchase Order
+					</span>
+				</xpath>
+				<!-- <xpath expr="//form/header/button[@name='action_rfq_send']" position="before">
+					<button name="move_qc" string="Move To Ready For PO" type="object" class="btn btn-warning"
+							attrs="{'invisible': ['|',('state','!=','cancel'),('boolean_create_po','=',False)]}"/>
+				</xpath> -->
+				<xpath expr="//form/header/button[@name='action_rfq_send']" position="replace">
+					<button name="action_rfq_send" states="draft" string="Send by Email" type="object"
+							context="{'send_rfq':True}" class="btn btn-warning"/>
+				</xpath>
+				<xpath expr="//form/header/button[@name='action_rfq_send']" position="replace">
+					<button name="action_rfq_send" states="draft" string="Send by Email" type="object"
+							context="{'send_rfq':True}" class="btn btn-warning"/>
+				</xpath>
+				<xpath expr="//form/header/button[@name='button_draft']" position="replace">
+					<button name="button_draft" string="Set to Draft" type="object"
+							attrs="{'invisible': [('state','!=','cancel')]}" invisible='1'/>
+				</xpath>
+				<xpath expr="//form/header/button[@name='print_quotation']" position="replace">
+					<button name="print_quotation" string="Print PO" type="object" states="draft"
+							class="btn btn-warning" groups="base.group_user"/>
+				</xpath>
+				<xpath expr="//form/header/button[@name='button_confirm']" position="replace">
+					<button name="button_confirm" type="object" states="approved" string="Confirm Order"
+							class="btn btn-success" id="bid_confirm" groups='kw_inventory.group_po_approver'/>
+				</xpath>
+				<xpath expr="//form/header/button[@name='button_cancel']" position="replace">
+					<button name="button_cancel" states="draft,to approve,approved,sent,purchase" string="Cancel" type="object"
+							class="btn btn-danger" confirm="Are you sure you want to cancel your order?"/>
+				</xpath>
+				<xpath expr="//form/header/button[@name='action_rfq_send'][2]" position="replace">
+				</xpath>
+				<xpath expr="//form/header/button[@name='print_quotation'][2]" position="replace">
+					<button name="print_quotation" string="Print PO" type="object" states="sent" class="btn btn-warning"
+							groups="base.group_user"/>
+				</xpath>
+				<xpath expr="/form/sheet/notebook/page[1]/field[@name='order_line']" position="after">
+					<group>
+						<group>
+							<field name="contact_prsn_name"/>
+							<field name="contact_prsn_number"/>
+						</group>
+					</group>
+				</xpath>
+								<xpath expr="//group/group/field[2]" position="after">
+					<field name="boolean_create_po" invisible="1"/>
+					<field name="qc_ids" string='QC No' widget='many2many_tags' options="{'no_create': True}"
+						   attrs="{'invisible': [('boolean_create_po','=',False)]}"/>
+				</xpath>
+				<xpath expr="//field[@name='partner_id']" position="replace">
+					<field name="partner_id" options="{'no_open': True,'no_create': True, 'no_edit': True}"  required="0" attrs="{'readonly': [('boolean_create_po','=',True)]}"/>
+				</xpath>
+				
+				<xpath expr="//field[@name='partner_id']" position="after">
+					<field name="child_ids" string="Contact &amp; Address" required="0"
+						   attrs="{'readonly': [('boolean_create_po','=',True)]}" invisible='1'/>
+				</xpath>
+				<xpath expr="//field[@name='child_ids']" position="after">
+					<label for="street" string="Address"/>
+					<div class="o_address_format">
+						<field name="address" string="Address" placeholder="Street..." class="o_address_street" readonly='1' force_save="1"/>
+					</div>
+				</xpath>
+				<xpath expr="//sheet/group/group/field[@name='company_id']" position="attributes">
+                    <attribute name="options">{'no_create': True, 'no_open': True}</attribute>
+				</xpath>
+				<xpath expr="//form/sheet/notebook/page/field/tree" position="replace">
+					<tree string="Purchase Order Lines" create='false' edit='false' delete="0"
+						  attrs="{'readonly': [('boolean_create','=',True)]}">
+						<field name="boolean_create" invisible="1"/>
+						<field name="currency_id" invisible="1"/>
+						<field name="state" invisible="1"/>
+						<field name="product_type" invisible="1"/>
+						<field name="sequence" widget="handle"/>
+						<field name="product_id" options="{'no_create':True,'no_edit':True,'no_open': True,}"
+							   attrs="{'readonly': ['&amp;',('state', 'in', ('purchase', 'to approve','done', 'cancel')),('boolean_create','=',True)]}"
+							   context="{'partner_id':parent.partner_id, 'quantity':product_qty,'uom':product_uom, 'company_id': parent.company_id}"
+							   force_save="1"/>
+						<field name="name" attrs="{'readonly': [('boolean_create','=',True)]}" invisible='1'/>
+						<field name="date_planned" attrs="{'readonly': [('boolean_create','=',True)]}"/>
+						<field name="company_id" groups="base.group_multi_company" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+						<field name="account_analytic_id" context="{'default_partner_id':parent.partner_id}"
+							   groups="analytic.group_analytic_accounting"/>
+						<field name="analytic_tag_ids" groups="analytic.group_analytic_tags" widget="many2many_tags"
+							   options="{'color_field': 'color'}"/>
+						<field name="product_qty" attrs="{'readonly': [('boolean_create','=',True)]}"/>
+						<field name="qty_received"
+							   attrs="{'column_invisible': [('parent.state', 'not in', ('purchase', 'done'))]}"/>
+						<field name="qty_invoiced"
+							   attrs="{'column_invisible': [('parent.state', 'not in', ('purchase', 'done'))]}"/>
+						<field name="product_uom" groups="uom.group_uom"
+							   attrs="{'readonly': ['&amp;',('state', 'in', ('purchase', 'done', 'cancel')),('boolean_create','=',True)]}"
+							   force_save="1" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+						<field name="price_unit" attrs="{'readonly': [('boolean_create','=',True)]}"/>
+						<field name="taxes_id" widget="many2many_tags" domain="[('type_tax_use','=','purchase')]"
+							   context="{'default_type_tax_use': 'purchase', 'search_view_ref': 'account.account_tax_view_search'}"
+							   options="{'no_create': True}"/>
+						<field name="price_subtotal" options="{'widget': 'monetary','display_currency': 'company_id.currency_id'}"/>
+					</tree>
+				</xpath>
+				<xpath expr="//field[@name='user_id']" position="attributes">
+					<attribute name="options">{'no_create': True, 'no_open': True}</attribute>
+				</xpath>
+				<xpath expr="//field[@name='partner_id']" position="attributes">
+					<attribute name="options">{'no_open': True}</attribute>
+				</xpath>
+				
+				
+				<xpath expr="//notebook" position="inside">
+					<page string="Purchase Requisition">
+						<!-- <field name="req_id_rel" string='Purchase Requisition Id'
+							   attrs="{'invisible': [('boolean_create_po','=',False)]}" options="{'no_open': True}"
+							   readonly="1">
+							<tree delete="0" create="false">
+								<field name="requisition_number"/>
+								<field name="cost_center_code"/>
+								<field name="budget_code"/>
+								<field name="estimated_value"/>
+								<field name="budgeted_value"/>
+							</tree>
+						</field> -->
+						<field name="requisition_ids" attrs="{'readonly': [('state', '!=', 'draft')]}" string='Purchase Requisition Id' widget="many2many_tags" options="{'no_create': True, 'no_edit': True}">
+							<!-- <tree delete="0" create="false">
+								<field name="requisition_number"/>
+								<field name="cost_center_code"/>
+								<field name="budget_code"/>
+								<field name="estimated_value"/>
+								<field name="budgeted_value"/>
+							</tree> -->
+						</field>
+					</page>
+				</xpath>
+				<xpath expr="//form" position="attributes">
+					<attribute name="duplicate">0</attribute>
+					<attribute name="delete">0</attribute>
+				</xpath>
+				<xpath expr="//field[@name='date_order']" position="after">
+					<field name="branch_id" options="{'no_open': True,'no_create': True, 'no_edit': True}"/>
+					<field name="sign_autority" options="{'no_open': True,'no_create': True, 'no_edit': True}"/>
+				</xpath>
+				<xpath expr="//field[@name='company_id']" position="after">
+					<field name="purchase_no" string="Purchase Seq No"/>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="purchase_order_view_form_inherited_new" model="ir.ui.view">
+			<field name="name">purchase.order.pickingtype</field>
+			<field name="model">purchase.order</field>
+			<field name="inherit_id" ref="purchase_stock.purchase_order_view_form_inherit"/>
+			<field name="arch" type="xml">
+				<xpath expr="//page[@name='purchase_delivery_invoice']/group/group/field[@name='picking_type_id']" position="attributes">
+					<attribute name="options">{'no_create': True, 'no_open': True}</attribute>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="purchase_order_views_tree_inherited" model="ir.ui.view">
+			<field name="name">purchase.order.tree.inherited</field>
+			<field name="model">purchase.order</field>
+			<field name="inherit_id" ref="purchase.purchase_order_tree"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='partner_id']" position="after">
+					<field name="po_created_by" options="{'no_open': True,'no_create': True, 'no_edit': True}"/>
+					<field name="pending_at" />
+				</xpath>
+				<xpath expr="//field[@name='user_id']" position="replace">
+				</xpath>
+			</field>
+		</record>
+
+		<record id="purchase_order_tree_report" model="ir.ui.view">
+			<field name="name">purchase.order.tree.report</field>
+			<field name="model">purchase.order</field>
+			<field name="arch" type="xml">
+				<tree decoration-bf="message_unread==True" decoration-muted="state=='cancel'"
+					  decoration-info="state in ('wait','confirmed')"
+					  string="Purchase Order" create='false' delete='false' import='false'>
+					<field name="message_unread" invisible="1"/>
+					<field name="name" string="Reference"/>
+					<field name="date_order"/>
+					<field name="partner_id"/>
+					<field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+					<field name="date_planned" invisible="context.get('quotation_only', False)"/>
+					<field name="user_id"/>
+					<field name="project_code" invisible="1"/>
+					<field name="origin"/>
+					<field name="amount_untaxed" sum="Total Untaxed amount" string="Untaxed" widget="monetary"/>
+					<field name="amount_total" sum="Total amount" widget="monetary"/>
+					<field name="currency_id" invisible="1"/>
+					<field name="state"/>
+					<field name="invoice_status" invisible="1"/>
+				</tree>
+			</field>
+		</record>
+
+		<record id="view_purchase_order_filter_inh" model="ir.ui.view">
+			<field name="name">request.quotation.select</field>
+			<field name="model">purchase.order</field>
+			<field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+			<field name="arch" type="xml">
+				<xpath expr="//filter[@name='expected_date']" position="after">
+					<filter name="group_state" string="Status" context="{'group_by':'state'}"/>
+					<filter name="group_status" string="Status" context="{'group_by':'status'}"/>
+				</xpath>
+			</field>
+		</record>
+
+		<!-- Purchase Order Report -->
+		<record id="purchase_rfq_report" model="ir.actions.act_window">
+			<field name="name">Purchase Order Report</field>
+			<field name="res_model">purchase.order</field>
+			<field name="view_mode">tree</field>
+			<field name="view_ids"
+				   eval="[(5, 0, 0),(0, 0, {'view_mode': 'tree', 'view_id': ref('kw_inventory.purchase_order_tree_report')})]"/>
+		</record>
+
+		<record id="purchase.purchase_rfq" model="ir.actions.act_window">
+			<field name="name">Purchase Order</field>
+			<field name="res_model">purchase.order</field>
+			<field name="view_mode">tree,form,pivot,graph,calendar</field>
+			<field name="view_ids"
+				   eval="[(5, 0, 0),
+				   (0, 0, {'view_mode': 'tree', 'view_id': ref('purchase.purchase_order_tree')}),
+				   (0, 0, {'view_mode': 'form', 'view_id': ref('purchase.purchase_order_form')})]"/>
+			<field name="search_view_id" ref="view_purchase_order_filter_inh"/>
+			<field name="context">{'search_default_group_status': 1,"create": False,"import": False}</field>
+		</record>
+		
+		<record id="purchase_order_server_action" model="ir.actions.server">
+            <field name="name">Purchase Order</field>
+            <field name="model_id" ref="model_purchase_order" />
+            <field name="state">code</field>
+            <field name="code">
+action = model.render_purchase_orders()
+
+            </field>
+        </record>
+
+		<menuitem action="purchase_order_server_action"
+				  id="purchase.menu_purchase_rfq"
+				  parent="purchase.menu_procurement_management"
+				  string="Purchase Order"
+				  sequence="0"/>
+
+		<record id="purchase.purchase_form_action" model="ir.actions.act_window">
+			<field name="name">Confirm Purchase Orders</field>
+		</record>
+
+		<menuitem action="purchase.purchase_form_action"
+				  id="purchase.menu_purchase_form_action"
+				  parent="purchase.menu_procurement_management"
+				  string="Confirm Purchase PO"
+				  sequence="6"/>
+		<!-- PO Report Menu -->
+		<menuitem name="Purchase Order Report"
+				  action="kw_inventory.purchase_rfq_report"
+				  id="menu_po_report"
+				  parent="stock.menu_warehouse_report"/>
+	</data>
+</odoo>

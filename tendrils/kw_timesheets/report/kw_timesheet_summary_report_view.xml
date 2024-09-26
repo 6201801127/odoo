@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Tree view for "model" -->
+        <record id="view_kw_timesheet_summary_report_tree" model="ir.ui.view">
+            <field name="name">view.kw_timesheet_summary_report.tree</field>
+            <field name="model">kw_timesheet_summary_report</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <tree decoration-danger="total_effortper == 0" decoration-warning="total_effortper &lt;= 90"  create='false' edit='false' import='false' string="view_kw_timesheet_summary_report_tree">
+                    <field name="employee_id" />
+                    <field name="designation_id" />
+                    <field name="department_id" />
+                    <field name="division_id" />
+                    <field name="week_start_date" />
+                    <field name="week_end_date" />
+                    <field name="working_days" />
+                    <field name="absent_days" />
+                    <field name="on_tour_days" />
+                    <field name="on_leave_days" />
+                    <field name="required_effort"/>
+                    <field name="timesheet_effort" />
+                    <field name="total_effortper" />
+                    <field name="total_effort" />
+                    <field name="remark" />
+                
+                    <!-- <button name="timesheet_summary_view_details" type="object" string="View Details" class="oe_highlight" groups="base.group_no_one" /> -->
+                    <button name="timesheet_summary_report_view_details_grid" type="object" string="View Details" class="oe_highlight" context="{'turn_view_readonly':True}" />
+                </tree>
+            </field>
+        </record>
+        
+        <!-- Search view for "model" -->
+        <record id="view_kw_timesheet_summary_report_search" model="ir.ui.view">
+            <field name="name">view.kw_timesheet_summary_report.search</field>
+            <field name="model">kw_timesheet_summary_report</field>
+            <field name="type">search</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <search string="view_kw_timesheet_summary_report_search">
+                    <field name="employee_id" />
+                    <group expand="0" string="Group By...">
+                        <filter name="groupby_employee" string="Employee" domain="[]" context="{'group_by':'employee_id'}"/>
+                        <filter string="This Month" name="filter_current_month" domain="[('week_start_date', 'like',context_today().strftime('%Y-%m-%'))]" />
+                        <filter string="Last Month" name="filter_last_month" domain="[('week_start_date', '&gt;',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('week_start_date','&lt;',(context_today()).strftime('%Y-%m-01'))]" />
+                        <separator/>
+                        <filter string="Date" name="filter_timesheet_summary_date" date="week_start_date"/>
+                        <separator/>
+                        <filter string="Defaulter" domain="[('total_effortper','&lt;=',90)]" name="total_effortper"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        
+        <!-- Main window action for "model" -->
+        <record id="action_view_kw_timesheet_summary_report_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Timesheet Summary Report</field>
+            <field name="res_model">kw_timesheet_summary_report</field>
+            <field name="view_mode">tree</field>
+            <field name="target">current</field> 
+            <field name="domain">[]</field>     
+            <field name="context">{'search_default_filter_current_month':1,'search_default_groupby_employee':1}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_kw_timesheet_summary_report_tree')})]"/>
+            <field name="search_view_id" ref="view_kw_timesheet_summary_report_search" />
+        </record>
+
+        <menuitem id="menu_timesheet_summary_report"
+            name="Timesheet Summary Report"
+            parent="hr_timesheet.menu_timesheets_reports"
+            action="action_view_kw_timesheet_summary_report_act_window"
+        groups="hr_timesheet.group_timesheet_manager,kw_timesheets.group_kw_timesheets_report_manager,hr_timesheet.group_hr_timesheet_user"/>
+    </data>
+</odoo>

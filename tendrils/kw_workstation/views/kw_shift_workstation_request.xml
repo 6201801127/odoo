@@ -1,0 +1,109 @@
+<odoo>
+    <data>
+        <record id="kw_workstation_emp_request_view_tree" model="ir.ui.view">
+            <field name="name">Request Of Swapping</field>
+            <field name="model">kw_swap_workstation</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="employee_id" invisible="0"/>
+                    <field name="location_name" widget="radio" options="{'horizontal': true}"/>
+                    <field name="date_of_start" options="{'datepicker':{'minDate': 'now'}}"/>
+                    <field name="end_date_of"/>
+                    <field name="reason_shift"/>
+                    <field name="state"/>
+                    <field name="pending_at"/>
+
+                </tree>
+            </field>
+        </record>
+        <record id="kw_workstation_request_view_form" model="ir.ui.view">
+            <field name="name">Request Of Swapping Form</field>
+            <field name="model">kw_swap_workstation</field>
+            <field name="arch" type="xml">
+                <form string="Request Of Swapping">
+                    <header>
+                        <button name="send_to_approve" string="Apply" type="object" class="btn-primary"
+                                attrs="{'invisible': ['|',('state', 'in', ['Applied','Approved']),('shift_change_check','=',True)]}"
+                                confirm="Are you sure, you want to confirm?"/>
+                        <!-- <button name="send_to_reschedule" string="Reschedule" type="object" class="btn-success"
+                                attrs="{'invisible': [('state', 'in', ['Applied','Approved','Draft','Reschedule'])]}"
+                                confirm="Are you sure, you want to confirm?"/> -->
+
+                        <field name="state" widget="statusbar"
+                               statusbar_visible="Draft,Applied,Approved,Reschedule,Reject"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <!-- <field name="emp_id" invisible="1"/> -->
+                                <field name="employee_id" readonly="1"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="work_name" readonly="1"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="location_name" readonly="1"/>
+                                <field name="date_of_start"/>
+                                <field name="end_date_of"/>
+                                <field name="workstation_type" widget="radio" options="{'horizontal': true}"/>
+                                <field name="workstation_avail"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'required':[('workstation_type','=','Other')], 'invisible':[('workstation_type', '!=', 'Other')]}"/>
+                                <field name="swapping_with" force_save='1'
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'required':[('workstation_type','!=','Other')], 'invisible':[('workstation_type', '=', 'Other')], 'readonly': True}"/>
+                                <field name="reason_shift"/>
+                                <field name="shift_change_check"/>
+                            </group>
+
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="kw_workstation_assign_emp_action_window" model="ir.actions.act_window">
+            <field name="name">Workstation Assignments</field>
+            <field name="res_model">kw_swap_workstation</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+        </record>
+        <record id="kw_workstation_emp_request_takeaction_view_tree" model="ir.ui.view">
+            <field name="name">Request Of Swapping Take Action</field>
+            <field name="model">kw_swap_workstation</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="employee_id" invisible="0"/>
+                    <field name="location_name" widget="radio" options="{'horizontal': true}"/>
+                    <field name="date_of_start"/>
+                    <field name="end_date_of"/>
+                    <field name="reason_shift"/>
+                    <field name="state"/>
+                    <button name="approved_request" string="Approved" type="object" class="btn-primary"
+                            attrs="{'invisible': [('state', 'in', ['Approved'])]}"
+                            confirm="Are you sure, you want to confirm?"/>
+                    <button name="reject_request" string="Reject" type="object" class="btn-danger"
+                            attrs="{'invisible': [('state', 'in', ['Reject'])]}"
+                            confirm="Are you sure, you want to reject?"/>
+                </tree>
+            </field>
+        </record>
+        <record id="kw_workstation_assign_emp_takeaction_window" model="ir.actions.act_window">
+            <field name="name">Workstation Assignments</field>
+            <field name="res_model">kw_swap_workstation</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kw_workstation_emp_request_takeaction_view_tree"/>
+            <field name="domain">[('state','=','Applied'),('pending_at.user_id','=',uid)]</field>
+            <field name="context">{'create':False,'edit':False}</field>
+        </record>
+
+        <menuitem id="menu_kw_workstation_assign_apply"
+                  name="WS Swapping Requests"
+                  action="kw_workstation_assign_emp_action_window"
+                  parent="kw_workstation.menu_kw_workstation_attendance_user"
+                  sequence="2"/>
+
+        <menuitem id="menu_kw_workstation_assign_takeaction"
+                  name="Request-Response"
+                  action="kw_workstation_assign_emp_takeaction_window"
+                  parent="kw_workstation.menu_kw_workstation_attendance_user"
+                  sequence="3"/>
+    </data>
+</odoo>

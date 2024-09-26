@@ -1,0 +1,104 @@
+<odoo>
+    <data>
+        <record id="view_dept_mapping_budget_tree" model="ir.ui.view">
+            <field name="name">kw_budget_dept_mapping</field>
+            <field name="model">kw_budget_dept_mapping</field>
+            <field name="arch" type="xml">
+                <tree string="Department Mapping">
+                    <field name="budget_type" readonly="1" class="revenue_month_class_total"/>
+                    <field name="name" readonly="1" class="revenue_month_class"/>
+                    <field name="fiscal_year" readonly="1"/>
+<!--                    <field name="department_id" />-->
+<!--                    <field name="division_id"/>-->
+<!--                    <field name="section_id"/>-->
+                    <field name="level_1_approver" widget="many2many_tags" />
+                    <field name="level_2_approver" widget="many2many_tags" />
+                    <field name="revenue_boolean" widget="checkbox" string="Treasury"/>
+                    <field name="level_1_approver_capital" widget="many2many_tags" />
+                    <field name="level_2_approver_capital" widget="many2many_tags" />
+                    <field name="capital_boolean" widget="checkbox"/>
+                    <field name="level_1_approver_sbu" widget="many2many_tags" />
+                    <field name="level_2_approver_sbu" widget="many2many_tags" />
+                    <field name="sbu_boolean" class="sbu_l1_l2"/>
+                    <field name="state"/>
+                    <field name="active" widget="boolean_toggle" />
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_dept_mapping_budget_form">
+            <field name="name">kw_budget_dept_mapping_view_form</field>
+            <field name="model">kw_budget_dept_mapping</field>
+            <field name="arch" type="xml">
+                <form string="Department Mapping">
+                    <sheet>
+                        <header>
+                        <button name="start_budget" type="object" confirm="Are you sure,you want to apply? "
+                                states="draft" string="Start Budget" class="btn btn-success" groups="kw_budget.group_cfo_kw_budget"/>
+
+                            <field name="state" widget="statusbar" />
+                        </header>
+                        <label for="name" string="Name" style="font-size:30px;color:rgb(95, 196, 234);"/>
+                        <h1>
+                            <div>
+                                <field name="name" readonly="1" />
+                            </div>
+                        </h1>
+                        <group>
+
+                            <group>
+                                <field name="budget_type"/>
+<!--                                <field name="name" readonly="1"/>-->
+                                <field name="fiscal_year" readonly="1" options="{'no_create':True, 'no_open':True, 'no_edit':True}" class="hover" />
+                                <field name="department_id" options="{'no_create':True, 'no_open':True, 'no_edit':True}" attrs="{'required': [('budget_type','=', 'Treasury/Capital')], 'invisible': [('budget_type','in', ('blank','SBU-Project'))]}" class="hover" domain="[('dept_type.code', '=', 'department')]"/>
+                                <field name="sbu_id" options="{'no_create':True, 'no_open':True, 'no_edit':True}" attrs="{'required': [('budget_type','=', 'SBU-Project')], 'invisible': [('budget_type','in', ('blank','Treasury/Capital'))]}" class="hover"/>
+
+
+
+
+                            </group>
+                            <group>
+                                <h2 attrs="{'required': [('budget_type','=', 'SBU-Project')], 'invisible': [('budget_type','in', ('Treasury/Capital', 'blank'))]}" style="color:#17a2b8">For SBU Budget Maping</h2>
+                                <field name="level_1_approver_sbu" widget="many2many_tags" attrs="{'required': [('budget_type','=', 'SBU-Project')], 'invisible': [('budget_type','in', ('Treasury/Capital', 'blank'))]}" options="{'no_create':True, 'no_open':True, 'no_edit':True}"/>
+                                <field name="level_2_approver_sbu" widget="many2many_tags" attrs="{'required': [('budget_type','=', 'SBU-Project')], 'invisible': [('budget_type','in', ('blank', 'Treasury/Capital'))]}" options="{'no_create':True, 'no_open':True, 'no_edit':True}"/>
+
+                                 <field name="division_id" attrs="{ 'invisible': [('budget_type','in', ('blank', 'SBU-Project'))]}" options="{'no_create':True, 'no_open':True, 'no_edit':True}" class="hover" domain="[('parent_id', '=', department_id)]"/>
+                                <field name="section_id" attrs="{'invisible': [('budget_type','in', ('blank', 'SBU-Project'))]}" options="{'no_create':True, 'no_open':True, 'no_edit':True}" class="hover" domain="[('parent_id', '=', division_id)]"/>
+                            </group>
+                            <group attrs="{'invisible': [('budget_type','in', ('blank', 'SBU-Project'))]}">
+                                <h2 style="color:#17a2b8">For Treasury Budget Maping</h2>
+                                <field name="revenue_boolean" widget="checkbox"/>
+                                <field name="level_1_approver" widget="many2many_tags" attrs="{'required': [('revenue_boolean','=', True)], 'invisible': [('revenue_boolean','=', False)]}" options="{'no_create':True, 'no_open':True, 'no_edit':True}"/>
+                                <field name="level_2_approver" widget="many2many_tags" attrs="{'required': [('revenue_boolean','=', True)], 'invisible': [('revenue_boolean','=', False)]}" options="{'no_create':True, 'no_open':True, 'no_edit':True}"/>
+                            </group>
+                            <group attrs="{'invisible': [('budget_type','in', ('blank', 'SBU-Project'))]}">
+                                <h2 style="color:#17a2b8">For Capital Budget Maping</h2>
+                                <field name="capital_boolean" widget="checkbox"/>
+                                <field name="level_1_approver_capital" widget="many2many_tags" attrs="{'required': [('capital_boolean','=', True)], 'invisible': [('capital_boolean','=', False)]}" options="{'no_create':True, 'no_open':True, 'no_edit':True}"/>
+                                <field name="level_2_approver_capital" widget="many2many_tags" attrs="{'required': [('capital_boolean','=', True)], 'invisible': [('capital_boolean','=', False)]}" options="{'no_create':True, 'no_open':True, 'no_edit':True}"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+
+            </field>
+        </record>
+
+        <!-- actions opening views on models -->
+
+        <record model="ir.actions.act_window" id="view_dept_mapping_budget_window_action">
+            <field name="name">Department Mapping</field>
+            <field name="res_model">kw_budget_dept_mapping</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Click to create a new department mapping.
+                </p>
+                <p>
+
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="payroll_tds_report_view_tree" model="ir.ui.view">
+            <field name="name">tds_report_view.tree</field>
+            <field name="model">payroll_tds_report</field>
+            <field name="arch" type="xml">
+                <tree string="Tds Report View" create="false" import="false">
+                    <field name="emp_code"/>
+                    <field name="name"/>
+                    <field name="employee_id"  invisible="1"/>
+                    <field name="pan_number"/>
+                    <field name="final_gross" sum="Total"/>
+                    <field name="tds_amount" sum="Total"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="payroll_tds_report_search" model="ir.ui.view">
+            <field name="name">tds_report_view.view.search</field>
+            <field name="model">payroll_tds_report</field>
+            <field name="arch" type="xml">
+                <search string="Search Description">
+                    <field name="employee_id"/>
+                    <field name="year"/>
+                    <field name="month"/>
+                    <field name="employee_id"/>
+
+                    <filter string="This Year" domain="[('year', '=',context_today().strftime('%Y'))]" name="current_year_payroll_tds"/>
+                    <filter string="Last Year" domain="[('year', '=',(context_today()-relativedelta(years=1)).strftime('%Y'))]" name="last_year_payroll_tds"/> 
+                    <separator/>
+
+                    <filter string="This Month" domain="[('date_to', 'like',context_today().strftime('%Y-%m'))]" name="current_month__payroll_tds"/>
+                    <filter string="Last Month" domain="[('date_to','&gt;',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('date_to','&lt;',(context_today()).strftime('%Y-%m-01'))]" name="last_month_salary_other_advance"/>
+                    <separator/>
+
+                    <filter string="January" domain="[('month','=','1')]" name="january__payroll_tds"/>
+                    <filter string="February" domain="[('month','=','2')]" name="february__payroll_tds"/>
+                    <filter string="March" domain="[('month','=','3')]" name="march__payroll_tds"/>
+                    <filter string="April" domain="[('month','=','4')]" name="april__payroll_tds"/>
+                    <filter string="May" domain="[('month','=','5')]" name="may__payroll_tds"/>
+                    <filter string="June" domain="[('month','=','6')]" name="june__payroll_tds"/>
+                    <filter string="July" domain="[('month','=','7')]" name="july__payroll_tds"/>
+                    <filter string="August" domain="[('month','=','8')]" name="august__payroll_tds"/>
+                    <filter string="September" domain="[('month','=','9')]" name="september__payroll_tds"/>
+                    <filter string="October" domain="[('month','=','10')]" name="october__payroll_tds"/>
+                    <filter string="November" domain="[('month','=','11')]" name="november__payroll_tds"/>
+                    <filter string="December" domain="[('month','=','12')]" name="december__payroll_tds"/>
+                    <separator/>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="payroll_tds_deduction_report_action" model="ir.actions.act_window">
+            <field name="name">TDS Report</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">payroll_tds_report</field>
+            <field name="context">{'search_default_current_year_payroll_tds':1,'search_default_current_month__payroll_tds':1}</field>
+            <field name="view_mode">tree</field>
+            <field name="view_type">form</field>
+            <field name="domain">[]</field>
+            <field name="view_ids" eval="[(5, 0, 0), 
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('payroll_tds_report_view_tree')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No Records to show...
+                </p>
+            </field>
+        </record>
+
+
+        <record id="kw_payroll_tds_download_view_form" model="ir.ui.view">
+            <field name="name">kw_payroll_tds_report.view.form</field>
+            <field name="model">tds_report_download</field>
+            <field name="arch" type="xml">
+                <form string="">
+                    <sheet>
+                        <group>
+                            <field name="tds_balance_ids"/>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <center>
+							<button name="%(payroll_inherit.payroll_tds_report)d" type="action" string="Download Report" class="oe_highlight" />
+						</center>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    
+        <menuitem id="payroll_tds_ded_report_menu" name="TDS Report" 
+        parent="finance_payroll_menu" 
+        groups="payroll_inherit.payroll_finance_group" 
+        action="payroll_tds_deduction_report_action" sequence="99"/>
+
+        <!-- <menuitem id="backdate_tds_ded_report_menu" name="Back Date TDS Report" 
+        parent="finance_payroll_menu" 
+        groups="payroll_inherit.payroll_finance_group" 
+        action="backdate_tds_deduction_report_action" sequence="100"/> -->
+    
+        <act_window id="action_payroll_tds_report" name="TDS Report" src_model="payroll_tds_report" res_model="tds_report_download" view_type="form" view_mode="form" view_id="kw_payroll_tds_download_view_form" key2="client_action_multi" target="new" context="{'selected_active_ids':active_ids}"/>
+
+     <record id="payroll_tds_verify_report_tree" model="ir.ui.view">
+            <field name="name">payroll_tds_verify_report.tree</field>
+            <field name="model">payroll_tds_verify_report</field>
+            <field name="arch" type="xml">
+                <tree string="Tds Report View" >
+                    <field name="emp_code"/>
+                    <field name="name"/>
+                    <field name="employee_id"  invisible="1"/>
+                    <field name="pan_number"/>
+                    <field name="final_gross" sum="Total"/>
+                    <field name="tds_amount" sum="Total"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="payroll_tds_verify_report_search" model="ir.ui.view">
+            <field name="name">payroll_tds_verify_report.view.search</field>
+            <field name="model">payroll_tds_verify_report</field>
+            <field name="arch" type="xml">
+                <search string="Search Description">
+                    <field name="employee_id"/>
+                    <field name="year"/>
+                    <field name="month"/>
+                    <field name="employee_id"/>
+
+                    <filter string="This Year" domain="[('year', '=',context_today().strftime('%Y'))]" name="current_year_payroll_tds"/>
+                    <filter string="Last Year" domain="[('year', '=',(context_today()-relativedelta(years=1)).strftime('%Y'))]" name="last_year_payroll_tds"/> 
+                    <separator/>
+
+                    <!-- <filter string="This Month" name="current_month__payroll_tds" domain="[('month', '=',context_today().strftime('%m'))]"/> -->
+                    <filter string="This Month" domain="[('date_to', 'like',context_today().strftime('%Y-%m'))]" name="current_month__payroll_tds"/>
+
+                    <filter string="Last Month" domain="[('date_to','&gt;',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('date_to','&lt;',(context_today()).strftime('%Y-%m-01'))]" name="last_month_salary_other_advance"/>
+                    <separator/>
+
+                    <filter string="January" domain="[('month','=','1')]" name="january__payroll_tds"/>
+                    <filter string="February" domain="[('month','=','2')]" name="february__payroll_tds"/>
+                    <filter string="March" domain="[('month','=','3')]" name="march__payroll_tds"/>
+                    <filter string="April" domain="[('month','=','4')]" name="april__payroll_tds"/>
+                    <filter string="May" domain="[('month','=','5')]" name="may__payroll_tds"/>
+                    <filter string="June" domain="[('month','=','6')]" name="june__payroll_tds"/>
+                    <filter string="July" domain="[('month','=','7')]" name="july__payroll_tds"/>
+                    <filter string="August" domain="[('month','=','8')]" name="august__payroll_tds"/>
+                    <filter string="September" domain="[('month','=','9')]" name="september__payroll_tds"/>
+                    <filter string="October" domain="[('month','=','10')]" name="october__payroll_tds"/>
+                    <filter string="November" domain="[('month','=','11')]" name="november__payroll_tds"/>
+                    <filter string="December" domain="[('month','=','12')]" name="december__payroll_tds"/>
+                    <separator/>
+                </search>
+            </field>
+        </record>
+
+         <record id="payroll_tds_verify_report_action" model="ir.actions.act_window">
+            <field name="name">TDS Report</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">payroll_tds_verify_report</field>
+            <field name="context">{'search_default_current_year_payroll_tds':1,'search_default_current_month__payroll_tds':1,'create':False,'import':False,'delete':False}</field>
+            <field name="view_mode">tree</field>
+            <field name="view_type">form</field>
+            <field name="domain">[]</field>
+            <field name="view_ids" eval="[(5, 0, 0), 
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('payroll_tds_verify_report_tree')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No Records to show...
+                </p>
+            </field>
+        </record>
+
+           <menuitem id="payroll_tds_ded_verify_report_menu" name="TDS Report" 
+        parent="verify_payroll_menu" groups="payroll_inherit.payroll_verify_group"
+        action="payroll_tds_verify_report_action" sequence="10"/>
+    </data>
+</odoo>

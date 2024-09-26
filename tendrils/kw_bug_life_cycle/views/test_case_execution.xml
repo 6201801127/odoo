@@ -1,0 +1,141 @@
+<odoo>
+    <data>
+        <!-- <template id="assets_backend" name="Assets" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/kw_bug_life_cycle/static/src/js/tree_view_buttons.js"></script>
+            </xpath>
+        </template> -->
+
+        <record model="ir.ui.view" id="kw_test_case_execution_tree">
+            <field name="name">kw_test_case_exec_tree</field>
+            <field name="model">kw_test_case_exec</field>
+            <field name="arch" type="xml">
+                <tree duplicate="false" delete="false" import="false" class="bug_raise_tree">
+                    <field name="create_uid" string="Created By" readonly="1"/>
+                    <field name="create_date" readonly="1"/>
+                    <field name="testing_level"/>
+                    <field name="project_id"/>
+                    <field name="module_id"/>
+                    <field name="data_line_ids" string="No of Records."/>
+                    <field name="iteration"/>
+                    <field name="write_uid" readonly="1"/>
+                    <field name="write_date" readonly="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- kw_test_case_exec form view -->
+
+        <record model="ir.ui.view" id="kw_test_case_exec_form">
+            <field name="name">kw_test_case_exec_form</field>
+            <field name="model">kw_test_case_exec</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form duplicate="false" delete="false">
+                    <sheet>
+                        <group string="Test Case Details">
+                            <group style="background-color:#ebfdf8;">
+                                <field name="fetch_bool" invisible="1"/>
+                                <field name="testing_level" required='True' options="{'no_open': True, 'no_create': True, 'no_edit': True}" attrs="{'readonly': [('fetch_bool', '=', True)]}"/>
+                                <field name="project_id"  options="{'no_open': True, 'no_create': True, 'no_edit': True}" attrs="{'readonly': [('fetch_bool', '=', True)]}"/>
+                                <field name="module_id"  options="{'no_open': True, 'no_create': True, 'no_edit': True}" attrs="{'readonly': [('fetch_bool', '=', True)]}"/>
+                                <field name="iteration" string="Current Iteration" force_save="1" readonly="1"/>
+                                <field name="fetch_from"   widget="radio" options="{'horizontal': True}" attrs="{'readonly': [('fetch_bool', '=', True)]}"/>
+                                <field name="complete_msg" widget="html" invisible="1"/>
+                            </group>
+                            <group>
+                            </group>
+                            <group>
+                                <button string="Fetch" type="object" class="btn-danger slow-zoom" name="button_fetch" attrs="{'invisible': [('fetch_bool', '=', True)]}"/>
+                            </group>
+                        </group>
+                        <field name="data_line_ids">
+                            <tree editable="bottom" class="bug_raise_tree" delete="false" edit="true" create="false">
+                                <field name="sl_no" readonly="0"/>
+                                <field name="scenario_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}" readonly="1"/>
+                                <field name="tc_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}" readonly="1"/>
+                                <field name="pos_neg" readonly="1"/>
+                                <field name="scenario" readonly="1"/>
+                                <field name="test_case_description" readonly="1"/>
+                                <field name="test_data_action" readonly="1"/>
+                                <field name="expectation" readonly="1"/>
+                                <field name="result" domain="[('code', 'in', ['PASS','FAIL'])]" required="1" options="{'no_open': True, 'no_create': True, 'no_edit': True}" attrs="{'readonly': [('result_readonly_boolean', '=', True)]}" force_save="1"/>
+                                <field name="code" invisible="1"/>
+                                <field name="iteration" readonly="1" force_save="1" string="Current Iteration"/>
+                                <field name="actual" attrs="{'readonly': [('code', 'not in', ['PASS','FAIL'])], 'required':[('code', 'in', ['PASS','FAIL'])]}"/>
+                                <button string="Raise Defect" type="object" class="slow-zoom" style="background-color: blue; color: white;" name="button_raises"
+                                        attrs="{'invisible': [('code', '!=', 'FAIL')]}"/>
+                                <field name="bug_ids" widget="many2many_tags" invisible="1" options="{'no_open': True, 'no_create': True, 'no_edit': True}" readonly="1"/>
+                                <field name="bug_id_status" widget="html" readonly="1"/>
+                                <field name="case_execute_id" invisible="1"/>
+                                <field name="iter_comp_boolean" invisible="1"/>
+                                <field name="result_readonly_boolean" invisible="1" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="sl_no" readonly="1"/>
+                                    <field name="scenario_id" required="1" options="{'no_open': True, 'no_create': True, 'no_edit': True}" readonly="1"/>
+                                    <field name="tc_id" readonly="1"/>
+                                    <field name="pos_neg" readonly="1"/>
+                                    <field name="scenario" readonly="1"/>
+                                    <field name="test_data_action" readonly="1"/>
+                                    <field name="expectation" readonly="1"/>
+                                    <field name="actual" readonly="1"/>
+                                    <field name="result" readonly="1" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                                </group>
+                            </form>
+                        </field>
+                        <group string="Iteration Log" invisible="1">
+                            <field name="iteration_log_ids">
+                                <tree editable="bottom" class="bug_raise_tree" delete="false" edit="true" create="false">
+                                    <field name="tc_id" readonly="1"/>
+                                    <field name="ts_id" readonly="1"/>
+                                    <field name="result" options="{'no_open': True, 'no_create': True, 'no_edit': True}" readonly="1"/>
+                                    <field name="iter_num" options="{'no_open': True, 'no_create': True, 'no_edit': True}" readonly="1"/>
+                                    <field name="iter_date" options="{'no_open': True, 'no_create': True, 'no_edit': True}" readonly="1"/>
+                                    <field name="tc_execution_id" invisible="1"/>
+                                    <field name="bug_ids" widget="many2many_tags"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <group>
+                            <field name="complete_bool" invisible="1"/>
+                            <button string="Complete" type="object" class="btn-success slow-zoom" name="button_success" attrs="{'invisible':[('complete_bool', '!=', True)]}"/>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Test case Execution search view -->
+
+        <record id="kw_test_case_execution_search_view" model="ir.ui.view">
+            <field name="name">kw_use_case_execution_search_view</field>
+            <field name="model">kw_test_case_exec</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="testing_level"/>
+                    <field name="project_id"/>
+                    <field name="module_id"/>
+                    <separator/>
+                    <filter name="group_by_project" string="Project" context="{'group_by':'project_id'}" />
+                    <filter name="group_by_module" string="Global Link" context="{'group_by':'module_id'}"/>
+                    <filter name="group_by_level" string="Testing Level" context="{'group_by':'testing_level'}"/>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_test_case_exec_action_window">
+            <field name="name">Execution Test Case</field>
+            <field name="res_model">kw_test_case_exec</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="kw_test_case_execution_search_view"/>
+            <field name="domain">[]</field>
+        </record>
+
+    </data>
+</odoo>

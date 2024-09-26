@@ -1,0 +1,193 @@
+<?xml version="1.0"?>
+<odoo>
+  <data>
+
+        <record model="ir.actions.act_window" id="act_my_meetings_tree">
+            <field name="name">My Meetings</field>
+            <field name="res_model">kw_my_meeting_dategroup_report</field>
+            <!-- <field name="view_type">form</field> -->
+            <field name="view_mode">tree</field>
+            <field name="domain">[]</field>
+           <field name="context">{"meetingparticipant":1,"group_by":"event_status"}</field>
+        </record>
+
+        <record id="view_kw_meeting_calendar_event_dashboard_tree" model="ir.ui.view">
+            <field name="name">kw_meeting_schedule.event.dashboard.tree</field>
+            <field name="model">kw_meeting_events</field>
+            <field name="arch" type="xml">
+                <tree string="Meetings" >
+                    <field name="name" string="Subject"/>                
+                    <field name="display_time"  string="Meeting Time"/>               
+                    <!-- <field name="meeting_room_id" /> -->
+                    <field name="agenda_ids" />  
+                    <field name="employee_ids" string="Participants"/>               
+                    <field name="duration" widget="float_time"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <!-- <record id="view_dashboard_meeting_gantt" model="ir.ui.view">
+            <field name="name">meeting schedule dashboard gantt</field>
+            <field name="model">kw_my_meeting_dategroup_report</field>
+            <field name="arch" type="xml">
+                <gantt date_stop="stop" date_start="start"  string="Meeting" default_group_by="event_id">
+                </gantt>
+            </field>
+        </record>
+ -->
+         <record id="view_dashboard_meeting_timeline" model="ir.ui.view">
+            <field name="model">kw_meeting_events</field>
+            <field name="type">timeline</field>
+            <field name="arch" type="xml">
+                <timeline date_start="start"
+                        date_stop="stop"
+                        date_delay ="duration"
+                        string="Meetings"
+                        default_group_by="meeting_room_id"
+                        event_open_popup="true"
+                        zoomKey="ctrlKey"
+                        colors="#2c9b34:meeting_start_status == true;#d25e60:kanban_state=='confirmed';"
+                        >
+                    <field name="meeting_start_status"/>
+                    <field name="user_id"/>
+                    <field name="meeting_room_id"/>
+                    
+                    <field name="name"/>
+                    <field name="duration"/>
+                    <templates>
+                        <div t-name="timeline-item">
+                            
+                            <img t-if="record.user_id"
+                                 t-attf-src="/web/image/res.users/#{record.user_id[0]}/image/24x24"
+                                 t-att-title="record.user_id[1]" width="24" height="24" class="mr8"/>
+                            <span name="display_name">
+                                <t t-esc="record.name"/>
+                            </span>
+                            <small name="duration" class="text-muted ml4">
+                                <t t-esc="field_utils.format.float_time(record.duration)"/>
+                            </small>
+                           
+                            <!--dependency_arrow="task_dependency_ids" Assigned to:
+                            <span t-esc="record.user_id[1]"/> -->
+                        </div>
+                    </templates>
+                </timeline>
+            </field>
+        </record>
+
+
+        <record id="act_my_meetings_timeline"  model="ir.actions.act_window">
+            <field name="name">My Meetings Gantt</field>
+            <field name="res_model">kw_meeting_events</field>
+            <!-- <field name="view_type">form</field> -->
+            <field name="view_mode">timeline</field>
+            <field name="view_id" ref="kw_meeting_schedule.view_dashboard_meeting_timeline"/>
+            <field name="domain">[('state', 'not in',['cancelled']),('recurrency', '=', False),('start', '&gt;=',context_today().strftime('%Y-%m-%d')),('start', '&lt;=',context_today().strftime('%Y-%m-%d'))]</field>
+           <!-- <field name="context">{"meetingparticipant":1,"group_by":"event_status"}</field> -->
+        </record>
+
+
+         <record id="kw_meeting_schedule_dategroup_dashboard_view_graph" model="ir.ui.view">
+            <field name="name">kw_my_meeting_dategroup_report.view.graph</field>
+            <field name="model">kw_my_meeting_dategroup_report</field>
+            <field name="arch" type="xml">
+                <graph string="Meeting Statistics" >
+                    <field name="meeting_room_id" type="col"/>
+                </graph>
+            </field>
+        </record>
+
+
+        <record id="action_view_kw_meeting_schedule_dategroup_dashboard_graph" model="ir.actions.act_window">
+            <field name="name">My Meetings Graphs</field>
+            <field name="res_model">kw_my_meeting_dategroup_report</field>
+            <field name="view_mode">graph</field>
+            <field name="domain">[('start', '&gt;=',context_today().strftime('%Y-%m-%d')),('start', '&lt;=',context_today().strftime('%Y-%m-%d'))]</field>
+            <field name="context">{'graph_mode':'pie'}</field>
+            <field name="view_id" ref="kw_meeting_schedule.kw_meeting_schedule_dategroup_dashboard_view_graph"/>
+        </record>
+
+       
+       <record id="kw_meeting_schedule_dategroup_dashboard_view_pivot" model="ir.ui.view">
+            <field name="name">kw_my_meeting_dategroup_report.view.pivot</field>
+            <field name="model">kw_my_meeting_dategroup_report</field>
+            <field name="arch" type="xml">
+                <pivot string="Timesheet">
+                   
+                    <field name="user_id" type="row"/> 
+                    <field name="event_id" type="row"/>    
+
+                    <field name="start" interval="day" type="col"/>
+                    <field name="meeting_room_id" type="col"/>
+                    <field name="duration" type="measure" widget="float_time"/>
+                </pivot>
+            </field>
+        </record>
+
+        <record id="action_view_kw_meeting_schedule_dashboard_pivot" model="ir.actions.act_window">
+            <field name="name">My Meetings Graphs</field>
+            <field name="res_model">kw_my_meeting_dategroup_report</field>
+            <field name="view_mode">pivot</field>
+            <field name="domain">[('start', '&gt;=',context_today().strftime('%Y-%m-%d')),('start', '&lt;=',context_today().strftime('%Y-%m-%d'))]</field>
+            <field name="view_id" ref="kw_meeting_schedule.kw_meeting_schedule_dategroup_dashboard_view_pivot"/>
+        </record>
+
+        <record model="ir.actions.act_window" id="act_all_meetings_today_tree">
+            <field name="name">Today's All Meetings</field>
+            <field name="res_model">kw_meeting_events</field>
+            <field name="view_id" ref="view_kw_meeting_calendar_event_dashboard_tree" />
+            <field name="view_mode">tree</field>
+            <field name="domain">[('state', 'not in',['cancelled']),('recurrency', '=', False),('start', '&gt;=',context_today().strftime('%Y-%m-%d')),('start', '&lt;=',context_today().strftime('%Y-%m-%d'))]</field>
+           <field name="context">{"group_by":"meeting_room_id"}</field>
+        </record>
+
+        <!-- Client Action For Meeting Dashboard -->
+        <record id="action_client_meeting_dashboard" model="ir.actions.client">
+            <field name="name">Dashboard</field>
+            <field name="tag">meeting_dashboard</field>
+        </record>
+
+        <record id="view_kw_meeting_schedule_dashboard_form" model="ir.ui.view">
+            <field name="name">Meeting Dashboard Form</field>
+            <field name="model">board.board</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Meeting Dashbaord">
+                
+                        <board style="1-1">
+                            
+                            <column>  
+                                <action string="My Meetings" name="%(act_my_meetings_tree)d"></action>
+                                <action string="Meetings Statistics" name="%(kw_meeting_schedule.action_view_kw_meeting_schedule_dategroup_dashboard_graph)d"></action>
+
+                                <action string="Meetings Timeline" name="%(kw_meeting_schedule.act_my_meetings_timeline)d"></action>
+
+                                
+                            
+                            </column>
+                        
+                            <column>                               
+                               <action string="Today's All Meetings" name="%(act_all_meetings_today_tree)d"></action>
+                               <action string="Meetings Statistics" name="%(kw_meeting_schedule.action_view_kw_meeting_schedule_dashboard_pivot)d"></action>
+                            </column>                
+
+                        </board>
+                </form>
+            </field>
+        </record>       
+
+        <record id="action_window_kw_meeting_schedule_dashboard" model="ir.actions.act_window">
+            <field name="name">Dashboard</field>
+            <field name="res_model">board.board</field>
+            <field name="view_mode">form</field>
+            <field name="usage">menu</field>
+            <field name="view_id" ref="view_kw_meeting_schedule_dashboard_form"/>               
+
+        </record>
+
+
+        <menuitem name="Dashboard" id="kw_meeting_schedule_dashboard_menu" sequence="1" parent="main_menu_kw_meeting_schedule"  action="action_window_kw_meeting_schedule_dashboard"/>
+
+    </data>
+</odoo>

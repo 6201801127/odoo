@@ -1,0 +1,663 @@
+<odoo>
+	<data>
+
+		<record id="view_partner_profiling_form" model="ir.ui.view">
+			<field name="name">res.partner.profiling.view</field>
+			<field name="model">res.partner</field>
+			<field name="priority" eval="1" />
+			<field name="arch" type="xml">
+
+				<form string="Partner Profiling Form">
+					<sheet>
+
+						<field name="image" widget='image' class="oe_avatar"
+							options='{"preview_image": "image_medium", "size": [90, 90]}' />
+						<div class="oe_title">
+							<field name="child_ids" invisible="1" />
+							<field name="is_company" invisible="1" />
+							<field name="commercial_partner_id" invisible="1" />
+							<field name="company_type" widget="radio" class="oe_edit_only"
+								options="{'horizontal': true}" invisible="True" />
+							<h1>
+								<field name="name" default_focus="1"
+									attrs="{'required' : [('type', '=', 'contact')]}"
+									placeholder="Company Name" />
+							</h1>
+							<div class="oe_title" modifiers="{}">
+								<label for="vendor_code" class="oe_edit_only" modifiers="{}" />
+								<field name="vendor_code" options="{'always_reload': True}"
+									modifiers="{}" />
+							</div>
+							<div class="o_row">
+								<field name="parent_id" widget="res_partner_many2one"
+									placeholder="Company"
+									domain="[('is_company', '=', True)]"
+									context="{'default_is_company': True, 'default_supplier': supplier, 'default_customer': customer, 'show_vat': True}"
+									attrs="{'invisible': ['|', '&amp;', ('is_company','=', True),('parent_id', '=', False),('company_name', '!=', False),('company_name', '!=', '')]}"
+									invisible='1' />
+								<field name="company_name"
+									attrs="{'invisible': ['|', '|', ('company_name', '=', False), ('company_name', '=', ''), ('is_company', '=', True)]}" />
+								<button name="create_company" type="object"
+									class="oe_edit_only btn-link"
+									attrs="{'invisible': ['|', '|', ('is_company','=', True), ('company_name', '=', ''), ('company_name', '=', False)]}">
+									<span class="fa fa-plus-square" /> Create company </button>
+							</div>
+						</div>
+
+						<group>
+							<group>
+								<field name="type" attrs="{'invisible': [('parent_id','=', False)]}"
+									groups="base.group_no_one" />
+								<field name="yoi" placeholder="Year Of Incorporation" />
+								<label for="street" string="Address" />
+								<div class="o_address_format">
+									<div
+										attrs="{'invisible': ['|', ('parent_id', '=', False), ('type', '!=', 'contact')]}"
+										class="oe_edit_only">
+										<b>Company Address:</b>
+									</div>
+									<field name="street" placeholder="Street..."
+										class="o_address_street"
+										attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}" />
+									<field name="street2" placeholder="Street 2..."
+										class="o_address_street"
+										attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}" />
+									<field name="city" placeholder="City" class="o_address_city"
+										attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}" />
+									<field name="state_id" class="o_address_state"
+										placeholder="State"
+										options='{"no_open": True}'
+										attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"
+										context="{'country_id': country_id, 'zip': zip}" />
+									<field name="zip" placeholder="ZIP" class="o_address_zip"
+										attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}" />
+									<field name="country_id" placeholder="Country"
+										class="o_address_country"
+										options="{'no_open': True,'no_create':True,'no_edit':True}"
+										attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}" />
+								</div>
+								<field name="employee_strength" />
+								<field name="partnership_year" />
+								<field name="average_turnover" />
+							</group>
+							<group>
+								<field name="phone" widget="phone" />
+								<field name="email" widget="email"
+									context="{'gravatar_image': True}" required="1" />
+								<field name="website" widget="url"
+									placeholder="e.g. https://www.odoo.com" />
+								<field name="lang" invisible="0" />
+								<field name="labour_license_no" />
+								<field name="tan" />
+								<field name="pan" />
+								<field name="user_ids" invisible="1" />
+							</group>
+						</group>
+						<field name="supplier" invisible="True" />
+						<field name="customer" invisible="True" />
+						<notebook>
+							<page name="contact_details" string="Contacts &amp; Addresses" autofocus="autofocus">
+								<!-- <button accesskey="c" class="btn btn-secondary o-kanban-button-new"
+									type="button">
+									Add
+								</button> -->
+								<field name="user_id" invisible="1" />
+								<!-- <page string="Contacts &amp; Addresses" autofocus="autofocus"> -->
+								<field name="child_ids" mode="tree">
+									<tree editable="top">
+										<field name="name" />
+										<field name="contact_designation" />
+										<field name="email" />
+										<field name="phone" />
+									</tree>
+								</field>
+								<!-- </page> -->
+							</page>
+							<page name="internal_notes" string="Internal Notes">
+								<field name="comment" placeholder="Internal Note" />
+							</page>
+							<page name="director_details" string="Promoter/Director Details">
+								<group>
+									<group string="Director Details">
+										<field name="director_name" placeholder="Name" />
+										<field name="director_designation" placeholder="Designation" />
+										<field name="director_email" placeholder="Email" />
+										<field name="director_mobile" placeholder=" Mobile No" />
+										<field name="director_alternative_no"
+											placeholder="Alternative No" />
+									</group>
+									<group string="First Key Person">
+										<field name="same_as_director" />
+										<field name="first_key_person_name" placeholder="Name" />
+										<field name="first_key_person_designation"
+											placeholder="Designation" />
+										<field name="first_key_person_email" placeholder="Email" />
+										<field name="first_key_person_mobile"
+											placeholder=" Mobile No" />
+										<field name="first_key_person_alternative_no"
+											placeholder="Alternative No" />
+									</group>
+									<group string="Second Key Person">
+										<field name="same_as_first_key_person" />
+										<field name="second_key_person_name" placeholder="Name" />
+										<field name="second_key_person_designation"
+											placeholder="Designation" />
+										<field name="second_key_person_email" placeholder="Email" />
+										<field name="second_key_person_mobile"
+											placeholder=" Mobile No" />
+										<field name="second_key_person_alternative_no"
+											placeholder="Alternative No" />
+									</group>
+								</group>
+							</page>
+							<page name="partner_profiling" string="Partner Profiling">
+								<group>
+									<group>
+										<field name="is_partner" invisible="1" />
+										<field name="partner_type_id"
+											required="1"
+											options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" />
+										<field name="geography_of_business"
+											options="{'no_create': True}"
+											widget="many2many_tags" />
+										<field name="oppertunity_id" widget="many2many_tags"
+											options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" />
+										<field name="maf"
+											attrs="{'invisible': [('partner_type_alias','!=', 'oem')]}"
+											widget='radio' options="{'horizontal': true}" />
+
+										<field name="partner_type_alias" invisible="1" />
+
+										<field name="products_focus_ids"
+											attrs="{'invisible': [('partner_type_alias','!=', 'oem')]}"
+											widget="many2many_tags" domain="[('type','=','3')]"
+											options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" />
+										<field name="geo_regions_to_focus"
+											attrs="{'invisible': [('partner_type_alias','!=', 'oem')]}"
+											widget="many2many_tags"
+											options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" />
+
+										<field name="date_of_incorporation"
+											attrs="{'invisible': [('partner_type_alias','not in', ['oem','bd'])]}"
+											options="{'datepicker':{'maxDate': 'now'}}"
+											autocomplete="off" />
+
+										<field name="incorporation_type" widget="radio"
+											options="{'horizontal': true}"
+											attrs="{'invisible': [('partner_type_alias','not in', ['oem','bd'])]}" />
+										<separator />
+										<field name="revenue" />
+										<field name="experience_govt_sector" widget="integer" />
+										<field name="partnership_area"
+											options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" />
+									</group>
+									<group>
+
+										<field name="industy_domain_ids" widget="many2many_tags"
+											options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" />
+
+
+										<field name="service_offering_ids"
+											domain="[('type','=','1')]"
+											widget="many2many_tags"
+											options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" />
+
+										<field name="tech_ids" domain="[('type','=','2')]"
+											widget="many2many_tags"
+											options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" />
+										<field name="product_services_ids" widget='one2many_list'
+											invisible='1' />
+									</group>
+								</group>
+							</page>
+							<page name="industry_category" string="Industry Category">
+								<field name="industry_category_ids" mode="tree">
+									<tree editable="bottom">
+										<field name="sell_in" string="Industry Category" readonly="0"/>
+										<field name="additional_info" string="Field Of Expertise"/>
+									</tree>
+								</field>
+							</page>
+							<!-- <page name="additional_info" string="Legal Details">
+								<group>
+									<group>
+										<field name="certification_ids"
+											options="{'no_create': True}"
+											widget="many2many_tags" />
+										<field name="geography_of_business"
+											options="{'no_create': True}"
+											widget="many2many_tags" invisible='1' />
+										<field name="vat" />
+										<field name="msme_reg_no" />
+										<field name="epf_reg_no" />
+										<field name="esi_reg_no" />
+									</group>
+									<group>
+										
+									</group>
+								</group>
+							</page> -->
+							<page name="csm_partnership" string="CSM Partnership">
+								<group>
+									<group>
+										<field name="oem_partnership_id" string="Partnership ID" />
+										<field name="date_of_partnership" />
+										<field name="validate_till_date" />
+										<!-- <separator /> -->
+										<label for="csm_authorized_first_person"
+											string="CSM Authorized Person-1" />
+										<div class="o_address_format">
+											<field name="csm_authorized_first_person" placeholder="Name" />
+											<field name="csm_authorized_first_person_email" placeholder="Email" />
+											<field name="csm_authorized_first_person_mobile"
+												placeholder="Mobile" />
+										</div>
+									</group>
+									<group>
+										<!-- <separator /> -->
+										<field name="partner_portal_link" />
+										<field name="partner_login_id" />
+										<!-- <separator /> -->
+										<label for="second_key_person_name"
+											string="CSM Authorized Person-2" />
+										<div class="o_address_format">
+											<field name="csm_authorized_second_person" placeholder="Name" />
+											<field name="csm_authorized_second_person_email"
+												placeholder="Email" />
+											<field name="csm_authorized_second_person_mobile"
+												placeholder="Mobil" />
+										</div>
+									</group>
+								</group>
+							</page>
+							<page name="documents" string="Documents Upload">
+								<field name="nda_file_name" invisible='1' />
+								<field name="msa_file_name" invisible='1' />
+								<group>
+									<group>
+										<field name="msa" filename="msa_file_name" />
+										<field name="msi_signoff_date" string="MSA Signoff Date"/>
+									</group>
+									<group>
+										<field name="nda" filename="nda_file_name" />
+										<field name="nda_signoff_date" />
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		<record id="view_partner_profiling_tree" model="ir.ui.view">
+			<field name="name">res.partner.profiling.tree</field>
+			<field name="model">res.partner</field>
+			<field eval="8" name="priority" />
+			<field name="arch" type="xml">
+				<tree string="Contacts">
+					<field name="child_ids" invisible='1' />
+					<field name="display_name" string="Name" />
+					<field name="phone" />
+					<field name="email" />
+					<field name="user_id" invisible="1" />
+					<field name="is_company" invisible="1" />
+					<field name="country_id" invisible="1" />
+					<field name="parent_id" invisible="1" />
+					<!-- <button type="object" name="btn_view_details" class="btn btn-primary"
+						string="View Details" /> -->
+				</tree>
+			</field>
+		</record>
+
+		<record id="view_partner_profiling_kanban" model="ir.ui.view">
+			<field name="name">res.partner.profiling.kanban</field>
+			<field name="model">res.partner</field>
+			<field eval="8" name="priority" />
+			<field name="arch" type="xml">
+				<kanban class="o_res_partner_kanban">
+					<field name="child_ids" invisible="1" />
+					<field name="id" />
+					<field name="color" />
+					<field name="display_name" />
+					<field name="title" />
+					<field name="email" />
+					<field name="parent_id" />
+					<field name="is_company" />
+					<field name="function" />
+					<field name="phone" />
+					<field name="street" />
+					<field name="street2" />
+					<field name="zip" />
+					<field name="city" />
+					<field name="country_id" />
+					<field name="mobile" />
+					<field name="state_id" />
+					<field name="category_id" />
+					<field name="image_small" />
+					<field name="type" />
+					<templates>
+						<t t-name="kanban-box">
+							<div
+								class="oe_kanban_global_click o_kanban_record_has_image_fill o_res_partner_kanban">
+								<t
+									t-if="record.image_small.raw_value &amp;&amp; !record.is_company.raw_value">
+									<div class="o_kanban_image_fill_left d-none d-md-block"
+										t-attf-style="background-image:url('#{kanban_image('res.partner', 'image_medium', record.id.raw_value)}')">
+										<img class="o_kanban_image_inner_pic"
+											t-if="record.parent_id.raw_value"
+											t-att-alt="record.parent_id.value"
+											t-att-src="kanban_image('res.partner', 'image_small', record.parent_id.raw_value)" />
+									</div>
+									<div class="o_kanban_image rounded-circle d-md-none"
+										t-attf-style="background-image:url('#{kanban_image('res.partner', 'image_small', record.id.raw_value)}')">
+										<img class="o_kanban_image_inner_pic"
+											t-if="record.parent_id.raw_value"
+											t-att-alt="record.parent_id.value"
+											t-att-src="kanban_image('res.partner', 'image_small', record.parent_id.raw_value)" />
+									</div>
+								</t>
+								<t
+									t-elif="record.image_small.raw_value &amp;&amp; record.is_company.raw_value">
+									<img class="o_kanban_image"
+										t-att-src="kanban_image('res.partner', 'image_small', record.id.raw_value)"
+										t-att-alt="record.display_name" />
+								</t>
+								<t t-else="">
+									<t t-if="record.type.raw_value === 'delivery'">
+										<img alt="Delivery"
+											t-att-src="_s + &quot;/base/static/img/truck.png&quot;"
+											class="o_kanban_image oe_kanban_avatar_smallbox" />
+									</t>
+									<t t-if="record.type.raw_value === 'invoice'">
+										<img alt="Invoice"
+											t-att-src="_s + &quot;/base/static/img/money.png&quot;"
+											class="o_kanban_image oe_kanban_avatar_smallbox" />
+									</t>
+									<t
+										t-if="record.type.raw_value != 'invoice' &amp;&amp; record.type.raw_value != 'delivery'">
+										<t t-if="record.is_company.raw_value === true">
+											<img class="o_kanban_image" alt="Logo"
+												t-att-src="_s + &quot;/base/static/img/company_image.png&quot;" />
+										</t>
+										<t t-if="record.is_company.raw_value === false">
+											<img class="o_kanban_image" alt="Avatar"
+												t-att-src="_s + &quot;/base/static/img/avatar.png&quot;" />
+										</t>
+									</t>
+								</t>
+								<div class="oe_kanban_details">
+									<strong class="o_kanban_record_title oe_partner_heading">
+										<field name="display_name" />
+									</strong>
+									<div class="o_kanban_tags_section oe_kanban_partner_categories" />
+									<ul>
+										<li
+											t-if="record.parent_id.raw_value and !record.function.raw_value">
+											<field name="parent_id" />
+										</li>
+										<li
+											t-if="!record.parent_id.raw_value and record.function.raw_value">
+											<field name="function" />
+										</li>
+										<li
+											t-if="record.parent_id.raw_value and record.function.raw_value">
+											<field name="function" /> at <field name="parent_id" />
+										</li>
+										<li
+											t-if="record.city.raw_value and !record.country_id.raw_value">
+											<field name="city" />
+										</li>
+										<li
+											t-if="!record.city.raw_value and record.country_id.raw_value">
+											<field name="country_id" />
+										</li>
+										<li
+											t-if="record.city.raw_value and record.country_id.raw_value"><field
+												name="city" />, <field name="country_id" />
+										</li>
+										<li t-if="record.email.raw_value" class="o_text_overflow">
+											<field name="email" />
+										</li>
+									</ul>
+									<div class="oe_kanban_partner_links" />
+									<!-- <div class="oe_footer">
+										<button type="object" name="btn_view_details"
+											class="btn btn-primary">View
+											Details
+										</button>
+									</div> -->
+								</div>
+							</div>
+						</t>
+					</templates>
+				</kanban>
+			</field>
+		</record>
+
+		<record id="view_partner_graph_view" model="ir.ui.view">
+			<field name="model">res.partner</field>
+			<field name="arch" type="xml">
+				<graph type="bar">
+					<field name="partner_type_id" />
+				</graph>
+			</field>
+		</record>
+
+		<!--  Pie Chart for industry/domain View  -->
+
+		<record id="view_partner_pie_view" model="ir.ui.view">
+			<field name="model">res.partner</field>
+			<field name="arch" type="xml">
+				<graph type="pie">
+					<field name="industy_domain_ids_graph" />
+				</graph>
+			</field>
+		</record>
+
+		<!--  Pie Chart for Area Of Business View  -->
+
+		<record id="view_area_of_business_pie" model="ir.ui.view">
+			<field name="model">res.partner</field>
+			<field name="arch" type="xml">
+				<graph type="pie">
+					<field name="geography_of_business_graph" />
+				</graph>
+			</field>
+		</record>
+
+		<!--  Pie Chart for Project/Oppertunity View  -->
+
+		<record id="view_project_oppertunity_pie" model="ir.ui.view">
+			<field name="model">res.partner</field>
+			<field name="arch" type="xml">
+				<graph type="pie">
+					<field name="oppertunity_id_graph" />
+				</graph>
+			</field>
+		</record>
+
+		<!--  Pie Chart For Services View  -->
+
+		<record id="view_partner_pie_service" model="ir.ui.view">
+			<field name="model">res.partner</field>
+			<field name="arch" type="xml">
+				<graph type="pie">
+					<field name="service_offering_ids_graph" />
+				</graph>
+			</field>
+		</record>
+
+		<!--  Pie Chart For Technologies View  -->
+
+		<record id="technology_graph_view" model="ir.ui.view">
+			<field name="name">technology.graph</field>
+			<field name="model">res.partner</field>
+			<field name="arch" type="xml">
+				<graph type="pie">
+					<field name="tech_ids_graph" />
+				</graph>
+			</field>
+		</record>
+
+
+		<!-- Action For Partner Profiling View -->
+		<record id="action_window_partner_profiling" model="ir.actions.act_window">
+			<field name="name">Partner Profiling</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">res.partner</field>
+			<field name="view_mode">kanban,tree,form</field>
+			<field name="view_type">form</field>
+			<field name="domain">[]</field>
+			<field name="context">{'company_type':'company','partner_profile':True}</field>
+			<field name="view_ids"
+				eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_partner_profiling_kanban')}),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('view_partner_profiling_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('view_partner_profiling_form')}),
+                ]" />
+		</record>
+		<!--  Action For Graph View -->
+		<record id="action_window_partner_profiling_graph" model="ir.actions.act_window">
+			<field name="name">Partner Profiling Graph</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">res.partner</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">graph</field>
+			<field name="domain">[('is_partner','=',True)]</field>
+			<field name="context">{'company_type':'company','partner_profile':True}</field>
+			<field name="view_id" ref="kw_partner_relationship_management.view_partner_graph_view" />
+		</record>
+
+		<!--  Action For Pie Chart View of Industries-->
+		<record id="action_window_partner_profiling_pie_chart_industries"
+			model="ir.actions.act_window">
+			<field name="name">Partner Profiling Pie Chart</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">res.partner</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">graph</field>
+			<field name="view_id" ref="kw_partner_relationship_management.view_partner_pie_view" />
+		</record>
+
+		<!--  Action For Pie Chart View of Area Of Business-->
+		<record id="action_window_partner_profiling_pie_chart_area_of_business"
+			model="ir.actions.act_window">
+			<field name="name">Area Of Business Pie Chart</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">res.partner</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">graph</field>
+			<field name="view_id" ref="kw_partner_relationship_management.view_area_of_business_pie" />
+		</record>
+
+		<!--  Action For Pie Chart View of Project/Oppertunity-->
+		<record id="action_window_partner_profiling_pie_chart_project_oppertunity"
+			model="ir.actions.act_window">
+			<field name="name">Project/Opportunity Pie Chart</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">res.partner</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">graph</field>
+			<field name="view_id"
+				ref="kw_partner_relationship_management.view_project_oppertunity_pie" />
+		</record>
+
+		<!--  Action For Pie Chart View of Technologies -->
+		<record id="action_window_partner_profiling_pie_chart_technologies"
+			model="ir.actions.act_window">
+			<field name="name">Technologies Pie Chart</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">res.partner</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">graph</field>
+			<field name="view_id" ref="kw_partner_relationship_management.technology_graph_view" />
+		</record>
+
+
+		<!--  Action For Pie Chart View of Service Offering -->
+		<record id="action_window_partner_profiling_pie_chart_services"
+			model="ir.actions.act_window">
+			<field name="name">Service Pie Chart</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">res.partner</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">graph</field>
+			<field name="view_id" ref="kw_partner_relationship_management.view_partner_pie_service" />
+		</record>
+
+
+		<!-- Dashboard View -->
+
+		<record model="ir.ui.view" id="partner_dashboard_view">
+			<field name="name">Partner Dashboard</field>
+			<field name="model">board.board</field>
+			<field name="arch" type="xml">
+				<form string="Partner Dashboard">
+					<board style="1-1">
+						<column>
+							<action name="%(action_window_partner_profiling_graph)d"
+								string="Partner Type" />
+
+							<action name="%(action_window_partner_profiling_pie_chart_industries)d"
+								string="Industries" />
+
+							<action
+								name="%(action_window_partner_profiling_pie_chart_area_of_business)d"
+								string="Area Of Business" />
+						</column>
+
+						<column>
+							<action
+								name="%(action_window_partner_profiling_pie_chart_project_oppertunity)d"
+								string="Project/Opportunity" />
+
+							<action
+								name="%(action_window_partner_profiling_pie_chart_technologies)d"
+								string="Technologies" />
+
+							<action name="%(action_window_partner_profiling_pie_chart_services)d"
+								string="Services" />
+						</column>
+
+					</board>
+				</form>
+			</field>
+		</record>
+
+
+		<!-- <column>
+				<action name="%(action_window_partner_profiling_pie_chart_industries)d" string="Industries"/>
+			</column> -->
+		<!-- <column>
+			<action name="%(action_window_partner_profiling_pie_chart_technologies)d" string="Technologies"/>
+		</column> -->
+
+
+		<!--  Action For Dashboard -->
+
+		<record model="ir.actions.act_window" id="partner_dash_view_action">
+			<field name="name">Partner Dashboard</field>
+			<field name="res_model">board.board</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="usage">menu</field>
+			<field name="view_id" ref="partner_dashboard_view" />
+			<field name="target">inline</field>
+			<field name="help" type="html">
+				<div class="oe_empty_custom_dashboard">
+					<p>
+						<b>Your personal dashboard is empty.</b>
+					</p>
+					<p> To add your first report into this dashboard, go to any menu, switch to list
+						or graph view, and click <i>'Add to
+							Dashboard'
+						</i> in the extended search options. </p>
+					<p>
+						You can filter and group data before inserting into the
+						dashboard using the search options.
+					</p>
+				</div>
+			</field>
+		</record>
+	</data>
+</odoo>

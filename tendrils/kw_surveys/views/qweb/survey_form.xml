@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data noupdate="0">
+		<template id="kwantify_surveys_form" name="Feedback Form">
+			<t t-call="website.layout">
+				<div class="container mt16">
+					<div class="row">
+						<div class="col-sm-10 col-offset-sm-2 mx-auto">
+							<div class="card">
+								<div class="csm card-header">
+									<p class="text-center text-white h3 m-0"
+									   t-esc="kwantify_surveys.survey_name"/>
+								</div>
+								<div class="card-body">
+									<form role="form" id='kw_work_from_home_survey_form' method="post"
+									      name="kw_work_from_home_survey_form" class="js_kw_survey_form"
+									      t-att-action="'/kwantify/survey/submit/%s' % (slug(kwantify_surveys))"
+									      t-att-data-prefill="'/kwantify/survey/prefill/%s/%s' % (slug(kwantify_surveys),token)"
+										  t-att-data-submit="'/kwantify/survey/submit/%s' % (slug(kwantify_surveys))">
+										<input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+										<input type="hidden" name="token" t-att-value="token"/>
+
+										<div class='clearfix mb-3'/>
+										<div class="parent-block" t-foreach="kwantify_surveys.survey_id.page_ids"
+										     t-as="page">
+											<t t-set="i" t-value="1"/>
+											<div class="child-items" t-foreach='page.question_ids' t-as='question'>
+												<t t-set="prefix"
+												   t-value="'%s_%s_%s' % (kwantify_surveys.survey_id.id, page.id, question.id)"/>
+												<div class="h5 ext-left align-middle mt-4 mb-2"
+												     style="font-weight: 700;">
+													<span class="survey_label_counter">
+														Q
+														<span t-esc="i"/>
+														.
+													</span>
+													<span t-field='question.question' class="font-weight-bold"/>
+													<t t-set="i" t-value="i+1"/>
+													<span t-if="question.constr_mandatory"
+													      class="font-weight-bold text-danger">*
+													</span>
+												</div>
+
+												<div class="mb-2 position-relative" t-att-id="prefix">
+													<t t-if="question.type == 'free_text'">
+														<t t-call="kw_surveys.kwantify_survey_free_text"/>
+													</t>
+													<t t-if="question.type == 'textbox'">
+														<t t-call="kw_surveys.kwantify_survey_textbox"/>
+														<t t-if="question.validation_required">
+															<div class="textbox_text_limit_info and question.validation_length_max > 0">
+																Max
+																<t t-esc="question.validation_length_max"/>
+																characters allowed.
+															</div>
+														</t>
+													</t>
+													<t t-if="question.type == 'numerical_box'">
+														<t t-call="kw_surveys.kwantify_survey_numerical_box"/>
+													</t>
+													<t t-if="question.type == 'date'">
+														<t t-call="kw_surveys.kwantify_survey_date"/>
+													</t>
+													<t t-if="question.type == 'simple_choice'">
+														<t t-call="kw_surveys.kwantify_survey_simple_choice"/>
+													</t>
+													<t t-if="question.type == 'multiple_choice'">
+														<t t-call="kw_surveys.kwantify_multiple_choice"/>
+													</t>
+													<t t-if="question.type == 'matrix'">
+														<t t-call="kw_surveys.kwantify_survey_matrix"/>
+													</t>
+													<div class="js_errzone text-danger font-weight-bold font-italic"
+													     style="display:none;" role="alert"/>
+												</div>
+											</div>
+										</div>
+
+										<div class="d-flex align-items-center flex-row justify-content-center">
+											<!-- <button t-if="can_skip" type="button" id='skip' class="btn btn-success badge" name="skip_survey" value="skip">Skip</button> -->
+											<button type="submit" id='finish' class="btn btn-primary badge"
+											        name="submit_survey" value="finish"
+											        style="background-color: #198fbb !important;">Submit
+											</button>
+											<!-- <t t-if="show_skip_button == True">
+												<a href="/skip-now-survey-feedback-submit" title="Skip Now">
+													<button type="button" class="btn btn-warning badge"  value="skip">
+															Skip Now
+														</button>
+													</a>
+											</t> -->
+											<!-- <button onclick='window.history.go(-1);' class="btn btn-primary badge"
+											        style="background-color: #198fbb !important;">
+												Back
+											</button> -->
+
+										</div>
+										
+									</form>
+								</div>
+								
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</t>
+		</template>
+
+		<template id="kwantify_survey_free_text" name="Free text box">
+			<div class="md-form m-0">
+				<textarea class="md-textarea form-control editor" t-att-id='prefix' rows="10" t-att-name="prefix"/>
+			</div>
+		</template>
+
+		<template id="kwantify_survey_textbox" name="Text box">
+			<div class="md-form m-0">
+				<input type="text" class="form-control" t-att-name="prefix"
+				       t-att-maxlength="question.validation_length_max if question.validation_required else 'false'"/>
+				<!-- <input type="text" class="form-control col-sm-4" t-att-name="prefix"/> -->
+			</div>
+		</template>
+
+		<template id="kwantify_survey_numerical_box" name="Numerical box">
+			<div class="md-form m-0">
+				<!-- <input type="number" step="any" class="form-control" t-att-name="prefix"/> -->
+				<input type="number" step="any" class="form-control col-sm-4 pull-left" t-att-name="prefix"/>
+				<div class="pt-3">days</div>
+			</div>
+		</template>
+
+		<template id="kwantify_survey_date" name="Date box">
+			<div class="form-group">
+				<div class="input-group date col-sm-3" t-attf-id="datetimepicker_#{question.id}" data-target-input="nearest"
+				     t-att-data-mindate="question.validation_min_date"
+				     t-att-data-maxdate="question.validation_max_date">
+					<input type="text" class="form-control datetimepicker-input"
+					       t-attf-data-target="#datetimepicker_#{question.id}" t-att-name="prefix"/>
+					<div class="input-group-append" t-attf-data-target="#datetimepicker_#{question.id}"
+					     data-toggle="datetimepicker">
+						<div class="input-group-text">
+							<i class="fa fa-calendar"/>
+						</div>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id="kwantify_survey_simple_choice" name="Simple choice">
+			<div t-if="question.display_mode == 'dropdown' and token" class="js_drop row">
+				<div class="col-lg-12">
+					<select class="form-control" t-att-name="prefix">
+						<option disabled="1" selected="1" value="">Choose...</option>
+						<t t-foreach='question.labels_ids' t-as='label'>
+							<option t-att-value='label.id'>
+								<t t-esc='label.value' style="font-weight: 0;"/>
+							</option>
+						</t>
+						<t t-if='question.comments_allowed and question.comment_count_as_answer'>
+							<option class="js_other_option" value="-1">
+								<span t-esc="question.comments_message"/>
+							</option>
+						</t>
+					</select>
+				</div>
+				<div t-if='question.comments_allowed and question.comment_count_as_answer' class="col-lg-6">
+					<input type="text" class="form-control" t-att-name="'%s_%s' % (prefix, 'comment')"
+					       data-oe-survey-othert="1"/>
+				</div>
+				<div t-if='question.comments_allowed and not question.comment_count_as_answer' class="col-lg-12 mt16">
+					<span t-field="question.comments_message"/>
+					<input type="text" class="form-control" t-att-name="'%s_%s' % (prefix, 'comment')"/>
+				</div>
+			</div>
+			<div t-if="question.display_mode == 'columns' or not token" class="row js_radio ml-3">
+				<div t-foreach='question.labels_ids' t-as='label' t-attf-class="col-lg-#{question.column_nb}">
+					<label t-att-class="' bg-success ' if quizz_correction and label.quizz_mark > 0.0 else None">
+						<input type="radio" t-att-name="prefix" t-att-value='label.id'/>
+						<span t-field='label.value' style="font-weight: 400"/>
+					</label>
+				</div>
+				<div t-if='question.comments_allowed and question.comment_count_as_answer'
+				     class="js_comments col-lg-12">
+					<label>
+						<input type="radio" t-att-name="prefix" value="-1"/>
+						<span t-field="question.comments_message" style="font-weight:400"/>
+					</label>
+					<input type="text" class="form-control" t-att-name="'%s_%s' % (prefix, 'comment')"/>
+				</div>
+				<div t-if='question.comments_allowed and not question.comment_count_as_answer' class="col-lg-12">
+					<span t-field="question.comments_message"/>
+					<input type="text" class="form-control" t-att-name="'%s_%s' % (prefix, 'comment')"
+					       data-oe-survey-othert="1"/>
+				</div>
+			</div>
+		</template>
+
+		<template id="kwantify_multiple_choice" name="Multiple choice">
+			<div class="row js_radio ml-3">
+				<div t-foreach='question.labels_ids' t-as='label' t-attf-class="col-lg-#{question.column_nb}">
+					<label t-att-class="' bg-success ' if quizz_correction and label.quizz_mark > 0.0 else None">
+						<input type="checkbox" t-att-name="'%s_%s' % (prefix, label.id)" t-att-value='label.id'/>
+						<span t-field='label.value'/>
+					</label>
+				</div>
+				<div t-if='question.comments_allowed and question.comment_count_as_answer'
+				     class="js_ck_comments col-lg-12">
+					<label>
+						<input type="checkbox" t-att-name="'%s_%s' % (prefix, -1)" value="-1"/>
+						<span t-field="question.comments_message"/>
+					</label>
+					<input type="text" class="form-control" t-att-name="'%s_%s' % (prefix, 'comment')"/>
+				</div>
+				<div t-if='question.comments_allowed and not question.comment_count_as_answer' class="col-lg-12">
+					<span t-field="question.comments_message"/>
+					<input type="text" class="form-control" t-att-name="'%s_%s' % (prefix, 'comment')"
+					       data-oe-survey-othert="1"/>
+				</div>
+			</div>
+		</template>
+
+		<template id="kwantify_survey_matrix" name="Matrix">
+			<table class="table table-hover">
+				<thead>
+					<tr>
+						<th></th>
+						<th t-foreach="question.labels_ids" t-as="col_label">
+							<span t-field="col_label.value"/>
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr t-foreach="question.labels_ids_2" t-as="row_label">
+						<th>
+							<span t-field="row_label.value"/>
+						</th>
+						<td t-foreach="question.labels_ids" t-as="col_label">
+							<input t-if="question.matrix_subtype == 'simple'" type="radio"
+							       t-att-name="'%s_%s' % (prefix, row_label.id)" t-att-value='col_label.id'/>
+							<input t-if="question.matrix_subtype == 'multiple'" type="checkbox"
+							       t-att-name="'%s_%s_%s' % (prefix, row_label.id, col_label.id)"
+							       t-att-value='col_label.id'/>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<div t-if='question.comments_allowed'>
+				<span t-field="question.comments_message"/>
+				<input type="text" class="form-control" t-att-name="'%s_%s' % (prefix, 'comment')"/>
+			</div>
+		</template>
+
+		<template id="kwantify_surveys_thanks_pages" name="Thank You">
+			<t t-call="website.layout">
+				<div class="wrap">
+					<div class="container">
+						<section class="service-request mt32">
+							<div class="container card">
+								<div class="card-body">
+									<div class="row">
+										<div class="col-12 mx-auto">
+											<div class="section__content text-center">
+												<div class="swal2-icon swal2-success swal2-animate-success-icon"
+												     style="display: flex;" data-oe-model="ir.ui.view" data-oe-id="1641"
+												     data-oe-field="arch"
+												     data-oe-xpath="/t[1]/t[1]/div[1]/div[1]/div[1]/div[1]">
+													<span class="swal2-success-line-tip"/>
+													<span class="swal2-success-line-long"/>
+													<div class="swal2-success-ring"/>
+												</div>
+												<!-- <t t-if ="demo['ignite']=='ignite'">
+													<h2 class="display-6 text-center font-weight-bold mt-6 mb-4">
+														Thank you!
+														<br/>
+													
+														You scored
+														<span>
+															<t t-esc="demo['quizz_score']" /> / <t t-esc="demo['total_score']" />
+														</span>
+														<br/>
+														We look forward to see you in another round of IGNITE Quiz Sessions!
+													</h2>
+												</t> -->
+												<t><h2 class="display-6 text-center font-weight-bold mt-6 mb-4">
+													Thank you!
+													<br/>
+													Your response has been submitted successfully.
+												</h2></t>
+												<a class="btn btn-primary badge"
+												   style="background-color: #f7941d !important;" t-attf-href="/web">
+													<i class="fa fa-arrow-circle-left "/>
+													&amp;nbsp;
+													Go To Dashboard
+												</a>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</section>
+					</div>
+				</div>
+			</t>
+		</template>
+
+		<template id="kwantify_surveys_notopen_pages" name="Survey is Not Open">
+			<t t-call="website.layout">
+				<div class="wrap">
+					<div class="container">
+						<section class="service-request mt32">
+							<div class="container card">
+								<div class="card-body">
+									<div class="row">
+										<div class="col-12 mx-auto">
+											<div class="section__content text-center">
+												<t><h2 class="display-6 text-center font-weight-bold mt-6 mb-4">
+													This survey is not open.<br/>
+													May be your survey period is not started or this survey has been closed.
+													<br/>Thank you for your interest !!
+												</h2></t>
+												<a class="btn btn-primary badge"
+												   style="background-color: #f7941d !important;" t-attf-href="/web">
+													<i class="fa fa-arrow-circle-left "/>
+													&amp;nbsp;
+													Go To Dashboard
+												</a>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</section>
+					</div>
+				</div>
+			</t>
+		</template>
+		<template id="kwantify_surveys_thanks_pages_assets" inherit_id="kw_surveys.kwantify_surveys_thanks_pages">
+			<xpath expr="." position="inside">
+				<link href="/kw_surveys/static/src/css/front_style.css" rel="stylesheet"/>
+				<link href="/kw_surveys/static/src/css/success.css" rel="stylesheet"/>
+				<link href="/kwantify_theme/static/src/mdb/css/mdb.min.css?v=12" rel="stylesheet"/>
+				<script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js?v=12"/>
+			</xpath>
+		</template>
+
+		<template id="kwantify_surveys_notopen_pages_assets" inherit_id="kw_surveys.kwantify_surveys_notopen_pages">
+			<xpath expr="." position="inside">
+				<link href="/kw_surveys/static/src/css/front_style.css" rel="stylesheet"/>
+				<link href="/kw_surveys/static/src/css/success.css" rel="stylesheet"/>
+				<link href="/kwantify_theme/static/src/mdb/css/mdb.min.css?v=12" rel="stylesheet"/>
+				<script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js?v=12"/>
+			</xpath>
+		</template>
+
+		<template id="kwantify_surveys_form_assets" inherit_id="kw_surveys.kwantify_surveys_form">
+			<xpath expr="." position="inside">
+				<link href="/kw_surveys/static/src/css/front_style.css" rel="stylesheet"/>
+				<link href="/web/static/lib/nvd3/nv.d3.css" rel="stylesheet" type="text/css"/>
+				<link rel="stylesheet" type="text/less" href="/web/static/src/scss/fonts.scss"/>
+				<link rel="stylesheet" type="text/less" href="/web_editor/static/src/scss/web_editor.common.scss"/>
+				<link href="/kwantify_theme/static/src/mdb/css/mdb.min.css?v=12" rel="stylesheet"/>
+
+				<script type="text/javascript" src="/web/static/lib/nvd3/d3.v3.js"/>
+				<script type="text/javascript" src="/web/static/lib/nvd3/nv.d3.js"/>
+				<!-- <script type="text/javascript" src="/kw_surveys/static/src/js/kw_survey_submit.js"/> -->
+				<script type="text/javascript" src="/kw_training/static/src/lib/jquery.validate.min.js"/>
+				<script type="text/javascript" src="/kw_training/static/src/lib/additional-methods.js"/>
+				<script type="text/javascript" src="/web/static/src/js/chrome/public_root_widget.js"/>
+				<script type="text/javascript" src="/web/static/src/js/fields/field_utils.js"/>
+				<!--	<script src="//cdn.ckeditor.com/4.15.0/standard/ckeditor.js"/>-->
+				<script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js?v=12"/>
+			 	<!-- <script type="text/javascript" src="/kw_surveys/static/src/js/kwantify_surveys.js"/> -->
+			 	<script type="text/javascript" src="/kw_surveys/static/src/js/survey_validator.js"/>
+				  <script type="text/javascript" src="/kw_surveys/static/src/js/kwantify_surveys_vaccine.js?v=12"/>
+
+				<t t-call="web._assets_frontend_helpers"/>
+				<t t-call="web._assets_bootstrap"/>
+
+				<!-- <link rel="stylesheet" href="https://jqueryvalidation.org/files/demo/site-demos.css"/> -->
+			</xpath>
+		</template>
+	</data>
+</odoo>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="meeting_event_form_view_zoom" model="ir.ui.view">
+            <field name="name">kw_meeting_schedule.event.form</field>
+            <field name="model">kw_meeting_events</field>
+            <field name="inherit_id" ref="kw_meeting_schedule.view_kw_meeting_calendar_event_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='meeting_detail_main']/group[@name='meeting_detail']/field[@name='allday']" position="before">
+                    <field name="zoom_enabled_user" invisible="1"/>
+                    <field name="online_meeting" 
+                        attrs="{'readonly': ['|',('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}" />
+                    
+                    <field name="other_meeting_url" attrs="{'required':[('online_meeting','=', 'other')],'invisible':[('online_meeting','!=', 'other')]}"/>
+                    <field name="logged_user_id" invisible="1"/>
+                </xpath>
+                <field name="location_id"  position="replace">
+                    <field name="location_id" options="{'no_create': True,'no_open': True}" attrs="{'required':[('online_meeting','=', False)],'readonly':['|',('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/>
+                </field>
+                <field name="meeting_room_id"  position="replace">
+                    <field name="meeting_room_id" options="{'no_create': True,'no_open': True}" widget="form.kwmeeting_room_onchange" attrs="{'required':[('online_meeting','=', False)],'readonly':['|',('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/>
+                </field>
+                <xpath expr="//sheet/div[@name='button_box']" position="inside">
+                    <button class="btn btn-primary ml-2 oe_stat_button" type="object" name="action_start_meeting" string="Start Online Meeting" icon="fa-users" 
+                        attrs="{'invisible':['|','|','|','|',('is_create_user','=',False),('online_meeting', '=', False),('id','=', False),('disable_meeeting','=', True),('participant_meeeting','=', False)]}"/>
+
+                    <button class="btn btn-warning ml-2" type="object" name="action_join_meeting" string="Join Online Meeting" icon="fa-users" attrs="{'invisible':['|','|','|','|',('is_create_user','=',True),('online_meeting', '=', False),('id','=', False),('disable_meeeting','=', True),('participant_meeeting','=', False)]}"/>
+
+                    <field name="participant_meeeting" invisible="1"/>
+                    <field name="is_create_user" invisible="1"/>
+                    <field name="disable_meeeting" invisible="1"/>
+                </xpath>
+
+            </field>
+        </record>
+        <record id="meeting_event_tree_view_zoom" model="ir.ui.view">
+            <field name="name">kw_meeting_schedule.event.tree</field>
+            <field name="model">kw_meeting_events</field>
+            <field name="inherit_id" ref="kw_meeting_schedule.view_kw_meeting_calendar_event_tree"/>
+            <field name="arch" type="xml">
+                <field name="organiser_id" position="after">
+                    <field name="is_create_user" invisible="1"/>
+                    <field name="online_meeting" invisible="1"/>
+                    <field name="disable_meeeting" invisible="1"/>
+                    <field name="participant_meeeting" invisible="1"/>
+                    <button class="btn btn-sm btn-primary ml-2" type="object" name="action_start_meeting" string="Start Online Meeting" attrs="{'invisible':['|','|','|',('is_create_user','=',False),('online_meeting', '=', False),('disable_meeeting','=', True),('participant_meeeting','=', False)]}"/>
+                    <button class="btn btn-sm btn-warning ml-2" type="object" name="action_join_meeting" string="Join Online Meeting"
+                        attrs="{'invisible':['|','|','|',('is_create_user','=',True),('online_meeting', '=', False),('disable_meeeting','=', True),('participant_meeeting','=', False)]}"/>
+
+                </field>
+            </field>
+        </record>
+        <record id="meeting_event_kanban_view_zoom" model="ir.ui.view">
+            <field name="name">kw_meeting_schedule_events.kanban view</field>
+            <field name="model">kw_meeting_events</field>
+            <field name="inherit_id" ref="kw_meeting_schedule.kw_meeting_schedule_event_view_kanban"/>
+            <field name="arch" type="xml">
+                <field name="is_meeting_responsible" position="after">
+                    <field name="create_uid"/>
+                    <field name="is_create_user"/>
+                    <field name="disable_meeeting"/>
+                    <field name="online_meeting"/>
+                    <field name="participant_meeeting" invisible="1"/>
+                </field>
+                <xpath expr="//templates/t/div/div[@class='o_kanban_record_bottom']" position="replace">
+                    <div class="o_kanban_record_bottom mt-2">
+                        <div class="oe_kanban_bottom_left">
+                            <t t-if="record.meeting_room_id.value">
+                                Room No: <field name="meeting_room_id" />
+                            </t>
+                            <t t-else="">
+                                Virtual
+                            </t>
+                        </div>
+                        <div class="oe_kanban_bottom_right">
+                            <a type="object" name="action_meeting_agenda" role="menuitem" style="margin-right: 10px;">
+                                <i class="fa fa-calendar-check-o" />
+                            </a>
+                            <a type="object" name="action_meeting_partcipants" role="menuitem" >
+                                <i class="fa fa-users" /><field name="total_attendee_count"/>
+                            </a>
+                            <img t-att-src="kanban_image('res.users', 'image_small', record.user_id.raw_value)" t-att-title="record.user_id.value"
+                            t-att-alt="record.user_id.value" class="oe_kanban_avatar"/>
+                        </div>
+
+                    </div>
+                </xpath>
+                <xpath expr="//templates/t/div/div/div[@class='o_kanban_record_body']" position="replace">
+                    <div class="o_kanban_record_body">
+                        <div class="pull-left mt-2">
+                            <field name="categ_ids" widget="many2many_tags" options="{'color_field': 'color'}" />
+                        </div>
+                        <t t-if="record.online_meeting.raw_value!=false">
+                            <div class="pull-right">
+                                <t t-if="record.is_create_user.raw_value==true">
+                                    <t t-if="record.participant_meeeting.raw_value==true">
+                                        <div t-if="record.disable_meeeting.raw_value==false">
+                                            <button class="btn btn-sm btn-primary mt-2"  name="action_start_meeting" type="object" string="Start Meeting">Start Online Meeting</button>
+                                        </div>
+                                    </t>
+                                </t>
+                                <t t-if="record.is_create_user.raw_value==false">
+                                    <t t-if="record.participant_meeeting.raw_value==true">
+                                        <div t-if="record.disable_meeeting.raw_value==false">
+                                            <button class="btn btn-sm btn-warning mt-2"  name="action_join_meeting" type="object" string="Join Meeting">Join Online Meeting</button>
+                                        </div>
+                                    </t>
+                                </t>
+                            </div>
+                        </t>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+        <record id="view_meeting_schedule_take_action_form_inh" model="ir.ui.view">
+            <field name="name">Meeting Take Action Form</field>
+            <field name="model">kw_meeting_events</field>
+            <field name="inherit_id" ref="kw_meeting_schedule.view_meeting_schedule_take_action_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet/group/field[@name='external_attendee_ids']" position="after">
+                    <field name="other_attendees">
+                        <tree create="true" editable="top" delete="false">
+                            <field name="name" string="Name"/>
+                            <field name="attendance_status" />
+                        </tree>
+                    </field>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

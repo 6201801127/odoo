@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- GOAL AND MILESTONE ACTION -->
+    <record id="kw_feedback_goal_and_milestone_action" model="ir.actions.act_window">
+        <field name="name">Goal &amp; Milestone</field>
+        <field name="res_model">kw_feedback_goal_and_milestone</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">['|',('emp_id.parent_id.user_id','=',uid),('emp_id.user_id','=',uid)]</field>
+        <field name="context">{'search_default_by_current_month_year':1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+				Create Goal &amp; Milestone against your sub-ordinates...
+            </p>
+        </field>
+    </record>
+
+    <!-- GOAL AND MILESTONE TREE -->
+    <record id="kw_feedback_goal_and_milestone_tree" model="ir.ui.view">
+        <field name="name">Goal &amp; Milestone</field>
+        <field name="model">kw_feedback_goal_and_milestone</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="year" />
+                <field name="months" />
+                <field name="emp_id" />
+                <field name="designation"/>
+                <field name="department"/>
+                <field name="goal_name"/>
+                <field name="state"/>
+                <field name="from_date" invisible='1'/>
+                <field name="validate_own" invisible='1'/>
+                <button string='Update Score' attrs="{'invisible': ['|','|',('validate_own','=',True),('state','in',['1','4']),('from_date','=',True)]}" class="btn btn-sm oe_highlight" type="object" name="update_milestone"></button>
+            </tree>
+        </field>
+    </record>
+
+    <record id="kw_feedback_goal_and_milestone_search" model="ir.ui.view">
+        <field name="name">Goal &amp; Milestone</field>
+        <field name="model">kw_feedback_goal_and_milestone</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="emp_id" />
+
+                <!-- <filter string="Current Month" domain="[('months','=',context_today().strftime('%%m')),('year','=',context_today().strftime('%%Y'))]" name="by_current_month_year"/>
+                    <separator/>
+                    <filter string="Last Month" domain="[('months','=',(context_today()-relativedelta(months=1)).strftime('%%m')),('year','=',context_today().strftime('%%Y'))]" name="by_last_month_year"/>
+                     -->
+                <filter string="Current Month" name="by_current_month_year" domain="[('current_month','=',True)]"/>
+                <separator/>
+                <filter string="Last Month" name="by_last_month_year" domain="[('last_month','=',True)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- GOAL AND MILESTONE FORM -->
+    <record id="kw_feedback_goal_and_milestone_form" model="ir.ui.view">
+        <field name="name">Goal &amp; Milestone</field>
+        <field name="model">kw_feedback_goal_and_milestone</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="validate_own" invisible='1'/>
+                            <field name="emp_id" attrs="{'readonly': ['|',('validate_own','=',True),('state','in',['3','4'])]}" options="{'no_create': True,'no_open': True, 'no_edit':True}"/>
+                            <field name="designation" options="{'no_create': True,'no_open': True,'no_edit':True}" />
+                            <!-- <field name="department" options="{'no_create': True,'no_open': True,'no_edit':True}" /> -->
+                            <field name="goal_name" autocomplete='off' attrs="{'readonly': ['|',('validate_own','=',True),('state','in',['3','4'])]}"/>
+                            <field name="milestones" attrs="{'readonly': ['|',('validate_own','=',True),('state','in',['3','4'])]}">
+                                <tree editable="bottom">
+                                    <field name="milestone_name"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="kw_feedback_goal_and_milestone_form_reference" model="ir.ui.view">
+        <field name="name">Goal &amp; Milestones</field>
+        <field name="model">kw_feedback_goal_and_milestone</field>
+        <field name="arch" type="xml">
+            <form string="Goal and milestones">
+                <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                </script>
+                <div class="row">
+                    <div class="col-sm-12 col-sm-offset-4 mx-auto">
+                        <group>
+                            <field name="emp_id" readonly='1' options="{'no_create': True,'no_open': True,'no_edit':True}"/>
+                            <field name="designation" options="{'no_create': True,'no_open': True,'no_edit':True}" />
+                            <!-- <field name="department" options="{'no_create': True,'no_open': True,'no_edit':True}" /> -->
+                            <field name="goal_name" readonly='1'/>
+                            <field name="milestones">
+                                <tree editable="bottom" create='false' delete='false'>
+                                    <field name="milestone_name" readonly='1'/>
+                                    <field name="score" required='1'/>
+                                    <field name="weightage_id" readonly='1' force_save='1' options="{'no_create': True,'no_open': True,'no_edit':True}" />
+                                </tree>
+                            </field>
+                        </group>
+                        <center>
+                            <button name="feedback_redirect" type="object" class="btn-success mr-2">Update</button>
+                            <button string="Cancel" class="btn-danger" special="cancel"/>
+                            <footer></footer>
+                        </center>
+                    </div>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="kw_feedback_goal_and_milestone_action_view_tree" model="ir.actions.act_window.view">
+        <field eval="1" name="sequence"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="kw_feedback_goal_and_milestone_tree"/>
+        <field name="act_window_id" ref="kw_feedback_goal_and_milestone_action"/>
+    </record>
+
+    <record id="kw_feedback_goal_and_milestone_action_view_form" model="ir.actions.act_window.view">
+        <field eval="2" name="sequence"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="kw_feedback_goal_and_milestone_form"/>
+        <field name="act_window_id" ref="kw_feedback_goal_and_milestone_action"/>
+    </record>
+
+
+</odoo>

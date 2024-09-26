@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <!-- hr_payroll_salary_report tree view -->
+        <record id="hr_payroll_salary_report_view_tree" model="ir.ui.view">
+            <field name="name">hr_payroll_salary_report.view.tree</field>
+            <field name="model">hr.payslip</field>
+            <field name="arch" type="xml">
+                <tree create='0'>
+                    <!-- Add your fields here -->
+                    <field name="salary_confirm_year"/>
+                    <field name="salary_month_string"/>
+                    <field name="department" groups='kw_employee.group_payroll_manager,hr_payroll.group_hr_payroll_manager'/>
+                    <field name="job_id" groups='kw_employee.group_payroll_manager,hr_payroll.group_hr_payroll_manager'/>
+                    <field name="emp_type" groups='kw_employee.group_payroll_manager,hr_payroll.group_hr_payroll_manager'/>
+                    <field name="emp_code" groups='kw_employee.group_payroll_manager,hr_payroll.group_hr_payroll_manager'/>
+                    <field name="employee" groups='kw_employee.group_payroll_manager,hr_payroll.group_hr_payroll_manager' class="font-weight-bold"/>
+                    <field name="basic" sum="Total" groups='kw_employee.group_payroll_manager,hr_payroll.group_hr_payroll_manager'/>
+                    <field name="gratuity" sum="Total" groups='kw_employee.group_payroll_manager,hr_payroll.group_hr_payroll_manager'/>
+                    <field name="employer_pf" sum="Total" groups='kw_employee.group_payroll_manager,hr_payroll.group_hr_payroll_manager'/>
+                    <field name="esic" sum="Total" groups='kw_employee.group_payroll_manager,hr_payroll.group_hr_payroll_manager'/>
+                    <field name="health_insurance_self" sum="Total" groups='kw_employee.group_payroll_manager,hr_payroll.group_hr_payroll_manager'/>
+                    <field name="salary_confirmation_month" invisible='1'/>
+                    <field name="branch_id" invisible='1'/>
+                </tree>
+            </field>
+        </record>
+        <record id="hr_payslip_report_search_view" model="ir.ui.view">
+            <field name="name">payslip.search</field>
+            <field name="model">hr.payslip</field>
+            <field name="inherit_id" ref="hr_payroll.view_hr_payslip_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//search" position="inside">
+                    <field name="salary_confirmation_month"/>
+                    <field name="department_id"/>
+                    <field name="employement_type"/>
+                    <field name="branch_id"/>
+                    <field name="job_id"/>
+                    <filter string="This FY Year" name="this_year_beverages_report"
+                        domain="[('date_to', '&gt;', context_today().strftime('%Y') + '/03/31'),
+				('date_to', '&lt;=', (context_today()+relativedelta(years=1)).strftime('%Y')+ '/04/01')]" />
+                    <filter string="Last FY Year" name="last_year_beverages_report"
+                        domain="[('date_to', '&lt;=', context_today().strftime('%Y') + '/03/31'),
+				('date_to', '&gt;=', (context_today()-relativedelta(years=1)).strftime('%Y')+ '/04/01')]" />
+                    <separator />
+                    <filter string="This Year" domain="[('salary_confirm_year', '=',context_today().strftime('%Y'))]" name="current_year_salary"/>
+                    <filter string="Last Year" domain="[('salary_confirm_year', '=',(context_today()-relativedelta(years=1)).strftime('%Y'))]" name="last_year_salary"/>
+                    <separator/>
+                    <filter string="Back Dated Payslips" domain="[('back_date_entry','=',True)]" name="back_dated_payslip"/>
+                    <filter string="Regular Payslips" domain="[('back_date_entry','!=',True)]" name="regular_payslip"/>
+
+                    <separator/>
+                    <filter string="This Month" name="current_month_salary" domain="[('salary_confirmation_month', '=',context_today().strftime('%m'))]"  /> 
+                    <filter string="Last Month"
+                        domain="[('date_to','&gt;',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('date_to','&lt;',(context_today()).strftime('%Y-%m-01'))]"
+                        name="last_month_beverage" />
+                    <filter string="January" domain="[('salary_confirmation_month','=',1)]" name="january_salary"/>
+                    <filter string="February" domain="[('salary_confirmation_month','=',2)]" name="february_salary"/>
+                    <filter string="March" domain="[('salary_confirmation_month','=',3)]" name="march_salary"/>
+                    <filter string="April" domain="[('salary_confirmation_month','=',4)]" name="april_salary"/>
+                    <filter string="May" domain="[('salary_confirmation_month','=',5)]" name="may_salary"/>
+                    <filter string="June" domain="[('salary_confirmation_month','=',6)]" name="june_salary"/>
+                    <filter string="July" domain="[('salary_confirmation_month','=',7)]" name="july_salary"/>
+                    <filter string="August" domain="[('salary_confirmation_month','=',8)]" name="august_salary"/>
+                    <filter string="September" domain="[('salary_confirmation_month','=',9)]" name="september_salary"/>
+                    <filter string="October" domain="[('salary_confirmation_month','=',10)]" name="october_salary"/>
+                    <filter string="November" domain="[('salary_confirmation_month','=',11)]" name="november_salary"/>
+                    <filter string="December" domain="[('salary_confirmation_month','=',12)]" name="december_salary"/>
+                    <separator/>
+                    <filter name="employment_type_fte" string="FTE" domain="[('employement_type.code','=','P')]"/>
+                    <filter name="employment_type_ret" string="RET" domain="[('employement_type.code','in',['S','C'])]"/>
+                    <filter name="employment_type_off_shore" string="Outsourced" domain="[('employement_type.code','=','O')]"/>
+                    <filter name="employment_type_contractual" string="Contractual" domain="[('employement_type.code','=','CE')]"/>
+                    <separator/>
+                    <filter string="Bhubaneswar" domain="[('branch_id.alias', 'ilike','Bhubaneswar')]" name="emp_bhubaneshwar_branch"/>
+                    <separator/>
+                </xpath>
+                <xpath expr="//search/group/filter[2]" position="after">
+                    <filter string="Designation" name="job_id" context="{'group_by':'job_id'}"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

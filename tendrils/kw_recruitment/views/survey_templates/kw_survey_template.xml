@@ -1,0 +1,2463 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+		<!-- survey assets -->
+		<template id="kw_recruitment_survey_assets" name="Survey Results assets">
+			<script src="/web/static/lib/nvd3/d3.v3.js" />
+			<script src="/web/static/lib/nvd3/nv.d3.js" />
+			<script type="text/javascript" src="/web/static/src/js/services/session.js" />
+			<!--
+			<script type="text/javascript" src="/kw_recruitment/survey/static/src/js/kw_recruitment/survey_result.js" />
+			<script type="text/javascript" src="/kw_recruitment/survey/static/src/js/kw_recruitment/survey.js" />
+			-->
+			<script type="text/javascript" src="/kw_recruitment/static/src/js/survey_result.js" />
+			<script type="text/javascript" src="/kw_recruitment/static/src/js/survey.js" />
+			<script type="text/javascript" src="/web/static/src/js/chrome/public_root_widget.js" />
+			<script type="text/javascript" src="/web/static/src/js/fields/field_utils.js" />
+			<t t-call="web._assets_frontend_helpers" />
+			<link href="/web/static/lib/nvd3/nv.d3.css" rel="stylesheet" type="text/css" />
+			<t t-call="web._assets_bootstrap" />
+			<link rel="stylesheet" type="text/less" href="/web/static/src/scss/fonts.scss" />
+			<!-- Some helper classes (like mt- mb-) are required for survey templates -->
+			<link rel="stylesheet" type="text/less" href="/web_editor/static/src/scss/web_editor.common.scss" />
+			<link href="/kw_recruitment/static/src/css/survey_print.css" rel="stylesheet" type="text/css" />
+			<link href="/kw_recruitment/static/src/css/survey_result.css" rel="stylesheet" type="text/css" />
+		</template>
+		<!--
+		<template id="assets_common" name="tour" inherit_id="web.assets_common">
+		<xpath expr="//script[last()]" position="after">
+		<script type="text/javascript" src="/kw_recruitment/survey/static/src/js/tour_test_survey.js"></script>
+		</xpath>
+		</template>
+		-->
+		<!-- Forbidden error messages -->
+		<template id="error">
+			<t t-call="kw_recruitment.layout">
+				<div id="wrap">
+					<div class="container">
+						<h1 class="mt32">
+							Error: Forbidden
+						</h1>
+						<p>
+							The page you were looking for could not be authorized.
+						</p>
+						<p>
+							Maybe you were looking for
+							<a t-attf-href="/web#view_type=form&amp;model=survey.survey&amp;id=#{survey.id}&amp;action=survey.action_survey_form">
+								this page
+							</a>
+							?
+						</p>
+					</div>
+				</div>
+			</t>
+		</template>
+		<!-- "Thank you" message when the survey is completed -->
+		<template id="sfinished" name="Survey Finished">
+			<t t-call="website.layout">
+				<t t-call="kw_recruitment.layout">
+					<div class="wrap">
+						<div class="container">
+							<t t-call="kw_recruitment.back" />
+							<section class="service-request">
+								<div class="container card">
+									<div class="card-body">
+										<div class="row">
+											<div class="col-12 mx-auto">
+												<div class="section__content text-center">
+													<span class="fa fa-check-circle ">
+													</span>
+													<h2 class="display-8 text-center font-weight-bold mt-2 mb-4">
+														Your
+														feedback submitted successfully!
+													</h2>
+													<t t-if="user_input and user_input.kw_meeting_id">
+														<a class="btn btn-primary btn-lg meeting" 
+										t-att-href="'/web#id='+str(user_input.kw_meeting_id.id)+'&amp;action=kw_recruitment_meeting_schedule.action_kw_meeting_events_attendee&amp;model=kw_meeting_events&amp;view_type=form&amp;menu_id=%s'  % (menu_id)">
+															Back to meeting
+														</a>
+													</t>
+													<t t-else="">
+														<a class="btn btn-primary btn-lg meeting" t-attf-href="/web">
+															Back to dashboard
+														</a>
+													</t>
+													
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</section>
+							<!--
+							<div class="mt32 p-7">
+							<h1 class="white-text mt40">Thank you!</h1>
+							<div t-field="survey.thank_you_message" class="oe_no_empty" />
+							<div t-if='survey.quizz_mode'>You scored <t t-esc="user_input.quizz_score" /> points.</div>
+							<div class="white-text">If you wish, you can <a t-att-href="'/kw_recruitment/survey/print/%s/%s' % (slug(survey), token)">review your answers</a>.</div>
+							</div>
+							-->
+						</div>
+					</div>
+				</t>
+			</t>
+		</template>
+		<!-- Message when the survey is not open -->
+		<template id="notopen" name="Survey not open">
+			<t t-call="kw_recruitment.layout">
+				<div class="wrap">
+					<div class="container">
+						<div class="jumbotron mt32">
+							<h1>
+								Not open
+							</h1>
+							<p>
+								This survey is not open. Thank you for your interest!
+							</p>
+						</div>
+					</div>
+				</div>
+			</t>
+		</template>
+		<!-- Message when a login is required -->
+		<template id="auth_required" name="Login required for this survey">
+			<t t-call="kw_recruitment.layout">
+				<div class="wrap">
+					<div class="container">
+						<div class="jumbotron mt32">
+							<h1>
+								Login required
+							</h1>
+							<p>
+								This survey is open only to registered people. Please
+								<a t-attf-href="/web/login?redirect=%2Fkw_recruitment%2Fsurvey%2Fstart%2F#{ slug(survey) }%2F#{token}">
+									log in
+								</a>
+								.
+							</p>
+						</div>
+					</div>
+				</div>
+			</t>
+		</template>
+		<!-- Message when the survey has no pages -->
+		<template id="nopages" name="Survey has no pages">
+			<t t-call="kw_recruitment.layout">
+				<div class="wrap">
+					<div class="container">
+						<t t-call="kw_recruitment.back" />
+						<div class="jumbotron mt32">
+							<h1>
+								Not ready
+							</h1>
+							<p>
+								This survey has no pages by now!
+							</p>
+						</div>
+					</div>
+				</div>
+			</t>
+		</template>
+		<!-- Back Button to redirect in form view of survey -->
+		<template id="back" name="Back">
+			<div groups="website.group_website_publisher" t-ignore="true" class="float-right">
+				<!-- <a role="button" t-attf-href="/web#view_type=form&amp;model=survey.survey&amp;id=#{survey.id}&amp;action=survey.action_survey_form" class="btn btn-secondary">Back to Survey</a> -->
+			</div>
+		</template>
+		<!-- new layout for survey -->
+		<template id="layout" name="Survey Layout">
+			<t t-call="web.layout">
+				<t t-set="head">
+					<t t-call-assets="web.assets_common" />
+					<t t-call-assets="kw_recruitment.kw_recruitment_survey_assets" />
+				</t>
+				<body>
+					<!--
+					<header>
+					<div><title>Odoo</title></div>
+					<div class="text-center">
+					<img t-attf-src="/web/binary/company_logo" alt="Logo"/>
+					</div>
+					</header>
+					-->
+					<div id="wrap" class="oe_structure oe_empty" />
+					<main>
+						<t t-raw="0" />
+					</main>
+				</body>
+				<!--
+				<xpath expr="//footer" position="replace">
+				<div class="container mt16 mb8">
+				<div class="float-right" t-ignore="true" t-if="not editable">
+				Create a <a target="_blank" href="https://www.odoo.com/page/website-builder">free website</a> with
+				<a target="_blank" class="badge badge-danger" href="https://www.odoo.com/page/website-builder">Odoo</a>
+				</div>
+				<div class="float-left text-muted" itemscope="itemscope" itemtype="https://schema.org/Organization">
+				Copyright &amp;copy; <span t-field="res_company.name" itemprop="name">Company name</span>
+				</div>
+				</div>
+				</xpath>
+				-->
+			</t>
+		</template>
+
+		<!-- A survey -->
+		<template id="survey" name="Interview Feedback">
+			<t t-call="website.layout">
+				<t t-call="kw_recruitment.layout">
+					<div class="wrap">
+						<div class="oe_structure" id="oe_structure_survey_survey_1" />
+						<div class="container">
+							<t t-call="kw_recruitment.back" />
+							<t t-call="kw_recruitment.page" />
+						</div>
+						<div class="oe_structure" id="oe_structure_survey_survey_2" />
+					</div>
+				</t>
+			</t>
+		</template>
+		<!-- A page -->
+		<template id="page" name="Page">
+			<div class="card mt-5">
+				<div class="card-header ch_survey text-center pb-0 white-text">
+			
+					<h1 t-field="page.title" class="font-weight-bold text-capitalize" />
+					<div t-field="page.description" class="oe_no_empty" />
+					
+				</div>
+				<!-- <t t-esc="page"/> -->
+				<div class="card-body">
+					<form role="form" method="post" class="js_surveyform" t-att-name="'%s_%s' % (survey.id, page.id)" t-att-action="'/kw_recruitment/survey/fill/%s/%s' % (slug(survey), token)" t-att-data-prefill="'/kw_recruitment/survey/prefill/%s/%s/%s' % (slug(survey), token, slug(page))" t-att-data-validate="'/kw_recruitment/survey/validate/%s' % (slug(survey))" t-att-data-submit="'/kw_recruitment/survey/submit/%s' % (slug(survey))">
+						<input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+						<input type="hidden" name="page_id" t-att-value="page.id" />
+						<input type="hidden" name="token" t-att-value="token" />
+						<t t-set="technical" t-value="['Interview Feedback_T_Tel','Interview Feedback_T_Tel - Development','Interview Feedback_T_F2F','Interview Feedback_T_F2F - Development','Interview Feedback_NT_Tel','Interview Feedback_NT_F2F','Interview Feedback_HR']" />
+						<t t-set="sqst" t-value="['Scoresheet Practical Test - Testing','Scoresheet Practical test-DBA','Scoresheet Practical test-DBA-V2']" />
+						<t t-set="dqst" t-value="['Scoresheet_Practical test_NSA']" />
+						<t t-set="paging" t-value="['Scoresheet_Practical_Graphic Designer','Scoresheet_Practical test_BSS','Scoresheet_Practical_Web Designer']" />
+						<t t-set="web_design" t-value="'Scoresheet_Practical_Web Designer'" />
+						<t t-set="graphic_design" t-value="'Scoresheet_Practical_Graphic Designer'" />
+						<t t-set="bss" t-value="'Scoresheet_Practical test_BSS'" />
+						<t t-set="dba_new" t-value="'Scoresheet Practical Test-DBA(New)'" />
+						<t t-set="presentation" t-value="'Presentation Skill- Score sheet'" />
+						<t t-set="new_interview_form" t-value="['New Interview Feedback_HR']" />
+						<table id="survey_table" class="table table-hover table-bordered auto-index">
+							
+							<tbody>
+								<!-- <t t-set="page_count" t-value="survey.page_ids.ids.index(page.id)"/> -->
+								<t t-set="count" t-value="0" />
+								
+								<t t-if="survey.title.strip() in technical or survey.title.strip() in new_interview_form">
+									<tr t-foreach="page.question_ids[0:7]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="20%" class="p-3 h6">
+												<span t-field="question.question" class="font-weight-bold" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col" class="p-1">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<t t-if="question.type == 'date'">
+													<t t-call="kw_recruitment.date" />
+												</t>
+												<t t-if="question.type == 'simple_choice'">
+													<t t-call="kw_recruitment.simple_choice" />
+												</t>
+												<t t-if="question.type == 'multiple_choice'">
+													<t t-call="kw_recruitment.multiple_choice" />
+												</t>
+												<t t-if="question.type == 'matrix'">
+													<t t-call="kw_recruitment.matrix" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+								</t>
+								<t t-if="survey.title.strip()== presentation">
+									<tr t-foreach="page.question_ids[0:4]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+												<span t-field="question.question" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<t t-if="question.type == 'date'">
+													<t t-call="kw_recruitment.date" />
+												</t>
+												<t t-if="question.type == 'simple_choice'">
+													<t t-call="kw_recruitment.simple_choice" />
+												</t>
+												<t t-if="question.type == 'multiple_choice'">
+													<t t-call="kw_recruitment.multiple_choice" />
+												</t>
+												<t t-if="question.type == 'matrix'">
+													<t t-call="kw_recruitment.matrix" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+								</t>
+								<t t-if="survey.title.strip() == dba_new">
+									<tr t-foreach="page.question_ids[0:2]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="14%" class="p-3 h6">
+												<span t-field="question.question" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<t t-if="question.type == 'date'">
+													<t t-call="kw_recruitment.date" />
+												</t>
+												<t t-if="question.type == 'simple_choice'">
+													<t t-call="kw_recruitment.simple_choice" />
+												</t>
+												<t t-if="question.type == 'multiple_choice'">
+													<t t-call="kw_recruitment.multiple_choice" />
+												</t>
+												<t t-if="question.type == 'matrix'">
+													<t t-call="kw_recruitment.matrix" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+								</t>
+								<t t-elif="survey.title.strip() in sqst">
+									<tr t-foreach="page.question_ids[0:2]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+												<span t-field="question.question" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<t t-if="question.type == 'date'">
+													<t t-call="kw_recruitment.date" />
+												</t>
+												<t t-if="question.type == 'simple_choice'">
+													<t t-call="kw_recruitment.simple_choice" />
+												</t>
+												<t t-if="question.type == 'multiple_choice'">
+													<t t-call="kw_recruitment.multiple_choice" />
+												</t>
+												<t t-if="question.type == 'matrix'">
+													<t t-call="kw_recruitment.matrix" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+								</t>
+								<t t-elif="survey.title.strip() in dqst">
+									<tr t-foreach="page.question_ids[0:2]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+												<span t-field="question.question" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<t t-if="question.type == 'date'">
+													<t t-call="kw_recruitment.date" />
+												</t>
+												<t t-if="question.type == 'simple_choice'">
+													<t t-call="kw_recruitment.simple_choice" />
+												</t>
+												<t t-if="question.type == 'multiple_choice'">
+													<t t-call="kw_recruitment.multiple_choice" />
+												</t>
+												<t t-if="question.type == 'matrix'">
+													<t t-call="kw_recruitment.matrix" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+								</t>
+								<t t-elif="survey.title.strip() == web_design or survey.title.strip() == graphic_design or survey.title.strip() == bss">
+									<tr t-foreach="page.question_ids[0:2]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="20%" class="p-3 h6" style="vertical-align: inherit;">
+												<span t-field="question.question" class="font-weight-bold"/>
+												<span t-if="question.constr_mandatory" class="text-danger">*</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+								</t>
+								<t t-else="" />
+							</tbody>
+						</table>
+						<table id="survey_table1" class="table table-hover table-bordered auto-index">
+							<thead t-if="survey.title.strip() not in new_interview_form">
+								<tr t-if="survey.title.strip() in technical">
+									<th scope="col" width="20%" class="font-weight-bold h5">
+										Parameters
+										<i class="fa fa-info-circle" title=" 1. Reject = (0 - 10) &#013; 2. Average = (11 - 30) &#013; 3. Satisfactory = (31 - 60) &#013; 4. Good = (61 - 80) &#013; 5. Excellent = (81 - 100)" />
+									</th>
+									<th scope="col" class="font-weight-bold h5">
+										Description
+									</th>
+									<th scope="col" width="18%" class="font-weight-bold h5">
+										Score
+									</th>
+								</tr>
+								<tr t-if="survey.title.strip()==dba_new">
+									<th scope="col" class="font-weight-bold h5" style="padding: 1rem !important;">
+										Parameters
+										<i class="fa fa-info-circle" title=" 1. Reject = (0 - 10) &#013; 2. Average = (11 - 30) &#013; 3. Satisfactory = (31 - 60) &#013; 4. Good = (61 - 80) &#013; 5. Excellent = (81 - 100)" />
+									</th>
+									<th scope="col" style="padding: 1rem !important;" width="10%" class="font-weight-bold h5">
+										Marks
+									</th>
+									<th scope="col" style="padding: 1rem !important;" width="10%" class="font-weight-bold h5">
+										Score
+									</th>
+								</tr>
+								<tr t-if="survey.title.strip()==presentation">
+									<th scope="col" class="font-weight-bold h5" style="padding: 1rem !important;">
+										Parameters
+										<i class="fa fa-info-circle" title=" 1. Reject = (0 - 10) &#013; 2. Average = (11 - 30) &#013; 3. Satisfactory = (31 - 60) &#013; 4. Good = (61 - 80) &#013; 5. Excellent = (81 - 100)" />
+									</th>
+									<th scope="col" class="font-weight-bold h5" style="padding: 1rem !important;">
+										Score (10)
+									</th>
+									<th scope="col" class="font-weight-bold h5" style="padding: 1rem !important;">
+										Remarks
+									</th>
+								</tr>
+								<tr t-if="survey.title.strip() in dqst or survey.title.strip() in sqst or survey.title.strip() in [web_design,graphic_design,bss]">
+									<th scope="col" class="font-weight-bold h5" style="padding: 1rem !important;">
+										Parameters
+									</th>
+									<th scope="col" width="15%" class="font-weight-bold h5" style="padding: 1rem !important;">
+										Score
+									</th>
+								</tr>
+								
+							</thead>
+							
+							<tbody t-if="survey.title.strip() not in new_interview_form">
+							
+								<t t-if="survey.title.strip() in technical">
+									<tr t-foreach="page.question_ids[7:-3]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" class="font-weight-bold">
+												<span t-field="question.question" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<span t-field="question.description" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<t t-if="question.type == 'date'">
+													<t t-call="kw_recruitment.date" />
+												</t>
+												<t t-if="question.type == 'simple_choice'">
+													<t t-call="kw_recruitment.simple_choice" />
+												</t>
+												<t t-if="question.type == 'multiple_choice'">
+													<t t-call="kw_recruitment.multiple_choice" />
+												</t>
+												<t t-if="question.type == 'matrix'">
+													<t t-call="kw_recruitment.matrix" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+								</t>
+								<t t-if="survey.title.strip() in dba_new">
+									<tr t-foreach="page.question_ids[2:-3]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+												<span t-field="question.question" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<span t-field="question.description" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<t t-if="question.type == 'date'">
+													<t t-call="kw_recruitment.date" />
+												</t>
+												<t t-if="question.type == 'simple_choice'">
+													<t t-call="kw_recruitment.simple_choice" />
+												</t>
+												<t t-if="question.type == 'multiple_choice'">
+													<t t-call="kw_recruitment.multiple_choice" />
+												</t>
+												<t t-if="question.type == 'matrix'">
+													<t t-call="kw_recruitment.matrix" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+								</t>
+								<t t-if="survey.title.strip() in dqst">
+									<tr t-foreach="page.question_ids[2:-3]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+												<span t-field="question.question" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<t t-if="question.type == 'date'">
+													<t t-call="kw_recruitment.date" />
+												</t>
+												<t t-if="question.type == 'simple_choice'">
+													<t t-call="kw_recruitment.simple_choice" />
+												</t>
+												<t t-if="question.type == 'multiple_choice'">
+													<t t-call="kw_recruitment.multiple_choice" />
+												</t>
+												<t t-if="question.type == 'matrix'">
+													<t t-call="kw_recruitment.matrix" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+								</t>
+								<t t-if="survey.title.strip() in sqst">
+									<tr t-foreach="page.question_ids[2:-3]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+												<span t-field="question.question" class="font-weight-bold"/>
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<t t-if="question.type == 'date'">
+													<t t-call="kw_recruitment.date" />
+												</t>
+												<t t-if="question.type == 'simple_choice'">
+													<t t-call="kw_recruitment.simple_choice" />
+												</t>
+												<t t-if="question.type == 'multiple_choice'">
+													<t t-call="kw_recruitment.multiple_choice" />
+												</t>
+												<t t-if="question.type == 'matrix'">
+													<t t-call="kw_recruitment.matrix" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+								</t>
+								<t t-if="survey.title.strip() == graphic_design">
+									<tr>
+										<th scope="col" style="padding: 1rem !important;" class="font-weight-bold" width="14%">
+											Designing Standard
+										</th>
+										<th scope="col" style="padding: 1rem !important;" class="font-weight-bold">
+											0-5
+										</th>
+									</tr>
+									<tr t-foreach="page.question_ids[2:7]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+												<span t-field="question.question" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+									<tr>
+										<th scope="col" class="font-weight-bold">
+											Technical Skill
+										</th>
+										<th scope="col" class="font-weight-bold">
+											0-5
+										</th>
+									</tr>
+									<tr t-foreach="page.question_ids[7:-3]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+												<span t-field="question.question" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<t t-if="question.type == 'simple_choice'">
+													<t t-call="kw_recruitment.simple_choice" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+								</t>
+								<t t-if="survey.title.strip() == web_design">
+									<tr>
+										<th scope="col" class="font-weight-bold">
+											Coding Standard
+										</th>
+										<th scope="col" class="font-weight-bold">
+											0-5
+										</th>
+									</tr>
+									<tr t-foreach="page.question_ids[2:9]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+												<span t-field="question.question" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+									<tr>
+										<th scope="col" class="font-weight-bold" style="padding: 1rem !important;">
+											Accessibility
+										</th>
+										<th scope="col" class="font-weight-bold" style="padding: 1rem !important;">
+											0-5
+										</th>
+									</tr>
+									<tr t-foreach="page.question_ids[9:-3]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+												<span t-field="question.question" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<t t-if="question.type == 'simple_choice'">
+													<t t-call="kw_recruitment.simple_choice" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+								</t>
+								<t t-if="survey.title.strip() == bss">
+									<tr>
+										<th scope="col" style="padding: 1rem !important;" class="font-weight-bold">
+											Coding Standard
+										</th>
+										<th scope="col" class="font-weight-bold">
+											0-5
+										</th>
+									</tr>
+									<tr t-foreach="page.question_ids[2:8]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+												<span t-field="question.question" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+									<tr>
+										<th scope="col" style="padding: 1rem !important" class="font-weight-bold">
+											System Architecture
+										</th>
+										<th scope="col" style="padding: 1rem !important" class="font-weight-bold">
+											0-5
+										</th>
+									</tr>
+									<tr t-foreach="page.question_ids[8:10]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+												<span t-field="question.question" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+									<tr>
+										<th scope="col" style="padding: 1rem !important" class="font-weight-bold">
+											Database Design
+										</th>
+										<th scope="col" style="padding: 1rem !important" class="font-weight-bold">
+											0-5
+										</th>
+									</tr>
+									<tr t-foreach="page.question_ids[10:15]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+												<span t-field="question.question" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+									<tr>
+										<th scope="col" class="font-weight-bold" style="padding: 1rem !important">
+											Project Output
+										</th>
+										<th scope="col" class="font-weight-bold" style="padding: 1rem !important">
+											0-5
+										</th>
+									</tr>
+									<tr t-foreach="page.question_ids[15:16]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+												<span t-field="question.question" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+									<tr>
+										<th scope="col" class="font-weight-bold" style="padding: 1rem !important">
+											Time Constraint
+										</th>
+										<th scope="col" class="font-weight-bold" style="padding: 1rem !important">
+											0-5
+										</th>
+									</tr>
+									<tr t-foreach="page.question_ids[16:-3]" t-as="question">
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+												<span t-field="question.question" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<t t-if="question.type == 'simple_choice'">
+													<t t-call="kw_recruitment.simple_choice" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+										</t>
+									</tr>
+								</t>
+								<t t-if="survey.title.strip() == presentation">
+									<t t-set="question_no" t-value="0" />
+									<tr t-foreach="page.question_ids[4:11]" t-as="question">
+										<t t-set="question_no" t-value="question_no+1" />
+										<t t-set="count" t-value="count+1" />
+										<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+										<t class="js_question-wrapper" t-att-id="prefix">
+											<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+												<span t-field="question.question" class="font-weight-bold" />
+												<span t-if="question.constr_mandatory" class="text-danger">
+													*
+												</span>
+											</td>
+											<td scope="col" style="vertical-align: middle;" >
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<t t-if="question.type == 'date'">
+													<t t-call="kw_recruitment.date" />
+												</t>
+												<t t-if="question.type == 'simple_choice'">
+													<t t-call="kw_recruitment.simple_choice" />
+												</t>
+												<t t-if="question.type == 'multiple_choice'">
+													<t t-call="kw_recruitment.multiple_choice" />
+												</t>
+												<t t-if="question.type == 'matrix'">
+													<t t-call="kw_recruitment.matrix" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</td>
+											<td scope="col" t-foreach="page.question_ids[question_no+10:question_no+11]" t-as="question">
+												<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+												<t class="js_question-wrapper" t-att-id="prefix">
+													<t t-if="question.type == 'free_text'">
+														<t t-call="kw_recruitment.free_text" />
+													</t>
+													<t t-if="question.type == 'textbox'">
+														<t t-call="kw_recruitment.textbox" />
+													</t>
+													<t t-if="question.type == 'numerical_box'">
+														<t t-call="kw_recruitment.numerical_box" />
+													</t>
+													<t t-if="question.type == 'date'">
+														<t t-call="kw_recruitment.date" />
+													</t>
+													<t t-if="question.type == 'simple_choice'">
+														<t t-call="kw_recruitment.simple_choice" />
+													</t>
+													<t t-if="question.type == 'multiple_choice'">
+														<t t-call="kw_recruitment.multiple_choice" />
+													</t>
+													<t t-if="question.type == 'matrix'">
+														<t t-call="kw_recruitment.matrix" />
+													</t>
+													<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+													</div>
+												</t>
+											</td>
+										</t>
+									</tr>
+								</t>
+							</tbody>
+						</table>
+						<t t-if="survey.title.strip() == presentation">
+							<table id="survey_table2" class="table table-hover auto-index table-bordered">
+								<tbody>
+									<tr t-foreach="page.question_ids[-1]" t-as="question">
+										<td>
+											Relevant Exp.
+										</td>
+										<td scope="col">
+											<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+											<t class="js_question-wrapper" t-att-id="prefix" readonly='False'>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</t>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</t>
+						<table id="survey_table2" class="table table-hover auto-index table-bordered" t-if="survey.title.strip() != presentation ">
+							<thead class="">
+								<tr>
+									<th scope="col" width="20%" style="padding: 1rem !important" class="font-weight-bold h5">
+										Remarks
+									</th>
+									<th colspan="2">
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								<t t-if="survey.title.strip() in technical or survey.title.strip() in new_interview_form">
+									<tr t-foreach="page.question_ids[-3]" t-as="question">
+										<td width="14%">
+											Please select an option
+										</td>
+										<td scope="col" colspan="2">
+											<t t-set="count" t-value="count+1" />
+											<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+											<t class="js_question-wrapper" t-att-id="prefix">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'simple_choice'">
+													<t t-call="kw_recruitment.simple_choice" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</t>
+										</td>
+									</tr>
+							
+									<tr t-foreach="page.question_ids[-2]" t-as="question">
+										<td>
+											Relevant Exp.
+										</td>
+										<td scope="col">
+											<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+											<t class="js_question-wrapper" t-att-id="prefix" readonly='False'>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</t>
+										</td>
+									</tr>
+								
+									<tr t-foreach="page.question_ids[-1]" t-as="question">
+										<td scope="col" colspan="3">
+											<t t-set="count" t-value="count+1" />
+											<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+											<t class="js_question-wrapper" t-att-id="prefix">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'simple_choice'">
+													<t t-call="kw_recruitment.simple_choice" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</t>
+										</td>
+									</tr>
+								</t>
+								<t t-if="survey.title.strip() in dqst or survey.title.strip() in sqst or survey.title.strip() in paging or survey.title.strip() in web_design or survey.title.strip() in graphic_design or survey.title.strip() in bss or survey.title.strip() in dba_new">
+									<tr t-foreach="page.question_ids[-3]" t-as="question">
+										<td width="14%">
+											Please select an option
+										</td>
+										<td scope="col" colspan="2">
+											<t t-set="count" t-value="count+1" />
+											<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+											<t class="js_question-wrapper" t-att-id="prefix">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'simple_choice'">
+													<t t-call="kw_recruitment.simple_choice" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</t>
+										</td>
+									</tr>
+									<tr t-foreach="page.question_ids[-2]" t-as="question">
+										<td>
+											Relevant Exp.
+										</td>
+										<td scope="col">
+											<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+											<t class="js_question-wrapper" t-att-id="prefix" readonly='False'>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</t>
+										</td>
+									</tr>
+									<tr t-foreach="page.question_ids[-1]" t-as="question">
+										<td scope="col" colspan="3">
+											<t t-set="count" t-value="count+1" />
+											<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+											<t class="js_question-wrapper" t-att-id="prefix">
+												<t t-if="question.type == 'free_text'">
+													<t t-call="kw_recruitment.free_text" />
+												</t>
+												<t t-if="question.type == 'textbox'">
+													<t t-call="kw_recruitment.textbox" />
+												</t>
+												<t t-if="question.type == 'simple_choice'">
+													<t t-call="kw_recruitment.simple_choice" />
+												</t>
+												<t t-if="question.type == 'numerical_box'">
+													<t t-call="kw_recruitment.numerical_box" />
+												</t>
+												<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+												</div>
+											</t>
+										</td>
+									</tr>
+								</t>
+							</tbody>
+						</table>
+						<div class="text-center mt16 mb16">
+							<!-- <a role="button" t-attf-href="/web#view_type=kanban&amp;model=kw_recruitment&amp;action=survey.action_survey_form&amp;menu_id=kw_recruitment.menu_hr_recruitment_configuration" class="btn btn-dark">Draft and back</a> -->
+							<button t-if="survey.users_can_go_back and page_nr > 0" type="submit" class="btn btn-secondary badge" name="button_submit" value="previous">
+								Previous
+							</button>
+							<button t-if="not last" type="submit" class="btn btn-primary badge" name="button_submit" value="next">
+								Submit
+							</button>
+							<button t-if="last" type="submit" class="btn btn-primary badge" name="button_submit" value="finish">
+								Submit
+							</button>
+							<a t-if="show_skip_button" href="/skip-now-interview-feedback-submit" title="Skip Now">
+								<button t-if="last" type="button" class="btn btn-warning badge" name="button_skip" value="skip">
+									Skip Now
+								</button>
+							</a>
+						</div>
+					</form>
+					<!-- Modal used to display error message, i.c.o. ajax error -->
+					<div role="dialog" class="modal fade" id="kw_AJAXErrorModal">
+						<div class="modal-dialog">
+							<div class="modal-content">
+								<header class="modal-header">
+									<h4 class="modal-title">
+										A problem has occured
+									</h4>
+									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+										&amp;times;
+									</button>
+								</header>
+								<main class="modal-body">
+									<p>
+										Something went wrong while contacting survey server.
+										<strong class="text-danger">
+											Your answers have probably not been recorded.
+										</strong>
+										Try refreshing.
+									</p>
+								</main>
+								<footer class="modal-footer">
+									<button type="button" class="btn btn-primary" data-dismiss="modal">
+										Close
+									</button>
+								</footer>
+							</div>
+						</div>
+					</div>
+					<t t-if="survey.title.strip() == presentation">
+						<script>
+							$(document).ready(function(){
+								$('#survey_table1').find('tr:last').css("background-color","rgba(175, 171, 171, 0.51)");
+								$('#survey_table1>tbody>tr:last').find('td').eq(1).find('input').removeAttr('max').removeAttr('placeholder').attr('readonly',true);
+								$('#survey_table1').find('select').change(function(){
+									var total = 0;
+									$('#survey_table1').find('select').each(function(){
+										total += parseInt($(this).find('option:selected').text()) > 0 ?
+										parseInt($(this).find('option:selected').text()) : 0;
+									});
+									
+									$('#survey_table1>tbody>tr:last').find('td').eq(1).find('input').val(total);
+								});
+							});
+						</script>
+					</t>
+					<t t-else="">
+						<script>
+							$(document).ready(function(){ 
+								$('#survey_table1').find('tr:last').css("background-color","rgba(175, 171, 171, 0.51)");
+								$('#survey_table1').find('input:last').removeAttr('max').removeAttr('placeholder').attr('readonly',true);
+								$('#survey_table1').find('input').not(':last').change(function(){
+									var total = 0;
+									$('#survey_table1').find('input').not(':last').each(function(){
+										total += parseInt($(this).val()) > 0 ? parseInt($(this).val()) : 0;
+									});
+									$('#survey_table1').find('input:last').val(total);
+								});
+							});
+						</script>
+					</t>
+				</div>
+			</div>
+		</template>
+		<template id="survey_page_assets" inherit_id="kw_recruitment.page">
+			<xpath expr="." position="inside">
+				<link rel="stylesheet" href="/kw_recruitment/static/src/css/survey_form.css " />
+				<link href="/kwantify_theme/static/src/mdb/css/mdb.min.css" rel="stylesheet" />
+				<script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js">
+				</script>
+			</xpath>
+		</template>
+		<!-- For viewing the given answers -->
+		<template id="survey_print" name="Survey">
+			<t t-call="website.layout">
+				<t t-call="kw_recruitment.layout">
+					<div class="wrap">
+						<div class="container mt-5">
+							<div class="card">
+								<t t-call="kw_recruitment.back" />
+								<!--
+								<div class='jumbotron mt10 text-center bg-info'>
+								<h3 class='font-weight-bold'>
+								<span t-field='survey.title'/>
+								</h3>
+								<t t-if="survey.description">
+								<div t-field='survey.description' class="oe_no_empty"/>
+								</t>
+								</div>
+								-->
+								<div role="form" class="js_surveyform" t-att-name="'%s' % (survey.id)" t-att-data-prefill="'/kw_recruitment/survey/prefill/%s/%s' % (slug(survey), token)">
+									<t t-foreach="survey.page_ids" t-as="page">
+										<div class="card-header ch_survey white-text text-center pb-0">
+											<h3 t-field="page.title" class="font-weight-bold"/>
+											<t t-if="page.description">
+												<div t-field="page.description" class="oe_no_empty" />
+											</t>
+										</div>
+										<div class="card-body">
+											<table id="survey_table00" class="table table-hover auto-index table-bordered">
+												
+												<t t-set="technical" t-value="['Interview Feedback_T_Tel','Interview Feedback_T_Tel - Development','Interview Feedback_T_F2F','Interview Feedback_T_F2F - Development','Interview Feedback_NT_Tel','Interview Feedback_NT_F2F','Interview Feedback_HR']" />
+												<t t-set="sqst" t-value="['Scoresheet Practical Test - Testing','Scoresheet Practical test-DBA','Scoresheet Practical test-DBA-V2']" />
+												<t t-set="dqst" t-value="['Scoresheet_Practical test_NSA']" />
+												<t t-set="paging" t-value="['Scoresheet_Practical_Graphic Designer','Scoresheet_Practical test_BSS','Scoresheet_Practical_Web Designer']" />
+												<t t-set="web_design" t-value="'Scoresheet_Practical_Web Designer'" />
+												<t t-set="graphic_design" t-value="'Scoresheet_Practical_Graphic Designer'" />
+												<t t-set="bss" t-value="'Scoresheet_Practical test_BSS'" />
+												<t t-set="dba_new" t-value="'Scoresheet Practical Test-DBA(New)'" />
+												<t t-set="presentation" t-value="'Presentation Skill- Score sheet'" />
+												<t t-set="new_interview_form" t-value="['New Interview Feedback_HR']" />
+												<tbody>
+													<t t-set="count" t-value="0" />
+													
+													<t t-if="survey.title.strip() in technical or survey.title.strip() in new_interview_form">
+														<tr t-foreach="page.question_ids[0:7]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<div class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col" width="20%" class="p-3 h6" style="vertical-align: inherit;">
+																	<span t-field="question.question" class="font-weight-bold"/>
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																	<span t-if="quizz_correction" class="badge badge-pill" t-att-data-score-question="question.id">
+																	</span>
+																</td>
+																<td>
+																	<t t-if="question.description">
+																		<div class="text-muted oe_no_empty" t-field="question.description" />
+																	</t>
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																</td>
+															</div>
+														</tr>
+													</t>
+													<t t-if="survey.title.strip()== presentation">
+														<tr t-foreach="page.question_ids[0:4]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<div class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col" width="20%" class="p-3 h6">
+																	<span t-field="question.question" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																	<span t-if="quizz_correction" class="badge badge-pill" t-att-data-score-question="question.id">
+																	</span>
+																</td>
+																<td>
+																	<t t-if="question.description">
+																		<div class="text-muted oe_no_empty" t-field="question.description" />
+																	</t>
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																</td>
+															</div>
+														</tr>
+													</t>
+													<t t-if="survey.title.strip() == dba_new">
+														<tr t-foreach="page.question_ids[0:2]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<div class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+																	<span t-field="question.question" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																	<span t-if="quizz_correction" class="badge badge-pill" t-att-data-score-question="question.id">
+																	</span>
+																</td>
+																<td>
+																	<t t-if="question.description">
+																		<div class="text-muted oe_no_empty" t-field="question.description" />
+																	</t>
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																</td>
+															</div>
+														</tr>
+													</t>
+													<t t-elif="survey.title.strip() in sqst">
+														<tr t-foreach="page.question_ids[0:2]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<div class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+																	<span t-field="question.question" class="font-weight-bold"/>
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																	<span t-if="quizz_correction" class="badge badge-pill" t-att-data-score-question="question.id">
+																	</span>
+																</td>
+																<td>
+																	<t t-if="question.description">
+																		<div class="text-muted oe_no_empty" t-field="question.description" />
+																	</t>
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																</td>
+															</div>
+														</tr>
+													</t>
+													<t t-elif="survey.title.strip() in dqst">
+														<tr t-foreach="page.question_ids[0:2]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<div class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col" width="14%" class="p-3 h6" style="vertical-align: inherit;">
+																	<span t-field="question.question" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																	<span t-if="quizz_correction" class="badge badge-pill" t-att-data-score-question="question.id">
+																	</span>
+																</td>
+																<td>
+																	<t t-if="question.description">
+																		<div class="text-muted oe_no_empty" t-field="question.description" />
+																	</t>
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																</td>
+															</div>
+														</tr>
+													</t>
+													<t t-elif="survey.title.strip() == web_design or survey.title.strip() == graphic_design or survey.title.strip() == bss">
+														<tr t-foreach="page.question_ids[0:2]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<div class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col" width="20%" class="p-3 h6" style="vertical-align: inherit;">
+																	<span t-field="question.question" class="font-weight-bold"/>
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																	<span t-if="quizz_correction" class="badge badge-pill" t-att-data-score-question="question.id">
+																	</span>
+																</td>
+																<td>
+																	<t t-if="question.description">
+																		<div class="text-muted oe_no_empty" t-field="question.description" />
+																	</t>
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																</td>
+															</div>
+														</tr>
+													</t>
+												</tbody>
+											</table>
+											<table id="survey_table22" class="table table-hover table-bordered auto-index">
+												<thead class="" t-if="survey.title.strip() not in new_interview_form">
+													<tr t-if="survey.title.strip() in technical">
+														<th scope="col" width="20%" class="font-weight-bold">
+															Parameters
+															<i class="fa fa-info-circle" title=" 1. Reject = (0 - 10) &#013; 2. Average = (11 - 30) &#013; 3. Satisfactory = (31 - 60) &#013; 4. Good = (61 - 80) &#013; 5. Excellent = (81 - 100)" />
+														</th>
+														<th scope="col" class="font-weight-bold">
+															Description
+														</th>
+														<th scope="col" width="18%" class="font-weight-bold">
+															Score
+														</th>
+													</tr>
+													<tr t-if="survey.title.strip()==dba_new">
+														<th scope="col" class="font-weight-bold">
+															Parameters
+															<i class="fa fa-info-circle" title=" 1. Reject = (0 - 10) &#013; 2. Average = (11 - 30) &#013; 3. Satisfactory = (31 - 60) &#013; 4. Good = (61 - 80) &#013; 5. Excellent = (81 - 100)" />
+														</th>
+														<th scope="col" width="10%">
+															Marks
+														</th>
+														<th scope="col" width="10%">
+															Score
+														</th>
+													</tr>
+													<tr t-if="survey.title.strip()==presentation">
+														<th scope="col" class="font-weight-bold">
+															Parameters
+															<i class="fa fa-info-circle" title=" 1. Reject = (0 - 10) &#013; 2. Average = (11 - 30) &#013; 3. Satisfactory = (31 - 60) &#013; 4. Good = (61 - 80) &#013; 5. Excellent = (81 - 100)" />
+														</th>
+														<th scope="col" class="font-weight-bold">
+															Score (10)
+														</th>
+														<th scope="col">
+															Remarks
+														</th>
+													</tr>
+													<tr t-if="survey.title.strip() in dqst or survey.title.strip() in sqst or survey.title.strip() in [web_design,graphic_design,bss]">
+														<th scope="col" style="padding: 1rem !important;" class="font-weight-bold">
+															Parameters
+														</th>
+														<th scope="col" style="padding: 1rem !important;" width="10%" class="font-weight-bold">
+															Score
+														</th>
+													</tr>
+													
+												</thead>
+												<tbody t-if="survey.title.strip() not in new_interview_form">
+													
+													<t t-if="survey.title.strip() in technical">
+														<tr t-foreach="page.question_ids[7:-3]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<t class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col" class="font-weight-bold">
+																	<span t-field="question.question" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																</td>
+																<td scope="col" style="vertical-align: inherit;">
+																	<span t-field="question.description" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																</td>
+																<td scope="col" class="font-weight-bold">
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																	<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																	</div>
+																</td>
+															</t>
+														</tr>
+													</t>
+													<t t-if="survey.title.strip() in dba_new">
+														<tr t-foreach="page.question_ids[2:-3]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<t class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col" class="font-weight-bold">
+																	<span t-field="question.question" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																</td>
+																<td scope="col" class="font-weight-bold">
+																	<span t-field="question.description" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																</td>
+																<td scope="col">
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																	<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																	</div>
+																</td>
+															</t>
+														</tr>
+													</t>
+													<t t-if="survey.title.strip() in dqst">
+														<tr t-foreach="page.question_ids[2:-3]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<t class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col" class="font-weight-bold">
+																	<span t-field="question.question" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																</td>
+																<td scope="col" class="font-weight-bold" style="vertical-align: inherit;">
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																	<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																	</div>
+																</td>
+															</t>
+														</tr>
+													</t>
+													<t t-if="survey.title.strip() in sqst">
+														<tr t-foreach="page.question_ids[2:-3]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<t class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col" class="font-weight-bold">
+																	<span t-field="question.question" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																</td>
+																<td scope="col" class="font-weight-bold">
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																	<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																	</div>
+																</td>
+															</t>
+														</tr>
+													</t>
+													<t t-if="survey.title.strip() == graphic_design">
+														<tr>
+															<th scope="col"  class="font-weight-bold" style="padding: 1rem !important;">
+																Designing Standard
+															</th>
+															<th scope="col" class="font-weight-bold" style="padding: 1rem !important;">
+																0-5
+															</th>
+														</tr>
+														<tr t-foreach="page.question_ids[2:7]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<t class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col" class="font-weight-bold">
+																	<span t-field="question.question" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																</td>
+																<td scope="col" class="font-weight-bold">
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																	<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																	</div>
+																</td>
+															</t>
+														</tr>
+														<tr>
+															<th scope="col" class="font-weight-bold" style="padding: 1rem !important;">
+																Technical Skill
+															</th>
+															<th scope="col" class="font-weight-bold" style="padding: 1rem !important;">
+																0-5
+															</th>
+														</tr>
+														<tr t-foreach="page.question_ids[7:-3]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<t class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col" class="font-weight-bold">
+																	<span t-field="question.question" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																</td>
+																<td scope="col" class="font-weight-bold">
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																	<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																	</div>
+																</td>
+															</t>
+														</tr>
+													</t>
+													<t t-if="survey.title.strip() == web_design">
+														<tr>
+															<th scope="col" class="font-weight-bold" style="padding: 1rem !important;">
+																Coding Standard
+															</th>
+															<th scope="col" class="font-weight-bold" style="padding: 1rem !important;">
+																0-5
+															</th>
+														</tr>
+														<tr t-foreach="page.question_ids[2:9]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<t class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col" >
+																	<span t-field="question.question" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																</td>
+																<td scope="col" class="font-weight-bold">
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																	<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																	</div>
+																</td>
+															</t>
+														</tr>
+														<tr>
+															<th scope="col" class="font-weight-bold" style="padding: 1rem !important;">
+																Accessibility
+															</th>
+															<th scope="col" class="font-weight-bold" style="padding: 1rem !important;">
+																0-5
+															</th>
+														</tr>
+														<tr t-foreach="page.question_ids[9:-3]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<t class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col">
+																	<span t-field="question.question" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																</td>
+																<td scope="col">
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																	<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																	</div>
+																</td>
+															</t>
+														</tr>
+													</t>
+													<t t-if="survey.title.strip() == bss">
+														<tr>
+															<th scope="col" class="font-weight-bold" style="padding: 1rem !important;">
+																Coding Standard
+															</th>
+															<th scope="col"  style="padding: 1rem !important;">
+																0-5
+															</th>
+														</tr>
+														<tr t-foreach="page.question_ids[2:8]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<t class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col" >
+																	<span t-field="question.question" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																</td>
+																<td scope="col" >
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																	<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																	</div>
+																</td>
+															</t>
+														</tr>
+														<tr>
+															<th scope="col" class="font-weight-bold" style="padding: 1rem !important;">
+																System Architecture
+															</th>
+															<th scope="col"  style="padding: 1rem !important;">
+																0-5
+															</th>
+														</tr>
+														<tr t-foreach="page.question_ids[8:10]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<t class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col">
+																	<span t-field="question.question" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																</td>
+																<td scope="col">
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																	<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																	</div>
+																</td>
+															</t>
+														</tr>
+														<tr>
+															<th scope="col" class="font-weight-bold" style="padding: 1rem !important;">
+																Database Design
+															</th>
+															<th scope="col" class="font-weight-bold" style="padding: 1rem !important;">
+																0-5
+															</th>
+														</tr>
+														<tr t-foreach="page.question_ids[10:15]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<t class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col">
+																	<span t-field="question.question" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																</td>
+																<td scope="col">
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																	<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																	</div>
+																</td>
+															</t>
+														</tr>
+														<tr>
+															<th scope="col" class="font-weight-bold" style="padding: 1rem !important;">
+																Project Output
+															</th>
+															<th scope="col" class="font-weight-bold" style="padding: 1rem !important;">
+																0-5
+															</th>
+														</tr>
+														<tr t-foreach="page.question_ids[15:16]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<t class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col">
+																	<span t-field="question.question" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																</td>
+																<td scope="col">
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																	<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																	</div>
+																</td>
+															</t>
+														</tr>
+														<tr>
+															<th scope="col" class="font-weight-bold" style="padding: 1rem !important">
+																Time Constraint
+															</th>
+															<th scope="col" class="font-weight-bold" style="padding: 1rem !important">
+																0-5
+															</th>
+														</tr>
+														<tr t-foreach="page.question_ids[16:-3]" t-as="question">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id,page.id,question.id)" />
+															<t class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col">
+																	<span t-field="question.question" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																</td>
+																<td scope="col">
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																	<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																	</div>
+																</td>
+															</t>
+														</tr>
+													</t>
+													<t t-if="survey.title.strip() == presentation">
+														<t t-set="ques_no" t-value="0" />
+														<tr t-foreach="page.question_ids[4:11]" t-as="question">
+															<t t-set="ques_no" t-value="ques_no+1" />
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<t class="js_question-wrapper" t-att-id="prefix">
+																<td scope="col" class="font-weight-bold" style="vertical-align: middle;">
+																	<span t-field="question.question" />
+																	<span t-if="question.constr_mandatory" class="text-danger">
+																		*
+																	</span>
+																</td>
+																<td scope="col" class="font-weight-bold" style="vertical-align: middle;" >
+																	<t t-if="question.type == 'free_text'">
+																		<t t-call="kw_recruitment.free_text" />
+																	</t>
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<t t-if="question.type == 'date'">
+																		<t t-call="kw_recruitment.date" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'multiple_choice'">
+																		<t t-call="kw_recruitment.multiple_choice" />
+																	</t>
+																	<t t-if="question.type == 'matrix'">
+																		<t t-call="kw_recruitment.matrix" />
+																	</t>
+																	<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																	</div>
+																</td>
+																<td scope="col" t-foreach="page.question_ids[ques_no+10:ques_no+11]" t-as="question">
+																	<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+																	<t class="js_question-wrapper" t-att-id="prefix">
+																		<t t-if="question.type == 'free_text'">
+																			<t t-call="kw_recruitment.free_text" />
+																		</t>
+																		<t t-if="question.type == 'textbox'">
+																			<t t-call="kw_recruitment.textbox" />
+																		</t>
+																		<t t-if="question.type == 'numerical_box'">
+																			<t t-call="kw_recruitment.numerical_box" />
+																		</t>
+																		<t t-if="question.type == 'date'">
+																			<t t-call="kw_recruitment.date" />
+																		</t>
+																		<t t-if="question.type == 'simple_choice'">
+																			<t t-call="kw_recruitment.simple_choice" />
+																		</t>
+																		<t t-if="question.type == 'multiple_choice'">
+																			<t t-call="kw_recruitment.multiple_choice" />
+																		</t>
+																		<t t-if="question.type == 'matrix'">
+																			<t t-call="kw_recruitment.matrix" />
+																		</t>
+																	</t>
+																	<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																	</div>
+																</td>
+															</t>
+														</tr>
+													</t>
+												</tbody>
+											</table>
+											<t t-if="survey.title.strip() == presentation ">
+												<table id="survey_table2" class="table table-hover auto-index">
+													<tbody>
+														<tr t-foreach="page.question_ids[-1]" t-as="question">
+															<td>
+																Relevant Experience
+															</td>
+															<td scope="col">
+																<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+																<t class="js_question-wrapper" t-att-id="prefix">
+																	<t t-if="question.type == 'textbox'">
+																		<t t-call="kw_recruitment.textbox" />
+																	</t>
+																	<t t-if="question.type == 'simple_choice'">
+																		<t t-call="kw_recruitment.simple_choice" />
+																	</t>
+																	<t t-if="question.type == 'numerical_box'">
+																		<t t-call="kw_recruitment.numerical_box" />
+																	</t>
+																	<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																	</div>
+																</t>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</t>
+											<table id="survey_table2" class="table table-hover auto-index" t-if="survey.title.strip() != presentation ">
+												<thead class="">
+													<tr>
+														<th colspan="3" scope="col" style="padding: 1rem !important;">
+															Remarks
+														</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr t-foreach="page.question_ids[-3]" t-as="question">
+														<td>
+															Status
+														</td>
+														<td scope="col">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<t class="js_question-wrapper" t-att-id="prefix">
+																<t t-if="question.type == 'textbox'">
+																	<t t-call="kw_recruitment.textbox" />
+																</t>
+																<t t-if="question.type == 'simple_choice'">
+																	<t t-call="kw_recruitment.simple_choice" />
+																</t>
+																<t t-if="question.type == 'numerical_box'">
+																	<t t-call="kw_recruitment.numerical_box" />
+																</t>
+																<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																</div>
+															</t>
+														</td>
+													</tr>
+													<tr t-foreach="page.question_ids[-2]" t-as="question">
+														<td>
+															Relevant Experience
+														</td>
+														<td scope="col">
+															<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+															<t class="js_question-wrapper" t-att-id="prefix">
+																<t t-if="question.type == 'textbox'">
+																	<t t-call="kw_recruitment.textbox" />
+																</t>
+																<t t-if="question.type == 'simple_choice'">
+																	<t t-call="kw_recruitment.simple_choice" />
+																</t>
+																<t t-if="question.type == 'numerical_box'">
+																	<t t-call="kw_recruitment.numerical_box" />
+																</t>
+																<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																</div>
+															</t>
+														</td>
+													</tr>
+													<tr t-foreach="page.question_ids[-1]" t-as="question">
+														<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+														<t class="js_question-wrapper" t-att-id="prefix">
+															<td scope="col" colspan="3">
+																<t t-if="question.type == 'free_text'">
+																	<t t-call="kw_recruitment.free_text" />
+																</t>
+																<t t-if="question.type == 'textbox'">
+																	<t t-call="kw_recruitment.textbox" />
+																</t>
+																<t t-if="question.type == 'numerical_box'">
+																	<t t-call="kw_recruitment.numerical_box" />
+																</t>
+																<t t-if="question.type == 'date'">
+																	<t t-call="kw_recruitment.date" />
+																</t>
+																<t t-if="question.type == 'simple_choice'">
+																	<t t-call="kw_recruitment.simple_choice" />
+																</t>
+																<t t-if="question.type == 'multiple_choice'">
+																	<t t-call="kw_recruitment.multiple_choice" />
+																</t>
+																<t t-if="question.type == 'matrix'">
+																	<t t-call="kw_recruitment.matrix" />
+																</t>
+																<div class="js_errzone alert alert-danger" style="display:none;" role="alert">
+																</div>
+															</td>
+														</t>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+									</t>
+								</div>
+								<button class="btn btn-primary col-sm-2 badge mx-auto mb-3 meeting" type="button" onclick="window.history.go(-1);">
+									<i class="fa fa-arrow-circle-left " />
+									&amp;nbsp;
+									Back to meetings
+								</button>
+								<a class="btn white-text btn-primary col-sm-2 badge mx-auto mb-3 meeting" groups="base.group_user" t-att-href="'/kw_recruitment/survey/fill/%s/%s' % (slug(survey), token)">
+								Edit
+								</a>
+							</div>
+						</div>
+					</div>
+					<script>
+							$(document).ready(function(){
+								$('#survey_table22').find('tr:last').css("background-color","rgba(175, 171, 171, 0.51)");
+							});
+						</script>
+				</t>
+			</t>
+		</template>
+		<template id="survey_print_assets" inherit_id="kw_recruitment.survey_print">
+			<xpath expr="." position="inside">
+				<style>
+					input[type="number"] { background:none !important; border: none !important;}
+					input::-webkit-outer-spin-button,
+					input::-webkit-inner-spin-button {
+					-webkit-appearance: none;
+					margin: 0;
+					}
+					input[type=number] {
+					-moz-appearance:textfield;
+					}
+				</style>
+				<link rel="stylesheet" href="/kw_recruitment/static/src/css/survey_form.css " />
+				<link rel="stylesheet" href="/kw_recruitment/static/src/css/survey_print.css " />
+				<link href="/kwantify_theme/static/src/mdb/css/mdb.min.css" rel="stylesheet" />
+				<script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js">
+				</script>
+			</xpath>
+		</template>
+		<template id="sfinished_assets" inherit_id="kw_recruitment.sfinished">
+			<xpath expr="." position="inside">
+				<link rel="stylesheet" href="/kw_recruitment/static/src/css/style.css" />
+			</xpath>
+		</template>
+	</data>
+</odoo>

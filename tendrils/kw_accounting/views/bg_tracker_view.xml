@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Tree view for "model" -->
+        <record id="view_bg_tracker_tree" model="ir.ui.view">
+            <field name="name">view.bg_tracker.tree</field>
+            <field name="model">bg_tracker</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <tree string="bg_tracker_tree" create="true" delete="false"  
+                    decoration-danger="bg_expiry_date &lt; current_date and bg_closure_date == False" 
+                    decoration-info="bg_expiry_date &lt;= ckeck_thirty_days and bg_expiry_date > current_date and bg_closure_date == False" 
+                    decoration-muted="bg_closure_date != False">
+                    <field name="ckeck_thirty_days" invisible="1" />
+                    <field name="sl_no" string="Sl." />
+                    <field name="ifsc_code" string="Bank" />
+                    <field name="bg_number" />
+                    <field name="bg_date" invisible="1"/>
+                    <field name="bg_date_char" string="BG Date" class="date_width"/>
+                    <field name="bg_amount" sum="Total"/>
+                    <field name="bg_expiry_date" invisible="1"/>
+                    <field name="bg_expiry_date_char" string="BG Expiry"  class="date_width"/>
+                    <field name="claim_date" string="BG Claim Date" invisible="1"/>
+                    <field name="claim_date_char" string="BG Claim Date" class="date_width"/>
+                    <field name="bg_expenses" sum="Total" string="BG Exp. Amt."/>
+                    <field name="bg_closure_date" invisible="1" />
+                    <field name="bg_closure_date_char"  class="date_width" string="BG Closure"/>
+                    <field name="bg_purpose" />
+                    <field name="fd_amount" sum="Total" string="FD Lien Amt."/>
+                    <field name="fd_reference_ids" widget="many2many_tags"/>
+                    <field name="wo_id" invisible="1"/>
+                    <field name="wo_number" />
+                    <field name="wo_name" />
+                    <field name="client_name" />
+                    <field name="project_amount" sum="Total"/>
+                    <field name="csg_head_id" />
+                    <field name="account_holder_id" />
+                    <field name="transaction_expiry" string="Follow up BG Return By" invisible="1"/>
+                    <field name="transaction_expiry_char" string="Follow up BG Return By" class="date_width"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="view_bg_tracker_form" model="ir.ui.view">
+            <field name="name">view.bg_tracker.form</field>
+            <field name="model">bg_tracker</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <form string="bg_tracker_form" create="true" delete="true" edit="true">
+                    <header>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="bg_number" class="oe_edit_only" />
+                            <h1>
+                                <field name="bg_number" class="oe_inline"
+                                    placeholder="BG Number" required="1"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <!-- <field name="sl_no" /> -->
+                                <field name="bank_id"  options="{'no_create': True, 'no_open': True, 'no_create_edit': True}"  required="1"/>
+                                <field name="bg_date"  required="1"/>
+                                <field name="bg_amount"  required="1"/>
+                                <field name="bg_expenses"  required="1"/>
+                                <field name="bg_expiry_date"  required="1"/>
+                                <field name="claim_date"  required="1"/>
+                                <field name="bg_purpose"  required="1"/>
+                                <field name="bg_closure_date"/>
+                            </group>
+                            <group>
+                                <field name="wo_id" attrs="{'invisible': [('bg_purpose','!=','workorder')],'required': [('bg_purpose','=','workorder')]}" context="{'show_code':1}" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}" />
+                                <field name="client_name" string="Recepient" attrs="{'required': [('bg_purpose','=','workorder')]}"/>
+                                <field name="project_amount" />
+                                <field name="csg_head_id" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}" required="1"/>
+                                <field name="account_holder_id" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}" required="1"/>
+                                <field name="fd_amount" required="1"/>
+                                <field name="transaction_expiry" />
+                                <field name="bg_scan_file" />
+                                <field name="ref_doc" />
+                            </group>
+                        </group>
+                        <group>
+                            <field name="fd_reference_ids" options="{'no_create': True,'no_create_edit': True}">
+                                <tree editable="bottom">
+                                    <field name="parent_id" invisible="1" />
+                                    <field name="fd_id" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}" />
+                                    <field name="fd_start_date" />
+                                    <field name="fd_maturity_date" />
+                                    <field name="fd_principal_amt" />
+                                    <field name="bg_amount" string="Lien Amount" />
+                                </tree>
+                            </field>
+                            <field name="finance_remarks" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        
+        <!-- Search view for "model" -->
+        <record id="view_bg_tracker_search" model="ir.ui.view">
+            <field name="name">view.bg_tracker.search</field>
+            <field name="model">bg_tracker</field>
+            <field name="type">search</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <search string="bg_tracker_search">
+                    <field name="bg_number" />
+                    
+                </search>
+            </field>
+        </record>
+        
+        <!-- Main window action for "model" -->
+        <record id="action_bg_tracker_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">BG Tracker</field>
+            <field name="res_model">bg_tracker</field>
+            <field name="view_mode">tree,pivot,form</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>
+            <field name="search_view_id" ref="view_bg_tracker_search" />
+        </record>
+        
+        <!-- Main menu for "model" -->
+        
+        
+        <record model="ir.ui.view" id="bg_tracker_pivot_view">
+            <field name="name">BG Tracker Pivot</field>
+            <field name="model">bg_tracker</field>
+            <field name="arch" type="xml">
+                <pivot>
+                    <field name="fd_reference_ids" type="col"/>
+                </pivot>
+            </field>
+        </record>
+
+        <record id="action_bg_tracker_report" model="ir.actions.client">
+            <field name="name">BG Report</field>
+            <field name="tag">kw_accounting.fd_bg_report</field>
+        </record>   
+        
+        
+    </data>
+</odoo>

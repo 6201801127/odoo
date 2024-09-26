@@ -1,0 +1,97 @@
+<odoo>
+<data>
+<record model="ir.ui.view" id="informed_lost_and_found_tree">
+    <field name="name"> Informed Lost And Found</field>
+    <field name="model">kw_lost_and_found</field>
+    <field name="arch" type="xml">
+      <tree delete='0' create="0" edit="0">
+        <field name="code" />
+        <field name="lost_datetime" />
+        <field name="category"/>
+        <field name="item_name"/>
+        <field name="item_attributes"/>
+        <!-- <field name="tentative_location" /> -->
+        <field name="upload_image" widget="image" options="{'preview_image': 'image', 'size': [30, 30]}" class="oe_avatar"/>
+        
+        <field name="state"/>
+        <field name="create_uid" />
+        <field name="requested_by" options="{'no_open':True,'no_create':True,'no_edit': True}"/>
+        <field name="informed_mail" invisible="1" />
+        <!-- <button name="action_informed_send_mail" string="Send Mail" type="object" class="btn-primary" attrs="{'invisible':[('informed_mail','=',True)]}"/> -->
+        <button name="action_request_close" string="Close" type="object" class="btn-danger"/>
+      </tree>
+    </field>
+  </record>
+
+
+  <record id="informed_add_item_view_form" model="ir.ui.view">
+    <field name="name">Informed Lost And Found</field>
+    <field name="model">kw_lost_and_found</field>
+    <field name="priority" eval="10" />
+    <field name="arch" type="xml">
+      <form string="" create="0" edit="0">
+        <header>
+          <button name="action_button_informed" string="Informed" type="object" class = "btn-primary" style="background-color:green;" attrs="{'invisible':['|',('id','=',False),('state', 'in' ,['informed','handover','discard'])]}"/>
+          <field name="state" widget="statusbar"/>
+        </header>
+        <sheet>
+          <style>
+            .item_label {font-size:11px;}
+          </style>
+          <group>
+            <group>
+              <field name="category" required="True"/>
+              <field name="requested_by" attrs="{'required':[('category','=','lost')],'invisible':[('category','=','found')]}" options="{'no_open':True,'no_create':True,'no_edit': True}"/>
+              <field name="item_name" required="True"/>
+              <label for="item_attributes" string="Item Attributes" class="oe_inline"/> <br/>
+              <label for="item_attributes" class="text-success font-italic item_label oe_inline" string="(brand,size,colour etc.)" style="font-size:11px"/>
+              <field name="item_attributes" required="True" nolabel="1" />
+              <field name="office_location_id"  options="{'no_open':True,'no_create':True,'no_edit': True}" required="1"/>
+              <field name="spoc_id" options="{'no_open':True,'no_create':True,'no_edit': True}" invisible="1"/>
+            </group>
+            <group>
+              <label for="lost_datetime" string="Date &amp; Time" attrs="{'invisible':[('category','=','found')]}"/><br attrs="{'invisible':[('category','=','found')]}"/>
+              <label for="lost_datetime" class="text-success font-italic item_label" string="(Approx)" style="font-size:11px" attrs="{'invisible':[('category','=','found')] }"/>
+              <field name="lost_datetime" string="Date &amp; Time" nolabel="1" required="1" attrs="{'invisible':[('category','=','found')] }" />
+
+              <field name="lost_datetime" string="Date &amp; Time" required="1" attrs="{'invisible':[('category','=','lost')] }" />
+              
+              <label for="lost_location" string="Lost Location" attrs="{'invisible':[('category','=','found')]}"/><br attrs="{'invisible':[('category','=','found')]}"/>
+              <label for="lost_location" class="text-success font-italic item_label" string="(Tentative)" style="font-size:11px" attrs="{'invisible':[('category','=','found')] }"/>
+              <field name="lost_location" nolabel="1" attrs="{'required':[('category','=','lost')],'invisible':[('category','=','found')] }"/>
+              
+              <field name="tentative_location" attrs="{'required':[('category','=','found')], 'invisible':[('category','=','lost')]}" />
+              <field name="upload_image" attrs="{'required':[('category','=','found')]}" widget="image" class="oe_avatar"/>
+            </group>
+          </group>
+          <group>
+            <field name="remark" />
+            <field name="found_date" attrs="{'invisible':['|',('id','=',False),('state', '=' ,'draft')]}"/>
+          </group>
+          <group attrs="{'invisible':['|',('id','=',False),('state', '=' ,'draft')]}">
+            <field name="response_log">
+              <tree editable="top">
+                <field name="lf_id" invisible="1" />
+                <field name="employee_id" options="{'no_open':True,'no_create':True,'no_edit': True}"/>
+                <field name="response" />
+              </tree>
+            </field> 
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record model="ir.actions.act_window" id="kw_infomrd_lost_and_found_action_window">
+    <field name="name">Lost Items</field>
+    <field name="res_model">kw_lost_and_found</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[('state','=','informed'),('category','=','lost'),('spoc_id.employee_id.user_id','=',uid)]</field>
+    <field name="view_ids" eval="[(5, 0, 0),
+      (0, 0, {'view_mode': 'tree', 'view_id': ref('informed_lost_and_found_tree')}),
+      (0, 0, {'view_mode': 'form', 'view_id': ref('informed_add_item_view_form')})]"/>
+  </record>
+
+</data>
+</odoo>

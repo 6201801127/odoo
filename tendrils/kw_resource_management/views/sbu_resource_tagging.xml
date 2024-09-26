@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="sbu_resource_tagging_tree" model="ir.ui.view">
+            <field name="name">sbu_resource_tagging.tree</field>
+            <field name="model">sbu_resource_tagging</field>
+            <field name="arch" type="xml">
+                <tree create='0' edit='0' delete='0' decoration-danger="applied_eos == True">
+                    <!-- <field name="id" string="Sl.No"/> -->
+                    <field name="code"/>
+                    <field name="employee_id" invisible='1'/>
+                    <field name="name"/>
+                    <field name="designation"/>
+                    <field name="date_of_joining"/>
+                    <field name="emp_role"/>
+                    <field name="emp_category"/>
+                    <field name="employement_type"/>
+                    <field name="job_branch_id"/>
+                    <field name="applied_eos" invisible='1'/>
+                    <field name="category_kw_id" invisible='1'/>
+                    <field name="sbu_type"/>
+                    <field name="sbu" invisible="1"/>
+                    <field name="sbu_name"/>
+                    <field name="primary_skill_id"/>
+                    <field name="engagement_plan" />
+                    <field name="engagement_plan_details"/>
+                    <field name="till_date"/>
+                    <field name="future_engagement" invisible='1'/>
+                    <field name="future_projection"/>
+                    <field name="total_experience_display" string="Experience"/>
+
+                    <!-- <field name="project_id" string='Future Projection' /> -->
+                    <!-- <field name="other_text" string='Other' /> -->
+                </tree>
+            </field>
+        </record>
+
+        <record id="sbu_resource_tagging_search_view" model="ir.ui.view">
+            <field name="name">sbu_resource_tagging search view</field>
+            <field name="model">sbu_resource_tagging</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="employee_id" string='Employee'/>
+                    <field name="designation" string="Employee Designation"/>
+                    <field name="emp_category" string=' Employee Category'/>
+                    <field name="emp_role" string='Employee Role'/>
+                    <field name="employement_type" string="Employment Type"/>
+                    <field name="job_branch_id" string='Location'/>
+                    <field name="future_projection" string='Future Projection'/>
+                    <field name="engagement_plan" string='Engagement Plan'/>
+                    <separator string='Employee Category'/>
+                    <filter string="Coding" domain="[('category_kw_id','=',3)]" name="january_end_date"/>
+                    <filter string="Delivery" domain="[('category_kw_id','=',7)]" name="january_end_date"/>
+                    <filter string="Project Management" domain="[('category_kw_id','=',1)]" name="january_end_date"/>
+                    <filter string="Team/Tech Lead" domain="[('category_kw_id','=',19)]" name="january_end_date"/>
+                    <filter name="sbu_type" string="Resource Type" domain="[]" context="{'group_by':'sbu_type'}"/>
+                    <filter string="Tagged" domain="[('sbu_type','in',['sbu','horizontal'])]" name="sbu_tagged"/>
+                    <filter string="Un Tagged" domain="[('sbu_type','not in',['sbu','horizontal'])]" name="sbu_untagged"/>
+                </search>
+            </field>
+        </record>
+
+        <!-- kw_contract_end_log action window -->
+        <record id="sbu_resource_tagging_action" model="ir.actions.act_window">
+            <field name="name">SBU Tagging</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sbu_resource_tagging</field>
+            <field name="view_mode">tree</field>
+            <field name="view_type">form</field>
+            <field name="context">{}</field>
+
+        </record>
+  
+        <record id="sbu_tagging_wizard_form" model="ir.ui.view">
+            <field name="name">sbu_tagging_wizard form</field>
+            <field name="model">sbu_tagging_wizard</field>
+            <field name="arch" type="xml">
+                <form string="SBU Tagging">
+                    <script>
+                        $(document).ready(function(){
+                        $(".modal-title").show();
+                        });
+                    </script>
+                    <header>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="employee_ids" style="pointer-events:none;" readonly="1">
+                                    <tree>
+                                        <field name="code"/>
+                                        <field name="employee_id" invisible='1'/>
+                                        <field name="name"/>
+                                        <field name="designation"/>
+                                        <field name="date_of_joining"/>
+                                        <field name="emp_role"/>
+                                        <field name="emp_category"/>
+                                        <field name="job_branch_id"/>
+                                    </tree>
+                                </field>
+                                <field name="sbu_tagging" required="1" widget="radio" options="{'horizontal': true}" invisible="1"/>
+                                <field name="sbu_type" required="1" widget="radio" options="{'horizontal': true}" attrs="{'invisible':[('sbu_tagging','=','untag')]}" invisible="1"/>
+
+                            </group>
+                            <group>
+                                <field name="sbu_master_id" options="{'no_create': True, 'no_edit':True, 'no_open': True}" domain="[('type','=',sbu_type)]" attrs="{'invisible':[('sbu_tagging','=','untag')],'required':[('sbu_tagging','=','tag')]}"/>
+                                <field name="primary_skill_id" invisible="1"/>
+                                <field name="send_mail" />
+
+                            </group>
+                            <group>
+                                <field name="emp_ids" attrs="{'invisible':[('send_mail', '=', False)]}" >
+                                    <tree editable="top" create="0" delete="0">
+    
+                                        <field name="employee_id" readonly="1" force_save="1" invisible="1"/>
+                                        <field name="emp_name" string="Employee Name"/>
+                                        <field name="designation" readonly="1" force_save="1"/>
+                                        <field name="joining_date" readonly="1" force_save="1"/>
+                                        <field name="technology" readonly="1" force_save="1"/>
+                                        <field name="department" readonly="1" force_save="1"/>
+                                        <field name="location" readonly="1" force_save="1"/>
+                                        <field name="type_of_employee" readonly="1" force_save="1"/>
+                                        <!-- <field name="resource"/> -->
+                                        <!-- <field name="replacement_of" options="{'no_open': True,'no_create':True,'no_edit':True}" /> -->
+                                        <!-- <field name="experience"/> -->
+                                        <!-- <field name="qualification"/> -->
+                                        <!-- <field name="planned_project" options="{'no_open': True,'no_create':True,'no_edit':True}" /> -->
+                                        <field name="state" invisible="1"/>
+                                        <field name="primary_skill_id" invisible="1"/>
+                                        <field name="sbu_master_id" invisible="1"/>
+    
+    
+                                    </tree>
+                                </field>
+                            </group>
+                            <group>
+                                <field name="department_id" invisible='1'/>
+                                <field name="division" options="{'no_open': True,'no_create':True,'no_edit':True}" invisible="1"/>
+                                <field name="section" options="{'no_open': True,'no_create':True,'no_edit':True}" invisible="1"/>
+                                <field name="practise" options="{'no_open': True,'no_create':True,'no_edit':True}" invisible="1"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="cc_employee" widget="many2many_tags" attrs="{'invisible':[('send_mail', '=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="share_sbu_info_with_employee" string="Confirm" type="object" class="btn btn-warning" icon="fa-check" confirm="Are you sure, you want to confirm?"/>
+
+                        <button string="Close" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <act_window id="action_sbu_tagging_share_hr_module_wizard" name="SBU Tagging" src_model="sbu_resource_tagging" res_model="sbu_tagging_wizard" view_type="form" view_mode="form" view_id="sbu_tagging_wizard_form" key2="client_action_multi" target="new"/>
+
+
+        <record id="central_bench_wizard_form" model="ir.ui.view">
+            <field name="name">central_bench_wizardform</field>
+            <field name="model">central_bench_wizard</field>
+            <field name="arch" type="xml">
+                <form string="Central Bench Engagement">
+                    <sheet>
+                        <group>
+                            <field name="employee_ids" style="pointer-events:none;" readonly="1"/>
+                        </group>
+                            <group>
+                                <group>
+                                    <field name="engagement_plan" options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                                    <field name="till_date" required="1"/>
+                                    <field name="future_engagement" widget="radio" options="{'horizontal': true}" required="1"/>
+                                    <field name="project_id"  attrs="{'invisible':[('future_engagement','in',('other',False))],'required':[('future_engagement','=','project')]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                    <field name="other_text" attrs="{'invisible':[('future_engagement','in',('project',False))],'required':[('future_engagement','=','other')]}" />
+                                    <field name="check_bool" invisible='1'/>
+                                    <field name="plan_details" attrs="{'invisible':[('check_bool','!=',True)],'required':[('check_bool','=',True)]}"/>
+                                </group>
+                            </group>
+                    </sheet>
+                    <footer>
+                        <button name="engagement_to_project" string="Confirm" type="object" class="btn btn-warning" icon="fa-check" confirm="Are you sure, you want to confirm?"/>
+
+                        <button string="Close" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <act_window id="action_cental_bench_engagement_module_wizard" name="Central Bench Engagement" src_model="sbu_resource_tagging" res_model="central_bench_wizard" view_type="form" view_mode="form" view_id="central_bench_wizard_form" key2="client_action_multi" target="new"/>
+
+
+
+    </data>
+</odoo>

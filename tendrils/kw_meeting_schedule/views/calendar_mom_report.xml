@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <report id="report_meeting_draft_mom"
+        model="kw_meeting_events"
+        string="Draft MOM"
+        report_type="qweb-pdf"
+        name="kw_meeting_schedule.report_meeting_schedule_draft_mom"
+        file="meeting_draft_mom"
+        menu="False"
+       
+        
+        />
+
+        <!--  attachment_use="True"
+        attachment="(object.state in ('open','paid')) and
+        ('INV'+(object.number or '').replace('/','')+'.pdf')" -->
+
+
+        <template id="report_meeting_schedule_draft_mom">
+            <t t-call="web.basic_layout">
+
+                <xpath expr="//div[@class='header']" position="replace">
+
+                        <div class="header" style="font-family: Arial, Helvetica, sans-serif;font-size: 15px;">
+
+                            <div class="container" style="margin: 0 auto;">
+                                <div class="main-form" style="background: #fff;">
+                                <table style="text-align: center;background-color: rgba(64, 255, 255, 0.45);width: 100%;border-spacing: 0px;border-collapse: collapse;">
+                                    <tr>
+                                        <td rowspan="2" style="border: 1px solid #000;padding: 0.2rem;"><img src="kw_meeting_schedule/static/img/csm_logo.png" /></td>
+                                        <td style="border: 1px solid #000;padding: 0.2rem;"><h3 style="margin: 0px;font-size: 17px;">Quality System Document</h3><p style="margin: 5px;">CSM Technologies</p></td>
+                                        <td style="border: 1px solid #000;padding: 0.2rem;"><small>Document # :</small><h4 style="margin: 5px;">CSM/QF/08/01</h4></td>
+                                        <td style="border: 1px solid #000;padding: 0.2rem;"><p style="margin: 5px;font-size: 12px;">Rev.: <b style="font-size: 16px;">2.0</b></p><p  style="margin: 0px;font-size: 12px;">Page#: <b style="font-size: 16px;">1 of 1</b></p></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: 1px solid #000;padding: 0.2rem;"><h3 style="margin: 0px;font-size: 16px;">Minutes of Meeting</h3></td>
+                                        <td style="border: 1px solid #000;padding: 0.2rem;"></td>
+                                        <td style="border: 1px solid #000;padding: 0.2rem;"></td>
+                                    </tr>
+                                </table>  
+                            </div>
+                            </div>
+
+                        </div>
+                </xpath>
+                <div class="page" style="font-family: Arial, Helvetica, sans-serif;font-size: 15px;">    
+                    <div class="container" style="margin: 0 auto;">
+                    <div class="main-form" style="background: #fff;">
+                    <t t-foreach="docs" t-as="doc"> 
+                        <div class="sub-data" style="margin-top: 40px;">
+                            <h6 style="margin: 5px;">Subject  <span style="margin-left: 116px;">: </span><span t-field="doc.name"/></h6>
+                            <h6 style="margin: 5px;">Room No  <span style="margin-left: 125px;">: </span><span t-field="doc.meeting_room_id.name"/></h6>
+                            <h6 style="margin: 5px;">Date &amp; Time  <span style="margin-left: 80px;">: </span><span t-field="doc.display_time"/></h6>
+                            <!-- <h6 style="margin: 5px;">Duration  <span style="margin-left: 108px;">: </span><span t-field="doc.duration"/></h6> -->
+                            <h6 style="margin: 5px;">Organiser(s)  <span style="margin-left: 67px;">: </span><span t-field="doc.user_id.name"/></h6>
+                            <h6 style="margin: 5px;">Participants  <span style="margin-left: 85px;">: </span>
+                                 <t t-foreach="docs.attendee_ids" t-as="attendee"> 
+                                     <span t-field="attendee.common_name"/> ,
+                                </t>
+                            </h6>
+                            <h6 style="margin-top: 15px;margin-left: 5px;">Minutes Controller  <span style="margin-left: 38px;">: </span><span t-field="doc.mom_controller_id.name"/></h6>
+                        </div>
+                       <!--  <span t-field="doc.draft_mom_content"/> -->
+                         <t t-if="doc.agenda_ids"> 
+                            <t t-if="doc.has_info_act">  
+                            <h4 style="margin-top: 25px;font-size: 16px;margin-bottom: 15px;">Points Discussed : </h4>
+                            <table style="text-align: left;width: 100%;border-spacing: 0px;border-collapse: collapse;font-size: 14px;">
+                                <tr>
+                                    <th style="border: 1px solid #000;padding: 0.5rem;">Sl. #</th>
+                                    <th style="border: 1px solid #000;padding: 0.5rem;">AGENDA</th>
+                                    <th style="border: 1px solid #000;padding: 0.5rem;">DETAILS</th> 
+                                </tr>
+                                <t t-set="sl_no" t-value="1"/>
+                                <t t-foreach="doc.agenda_ids" t-as="agenda">
+                                    
+                                    <t t-foreach="agenda.activity_ids" t-as="agenda_activity">
+                                        <t t-if="agenda_activity.activity_type=='info'">
+                                            <tr>
+                                                <td style="border: 1px solid #000;padding: 0.5rem;"><t t-esc="sl_no" /><t t-set="sl_no" t-value="sl_no+1"/></td>
+                                                <td style="border: 1px solid #000;padding: 0.5rem;">                                                
+                                                    <t t-esc="agenda.name" />                                                
+                                                </td>
+                                                <td style="border: 1px solid #000;padding: 0.5rem;"  t-esc="agenda_activity.name" >                                                                                                                                                           
+                                                </td>
+                                            </tr>
+                                        </t>
+                                        
+                                    </t>
+                                </t>                                
+                            </table>
+                            </t>
+                            <t t-if="doc.has_activity_act">  
+                            <h4 style="margin-top: 25px;font-size: 16px;margin-bottom: 15px;">Activity with Target : </h4>
+
+                            <table style="text-align: left;width: 100%;border-spacing: 0px;border-collapse: collapse;font-size: 14px;">
+                                <tr>
+                                    <th style="border: 1px solid #000;padding: 0.5rem;">Sl. #</th>
+                                    <th style="border: 1px solid #000;padding: 0.5rem;">AGENDA</th>
+                                    <th style="border: 1px solid #000;padding: 0.5rem;">DETAILS</th>
+                                    <th style="border: 1px solid #000;padding: 0.5rem;">RESPONSIBILITY </th>
+                                    <th style="border: 1px solid #000;padding: 0.5rem;">TARGET DATE </th>   
+                                </tr>
+                                <t t-set="sl_no" t-value="1"/>
+                                <t t-foreach="doc.agenda_ids" t-as="agenda">
+                                    <t t-foreach="agenda.activity_ids" t-as="agenda_activity">
+                                        <t t-if="agenda_activity.activity_type=='activity'">
+                                            <tr>
+                                                <td style="border: 1px solid #000;padding: 0.5rem;"><t t-esc="sl_no" /><t t-set="sl_no" t-value="sl_no+1"/></td>
+                                                <td style="border: 1px solid #000;padding: 0.5rem;">
+                                                    <t t-esc="agenda.name" />
+                                                </td>
+                                            
+                                                <td style="border: 1px solid #000;padding: 0.5rem;"  t-esc="agenda_activity.name" >                                                       
+                                                </td>
+                                                <td style="border: 1px solid #000;padding: 0.5rem;">
+                                                    <t t-esc="agenda_activity.assigned_to.name if agenda_activity.activity_type == 'activity' else '--'" />
+                                                </td>
+                                                <td style="border: 1px solid #000;padding: 0.5rem;">
+                                                    <t t-esc="agenda_activity.target_date.strftime('%d-%m-%Y') if agenda_activity.activity_type == 'activity' else '--'" />                                                
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                </t>                                
+                            </table>
+                            </t>
+                        </t>  <!-- End of activities -->
+
+                        
+                    </t>
+
+                    </div>
+                    </div>
+                 </div>
+
+                 <xpath expr="//div[@class='footer']" position="replace">
+                    <div class="footer">
+                        <div style="border-top: 1px solid #989898;margin-top: 40px;"></div>
+                            <p style="text-align: center;color: #5c5c5c;font-size: 10px;">VERIFY THAT THIS IS THE CORRECT REVISION BEFORE USE</p>
+                     </div>   
+                 </xpath>
+             </t>
+        </template>
+
+
+</odoo>

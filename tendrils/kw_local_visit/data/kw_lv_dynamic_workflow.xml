@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="kw_lv_dynamic_workflow_main" model="odoo.workflow">
+            <field name="name">Local Visit Approval</field>
+            <field name="activities_add" eval="True"/>
+            <field name="followers_add" eval="False"/>
+            <field name="mail_thread_add" eval="True"/>
+            <field name="remove_default_attrs_mod" eval="False"/>
+            <field name="model_id" ref="kw_local_visit.model_kw_lv_apply"/>
+        </record>
+
+        <record id="kw_lv_dynamic_workflow_node_0" model="odoo.workflow.node">
+            <field name="name">Office Out</field>
+            <field name="workflow_id" ref="kw_lv_dynamic_workflow_main"/>
+            <field name="node_name">office_out</field>
+            <field name="sequence" eval="1"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+        <record id="kw_lv_dynamic_workflow_node_1" model="odoo.workflow.node">
+            <field name="name">Applied</field>
+            <field name="workflow_id" ref="kw_lv_dynamic_workflow_main"/>
+            <field name="node_name">applied</field>
+            <field name="sequence" eval="2"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+        <record id="kw_lv_dynamic_workflow_node_2" model="odoo.workflow.node">
+            <field name="name">Approved</field>
+            <field name="workflow_id" ref="kw_lv_dynamic_workflow_main"/>
+            <field name="node_name">approved</field>
+            <field name="sequence" eval="3"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+        <record id="kw_lv_dynamic_workflow_node_3" model="odoo.workflow.node">
+            <field name="name">Rejected</field>
+            <field name="workflow_id" ref="kw_lv_dynamic_workflow_main"/>
+            <field name="node_name">rejected</field>
+            <field name="sequence" eval="4"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+        <record id="kw_lv_dynamic_workflow_node_4" model="odoo.workflow.node">
+            <field name="name">Not Required</field>
+            <field name="workflow_id" ref="kw_lv_dynamic_workflow_main"/>
+            <field name="node_name">no_required</field>
+            <field name="sequence" eval="5"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+        <record id="kw_lv_dynamic_workflow_link_1" model="odoo.workflow.link">
+            <field name="name">Applied -> Approved</field>
+            <field name="node_from" ref="kw_lv_dynamic_workflow_node_1"/>
+            <field name="node_to" ref="kw_lv_dynamic_workflow_node_2"/>
+        </record>
+
+        <record id="kw_lv_dynamic_workflow_link_2" model="odoo.workflow.link">
+            <field name="name">Applied -> Rejected</field>
+            <field name="node_from" ref="kw_lv_dynamic_workflow_node_1"/>
+            <field name="node_to" ref="kw_lv_dynamic_workflow_node_3"/>
+        </record>
+
+        <record id="kw_lv_dynamic_workflow_button_1" model="odoo.workflow.node.button">
+            <field name="sequence" eval="3"/>
+            <field name="workflow_id" ref="kw_lv_dynamic_workflow_main"/>
+            <field name="name">Approve</field>
+            <field name="node_id" ref="kw_lv_dynamic_workflow_node_2"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('state','not in',['applied']),('ra_access','=',False)]"/>
+            <field name="condition_code">
+if (obj.emp_name.parent_id and obj.emp_name.parent_id.user_id.id  == user.id or obj.emp_name.parent_id.parent_id.user_id.id == user.id):
+    result= True
+else:
+    warning("You are not allowed to approve this Local visit")
+    result = False
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_local_visit.kw_lv_approve_remark_form_view").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_lv_apply',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'res_id': obj.id,
+    'view_id': form_view_id,
+    'target': 'new',
+    'domain': [('id', '=', obj.id)]
+    }
+            </field>
+        </record>
+
+        <record id="kw_lv_dynamic_workflow_button_2" model="odoo.workflow.node.button">
+            <field name="sequence" eval="4"/>
+            <field name="workflow_id" ref="kw_lv_dynamic_workflow_main"/>
+            <field name="name">Reject</field>
+            <field name="node_id" ref="kw_lv_dynamic_workflow_node_3"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('state','not in',['applied']),('ra_access','=',False)]"/>
+            <field name="condition_code">
+if (obj.emp_name.parent_id and obj.emp_name.parent_id.user_id.id  == user.id or obj.emp_name.parent_id.parent_id.user_id.id == user.id):
+    result= True
+else:
+    warning("You are not allowed to reject this local visit")
+    result = False
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_local_visit.kw_lv_reject_remark_form_view").id
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_lv_apply',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'res_id': obj.id,
+    'view_id': form_view_id,
+    'target': 'new',
+    'domain': [('id', '=', obj.id)]
+    }
+            </field>
+
+        </record>
+
+        <record id="kw_lv_dynamic_workflow_button_3" model="odoo.workflow.node.button">
+            <field name="sequence" eval="2"/>
+            <field name="workflow_id" ref="kw_lv_dynamic_workflow_main"/>
+            <field name="name">Office Out</field>
+            <field name="node_id" ref="kw_lv_dynamic_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="[('status','in',['office_out','office_in'])]"/>
+            <field name="condition_code">
+result = obj.dynamic_status()
+if result:
+    result=True
+else:
+    result = False
+    </field>
+            <field name="action_type">code</field>
+            <field name="code">
+obj.update_ofc_out()
+action = env['ir.actions.act_window'].for_xml_id('kw_local_visit', 'kw_lv_apply_action_window')
+            </field>
+
+        </record>
+
+    </data>
+</odoo>

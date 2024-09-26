@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+		<record model="ir.ui.view" id="payslip_ledger_form">
+			<field name="name">Payslip Ledger</field>
+			<field name="model">kw_payslip_ledger</field>
+			<field name="arch" type="xml">
+				<tree editable="top">
+					<field name="year" attrs="{'readonly':[('boolean_readonly','=',True)]}"
+					       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+					<field name="month" attrs="{'readonly':[('boolean_readonly','=',True)]}"/>
+					<field name="employee_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+					       attrs="{'readonly':[('boolean_readonly','=',True)]}" context="{'tree_view_ref':'kw_hr_leaves.hr_employee_encashment_tree_view'}"/>
+					<field name="contract_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+					       attrs="{'readonly':[('boolean_readonly','=',True)]}" groups='base.group_no_one'/>
+					<field name="company_id" options="{'no_open': True,'no_create':True,'no_edit':True}" required='1'/>
+					<field name="salary_rule_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+					       attrs="{'readonly':[('boolean_readonly','=',True)]}"/>
+					<field name="amount" attrs="{'readonly':[('boolean_readonly','=',True)]}" sum='Total'/>
+					<field name="boolean_readonly" readonly="1"/>
+				</tree>
+			</field>
+		</record>
+		<record id="payslip_ledger_view_search" model="ir.ui.view">
+			<field name="name">kw_payslip_ledger.view.search</field>
+			<field name="model">kw_payslip_ledger</field>
+			<field name="arch" type="xml">
+				<search string="Search Description">
+					<!-- Add your fields here -->
+					<field name="month"/>
+					<field name="employee_id"/>
+					<field name="salary_rule_id" string="Rule"/>
+					<field name="company_id"/>
+					<filter string="This Year" domain="[('year', '=',context_today().strftime('%Y'))]"
+					        name="current_year_salary"/>
+					<filter string="Last Year"
+					        domain="[('year', '=',(context_today()-relativedelta(years=1)).strftime('%Y'))]"
+					        name="last_year_salary"/>
+					<separator/>
+					<filter string="This Month" name="by_current_month_year" domain="[('current_month','=',True)]"/>
+					<filter string="January" domain="[('month','=',1)]" name="january_salary"/>
+					<filter string="February" domain="[('month','=',2)]" name="february_salary"/>
+					<filter string="March" domain="[('month','=',3)]" name="march_salary"/>
+					<filter string="April" domain="[('month','=',4)]" name="april_salary"/>
+					<filter string="May" domain="[('month','=',5)]" name="may_salary"/>
+					<filter string="June" domain="[('month','=',6)]" name="june_salary"/>
+					<filter string="July" domain="[('month','=',7)]" name="july_salary"/>
+					<filter string="August" domain="[('month','=',8)]" name="august_salary"/>
+					<filter string="September" domain="[('month','=',9)]" name="september_salary"/>
+					<filter string="October" domain="[('month','=',10)]" name="october_salary"/>
+					<filter string="November" domain="[('month','=',11)]" name="november_salary"/>
+					<filter string="December" domain="[('month','=',12)]" name="december_salary"/>
+					<group expand="0" string="Group By">
+						<filter string="Employee" name="employee" context="{'group_by':'employee_id'}"/>
+						<filter string="Company" name="company" context="{'group_by':'company_id'}"/>
+					</group>
+				</search>
+			</field>
+		</record>
+
+		<record id="kw_payslip_ledger_window" model="ir.actions.act_window">
+			<field name="name">Payslip Ledger</field>
+			<field name="res_model">kw_payslip_ledger</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree</field>
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					No Records to show...
+				</p>
+			</field>
+		</record>
+
+
+		<record id="kw_payslip_ledger_confirm_window" model="ir.actions.act_window">
+			<field name="name">Payslip Ledger Report</field>
+			<field name="res_model">kw_payslip_ledger</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree</field>
+			<field name="domain">[('boolean_readonly','=',True)]</field>
+			<field name="context">{'create':False,'edit':False,'import':False,'search_default_current_year_salary':1,'search_default_by_current_month_year':1}</field>
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					No Records to show...
+				</p>
+			</field>
+		</record>
+		<!-- <record id="kw_payslip_ledger_server_action" model="ir.actions.server">
+            <field name="name">Payslip Ledger</field>
+            <field name="condition">True</field>
+            <field name="model_id" ref="payroll_inherit.model_kw_payslip_ledger"/>
+            <field name="state">code</field>
+            <field name="code">
+form_view_id = env.ref('payroll_inherit.view_kw_payroll_report_form').id
+action = {
+		'type': 'ir.actions.act_window',
+		'name' : 'Payslip Ledger',
+		'view_mode': 'form',
+		'view_mode': 'form',
+		'res_model': 'kw_payroll_reports',
+		'views': [(form_view_id,'form')],
+		'target': 'new',
+		'context':{'kw_payslip_ledger':True},
+}
+            </field>
+    </record> -->
+		<menuitem name="Payslip Ledger" id="payslip_ledger_menu" parent="process_payroll_menu"
+		          action="kw_payslip_ledger_window" sequence="20"/>
+		<menuitem name="Payslip Ledger Report" id="payslip_ledger_report_menu" parent="payroll_inherit.payroll_report_root_menu_act" action="kw_payslip_ledger_confirm_window" sequence="16"/>
+	</data>
+</odoo>

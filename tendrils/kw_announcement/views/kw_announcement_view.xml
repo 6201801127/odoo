@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+		<!-- explicit tree view definition Opening -->
+		<record id="kw_announcement_tree_view" model="ir.ui.view">
+			<field name="name">Announcements</field>
+			<field name="model">kw_announcement</field>
+			<field name="arch" type="xml">
+				<tree decoration-warning="state == 'draft'">
+					<!--  <field name="category_id"/> -->
+					<field name="headline"/>
+					<field name="start_date" string="Created On"/>
+					<field name="create_uid" string="Created By"/>
+					<field name="no_of_comment"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		<!-- explicit tree view definition Ending -->
+
+		<!-- explicit kanban view definition Opening -->
+		<record id="kw_announcement_kanban_view" model="ir.ui.view">
+			<field name="name">kw_announcement_kanban</field>
+			<field name="model">kw_announcement</field>
+			<field name="priority">10</field>
+			<field name="arch" type="xml">
+				<kanban class="o_hr_employee_kanban">
+					<field name="id"/>
+					<field name="enable_comment"/>
+					<field name="color"/>
+					<field name="upload_image"/>
+
+					<templates>
+						<t t-name="kanban-box">
+							<div t-attf-class="#{kanban_color(record.color.raw_value)}  oe_kanban_global_click o_kanban_record_has_image_fill">
+
+								<div class=" o_hr_kanban_record">
+
+
+									<!-- <div class="o_kanban_image_fill_left d-none d-md-block" t-if="record.upload_image.raw_value" t-attf-style="background-image: url(#{kanban_image('kw_announcement', 'upload_image', record.id.raw_value)})" role="img"/>
+
+									<div class="o_kanban_image d-md-none rounded-circle" t-else="" >
+
+
+									</div> -->
+									<!-- Employee's picture optimized for mobile -->
+
+
+									<div class="oe_kanban_details">
+
+										<div class="o_kanban_image rounded-circle" t-if="record.upload_image.raw_value">
+											<field name="upload_image" nolabel="1" widget="image"
+											       class="oe_inline oe_right oe_avatar"/>
+										</div>
+
+										<div class="o_kanban_record_top">
+											<div class="o_kanban_record_headings">
+												<strong class="o_kanban_record_title">
+													<b>
+														<field name="headline"/>
+													</b>
+												</strong>
+											</div>
+										</div>
+										<ul>
+											<li>By
+												<field name="create_uid"/>
+											</li>
+											<li>
+												<field name="start_date"/>
+											</li>
+										</ul>
+										<div class="o_kanban_primary_bottom bottom_block oe_right"
+										     t-if="record.enable_comment.raw_value">
+											<span title='Comments'>
+												<field name="no_of_comment"/>
+												<i class='fa fa-comment' role="img" aria-label="Comments"/>
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						</t>
+					</templates>
+				</kanban>
+
+			</field>
+		</record>
+		<!-- explicit kanban view definition Ending -->
+
+		<!-- explicit form view definition Opening -->
+		<record id="kw_announcement_form_view" model="ir.ui.view">
+			<field name="name">Announcements</field>
+			<field name="model">kw_announcement</field>
+			<field name="arch" type="xml">
+				<form string="Announcements">
+					<header>
+						<button string="Publish" class="btn-primary"
+						        groups="kw_announcement.group_kw_announcement_publisher" type="object" name="publish"
+						        attrs="{'invisible': [('state','in',['published'])]}"/>
+						<button string="Move to Draft" class="btn-primary"
+						        groups="kw_announcement.group_kw_announcement_manager" type="object" name="return_to_draft"
+						        attrs="{'invisible': [('state','in',['draft'])]}"/>
+						<field name="state" widget="statusbar" />
+					</header>
+					<sheet>
+						<label for="category_id" class="oe_edit_only" attrs="{'readonly':[('state','in',['published'])],'required':[('category_code','!=','late_entry')],'invisible':[('state','in',['published']),('category_code','=','late_entry')]}"/>
+						<h2>
+						<field name="category_id" attrs="{'invisible':[('state','in',['published'])]}"
+						       groups="kw_announcement.group_kw_announcement_publisher,kw_announcement.group_kw_announcement_manager"
+                               options='{"no_open": True, "no_create": True}'/>
+						</h2>
+
+						<label for="headline" class="oe_edit_only" attrs="{'readonly':[('state','in',['published'])],'required':[('category_code','!=','late_entry')],'invisible':[('category_code','=','late_entry')]}"/>
+						<h1>
+							<field name="headline" attrs="{'readonly':[('state','in',['published'])],'required':[('category_code','!=','late_entry')],'invisible':[('state','not in',['published']),('category_code','=','late_entry')]}" />
+						</h1>
+						<field name="enable_comment" invisible="1"/>
+						<group>
+
+							<group groups="kw_announcement.group_kw_announcement_publisher,kw_announcement.group_kw_announcement_manager">
+								
+								<field name="category_code" invisible="1"/>
+								<field name="employee_id" options='{"no_open": True, "no_create": True}' 
+									attrs="{'invisible':[('category_code','!=','late_entry')],'required':[('category_code','=','late_entry')],'readonly':[('state','in',['published'])]}"/>
+								<field name="coming_to_office" widget="radio" options="{'horizontal': true}" attrs="{'invisible':[('category_code','!=','late_entry')],'readonly':[('state','in',['published'])]}"/>
+								<field name="office_time" attrs="{'invisible':['|',('coming_to_office','!=','yes'),('category_code','!=','late_entry')],'required':[('coming_to_office','=','yes')],'readonly':[('state','in',['published'])]}"/>
+								<field name="start_date" attrs="{'invisible':['|',('category_code','=','late_entry'),('state','in',['published'])]}"/>
+								<field name="expire_date" attrs="{'invisible':['|',('category_code','=','late_entry'),('state','in',['published'])]}"/>
+
+								<!--   <field name="employee_ids" widget="many2many_tags" attrs="{'invisible': ['|',('is_announcement', '!=', False), ('announcement_type', '!=', 'employee')]}"/>
+								<field name="department_ids" widget="many2many_tags" attrs="{'invisible': ['|',('is_announcement', '!=', False), ('announcement_type', '!=', 'department')]}"/>
+								<field name="position_ids" widget="many2many_tags" attrs="{'invisible': ['|',('is_announcement', '!=', False), ('announcement_type', '!=', 'job_position')]}"/>
+
+								<field name="requested_date" readonly="1"/>
+								<field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/> -->
+
+								<field name="send_mail_option" attrs="{'invisible':['|',('category_code','=','late_entry'),('state','in',['published'])]}"/>
+
+								<field name="send_whatsapp_msg" attrs="{'invisible':['|',('category_code','=','late_entry'),('state','in',['published'])]}"/>
+								<field name="whatsapp_template" options='{"no_open": True, "no_create": True}'
+								       attrs="{'invisible':['|',('state','in',['published']),('send_whatsapp_msg', '=', False)]}"/>
+
+								<field name="whatsapp_message"
+								       attrs="{'invisible':['|',('state','in',['published']),('whatsapp_template', '=', False)]}"/>
+
+							</group>
+							<group>
+								<field name="upload_doc" widget="binary" filename="file_name"
+								       attrs="{'readonly':[('state','in',['published'])],'invisible':['|',('category_code','=','late_entry'),('state','in',['published']),'&amp;',('upload_doc','=',False)]}"/>
+								<field name="file_name" invisible="1"/>
+								<div class="file-format-note" attrs="{'invisible':['|',('category_code','=','late_entry'),('state','in',['published'])]}">(Only
+									.pdf format is allowed.
+									<br/>
+									Maximum file size is 20 MB) &#x2063;
+								</div>
+
+								<field name="permitted_cat_ids" invisible="1"/>
+								<!--  <field name="upload_doc" attrs="{'readonly':[('state','in',['published'])],'invisible':['&amp;',('state','in',['published']),('upload_doc','=',False)]}" class="oe_inline" widget="pdf_viewer"/>  -->
+								<label for='upload_image' attrs="{'invisible':['|',('category_code','=','late_entry'),('state','in',['published'])]}"/>
+
+								<field name="upload_image" widget="image" nolabel='1' class="oe_inline oe_avatar"
+								       attrs="{'readonly':[('state','in',['published'])],'invisible':['|',('category_code','=','late_entry'),('state','in',['published'])]}"/>
+
+								<!-- <field name="upload_image" widget="image" nolabel='1' class="oe_inline oe_avatar" attrs="{'readonly':[('state','in',['published'])],'invisible':['&amp;',('state','in',['published']),('upload_image','=',False)]}" /> -->
+
+								<div class="file-format-note" attrs="{'invisible':['|',('category_code','=','late_entry'),('state','in',['published'])]}">(Only
+									.jpeg,.jpg,.png, .gif format are allowed.
+									<br/>
+									Maximum file size is 5 MB) &#x2063;<span style="color:red;">*</span>
+								</div>
+
+								
+							</group>
+
+						</group>
+						<group name="announcement" attrs="{'invisible':['|',('category_code','=','late_entry'),'&amp;',('state','in',['published']),('description','=',False)]}">
+							<field name="description" attrs="{'readonly':[('state','in',['published'])],'invisible':['|',('category_code','=','late_entry'),'&amp;',('state','in',['published']),('description','=',False)]}"/>
+						</group>
+						<group attrs="{'invisible':['|',('category_code','=','late_entry'),('state','in',['published'])]}">
+							<group name="select_group" 
+								      groups="kw_announcement.group_kw_announcement_publisher,kw_announcement.group_kw_announcement_manager"
+								      attrs="{'invisible':[('state','in',['published'])]}">
+								<field name="broadcasting_group"
+								       attrs="{'invisible':['|',('enable_location','=',True),('state','in',['published'])]}"
+								       options='{"no_open": True, "no_create": True}' string="Choose Your Audience"/>
+								<field name="broadcast_location"
+								       attrs="{'invisible':['|',('enable_location','=',False),('state','in',['published'])]}"
+								       options='{"no_open": True, "no_create": True}'/>
+								<field name="enable_location" invisible="1"/>
+								<field name="company_partner_id" invisible="1"/>
+							</group>
+						   	<group>
+                                <field name="contact_ids" attrs="{'invisible':[('state','in',['published'])]}" domain="[('is_announcement','=', True)]" options="{'no_create': True,}">
+                                      <tree create="true" editable="bottom">
+                                            <field name="name" required="1" context="{'default_is_announcement':1, 'search_default_is_announcement': 1}"/>
+                                            <field name="email" required="1"/>
+                                        </tree>
+                                    </field>
+                           </group> 
+						</group>
+						<!-- <notebook>
+							<page name="announcement" string="Description"
+							      attrs="{'invisible':['&amp;',('state','in',['published']),('description','=',False)]}">
+								<field name="description"
+								       attrs="{'readonly':[('state','in',['published'])],'invisible':['&amp;',('state','in',['published']),('description','=',False)]}"/>
+							</page>
+							<page name="select_group" string="Choose Your Audience"
+							      groups="kw_announcement.group_kw_announcement_publisher,kw_announcement.group_kw_announcement_manager"
+							      attrs="{'invisible':[('state','in',['published'])]}">
+
+								<group>
+									<field name="broadcasting_group"
+									       attrs="{'invisible':['|',('enable_location','=',True),('state','in',['published'])]}"
+									       options='{"no_open": True, "no_create": True}'/>
+								</group>
+
+								<group>
+									<field name="broadcast_location"
+									       attrs="{'invisible':['|',('enable_location','=',False),('state','in',['published'])]}"
+									       options='{"no_open": True, "no_create": True}'/>
+								</group>
+
+								<field name="enable_location" invisible="1"/>
+								<field name="company_partner_id" invisible="1"/>
+
+							</page>
+
+						</notebook> -->
+
+						<separator string="Comment Section"
+						           attrs="{'invisible':['|',('enable_comment','=',False),('state','in',['draft'])]}"/>
+						<div attrs="{'invisible':['|',('enable_comment','=',False),('state','in',['draft'])]}">
+							<!-- <h4 class="o_org_chart_title mb16 mt0">Organization Chart</h4> -->
+							<field name="comments_ids" widget="list.kwannounce_comment_box"/>
+						</div>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<!-- actions views Opening-->
+		<record id="view_kw_announcement_filter" model="ir.ui.view">
+			<field name="name">kw_announcement_filter_records</field>
+			<field name="model">kw_announcement</field>
+			<field name="arch" type="xml">
+				<search string="Search announcements">
+					<field name="state"/>
+					<field name="start_date"/>
+					<field name="expire_date"/>
+					<field name="create_uid"/>
+					<field name="category_id"/>
+
+					<filter string="Today's Announcements"
+					        domain="['&amp;',('start_date', '&lt;=',context_today().strftime('%Y-%m-%d')),('expire_date', '&gt;=',context_today().strftime('%Y-%m-%d'))]"
+					        name="today_announcement"
+					        groups="kw_announcement.group_kw_announcement_publisher,kw_announcement.group_kw_announcement_manager"/>
+
+					<filter string="Announcement Date" name="start_date" date="start_date"/>
+
+					<filter domain="[('create_uid','=',uid)]" string="My Announcements" name="my_announcement"
+					        groups="kw_announcement.group_kw_announcement_publisher,kw_announcement.group_kw_announcement_manager"/>
+
+					<filter string="Expired Announcements" groups="kw_announcement.group_kw_announcement_manager"
+					        domain="[('expire_date', '&lt;',context_today().strftime('%Y-%m-%d'))]"
+					        name="expired_announcement"/>
+
+					<filter string="Future Announcements"
+					        groups="kw_announcement.group_kw_announcement_publisher,kw_announcement.group_kw_announcement_manager"
+					        domain="[('start_date', '&gt;',context_today().strftime('%Y-%m-%d'))]"
+					        name="future_announcement"/>
+					<group expand="0" string="Group By">
+						<filter name="group_category" string="Category" context="{'group_by':'category_id'}"/>
+					</group>
+				</search>
+			</field>
+		</record>
+		<!-- actions views ending-->
+
+
+		<record id="kw_announcement_action_window" model="ir.actions.act_window">
+			<field name="name">Announcements</field>
+			<field name="res_model">kw_announcement</field>
+			<field name="view_mode">kanban,tree,form</field>
+			<field name="context">{'search_default_today_announcement':1}
+			</field><!--  ('create_uid', '=', uid) ('state','=','published')-->
+			<field name="domain">[]</field>
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">No announcements.</p>
+			</field>
+		</record>
+		<menuitem name="Announcements"
+		          groups="kw_announcement.group_kw_announcement_publisher,kw_announcement.group_kw_announcement_manager,kw_announcement.group_kw_announcement_subscriber"
+		          id="kw_announcement_menu"
+		          parent='kw_announcement_parent_menu'
+		          sequence="1"
+		          action="kw_announcement_action_window"/>
+		<!-- <field name="domain">['&amp;','&amp;',('state', '=','published'),('start_date', '&lt;=',context_today().strftime('%Y-%m-%d')),('expire_date', '&gt;=',context_today().strftime('%Y-%m-%d'))]</field> -->
+
+
+	</data>
+</odoo>

@@ -1,0 +1,318 @@
+<odoo>
+    <data>
+
+        <!--        Resource Budget Tree View    class="customer_tree"-->
+
+        <record id="view_kw_resource_budget_tree" model="ir.ui.view">
+            <field name="name">kw_resource_budget_tree</field>
+            <field name="model">kw_resource_budget</field>
+            <field name="arch" type="xml">
+                <tree  class="customer_tree" duplicate="false" delete="false">
+                    <field name="fiscal_year" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="work_order_id" invisible="1"/>
+                    <field name="wo_code"/>
+                    <field name ="client_name"/>
+                    <field name="order_name"/>
+                    <field name="order_value"/>
+                    <field name="order_date" invisible="1"/>
+                    <field name="account_holder_id" invisible="1"/>
+                    <field name="presale_member_id"/>
+                    <field name="delivery_manager_id" invisible="1"/>
+                    <field name="project_manager_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <!--    Resource Budget Form View    -->
+
+        <record model="ir.ui.view" id="view_kw_resource_budget_form">
+            <field name="name">kw_resource_budget_form</field>
+            <field name="model">kw_resource_budget</field>
+            <field name="arch" type="xml">
+                <form duplicate="false" delete="false">
+                    <sheet>
+                        <group string="Work Order Details" style="background-color: #def2e5;">
+                            <group>
+                                <field name="work_order_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="fiscal_year" readonly="0" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name ="client_name" readonly="1" force_save="1"/>
+                                <field name="account_holder_id" readonly="1" force_save="1"/>
+                                <field name="available_fiscal_year_ids" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="project_name" readonly="1" force_save="1"/>
+                                <field name="sbu_id" readonly="1" force_save="1" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="order_name" readonly="1" force_save="1"/>
+                                <field name="wo_code" readonly="1" force_save="1"/>
+                                <field name="order_date" readonly="1" force_save="1" invisible="1"/>
+                                <field name="order_value" readonly="1" style="color: red;" force_save="1"/>
+                            </group>
+                        </group>
+                        <group>
+                        </group>
+                        <button name="update_account_details"  type="object" string="Update"  class="btn-success fa fa-refresh" invisible="1"/>
+                        <group string="Account Details">
+                            <field name="account_line_ids"  nolabel="1">
+                                <tree create="0" delete="0" class="customer_tree">
+                                    <field name="account_head_id"/>
+                                    <field name="account_sub_head_id"/>
+                                    <field name="budget"/>
+                                    <field name="total_spent"/>
+                                    <field name="total_balance"/>
+                                    <field name="resource_add_ids" string="Add Resource" style="color: red;" class="fa fa-long-arrow-right"/>
+                                    <button name="add_details_func" type="object" class="btn-warning" string="Add/Edit"/>
+                                </tree>
+                                <form>
+                                    <group style="background-color: #def2e5;">
+                                        <group>
+                                            <field name="account_head_id" readonly="1"  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                            <field name="account_sub_head_id" readonly="1"  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                            <field name="budget" readonly="1"/>
+                                        </group>
+                                        <group>
+                                            <field name="total_spent" readonly="1"/>
+                                            <field name="total_balance" readonly="1"/>
+                                            <field name="acc_fiscal_year" readonly="1" invisible="1"/>
+                                            <field name="order_date" readonly="1" invisible="1"/>
+                                        </group>
+                                    </group>
+                                    <group string="Tag Resource">
+                                        <group>
+                                        </group>
+                                        <field name="resource_add_ids">
+                                            <tree editable="top"  class="customer_tree">
+                                                <field name="role_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                                <field name="category_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                                <field name="tag_resource_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                                <field name="availability_type"/>
+                                                <field name="engaged_data"/>
+                                                <field name="involvement_period_from"/>
+                                                <field name="involvement_period_to"/>
+                                            </tree>
+                                        </field>
+                                    </group>
+                                    <group>
+                                        <field name="out_source" readonly="1" force_save="1"/>
+                                        <field name="ctc_perc_data" readonly="1" invisible="1"/>
+                                        <field name="total_ctc_data" readonly="1" invisible="1"/>
+                                    </group>
+                                    <group>
+                                        <table border="1" style="width:100%;">
+                                            <thead>
+                                                <tr style="color: black;text-align:right;background-color: pink;">
+                                                    <th><i>Budget Allocated(A)</i></th>
+                                                    <th>:</th>
+                                                    <th><i><field name="budget" readonly="1"/></i></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><i>Development Expense Incurred in opportunity stage (B)</i></td>
+                                                    <td>:</td>
+                                                    <td style="text-align:right;"><i>0</i></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i>Salary Expense Incurred during implementation till <field name="order_date" readonly="1" style="color:red;"/> (C)</i></td>
+                                                    <td>:</td>
+                                                    <td style="text-align:right;"><i>0</i></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i>Outsource Expense Incurred during Implementation till <field name="order_date" readonly="1" style="color:red;"/> (D)</i></td>
+                                                    <td>:</td>
+                                                    <td style="text-align:right;"><i>0</i></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i>Total Expense Incurred during implementation in <field name="acc_fiscal_year" readonly="1" style="color:red;"/> (E)</i></td>
+                                                    <td>:</td>
+                                                    <td style="text-align:right;"><i>0</i></td>
+                                                </tr>
+                                                <tr style="color: black;text-align:right;background-color: pink;">
+                                                    <td><i>Balance(F) i.e(A-(B+C+D+E))</i></td>
+                                                    <td>:</td>
+                                                    <td><i><field name="budget" readonly="1"/></i></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i>In-Source [Salary-Payroll] (G)</i></td>
+                                                    <td>:</td>
+                                                    <td style="text-align:right;"><i><field name="ctc_perc_data" readonly="1"/></i></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i>Outsource Source (H) i.e (I-D)</i></td>
+                                                    <td>:</td>
+                                                    <td style="text-align:right;"><i><field name="out_source" readonly="1" force_save="1"/></i></td>
+                                                </tr>
+                                                <tr style="color: black;text-align:right;background-color: pink;">
+                                                    <td><i>Current Plan (J) i.e(G+H)</i></td>
+                                                    <td>:</td>
+                                                    <td><i><field name="total_ctc_data" readonly="1"/></i></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </group>
+                                </form>
+                            </field>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Add details view -->
+        <record model="ir.ui.view" id="view_details_kw_resource_budget_form">
+            <field name="name">kw_resource_budget_form</field>
+            <field name="model">kw_account_code_line</field>
+            <field name="arch" type="xml">
+                <form duplicate="false" delete="false" create="false">
+                    <sheet>
+                        <group style="background-color: #def2e5;">
+                            <group>
+                                <field name="account_head_id" readonly="1"  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="account_sub_head_id" readonly="1"  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="budget" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="total_spent" readonly="1"/>
+                                <field name="total_balance" readonly="1"/>
+                                <!-- <field name="fy_wise_budget_allocate_line_id"/> -->
+                                <field name="acc_fiscal_year" readonly="1" invisible="1"/>
+                                <field name="order_date" readonly="1" invisible="1"/>
+                            </group>
+                        </group>
+                        <group string="Tag Resource">
+                            <group>
+                            </group>
+                            <field name="resource_add_ids">
+                                <tree editable="top"  class="customer_tree">
+                                    <field name='role_ids' invisible="1" widget="many2many_tags"/>
+                                    <field name='category_ids' invisible="1" widget="many2many_tags"/>
+                                    <field name="role_id" options="{'no_open': True,'no_create':True,'no_edit':True}" domain ="[('id','=',role_ids)]"/>
+                                    <field name="category_id" options="{'no_open': True,'no_create':True,'no_edit':True}" domain ="[('id','=',category_ids)]"/>
+                                    <field name='resource_ids' invisible="1" widget="many2many_tags"/>
+                                    <field name="tag_resource_id" domain ="[('id','=',resource_ids)]" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                    <field name="availability_type"/>
+                                    <field name="engaged_data"/>
+                                    <field name="involvement_period_from"/>
+                                    <field name="involvement_period_to"/>
+                                </tree>
+
+                            </field>
+                        </group>
+                        <group>
+                            <field name="out_source" force_save="1"/>
+                            <field name="ctc_perc_data" readonly="1" invisible="1"/>
+                        </group>
+                        <group>
+                            <table border="1" style="width:100%;">
+                                <thead>
+                                    <tr style="color: black;text-align:right;background-color: pink;">
+                                        <th><i>Budget Allocated(A)</i></th>
+                                        <th>:</th>
+                                        <th><i><field name="budget" readonly="1"/></i></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><i>Development Expense Incurred in opportunity stage (B)</i></td>
+                                        <td>:</td>
+                                        <td style="text-align:right;"><i>0</i></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i>Salary Expense Incurred during implementation till <field name="order_date" readonly="1" style="color:red;"/> (C)</i></td>
+                                        <td>:</td>
+                                        <td style="text-align:right;"><i>0</i></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i>Outsource Expense Incurred during Implementation till <field name="order_date" readonly="1" style="color:red;"/> (D)</i></td>
+                                        <td>:</td>
+                                        <td style="text-align:right;"><i>0</i></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i>Total Expense Incurred during implementation in <field name="acc_fiscal_year" readonly="1" style="color:red;"/> (E)</i></td>
+                                        <td>:</td>
+                                        <td style="text-align:right;"><i>0</i></td>
+                                    </tr>
+                                    <tr style="color: black;text-align:right;background-color: pink;">
+                                        <td><i>Balance(F) i.e(A-(B+C+D+E))</i></td>
+                                        <td>:</td>
+                                        <td><i><field name="budget" readonly="1"/></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i>In-Source [Salary-Payroll] (G)</i></td>
+                                        <td>:</td>
+                                        <td style="text-align:right;"><i><field name="ctc_perc_data" readonly="1"/></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i>Outsource Source (H) i.e (I-D)</i></td>
+                                        <td>:</td>
+                                        <td style="text-align:right;"><i><field name="out_source" readonly="1" force_save="1"/></i></td>
+                                    </tr>
+                                    <tr style="color: black;text-align:right;background-color: pink;">
+                                        <td><i>Current Plan (J) i.e(G+H)</i></td>
+                                        <td>:</td>
+                                        <td><i><field name="total_ctc_data" readonly="1"/></i></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </group>
+                    </sheet>
+
+                </form>
+            </field>
+        </record>
+
+        <!--        Search view-->
+
+        <record id="view_resource_budget_allocation_search" model="ir.ui.view">
+            <field name="name">resource.budget.view.search</field>
+            <field name="model">kw_resource_budget</field>
+            <field name="arch" type="xml">
+                <search string="Search Description">
+                    <field name="fiscal_year"/>
+                    <field name="work_order_id"/>
+                    <field name ="wo_code"/>
+                    <field name="client_name"/>
+                    <field name="order_name"/>
+                    <field name="order_value"/>
+                    <field name="order_date"/>
+                    <field name="account_holder_id"/>
+                    <field name="presale_member_id"/>
+                    <field name="delivery_manager_id"/>
+                    <field name="project_manager_id"/>
+                    <filter name="fiscalyr_filter" string="Current Fiscal Year"
+                            domain="['&amp;',('fiscal_year.date_start', '&lt;=',context_today().strftime('%Y-%m-%d')),('fiscal_year.date_stop', '&gt;=',context_today().strftime('%Y-%m-%d'))]"
+                            context="{}" readonly="1"/>
+                    <filter name="prev_fiscalyr_filter" string="Previous Fiscal Year"
+                            domain="['&amp;', ('fiscal_year.date_stop', '&lt;', context_today().strftime('%Y-%m-%d')), ('fiscal_year.date_stop', '&gt;', (context_today() - relativedelta(years=1)).strftime('%Y-%m-%d'))]"
+                            context="{}" readonly="1"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_fiscal_year" string="Fiscal Year" context="{'group_by': 'fiscal_year'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+
+
+        <!--     Cash Flow Action   -->
+
+        <record model="ir.actions.act_window" id="kw_resource_budget_action_window">
+            <field name="name">Resource Budget</field>
+            <field name="res_model">kw_resource_budget</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Click to create a new Resource Budget.
+                </p>
+                <p>
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

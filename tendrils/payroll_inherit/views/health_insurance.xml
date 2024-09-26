@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="health_insurance_dependant_list">
+            <field name="name">Health Insurance Dependant</field>
+            <field name="model">health_insurance_dependant</field>
+            <field name="arch" type="xml">
+                <tree decoration-danger="on_job_sts == 'Inactive'">
+                    <field name="employee_id"
+                        options="{'no_open': True,'no_create':True,'no_edit':True}"
+                        context="{'tree_view_ref':'kw_hr_leaves.hr_employee_encashment_tree_view'}"  invisible='1'/>
+                    <field name="employee_code" />
+                    <field name="employee_name"/>
+                    <field name="date_range"
+                        options="{'no_open': True,'no_create':True,'no_edit':True}"
+                    />
+                    <field name="department" />
+                    <field name="birthday"  groups="hr_payroll.group_hr_payroll_manager,kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group"/>
+                    <field name="level"  groups="hr_payroll.group_hr_payroll_manager,kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group"/>
+                    <field name="grade"  groups="hr_payroll.group_hr_payroll_manager,kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group"/>
+                    <field name="job_branch_id"  groups="hr_payroll.group_hr_payroll_manager,kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group"/>
+                    <field name="on_job_sts" groups="hr_payroll.group_hr_payroll_manager,kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group"/>
+                    <field name="gender" groups="hr_payroll.group_hr_payroll_manager,kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group"/>
+                    <field name="no_of_installment" force_save="1" />
+                    <field name="amount_" sum='Total'/>
+                    <field name="employeer_contribution" sum='Total'/>
+                    <field name="insurance_amount" sum='Total'/>
+                    <field name="num_dependant" sum='Total' force_save='1'/>
+                    <field name="relationship_name" />
+                    <field name="times_of_ded" invisible='1' />
+                    <field name="boolean_readonly" readonly="1" invisible="1" />
+                    <field name="amount" invisible='1'/>
+                    <field name="test_css" invisible='1' />
+                    <field name="state" invisible='1' />
+                    <field name="allow_insurance_edit_boolean" widget="boolean_toggle" string='Allow Edit' 
+                            attrs="{'invisible':[('state','!=','approved')]}"
+                            groups='hr_payroll.group_hr_payroll_manager,kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group' />
+                    <button name="btn_reject_record" type="object"
+                        string="Reject" class="btn btn-danger"
+                        attrs="{'invisible':[('state','!=','applied')]}"
+                        groups='kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group' />
+                    <button name="btn_reset_record" type="object"
+                        string="Reset To Draft" class="btn btn-warning"
+                        attrs="{'invisible':[('state','!=','rejected')]}"
+                        groups='kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group' />
+                    <!-- <button name="btn_duplicate" type="object"
+                        string="Regenerate" class="btn btn-warning"
+                        groups='kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group' /> -->
+                    <button name="add_new_members" type="object"
+                        string="Add New Members" class="btn btn-success"
+                        attrs="{'invisible':['|',('state','!=','approved'),('allow_insurance_edit_boolean','=',False)]}"/>
+                </tree>
+            </field>
+        </record>
+        <!-- health_i search view -->
+        <record id="health_insurance_dependant_view_search" model="ir.ui.view">
+            <field name="name">health_insurance_dependant.view.search</field>
+            <field name="model">health_insurance_dependant</field>
+            <field name="arch" type="xml">
+                <search string="Search Description">
+                    <!-- Add your fields here -->
+                    <field name="employee_id" string='Employee' />
+                    <field name="date_range" string='Financial Year' />
+                    <filter string="Current Finanacial Year" name="date_range_filter"
+                        domain="[('date_range.date_start', '&gt;=', context_today().strftime('%Y') + '/03/31'),
+                            ('date_range.date_stop', '&lt;=', (context_today()+relativedelta(years=1)).strftime('%Y')+ '/04/01')]" />
+                    <separator />
+                    <filter string="Draft" name="draft" domain="[('state','=','draft')]" />
+                    <filter string="Approved" name="approved" domain="[('state','=','approved')]" />
+                    <filter string="Applied" name="applied" domain="[('state','=','applied')]" />
+                    <filter string="Closed" name="closed" domain="[('state','=','closed')]" />
+                    <filter string="Rejected" name="rejected" domain="[('state','=','rejected')]" />
+                    <separator />
+                    <group expand="0" string="Group By">
+                        <filter string="Financial Year" name="financial_yr"
+                            context="{'group_by':'date_range'}" />
+                        <filter string="Department" name="department"
+                            context="{'group_by':'department'}" />
+                        <filter string="State" name="state" context="{'group_by':'state'}" />
+                        <filter string="Dependent" name="dependent"
+                        context="{'group_by':'num_dependant'}" />
+                    </group>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="dependant_view_form" model="ir.ui.view">
+            <field name="name">Health Insurance Dependant</field>
+            <field name="model">health_insurance_dependant</field>
+            <field name="arch" type="xml">
+                <form string="Health Insurance Dependant"  duplicate="false">
+                    <header>
+                        <button name="apply_record" type="object"
+                            string="Apply" class="btn btn-success"
+                            states='draft' />
+                        <button name="approve_record" type="object"
+                            string="Approve" class="btn btn-success"
+                            states="applied" confirm="Are you sure you want to do?"
+                            groups='kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group' />
+                        <button name="btn_reject_record" type="object"
+                            string="Reject" class="btn btn-danger"
+                            states='applied' groups='kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group' />
+                        <button name="btn_reset_record" type="object"
+                            string="Reset To Draft" class="btn btn-warning"
+                            attrs="{'invisible':[('state','!=','rejected')]}"
+                            groups='kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group' />
+                        <button name="add_new_members" type="object"
+                            string="Add New Members" class="btn btn-success"
+                            attrs="{'invisible':['|',('state','!=','approved'),('allow_insurance_edit_boolean','=',False)]}"/>
+                        <!-- <button name="btn_revert_record" type="object"
+                                string="Revert" class="btn btn-danger"
+                                attrs="{'invisible':[('enable_revert','=',False)]}"/> -->
+                        <field name="state" widget="statusbar" />
+                    </header>
+                    <sheet>
+                        <group>
+                            <group string="Dependent">
+                                <field name="allow_insurance_edit_boolean" invisible='1'/>
+                                <field name="enable_revert" invisible='1' />
+                                <field name="check_user" invisible='1' />
+                                <field name="total_insurance_amount" invisible='1' />
+                                <field name="edit_boolean" invisible='1' />
+                                <field name="date_range"
+                                    options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                    attrs="{'readonly':[('edit_boolean','=',False)]}" style="pointer-events:none;" force_save='1'/>
+                                <field name="period_from"  groups="hr_payroll.group_hr_payroll_manager,kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group"/>
+                                <field name="period_to"  groups="hr_payroll.group_hr_payroll_manager,kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group"/>
+                                <field name="employee_id"
+                                    options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                    attrs="{'readonly':['|',('edit_boolean','=',False),('check_user','=',True)]}" />
+                                <field name="department" readonly='1' />
+
+                                <field name="times_of_ded" invisible='1'
+                                    attrs="{'readonly':[('edit_boolean','=',False)]}" />
+                                <field name="boolean_readonly" invisible="1" />
+                                <field name="test_css" invisible='1' />
+                            </group>
+                            <group>
+                                <group groups="hr_payroll.group_hr_payroll_manager,kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group">
+                                    <field name="birthday"  groups="hr_payroll.group_hr_payroll_manager,kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group"/>
+                                    <field name="level"  groups="hr_payroll.group_hr_payroll_manager,kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group"/>
+                                    <field name="grade"  groups="hr_payroll.group_hr_payroll_manager,kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group"/>
+                                    <field name="job_branch_id"  groups="hr_payroll.group_hr_payroll_manager,kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group"  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                    <field name="gender" groups="hr_payroll.group_hr_payroll_manager,kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group"/>
+                                    <field name="on_job_sts" groups="hr_payroll.group_hr_payroll_manager,kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group"/>
+                                </group>
+                            </group>
+                            <group>
+                                <field name="enable_insurance_calculation" invisible="1" />
+                                <field name="sum_assured_select"
+                                    attrs="{'readonly':[('state','in',['approved','closed'])]}" />
+                                <field name="sum_assured" force_save="1"
+                                    attrs="{'readonly':[('edit_boolean','=',False)]}" invisible="1" />
+                                <field name="amount_" force_save="1"
+                                       attrs="{'readonly':[('state','in',['approved','closed'])]}" groups='kw_employee.group_payroll_manager,hr_payroll.group_hr_payroll_manager,hr.group_hr_manager,payroll_inherit.payroll_insurance_group'/>
+                                <field name="employeer_contribution" readonly="1" attrs="{'readonly':[('state','in',['approved','closed'])]}" groups='kw_employee.group_payroll_manager,hr_payroll.group_hr_payroll_manager,hr.group_hr_manager,payroll_inherit.payroll_insurance_group'/>
+                                <field name="employee_contribution" invisible="1"/>
+                                <field name="no_of_installment" force_save="1"
+                                    attrs="{'readonly':[('state','in',['approved','closed'])]}"
+                                    readonly="1" />
+                            </group>
+                            <group string="Action Log"
+                                attrs="{'invisible':[('state', '=','draft')]}" groups='payroll_inherit.payroll_insurance_group'> 
+                                <field name="applied_by"
+                                    options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                    readonly="1" attrs="{'invisible':[('applied_by','=',False)]}" />
+                                <field name="applied_on" readonly="1"
+                                    attrs="{'invisible':[('applied_on','=',False)]}" />
+                                <field name="approved_by"
+                                    options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                    readonly="1" attrs="{'invisible':[('approved_by','=',False)]}" />
+                                <field name="approved_on" readonly="1"
+                                    attrs="{'invisible':[('approved_on','=',False)]}" />
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="family_details_ids" context="{'current_id': id}"
+                                    attrs="{'readonly':[('state','in',['approved','closed'])]}">
+                                    <tree editable='buttom'>
+                                        <field name="relationship_id"
+                                            options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                                        <field name="dependant_id"
+                                            options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                                        <field name="gender" />
+                                        <field name="date_of_birth"
+                                            options="{'datepicker':{'maxDate': 'now'}}" />
+                                        <field name="insurance_amount" sum="Total" invisible='1' />
+                                    </tree>
+                                </field>
+                                <field name="num_dependant" invisible='1'/>
+                            </group>
+                            <group>
+                                <field name="emi_details_ids">
+                                    <tree create="0" delete='0'>
+                                        <field name="year" readonly="1" force_save="1" />
+                                        <field name="month" readonly="1" force_save="1" />
+                                        <field name="installment" readonly="1" force_save="1" />
+                                        <field name="status" readonly="1" force_save="1" />
+                                        <field name="emi_date" invisible="1" force_save="1" />
+                                        <field name="emi_details_id" invisible="1" force_save="1" />
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                        <div class="text-center">
+                            <label class="font-weight-bold col-md-2" style="margin-left: -439px;"
+                                for="insurance_amount" />
+                            <span>
+                                <field name="insurance_amount" decoration-bf="1" />
+                            </span>
+                        </div>
+                        <!--                        <group>-->
+                        <!--                            <field name="insurance_amount" decoration-bf="1"/>-->
+                        <!--                        </group>-->
+                        <!--                        <div style="font-size: 14px;text-align: justify;">-->
+                        <!--                            <strong>-->
+                        <!--                                Note: Last date of submitting the health insurance is <field
+                        name="insurance_submitting_date" readonly='1'/>. -->
+                        <!--                            </strong>-->
+                        <!--                        </div> -->
+                    </sheet>
+                <group name="aaa" groups='kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group'>
+                    <div class="oe_chatter" >
+                        <field name="message_follower_ids" widget="mail_followers" />
+                        <field name="message_ids" widget="mail_thread" />
+                        <field name="activity_ids" widget="mail_activity" />
+                    </div>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <act_window id="action_approve_health_insurance"
+            name="Approve"
+            src_model="health_insurance_dependant"
+            res_model="kw_approve_insurance"
+            view_type="form"
+            view_mode="form"
+            view_id="payroll_inherit.health_insurance_dependant_list"
+            key2="client_action_multi"
+            target="new"
+            groups="hr_payroll.group_hr_payroll_manager,kw_employee.group_payroll_manager,payroll_inherit.payroll_insurance_group"
+            context="{'selected_active_ids':active_ids}" />
+        <!--        <act_window id="action_update_health_insurance"-->
+        <!--                    name="Update insurance"-->
+        <!--                    src_model="health_insurance_dependant"-->
+        <!--                    res_model="kw_update_insurance"-->
+        <!--                    view_type="form"-->
+        <!--                    view_mode="form"-->
+        <!--                    view_id="payroll_inherit.health_insurance_dependant_list"-->
+        <!--                    key2="client_action_multi"-->
+        <!--                    target="new"-->
+        <!--                    groups="kw_employee.group_payroll_manager"-->
+        <!--                    context="{'selected_active_ids':active_ids}"/>-->
+
+        <record id="health_insurance_dependant_window" model="ir.actions.act_window">
+            <field name="name">Group Health Insurance Dependent</field>
+            <field name="res_model">health_insurance_dependant</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <!-- <field name="domain">[('employee_id.active','=',True)]</field> -->
+            <field name="context">{'apply_user':1,'search_default_date_range_filter':1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No Records to show...
+                </p>
+            </field>
+        </record>
+        <!-- health_insurance_self search view -->
+        <record id="health_insurance_self_view_search" model="ir.ui.view">
+            <field name="name">health_insurance_self.view.search</field>
+            <field name="model">health_insurance_self</field>
+            <field name="arch" type="xml">
+                <search string="Search Description">
+                    <!-- Add your fields here -->
+                    <field name="year" string='Financial Year' />
+                    <field name="employee_id" string='Employee' />
+                </search>
+            </field>
+        </record>
+
+
+        <record model="ir.ui.view" id="health_insurance_self_list">
+            <field name="name">Employee Health Insurance</field>
+            <field name="model">health_insurance_self</field>
+            <field name="arch" type="xml">
+                <tree editable="top">
+                    <field name="year" attrs="{'readonly':[('boolean_readonly','=',True)]}"
+                        options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                    <!-- <field name="month" attrs="{'readonly':[('boolean_readonly','=',True)]}"/> -->
+                    <field name="employee_id"
+                        options="{'no_open': True,'no_create':True,'no_edit':True}"
+                        attrs="{'readonly':[('boolean_readonly','=',True)]}" />
+                    <field name="department" />
+                    <field name="division" />
+                    <field name="section" />
+                    <field name="practice" />
+                    <field name="designation" />
+                    <field name="insurance_amount"
+                        attrs="{'readonly':[('boolean_readonly','=',True)]}" required="1" />
+                    <field name="boolean_readonly" readonly="1" />
+                </tree>
+            </field>
+        </record>
+        <record id="health_insurance_self_window" model="ir.actions.act_window">
+            <field name="name"> Group Employee Health Insurance</field>
+            <field name="res_model">health_insurance_self</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No Records to show...
+                </p>
+            </field>
+        </record>
+
+
+        <!-- <menuitem id="hr_menu_contract_payroll" name="Contracts"
+        action="hr_contract.action_hr_contract" parent="hr_payroll.menu_hr_payroll_root"
+        sequence="101" /> -->
+        <record id="health_insurance_dependant_approve_action" model="ir.actions.act_window">
+            <field name="name"> Group Health Insurance Dependent</field>
+            <field name="res_model">health_insurance_dependant</field>
+            <field name="context">{}</field>
+            <field name="search_view_id" ref="health_insurance_dependant_view_search" />
+            <field name="context">{'search_default_date_range_filter':1}</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','=','applied'),('employee_id.active','=',True)]</field>
+            <!-- <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('health_insurance_dependant_approval_list')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('dependant_view_form')}),
+               ]"/> -->
+        </record>
+
+
+        <menuitem name="Insurance" id="health_insurance_employee" parent="hr.menu_hr_root"
+            sequence="107" />
+        <!--		<menuitem name="Health Insurance For Self" id="health_insurance_self"
+        parent="health_insurance_employee"-->
+        <!--				  action="health_insurance_self_window" sequence="3"
+        groups='kw_employee.group_payroll_manager,hr.group_hr_manager'/>-->
+
+        <menuitem name="Health Insurance Approval"
+            id="health_insurance_dependant_approved"
+            parent="health_insurance_employee"
+            action="health_insurance_dependant_approve_action" sequence="2"
+            groups='kw_employee.group_payroll_manager,hr.group_hr_manager,payroll_inherit.payroll_insurance_group' />
+        <menuitem name="Health Insurance for Dependent"
+            id="health_insurance_dependant_emp"
+            parent="health_insurance_employee"
+            action="health_insurance_dependant_window" sequence="1" />
+        <!--        <menuitem name="Relationship Insurance Amount"-->
+        <!--                  id="relationship_insurance_amount"-->
+        <!--                  parent="health_insurance_employee"-->
+        <!--                  action="relationship_insurance_amount_action" sequence="3"-->
+        <!--                  groups='kw_employee.group_payroll_manager,hr.group_hr_manager'/>-->
+        <menuitem id="employee_family_report_menu"
+            name="Employee Health Insurance Details Excel Sheet"
+            parent="health_insurance_employee"
+            sequence="8"
+            action="employee_relationship_insurance_action"
+            groups='kw_employee.group_payroll_manager,hr.group_hr_manager,payroll_inherit.payroll_insurance_group' />
+        <!--        <menuitem name="Relationship Insurance Amount"-->
+        <!--                  id="relationship_insurance_amount"-->
+        <!--                  parent="health_insurance_employee"-->
+        <!--                  action="relationship_insurance_amount_action" sequence="3"-->
+        <!--                  groups='kw_employee.group_payroll_manager,hr.group_hr_manager'/>-->
+
+        <template id="health_insurance_backend_template" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <link rel="stylesheet"
+                    href="/payroll_inherit/static/src/css/health_insurance_form.css" />
+            </xpath>
+        </template>
+
+        <!-- payroll_generate_insurance form view -->
+        <record id="payroll_generate_insurance_view_form" model="ir.ui.view">
+            <field name="name">payroll_generate_insurance.view.form</field>
+            <field name="model">payroll_generate_insurance</field>
+            <field name="arch" type="xml">
+                <form string="">
+                    <sheet>
+                        <group>
+                            <!-- Add your fields here -->
+                            <field name="from_date_range" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="to_date_range" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="generate_insurance" type="object" string="Generate"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="payroll_generate_insurance_individual_view_form" model="ir.ui.view">
+            <field name="name">payroll_generate_insurance.view.form</field>
+            <field name="model">payroll_generate_insurance</field>
+            <field name="arch" type="xml">
+                <form string="">
+                    <sheet>
+                        <group>
+                            <!-- Add your fields here -->
+                            <field name="from_date_range" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="to_date_range" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="generate_individual_insurance" type="object" string="Generate Individual Insurance"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- payroll_generate_insurance action window -->
+        <record id="payroll_generate_insurance_action" model="ir.actions.act_window">
+            <field name="name">Generate Insurance</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">payroll_generate_insurance</field>
+            <field name="view_mode">form</field>
+            <field name="view_type">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- This Menu Item must have a parent and an action -->
+        <menuitem id="payroll_generate_insurance_action_menu_act" name="Generate Insurance" parent="payroll_inherit.health_insurance_employee" action="payroll_generate_insurance_action" sequence="212" groups='kw_employee.group_payroll_manager,hr.group_hr_manager,payroll_inherit.payroll_insurance_group'/>
+    </data>
+</odoo>

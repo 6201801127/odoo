@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data noupdate="0">
+		<record id="template_for_edited_mrf" model="mail.template">
+			<field name="name">MRF Post Approval Mail</field>
+			<field name="model_id" ref="kw_recruitment.model_kw_recruitment_requisition_log"/>
+			<field name="auto_delete" eval="False"/>
+			<field name="email_from">${object.mrf_id.write_uid.email}</field>
+			<field name="email_to">${object.mrf_id.approved_user_id.email}</field>
+			<field name="email_cc">${object.mrf_id.get_hr_email() or 'asit.mohanty@csm.tech'}</field>
+			<field name="subject">MRF Edited | Ref No ${object.mrf_id.code}</field>
+			<field name="body_html">
+                <![CDATA[
+                    <div style="padding-left: 20px;">
+                        <p>
+                            <b>
+                               <span style="color:rgb(22, 123, 158);font-size: 18px;margin-right: 2px;"> Dear </span>
+                               <span style="font-size: 18px;">${object.mrf_id.approved_user_id.name},</span>
+                            </b>
+                        </p>
+                        <p style="font-size: 14px;">
+                            Manpower Requisitions ref: <span style="color:rgb(22, 123, 158);">${object.mrf_id.code}</span> has been edited
+                            by ${object.mrf_id.write_uid.name} and the modified details are below,
+                        </p>
+                    </div>
+                    <table  style="border: 1px solid black; border-collapse: collapse;  margin-left:20px; margin-right:auto;width:80%;">
+                        <thead style="background-color:#eee; color:black;font-size:.9rem">
+                            <tr style="border: 1px solid black;">
+                                <td style="border: 1px solid black;text-align:center;">Details</td>
+                                <td style="border: 1px solid black;text-align:center;">Old</td>
+                                <td style="border: 1px solid black;text-align:center;">New</td>
+                            </tr>
+                        </thead>
+                        <tbody style="font-size:.8rem">
+                             %for val in ctx['data']:
+                                %if val.get('dept_name'):
+                                    <tr style="border: 1px solid black;">
+                                        <td style="border: 1px solid black;text-align:left;">Department </td>
+                                        <td style="border: 1px solid black;text-align:left;">${val.get('dept_name')}</td>
+                                        <td style="border: 1px solid black;text-align:left;">${object.mrf_id.dept_name.name}</td>
+                                    </tr>
+                                %endif
+                                %if val.get('requisition_type'):
+                                    <tr style="border: 1px solid black;">
+                                        <td style="border: 1px solid black;text-align:left;">Budget Type </td>
+                                        <td style="border: 1px solid black;text-align:left;">${val.get('requisition_type')}</td>
+                                        <td style="border: 1px solid black;text-align:left;">
+                                            ${dict (object.mrf_id.fields_get (allfields = ['requisition_type']) ['requisition_type'] ['selection']) [object.mrf_id.requisition_type]}
+                                        </td>
+                                    </tr>
+                                %endif
+                                
+                                %if val.get('project'):
+                                    <tr style="border: 1px solid black;">
+                                        <td style="border: 1px solid black;text-align:left;">Project </td>
+                                        <td style="border: 1px solid black;text-align:left;">${val.get('project')}</td>
+                                        <td style="border: 1px solid black;text-align:left;">${object.mrf_id.project.name or ''}</td>
+                                    </tr>
+                                %endif
+                                %if val.get('job_position'):
+                                    <tr style="border: 1px solid black;">
+                                        <td style="border: 1px solid black;text-align:left;">Position </td>
+                                        <td style="border: 1px solid black;text-align:left;">${val.get('job_position')}</td>
+                                        <td style="border: 1px solid black;text-align:left;">${object.mrf_id.job_position.name}</td>
+                                    </tr>
+                                %endif
+                                %if val.get('branch_id'):
+                                    <tr style="border: 1px solid black;">
+                                        <td style="border: 1px solid black;text-align:left;">Work Location </td>
+                                        <td style="border: 1px solid black;text-align:left;">${val.get('branch_id')}</td>
+                                        <td style="border: 1px solid black;text-align:left;">${object.mrf_id.branch_id.name}</td>
+                                    </tr>
+                                %endif
+                                %if val.get('employee_id'):
+                                    <tr style="border: 1px solid black;">
+                                        <td style="border: 1px solid black;text-align:left;">Replacement For </td>
+                                        <td style="border: 1px solid black;text-align:left;">${val.get('employee_id')}</td>
+                                        <td style="border: 1px solid black;text-align:left;">${object.mrf_id.employee_id.name}</td>
+                                    </tr>
+                                %endif
+                                %if val.get('type_employment'):
+                                    <tr style="border: 1px solid black;">
+                                        <td style="border: 1px solid black;text-align:left;">Employment Type </td>
+                                        <td style="border: 1px solid black;text-align:left;">${val.get('type_employment')}</td>
+                                        <td style="border: 1px solid black;text-align:left;">${object.mrf_id.type_employment.name}</td>
+                                    </tr>
+                                %endif
+                                
+                                %if val.get('duration'):
+                                    <tr style="border: 1px solid black;">
+                                        <td style="border: 1px solid black;text-align:left;"> Engagement Period </td>
+                                        <td style="border: 1px solid black;text-align:left;">${val.get('duration')} Months</td>
+                                        <td style="border: 1px solid black;text-align:left;">${object.mrf_id.duration} Months</td>
+                                    </tr>
+                                %endif
+                                
+                                
+                                %if val.get('no_of_resource'):
+                                    <tr style="border: 1px solid black;">
+                                        <td style="border: 1px solid black;text-align:left;">No. of Requirements </td>
+                                        <td style="border: 1px solid black;text-align:left;">${val.get('no_of_resource')}</td>
+                                        <td style="border: 1px solid black;text-align:left;">${object.mrf_id.no_of_resource}</td>
+                                    </tr>
+                                %endif
+                                
+                                %if val.get('qualification'):
+                                    <tr style="border: 1px solid black;">
+                                        <td style="border: 1px solid black;text-align:left;">Qualification</td>
+                                        <td style="border: 1px solid black;text-align:left;">${val.get('qualification')}</td>
+                                        <td style="border: 1px solid black;text-align:left;">${object.mrf_id.qualification}</td>
+                                    </tr>
+                                %endif
+                                %if val.get('resource'):
+                                    <tr style="border: 1px solid black;">
+                                        <td style="border: 1px solid black;text-align:left;">Hiring Type </td>
+                                        <td style="border: 1px solid black;text-align:left;">${val.get('resource')}</td>
+                                        <td style="border: 1px solid black;text-align:left;">${object.mrf_id.resource}</td>
+                                    </tr>
+                                %endif
+                                
+                                %if val.get('exp'):
+                                    <tr style="border: 1px solid black;">
+                                        <td style="border: 1px solid black;text-align:left;">Experience </td>
+                                        <td style="border: 1px solid black;text-align:left;">${val.get('exp')}</td>
+                                        <td style="border: 1px solid black;text-align:left;">
+                                            % if (object.mrf_id.min_exp_year == '0') and (object.mrf_id.max_exp_year == '0'):
+                                            Fresher
+                                        % endif
+                                        % if (object.mrf_id.min_exp_year != '0') or (object.mrf_id.min_exp_year == '0') and (object.mrf_id.max_exp_year != '0'):
+                                            ${object.mrf_id.min_exp_year} - ${object.mrf_id.max_exp_year} Years
+                                        % endif
+                                        </td>
+                                    </tr>
+                                %endif
+                                %if val.get('ctc') and (object.mrf_id.min_sal > 0) and (object.mrf_id.max_sal > 0):
+                                    <tr style="border: 1px solid black;">
+                                        <td style="border: 1px solid black;text-align:left;">Monthly CTC</td>
+                                        <td style="border: 1px solid black;text-align:left;">${val.get('ctc')}</td>
+                                        <td style="border: 1px solid black;text-align:left;">${object.mrf_id.min_sal} - ${object.mrf_id.max_sal}</td>
+                                    </tr>
+                                %endif
+                                
+                            %endfor
+                        </tbody>
+                    </table>
+                    &nbsp;
+                    <table border="0" style="border-collapse: collapse;font-size: 16px;">
+                                 % if object.mrf_id.code:
+                                    <tr>
+                                        <td style="padding-left: 20px;height: 40px;"
+                                            width="200px">
+                                            Reference No
+                                        </td>
+                                        <td style="color:#167b9e;height: 40px;">
+                                            ${object.mrf_id.code}
+                                        </td>
+                                    </tr>
+                                % endif
+                                % if object.mrf_id.dept_name:
+                                    <tr>
+                                        <td style="padding-left: 20px;height: 40px;"
+                                            width="200px">
+                                            Department
+                                        </td>
+                                        <td style="color:#167b9e;height: 40px;">
+                                            ${object.mrf_id.dept_name.name}
+                                        </td>
+                                    </tr>
+                                % endif
+                                % if object.mrf_id.requisition_type:
+                                    <tr>
+                                        <td style="padding-left: 20px;height: 40px;" width="200px">
+                                            Budget Type
+                                        </td>
+                                        <td style="color:#167b9e;height: 40px;">
+                                            ${dict (object.mrf_id.fields_get (allfields = ['requisition_type']) ['requisition_type'] ['selection']) [object.mrf_id.requisition_type]}
+                                        </td>
+                                    </tr>
+                                % endif
+                                % if object.mrf_id.project:
+                                    <tr>
+                                        <td style="padding-left: 20px;height: 40px;" width="200px">
+                                            Project Name
+                                        </td>
+                                        <td style="color:#167b9e;height: 40px;">
+                                            ${object.mrf_id.project.name}
+                                        </td>
+                                    </tr>
+                                % endif
+                                % if (object.mrf_id.duration > 0):
+                                    <tr>
+                                        <td style="padding-left: 20px;height: 40px;" width="200px">
+                                            Engagement Period
+                                        </td>
+                                        <td style="color:#167b9e;height: 40px;">
+                                            ${object.mrf_id.duration} Months
+                                        </td>
+                                    </tr>
+                                % endif
+                                % if object.mrf_id.job_position:
+                                    <tr>
+                                        <td style="padding-left: 20px;height: 40px;" width="200px">
+                                            Position
+                                        </td>
+                                        <td style="color:#167b9e;height: 40px;">
+                                            ${object.mrf_id.job_position.name}
+                                        </td>
+                                    </tr>
+                                % endif
+                                % if object.mrf_id.qualification:
+                                    <tr>
+                                        <td style="padding-left: 20px;height: 40px;" width="200px">
+                                            Qualification
+                                        </td>
+                                        <td style="color:#167b9e;height: 40px;">
+                                            ${object.mrf_id.qualification}
+                                        </td>
+                                    </tr>
+                                % endif
+                                % if (object.mrf_id.min_exp_year != False) and (object.mrf_id.max_exp_year != False):
+                                    <tr>
+                                        <td style="padding-left: 20px;height: 40px;" width="200px">
+                                            Experience
+                                        </td>
+                                        <td style="color:#167b9e;height: 40px;">
+                                        % if (object.mrf_id.min_exp_year == '0') and (object.mrf_id.max_exp_year == '0'):
+                                            Fresher
+                                        % endif
+                                        % if (object.mrf_id.min_exp_year != '0') or (object.mrf_id.min_exp_year == '0') and (object.mrf_id.max_exp_year != '0'):
+                                            ${object.mrf_id.min_exp_year} - ${object.mrf_id.max_exp_year} Years
+                                        % endif
+                                        </td>
+                                    </tr>
+                                % endif
+                                % if (object.mrf_id.min_sal > 0) and (object.mrf_id.max_sal > 0):
+                                    <tr>
+                                        <td style="padding-left: 20px;height: 40px;" width="200px">
+                                            Monthly CTC
+                                        </td>
+                                        <td style="color:#167b9e;height: 40px;">
+                                            ${object.mrf_id.min_sal} - ${object.mrf_id.max_sal}
+                                        </td>
+                                    </tr>
+								% elif object.mrf_id.max_sal > 0:
+									<tr>
+                                        <td style="padding-left: 20px;height: 40px;" width="200px">
+                                            Monthly CTC
+                                        </td>
+                                        <td style="color:#167b9e;height: 40px;">
+                                            ${object.mrf_id.max_sal}
+                                        </td>
+                                    </tr>
+                                % endif
+                                % if object.mrf_id.no_of_resource:
+                                    <tr>
+                                        <td style="padding-left: 20px;height: 40px;" width="200px">
+                                            No. of Requirements
+                                        </td>
+                                        <td style="color:#167b9e;height: 40px;">
+                                            % if object.mrf_id.no_of_resource:
+                                                ${object.mrf_id.no_of_resource}
+                                            % endif
+                                        </td>
+                                    </tr>
+                                % endif
+                                % if object.mrf_id.branch_id:
+                                    <tr>
+                                        <td style="padding-left: 20px;height: 40px;" width="200px">
+                                            Work Location
+                                        </td>
+                                        <td style="color:#167b9e;height: 40px;">
+                                            % for rec in object.mrf_id.branch_id:
+                                                ${rec.name} ,
+                                            % endfor
+                                        </td>
+                                    </tr>
+                                % endif
+                                % if object.mrf_id.resource:
+                                    <tr>
+                                        <td style="padding-left: 20px;height: 40px;" width="200px">
+                                            Hiring Type
+                                        </td>
+                                        <td style="color:#167b9e;height: 40px;">
+                                            ${dict (object.mrf_id.fields_get (allfields = ['resource']) ['resource'] ['selection']) [object.mrf_id.resource]}
+                                        </td>
+                                    </tr>
+                                % endif
+                                % if object.mrf_id.employee_id:
+                                    <tr>
+                                        <td style="padding-left: 20px;height: 40px;" width="200px">
+                                            Replacement For
+                                        </td>
+                                        <td style="color:#167b9e;height: 40px;">
+                                            % for rec in object.mrf_id.employee_id:
+                                                ${rec.name}, 
+                                            % endfor
+                                        </td>
+                                    </tr>
+                                % endif
+                                % if object.mrf_id.type_employment:
+                                    <tr>
+                                        <td style="padding-left: 20px;height: 40px;" width="200px">
+                                            Employment Type
+                                        </td>
+                                        <td style="color:#167b9e;height: 40px;">
+                                            ${object.mrf_id.type_employment.name}
+                                        </td>
+                                    </tr>
+                                % endif
+                            </table>
+
+					<div style="font-size: 15px;padding-left:20px;">
+						% if object.mrf_id.write_uid and object.write_uid.signature:
+	                        ${object.mrf_id.write_uid.signature | safe}
+	                    % else:
+	                        ${object.mrf_id.write_uid.name | safe}
+	                    % endif
+					</div>
+                ]]>
+            </field>
+			<field name="user_signature" eval="False"/>
+		</record>
+   </data>
+</odoo>   

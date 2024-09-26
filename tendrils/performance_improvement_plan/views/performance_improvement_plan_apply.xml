@@ -1,0 +1,196 @@
+<odoo>
+    <data>
+
+        <!-- explicit list view definition -->
+        <record id="performance_improvement_plan_form" model="ir.ui.view">
+            <field name="name">performance_improvement_plan form</field>
+            <field name="model">performance_improvement_plan</field>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                        $(document).ready(function(){ 
+                            status =  $("[aria-pressed=true]").text().trim();
+                            if ( (status === 'Closed' || status === 'Recommend PIP')){
+                                $('.o_form_button_edit').hide();
+                                $('.o_form_button_create').hide();
+                            }
+                        });
+                    </script>
+                    <style>
+                        .o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 333px;}
+                    </style>
+                    <header>
+                        <button name="send_to_approve" string="Raise" type="object" class="btn-primary"
+                                attrs="{'invisible': [('status', 'in', ['Applied','Recommend PIP','Closed'])]}"
+                                confirm="Are you sure, you want to Raise PIP?"/>
+                        <field name="status" widget="statusbar" statusbar_visible="Draft,Applied,Recommend PIP,Recommend Training,Closed"/>
+
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="reference" readonly="1" invisible="1"/>
+                                <field name="applied_date" string="Applied Date" invisible="1"/>
+
+                                <field name="raised_by" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       readonly="1" invisible="1"/>
+                                <!-- <field name="request_for" widget="radio" options="{'horizontal': true}" attrs="{'invisible':[('check_sbu', '=', False)],'required':[('check_sbu','=',True)]}"/> -->
+                                <field name="request_for" widget="radio" options="{'horizontal': true}" required="1"
+                                       attrs="{'invisible':['|','|',('check_pm', '=', True), ('check_reviewer', '=', True), ('hide_request_for', '=', True)],'readonly': [('status', 'not in', ['Draft'])]}"/>
+                                <!-- <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                        force_save="1"
+                                attrs="{'invisible': ['|',('check_division_head', '=', True), 
+                                    '&amp;', ('check_sbu', '=', True), ('check_pm', '=', False), ('request_for', 'in', ['SBU_employee', False]),'&amp;','|', ('check_sbu', '=', True),('request_for', 'in', ['SBU_employee', False]),
+                                    '&amp;','|', '|',('check_pm', '=', True), ('check_reviewer', '=', True),('check_pratice_head', '=', True)],
+                                    'required':['|','|', ('check_pm','=',True), ('check_reviewer','=',True), ('request_for','=','Project')],'readonly':[('status','not in',['Draft'])]}"/> -->
+                                <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                        force_save="1" attrs="{'required': ['|','|',('request_for', '=', 'Project'),('check_pm', '=', True), ('check_reviewer', '=', True)], 'readonly': [('status', 'not in', ['Draft'])],'invisible':[('request_for', 'in', [False,'SBU_employee']),('check_pm', '=', False), ('check_reviewer', '=', False)]}"/>
+
+                                <!-- <field name="project_code" force_save="1"
+                                    attrs="{'invisible': ['|',('check_division_head', '=', True), 
+                                        '&amp;', ('check_sbu', '=', True), ('check_pm', '=', False), ('request_for', 'in', ['SBU_employee', False]),'&amp;','|', ('check_sbu', '=', True),('request_for', 'in', ['SBU_employee', False]),
+                                        '&amp;','|', '|',('check_pm', '=', True), ('check_reviewer', '=', True),('check_pratice_head', '=', True)]}"/> -->
+                                <field name="project_code" force_save="1" attrs="{'required': ['|','|',('request_for', '=', 'Project'),('check_pm', '=', True), ('check_reviewer', '=', True)],'invisible':[('request_for', 'in', [False,'SBU_employee']),('check_pm', '=', False), ('check_reviewer', '=', False)]}"/>
+
+                                <field name="employee_id"
+                                       attrs="{'readonly':[('status','not in',['Draft'])]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="designation_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       force_save="1" readonly="1"/>
+                                <field name="department_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       force_save="1" readonly="1"/>
+                                <field name="division_id" options="{'no_open': True,'no_create':True,'no_edit':True}" force_save = "1" readonly="1"/>
+                                <field name="emp_sbu_master_id" options="{'no_open': True,'no_create':True,'no_edit':True}"  attrs="{'invisible':[('emp_sbu_master_id','=',False)]}" readonly="1"/>
+                                <field name="performance_reason" widget='many2many_tags'
+                                       attrs="{'readonly':[('status','not in',['Draft'])]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="remarks" string=" Describe the reason"
+                                       attrs="{'readonly':[('status','not in',['Draft'])],'invisible':['|','|',('check_pm','=',True),('check_reviewer','=',True),('check_sbu','=',True)],'required':['|','|',('check_division_head','=',True),('check_pratice_head','=',True),('check_hod','=',True)]}"/>
+                                <field name="remarks_pm" string=" Describe the reason"
+                                       attrs="{'readonly':[('status','not in',['Draft'])],'invisible':[('check_pm','=',False),('check_reviewer','=',False),('check_sbu','=',False)],'required':['|','|',('check_pm','=',True),('check_reviewer','=',True),('check_sbu','=',True)]}"/>
+                               <field name="suggestion_pm" invisible="1"
+                                            attrs="{'readonly':[('status', 'not in', ['Draft'])],
+                                                    'invisible': ['|','|','|',('check_hod','=',True),
+                                                            ('check_division_head', '=', True),
+                                                            ('check_pratice_head', '=', True),
+                                                            ('check_sbu', '=', True),
+                                                    ],
+                                                    'required': ['|', ('check_reviewer', '=', True),
+                                                                    '&amp;', ('check_sbu', '=', False), ('check_pm', '=', True)]}"/>
+                                <field name="suggestion" invisible="1"
+                                       attrs="{'readonly':[('status','not in',['Draft'])],'invisible':['|','|','|',('check_pm','=',True),('check_reviewer','=',True),('check_sbu','=',True), ('check_hod', '=', True)],
+                                        'required': ['|', '|',
+                                                ('check_division_head', '=', True),
+                                                ('check_pratice_head', '=', True)]}"/>
+                                <!-- <field name="suggestion_reviewer_sbu" attrs="{'invisible':[('check_sbu','=',False)]}" readonly="1"/>
+                                <field name="suggestion_reviewer" attrs="{'invisible':[('check_hod','=',False)]}"  readonly="1"/> -->
+                                <field name="suggestion_hod_sbu" attrs="{'invisible':[('check_sbu','=',False),('check_hod','=',False)],'readonly':[('status','not in',['Draft'])]}"/>
+                                <field name="documents_pm_doc" attrs="{'readonly':[('status','not in',['Draft'])]}" required="1" >
+                                    <tree editable="bottom">
+                                        <field name='ref_id' invisible="1"/>
+                                        <field name='documents' widget="binary" filename="file_name"/>
+                                        <field name="file_name" invisible="1"/>
+                                    </tree>
+                                    <form>
+                                        <field name='documents' widget="file_name"/>
+                                    </form>
+                                </field>
+                                <!-- <field name="documents_pm" widget="binary" filename="file_name"
+                                       attrs="{'readonly':[('status','not in',['Draft'])]}" required="1"/> -->
+                                <div class="d-flex  flex-column">
+                                    <div class="o_form_label o_readonly_modifier text-danger  h5 ">
+                                        <p>
+                                            <i>(Attach the evidences like emails
+                                            or data files such as timesheet/attendance
+                                            records/code review documents/etc. 
+                                            Allowed file formats are doc, docs, xls, xlxs, pdf, pptx and zip,max size of 2 MB per document)
+                                            </i>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- <span style='text-align:right;color:red;font-size:12px;word-wrap:break-word'>
+                                    <i>(Please attach the email and data files <br>
+                                    </br> from Kwantify, including Timesheet, <br>
+                                    </br> attendance records and code review documents.)</i>
+                                </span> -->
+
+                                <!-- <label for="documents_pm" string="(Please attach the email and data files "/> -->
+
+                                <field name="file_name" invisible="1"/>
+                                <!-- <field name="date_of_action"   attrs="{'invisible':['|','|','|','|','|',('check_pm','=',True),('check_reviewer','=',True),('check_division_head','=',True),('check_pratice_head','=',True),('check_sbu','=',True),('check_hod','=',True)]}"/> -->
+                                <!-- <field name="status"/> -->
+                                <field name="approve_remarks" invisible="1"/>
+                                <field name="check_sbu" invisible="1"/>
+                                <field name="check_reviewer" invisible="1"/>
+                                <field name="rcm_group" invisible="1"/>
+                                <field name="check_hod" invisible="1"/>
+                                <field name="check_division_head" invisible="1"/>
+                                <field name="check_pratice_head" invisible="1"/>
+                                <field name="check_pm" invisible="1"/>
+                                <field name="hide_request_for" invisible="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                    <group>
+                        <div class="oe_chatter">
+                            <field name="message_follower_ids" widget="mail_followers" />
+                            <field name="activity_ids" widget="mail_activity" />
+                            <field name="message_ids" widget="mail_thread" />
+                        </div>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="performance_improvement_plan_apply_list">
+            <field name="name">performance_improvement_plan list</field>
+            <field name="model">performance_improvement_plan</field>
+            <field name="arch" type="xml">
+                <tree import='false'>
+                    <field name="reference"/>
+                    <field name="employee_id" class="font-weight-bold"/>
+                    <field name="designation_id"/>
+                    <field name="project_id" force_save = "1"/>
+                    <field name="project_code" invisible="1"/>
+                    <field name="performance_reason" widget='many2many_tags'/>
+                    <field name="raised_by"/>
+                    <!-- <field name="remarks"/>
+                    <field name="suggestion"/> -->
+                    <field name="applied_date"/>
+                    <field name="status"/>
+                    <!-- <field name="date_of_action" /> -->
+                    <field name="pending_at" invisible="1"/>
+                    <field name="pending_at_txt"/>
+                    <field name="approved_by_txt"/>
+                    <!-- <field name="approved_user_id"/> -->
+                </tree>
+            </field>
+        </record>
+
+        <!-- actions opening views on models -->
+        <record model="ir.actions.act_window" id="performance_improvement_plan_action">
+            <field name="name">Raise PIP</field>
+            <field name="res_model">performance_improvement_plan</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">['|',('raised_by.user_id','=',uid),('create_uid','=',uid)]</field>
+            <field name="view_type">form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('performance_improvement_plan_apply_list')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('performance_improvement_plan_form')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Add a new record
+                </p>
+            </field>
+        </record>
+
+        <menuitem name="Raise PIP"
+                  id="performance_improvement_plan_menu"
+                  parent='pip_child_menu'
+                  action='performance_improvement_plan_action'
+                  groups="performance_improvement_plan.group_pip_user,performance_improvement_plan.group_pip_manager,performance_improvement_plan.group_pip_hr_user"
+                  sequence="1"/>
+
+    </data>
+</odoo>

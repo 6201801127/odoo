@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Tree view for "model" -->
+        <record id="view_kw_timesheet_payroll_report_tree" model="ir.ui.view">
+            <field name="name">view.kw_timesheet_payroll_report.tree</field>
+            <field name="model">kw_timesheet_payroll_report</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <tree string="Timesheet Payroll Report Tree" create="false" edit="false" delete="false" import="false">
+                    <field name="attendance_year" invisible="1"/>
+                    <field name="attendance_month" />
+                    <field name="emp_code" />
+                    <field name="employee" />
+                    <field name="designation" />
+                    <field name="department_id" />
+                    <field name="division"/>
+                    <field name="parent_id" />
+                    <field name="doj" />
+                    <field name="working_days" />
+                    <field name="absent_days" />
+                    <field name="on_tour_days" />
+                    <field name="on_leave_days" />
+                     <field name="per_day_effort" groups="base.group_no_one"/>
+                    <field name="required_effort_char" />
+                    <field name="actual_effort_char" />
+                    <field name="total_effort_char"/>
+                    <field name="total_effort_percent"/>
+                    <field name="required_effort_day" invisible="1"/>
+                    <field name="num_actual_effort_day" invisible="1"/>
+                    <field name="total_effort_day" invisible="1"/>
+                    <!-- <field name="timesheet_lwp_days"/>
+                    <field name="timesheet_paycut_days"/> -->
+                </tree>
+            </field>
+        </record>
+
+        <!-- Search view for "model" -->
+        <record id="view_kw_timesheet_payroll_report_search" model="ir.ui.view">
+            <field name="name">view.kw_timesheet_payroll_report.search</field>
+            <field name="model">kw_timesheet_payroll_report</field>
+            <field name="type">search</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <search string="Search Employee">
+                    <field name="employee"  string="Employee"/>
+                    <field name="designation" />
+                    <field name="department_id" />
+                    <field name="division" />
+                        <filter string="This Year" domain="[('attendance_year', '=',context_today().strftime('%Y'))]" name="current_year_attendance"/>
+                        <filter string="Last Year" domain="[('attendance_year', '=',(context_today()-relativedelta(years=1)).strftime('%Y'))]" name="last_year_attendance"/>
+                        <separator/>
+                        <filter string="This month" domain="[('attendance_month_year','&gt;',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('attendance_month_year','&lt;',(context_today()+relativedelta(months=1)).strftime('%Y-%m-01'))]" name="current_month_timesheet"/>
+                        <filter string="Last Month" domain="[('attendance_month_year','&gt;',(context_today()-relativedelta(months=2)).strftime('%Y-%m-01')),('attendance_month_year','&lt;',(context_today()).strftime('%Y-%m-01'))]" name="last_month_attendance"/>
+                        <separator/>
+                        <filter name="my_and_sub_ordinate_timesheet_payroll_report" string="My &amp; Sub-Ordinates" domain="['|',('employee_id.user_id','=',uid),('employee_id.parent_id.user_id','=',uid)]" />
+
+                        <filter name="hod_timesheet_payroll_report" string="HOD" domain="[('employee_id.department_id.manager_id.user_id','=',uid)]" />
+
+                        <filter string="January" domain="[('attendance_month','=','01')]" name="january_attendance"/>
+                        <filter string="February" domain="[('attendance_month','=','02')]" name="february_attendance"/>
+                        <filter string="March" domain="[('attendance_month','=','03')]" name="march_attendance"/>
+                        <filter string="April" domain="[('attendance_month','=','04')]" name="april_attendance"/>
+                        <filter string="May" domain="[('attendance_month','=','05')]" name="may_attendance"/>
+                        <filter string="June" domain="[('attendance_month','=','06')]" name="june_attendance"/>
+                        <filter string="July" domain="[('attendance_month','=','07')]" name="july_attendance"/>
+                        <filter string="August" domain="[('attendance_month','=','08')]" name="august_attendance"/>
+                        <filter string="September" domain="[('attendance_month','=','09')]" name="september_attendance"/>
+                        <filter string="October" domain="[('attendance_month','=','10')]" name="october_attendance"/>
+                        <filter string="November" domain="[('attendance_month','=','11')]" name="november_attendance"/>
+                        <filter string="December" domain="[('attendance_month','=','12')]" name="december_attendance"/>
+            </search>
+            </field>
+
+        </record>
+
+        <!-- Main window action for "model" -->
+        <record id="action_kw_timesheet_payroll_report_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Timesheet Payroll Deduction</field>
+            <field name="res_model">kw_timesheet_payroll_report</field>
+            <field name="view_mode">tree</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>
+            <field name="context">{'search_default_current_month_timesheet':1,'search_default_current_year_attendance':1,'search_default_my_and_sub_ordinate_timesheet_payroll_report':1}</field>
+            <field name="domain">[]</field>
+        </record>
+
+        <menuitem name="Timesheet Payroll"
+        id="parent_menu_timesheet_payroll_report" 
+        parent="hr_timesheet.menu_timesheets_reports"
+        groups="hr_timesheet.group_timesheet_manager"
+        sequence="999"/>
+
+
+        <menuitem name="Timesheet Payroll Report" action="action_kw_timesheet_payroll_report_window"
+                  id="menu_timesheet_payroll_report" parent="parent_menu_timesheet_payroll_report"
+                  groups="hr_timesheet.group_timesheet_manager,kw_timesheets.group_kw_timesheets_report_manager"/>
+
+        <!-- <record id="kw_timesheets.parent_menu_timesheet_payroll_report" model="ir.ui.menu">
+            <field name="groups_id" eval="[(3, ref('kw_timesheets.group_kw_timesheets_report_manager'))]"/>
+        </record> -->
+    </data>
+</odoo>

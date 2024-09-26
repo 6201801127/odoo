@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+        <record id="view_picking_internal_search_inherit" model="ir.ui.view">
+            <field name="name">Resource Skill Filter</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//search" position="inside">
+                    <field name="process_location"/>
+                </xpath>
+                <xpath expr="//search/group" position="inside">
+                    <filter name="process_location" string="Process location" domain="[]" context="{'group_by':'process_location'}"/>
+                </xpath>
+            </field>
+        </record>
+        <!--  -->
+        <record id="grn_action_view" model="ir.actions.act_window">
+            <field name="name">Goods Receipt Note</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stock.picking</field>
+            <field name="domain">[('location_dest_id.stock_process_location','=','grn')]</field>
+            <field name="context">{'search_default_picking_type':1,'search_default_available': 1,'hide_process_buttons':True,'create': False}</field>
+            <field name="search_view_id" ref="stock.view_picking_internal_search"/>
+            <field name="view_ids"
+                       eval="[(5, 0, 0),
+                              (0, 0, {'view_mode': 'tree', 'view_id': ref('stock.vpicktree')}),
+                              (0, 0, {'view_mode': 'form', 'view_id': ref('stock.view_picking_form')})]"/>
+        </record>
+
+        <record id="qc_action_view" model="ir.actions.act_window">
+            <field name="name">Quality Check/Inspection</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stock.picking</field>
+            <field name="domain">[('location_dest_id.stock_process_location','=','qc')]</field>
+            <field name="context">{'search_default_picking_type':1,'search_default_available': 1,'hide_process_buttons':True,'create': False}</field>
+            <field name="search_view_id" ref="stock.view_picking_internal_search"/>
+            <field name="view_ids"
+                       eval="[(5, 0, 0),
+                              (0, 0, {'view_mode': 'tree', 'view_id': ref('stock.vpicktree')}),
+                              (0, 0, {'view_mode': 'form', 'view_id': ref('stock.view_picking_form')})]"/>
+        </record>
+
+        <record id="store_action_view" model="ir.actions.act_window">
+            <field name="name">Store Receive Voucher</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stock.picking</field>
+            <field name="domain">[('location_dest_id.stock_process_location','=','store')]</field>
+            <field name="context">{'search_default_picking_type':1,'search_default_available': 1,'hide_process_buttons':True,'create': False}</field>
+            <field name="search_view_id" ref="stock.view_picking_internal_search"/>
+            <field name="view_ids"
+                       eval="[(5, 0, 0),
+                              (0, 0, {'view_mode': 'tree', 'view_id': ref('stock.vpicktree')}),
+                              (0, 0, {'view_mode': 'form', 'view_id': ref('stock.view_picking_form')})]"/>
+        </record>
+
+        <record id="operation_reprot_action_view" model="ir.actions.act_window">
+            <field name="name">Operation Report</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stock.picking</field>
+            <field name="domain"></field>
+            <field name="context">{'search_default_picking_type':1,'hide_process_buttons':True,'create': False}</field>
+            <field name="search_view_id" ref="stock.view_picking_internal_search"/>
+            <field name="view_ids"
+                       eval="[(5, 0, 0),
+                              (0, 0, {'view_mode': 'tree', 'view_id': ref('stock.vpicktree')}),
+                              (0, 0, {'view_mode': 'form', 'view_id': ref('stock.view_picking_form')})]"/>
+        </record>
+
+        <record id="purchase_order_line_inherited_tree" model="ir.ui.view">
+            <field name="name">purchase.order.line.inherited.tree</field>
+            <field name="model">purchase.order.line</field>
+            <field name="arch" type="xml">
+                <tree string="Purchase Order Lines Inherited" create="false" editable="bottom">
+                    <field name="order_id" readonly='1'/>
+                    <field name="name" readonly='1'/>
+                    <field name="partner_id" string="Vendor" />
+                    <field name="product_id" readonly='1'/>
+                    <field name="product_qty" readonly='1'/>
+                    <field name="product_uom" string='UoM' groups="uom.group_uom" readonly='1'/>
+                    <field name="date_planned"  widget="date" readonly='1'/>
+                    <field name="receive_remark" readonly='1'/>
+                    <!-- <field name="receive_date" readonly='1'/> -->
+                    <field name="status" readonly='1'/>
+                    <button string="Receive Services" name="receive_products" type="object" class="oe_highlight" attrs="{'invisible': [('status', '!=', 'pending')]}" />
+                    <button string="Return Services" name="return_products" invisible='1' type="object" class="oe_highlight"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="ses_form_action" model="ir.actions.act_window">
+            <field name="name">SES</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_mode">tree</field>
+            <field name="res_model">purchase.order.line</field>
+            <field name="domain">[('product_id.type','=','service')]</field>
+            <field name="context">{'search_default_groupby_supplier':1}</field>
+            <field name="search_view_id" ref="purchase.purchase_order_line_search"/>
+            <field name="view_ids"
+                       eval="[(5, 0, 0),
+                              (0, 0, {'view_mode': 'tree', 'view_id': ref('purchase_order_line_inherited_tree')})]"/>
+        </record>
+
+        <record id="return_stock_picking_action" model="ir.actions.act_window">
+            <field name="name">Return/Damage</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stock.picking</field>
+            <field name="domain">['|',('state','=','done'),('is_return','=',True)]</field>
+            <field name="context">{'search_default_process_location':1,'hide_print_stock_buttons':True,'create':False,'edit':False}</field>
+            <field name="search_view_id" ref="stock.view_picking_internal_search"/>
+            <field name="view_ids"
+                       eval="[(5, 0, 0),
+                              (0, 0, {'view_mode': 'tree', 'view_id': ref('stock.vpicktree')}),
+                              (0, 0, {'view_mode': 'form', 'view_id': ref('stock.view_picking_form')})]"/>
+        </record>
+
+        <menuitem id="stock_operations_menu"
+                      name="Overview"
+                      parent="stock.menu_stock_root"
+                      groups='stock.group_stock_manager,stock.group_stock_user'
+                      sequence="1"/>
+    
+        <menuitem action="kw_inventory.grn_action_view" id="grn_menu"
+            parent="kw_inventory.stock_operations_menu" 
+            name="Goods Receipt Note"
+            sequence="1"/>
+
+        <menuitem action="kw_inventory.qc_action_view" id="qc_menu"
+            parent="kw_inventory.stock_operations_menu" 
+            name="Quality Check/Inspection"
+            sequence="2"/>
+        
+        <menuitem action="kw_inventory.store_action_view" id="store_menu"
+            parent="kw_inventory.stock_operations_menu" 
+            name="Store Receive Voucher"
+            sequence="3"/>
+        
+        <menuitem action="kw_inventory.operation_reprot_action_view" id="operation_report_menu"
+            parent="kw_inventory.stock_operations_menu" 
+            sequence="5"
+            groups="base.group_no_one"/>
+            
+        <menuitem action="kw_inventory.ses_form_action" id="ses_form_action_menu" parent="kw_inventory.stock_operations_menu"
+            name='Service Entry Sheet'
+            sequence="5"/>
+        <menuitem id="material_request_inventory_menu" parent="stock.menu_stock_root"
+            name='Material Request'
+            sequence="2"
+            groups="group_material_request_user,stock.group_stock_manager,stock.group_stock_user,group_store_manager"/>
+
+        <menuitem id="material_request_apply_inventory_menu" parent="material_request_inventory_menu"
+            action='kw_material_request_action_window'
+            name='Apply'
+            groups="group_material_request_user,stock.group_stock_manager,group_store_manager"
+            sequence="1"/>
+
+        <record id="material_request_management_action" model="ir.actions.server">
+            <field name="name">Pending Actions</field>
+            <field name="model_id" ref="model_kw_material_management" />
+            <field name="state">code</field>
+            <field name="code">
+action = model.render_material_pending_actions()
+
+            </field>
+        </record>
+
+        <menuitem id="material_request_take_action_menu" parent="material_request_inventory_menu"
+            action='material_request_management_action'
+            name='Pending Actions'
+            groups="group_material_request_user,stock.group_stock_manager,group_store_manager"
+            sequence="2"/>
+        
+        <menuitem action="kw_inventory.ses_form_action" id="ses_form_action_menu" parent="kw_inventory.stock_operations_menu"
+            name='Service Entry Sheet' 
+            sequence="4"/>
+
+        <menuitem name='Stocks' id="stock_house_action_menus" parent="stock.menu_stock_root" 
+                        groups='stock.group_stock_manager,group_store_manager'/>
+        
+        <menuitem action="action_stock_quant_store" id="stock_store_action_menu_new"
+            parent="kw_inventory.stock_house_action_menus"
+            name='Store'
+            groups='stock.group_stock_manager,group_store_manager'
+            sequence="1"/>
+        
+        <!-- <menuitem action="kw_inventory.reserve_unreserved_stock_action" id="reserve_unreserved_stock_action_window"
+                parent="kw_inventory.stock_house_action_menus"
+                name='Reserved/Underprocess Stock'
+                groups='base.group_no_one'
+                sequence="2"/> -->
+        
+        <menuitem action="kw_inventory.return_stock_picking_action" id="stock_return_action_menu"
+            parent="kw_inventory.stock_house_action_menus"
+            name='Return/Damage Stock'
+            sequence="3"/>
+        <menuitem action="kw_inventory.kw_service_register_action" id="service_register_action_menu"
+            parent="kw_inventory.stock_house_action_menus"
+            name='Service Register'
+            sequence="2"/>
+        
+         <menuitem action="action_window_store_issue" id="stock_issue_action_menu"
+            parent="kw_inventory.stock_house_action_menus"
+            name='Issue Items'
+            groups='stock.group_stock_manager,group_store_manager'
+            sequence="4"/>
+
+        <menuitem action="kw_inventory.action_stock_quant_issued" id="store_return_action_menu"
+            parent="kw_inventory.stock_house_action_menus"
+            name='Issued'
+            groups='stock.group_stock_manager,group_store_manager'
+            sequence="92"/>
+        
+        <!-- <menuitem action="kw_inventory.action_stock_quant_sent_to_repair" id="sent_to_repair_action_menu"
+            parent="kw_inventory.stock_house_action_menus"
+            name='Sent to Repair'
+            sequence="93"/> -->
+        
+            <!-- <menuitem action="action_stock_quant_store" id="menu_action_store_master"
+        parent="kw_inventory.kw_purchase_master" 
+        sequence="4"/> -->
+        
+        <menuitem name='FA Register' id="fa_register_action_menus" parent="stock.menu_stock_root" 
+                        groups='stock.group_stock_manager,group_store_manager' sequence="111"/>
+        
+        <menuitem action="action_create_fa_window" id="create_fa_action_menu_new"
+            parent="kw_inventory.fa_register_action_menus"
+            name='Create Fixed Asset'
+            groups='stock.group_stock_manager,group_store_manager'
+            sequence="1"/>
+        
+            <menuitem action="action_all_fa_window" id="view_all_fa_action_menu_new"
+                parent="kw_inventory.fa_register_action_menus"
+                name='All Fixed Asset'
+                groups='stock.group_stock_manager,group_store_manager'
+                sequence="2"/>
+
+                <menuitem name="Asset Category"
+				action="kw_account_asset.action_account_asset_asset_list_normal_purchase"
+				id="menu_action_account_asset_category"
+				parent="kw_inventory.fa_register_action_menus"
+				sequence="3"
+				groups="stock.group_stock_manager,group_store_manager"/>
+        
+        <menuitem id="gatepass_action_menu"
+            parent="stock.menu_stock_root"
+            name='Gatepass'
+            groups="stock.group_stock_manager,group_asset_tracker_user"
+            sequence="112"/>
+
+        <record id="assign_gatepass_server_action" model="ir.actions.server">
+            <field name="name">Assign Nonreturnable/Returnable Gatepass</field>
+            <field name="model_id" ref="model_stock_quant"/>
+            <field name="state">code</field>
+            <field name="code">
+action = model.render_assign_gatepass()
+            </field>
+        </record>
+
+            <menuitem action="asset_tracker_window" id="gatepass_tracker_action_menu"
+                parent="kw_inventory.gatepass_action_menu"
+                name='Asset Tracker'
+                groups="stock.group_stock_manager,group_asset_tracker_user"
+                sequence="1"/>
+            <menuitem action="assign_gatepass_server_action" id="gatepass_assign_action_menu"
+                parent="kw_inventory.gatepass_action_menu"
+                name='Assign Nonreturnable/Returnable Gatepass'
+                groups="stock.group_stock_manager"
+                sequence="2"/>
+            <menuitem action="kw_inventory.action_nonreturnable_stock" id="nonreturnable_stock_action_menu"
+                parent="kw_inventory.gatepass_action_menu"
+                name='Nonreturnable/Returnable Gatepass'
+                groups="stock.group_stock_manager"
+                sequence="3"/>
+        
+	</data>
+</odoo>

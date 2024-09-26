@@ -1,0 +1,181 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+
+
+    <!-- Material Request -->
+        <record id="kw_materail_request_view_tree" model="ir.ui.view">
+            <field name="name">kw_material_management.view.tree</field>
+            <field name="model">kw_material_management</field>
+            <field name="arch" type="xml">
+                <tree default_order="id desc" import='0'  decoration-info="(state == 'Issued')" decoration-danger="(state in ['Rejected','Cancelled'])" decoration-success="(state == 'Approved')" >
+                    <field name="item_sequence" string="Material Ref." />
+                    <field name="employee_id" string="Employee" />
+                    <field name="department_id" string="Department" />
+                    <field name="date" string="Applied Date" />
+                    <field name="pending_at" string="Pending At" />
+                    <field name="state" string="Status"/>
+                </tree>
+            </field>
+        </record>
+        <record id="kw_materail_request_view_form" model="ir.ui.view">
+            <field name="name">kw_material_management.view.form</field>
+            <field name="model">kw_material_management</field>
+            <field name="priority">17</field>
+            <field name="arch" type="xml">
+                <form string="" duplicate="0" >
+                    <script>
+                        $(document).ready(function() {
+                            // Get the text content of the button
+                            var state = $("button[aria-checked=true]").text().trim();
+                            var states=  $("button[aria-pressed=true]").text().trim();
+
+
+                            // Check if the state is 'Issued'
+                            if (state === 'Issued' || state === 'Rejected' || state === 'Cancelled' || state === 'Approved' ||states === 'Issued' || states === 'Rejected' || states === 'Cancelled' || states === 'Approved' || state === 'Pending' || states === 'Pending') {
+                                // Hide the edit button
+                                $('.o_form_button_edit').hide();
+                            }
+                        });
+
+                    </script>
+                    <header>
+                        <button name="redirect_user_action" context='{"submit_material_request":True}' attrs="{'invisible': [('state', '!=', 'Draft')]}" string="Send For Approval" type="object" class="btn btn-success"/>
+                        <button name="redirect_user_action" context='{"send_back_request":True}' attrs="{'invisible': [('state', '!=', 'Pending')]}" string="Set To Draft" type="object" class="btn btn-info"/>
+                        <button name="redirect_user_action" context='{"cancel_item_request":True}' attrs="{'invisible': [('state', '!=', 'Pending')]}" string="Cancel" type="object" class="btn btn-danger"/>
+                        <field name="state" widget="statusbar" statusbar_visible="Draft" readonly="1"/>
+                    </header>
+                    <sheet>
+                        <style>
+                            .table-responsive .o_list_view thead tr:nth-child(1) th{
+                                background-color: #108fbb !important;
+                                color: whitesmoke;
+                            }
+                        </style>
+                        <group>
+                            <group>
+                                <field name="item_sequence" string="Material Ref." />
+                                <field name="employee_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" readonly='1'/>
+                                <field name="department_id" string="Department" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" readonly='1'/>
+                                <field name="division_id" attrs="{'invisible': [('division_id', '=', False)]}" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" readonly='1'/>
+                                <field name="section_id" attrs="{'invisible': [('section_id', '=', False)]}" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" readonly='1'/>
+                                <field name="practice_id" attrs="{'invisible': [('practice_id', '=', False)]}" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" readonly='1'/>
+                            </group>
+                            <group>
+                                <field name="date" string=" Applied Date" attrs="{'readonly': [('state', 'not in', ['Draft'])]}" readonly='1'/>
+                                <!-- <field name="dept_code" string="Department Code" readonly='1'/> -->
+                                <field name="requirement_type" string="Requirement Type" required='1' attrs="{'readonly': [('state', 'not in', ['Draft'])]}"/>
+                                <field name="project_code" attrs="{'required': [('requirement_type', '=','project')],'invisible': [('requirement_type', '!=','project')],'readonly':[('state','in',['Rejected','cancelled','Approved'])]}"/>
+                                <field name="branch_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" readonly='1'/>                                
+                            </group>
+                            <h1 class="my-3"> Item Details </h1>
+                            <field name="add_product_items_ids" string="Item Details" context="{'form_view_ref' : 'kw_inventory.kw_add_product_items_view_trees'}" attrs="{'readonly': [('state', 'not in', ['Draft'])]}">
+                                <tree editable="bottom"  create='1' edit='1' delete='1'>
+                                    <field name="product_type" string="Product Category" />
+                                    <!-- <field name="product_category" string=" Product Category"/> -->
+                                    <field name="product_template_id" string=" Product Type" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+                                    <field name="item_code" string="Item Code" options="{'no_create':True,'no_edit':True,'no_open': True,}" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}" context="{'search_view_ref': 'kw_inventory.department_tree_view'}" search_view_id="kw_inventory.kw_materail_request_view_search"/>
+                                    <field name="item_description" string="Item Description" readonly='0' invisible='1'/>
+                                    <field name="quantity_required" string="Quantity Required" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                                    <field name="uom" string="UoM" style="pointer-events:none;" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                                    <field name="expected_days"   required='1' string="Required Date" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                                    <field name="check_availability" invisible="1" force_save='1' />
+                                    <field name="employee_id" string='Issue to' force_save='1' required='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                                    <field name="item_in_stock" invisible='1'/>
+                                    <field name="alternate_name" invisible='1'/>
+                                    <!-- <field name="material_ids" widget="many2many_tags"/>
+                                    <field name="alternate_material_ids" widget="many2many_tags"/> -->
+                                    <!-- <field name="remark" attrs="{'invisible': [('status', '!=', 'Rejected')]}" /> -->
+                                    <field name="status" string="Status" readonly="1" />
+                                    <field name="gatepass_type" string="Product Move Type" invisible="1" />
+                                    <!-- <button name="redirect_request_items" attrs="{'invisible': [('status', '!=', 'Draft')]}" string="Send For Approvel" type="object" class="btn btn-success"/> -->
+                                </tree>
+                            </field>
+                            <h1 class="my-3">Action Log </h1>
+                            <field name="material_log" string="Action Log" force_save='1' style="pointer-events:none;"/>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_materail_request_view_search" model="ir.ui.view">
+            <field name="name">kw_material_management.search</field>
+            <field name="model">kw_material_management</field>
+            <field name="arch" type="xml">
+                <search string="">
+                    <field string="Material Ref" name="item_sequence"/>
+                    <field string="Employee" name="employee_id" />
+                    <field string="Department" name="department_id" />
+                    <field string="Division" name="division_id" />
+                    <field string="Section" name="section_id"/>
+                    <field string="Practice" name="practice_id" />
+                    <field string="Branch" name="branch_id" />
+                    <field string="Applied Date" name="date" />
+                    <field string="Project Code" name="project_code"/>
+                    <field string="State" name="state"/>
+
+
+                    <filter string="Draft" name="Check-In" domain="[('state', '=','Draft')]"/>
+                    <filter string="Pending" name="Check-Out" domain="[('state', '=','Pending')]"/>
+                    <filter string="Hold" name="Rejected" domain="[('state', '=','Hold')]"/>
+                    <filter string="Approved" name="Rejected" domain="[('state', '=','Approved')]"/>
+                    <filter string="Cancelled" name="Rejected" domain="[('state', '=','Cancelled')]"/>
+                    <filter string="Rejected" name="Rejected" domain="[('state', '=','Rejected')]"/>
+                    <filter string="Issued" name="Rejected" domain="[('state', '=','Issued')]"/>
+                    <filter string="Released" name="Rejected" domain="[('state', '=','Released')]"/>
+
+
+                    <group expand="0" string="Group By">
+                        <filter string="State" name="grp_by_state" domain="" context="{'group_by':'state'}"/>
+                        <filter string="Branch" name="grp_by_branch_id" domain="" context="{'group_by':'branch_id'}"/>
+                        <filter string="Department" name="grp_by_department_id" domain="" context="{'group_by':'department_id'}"/>
+                        <filter string="Division" name="grp_by_division_id" domain="" context="{'group_by':'division_id'}"/>
+                        <filter string="Section" name="grp_by_section_id" domain="" context="{'group_by':'section_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+    
+        <record id="kw_material_request_action_window" model="ir.actions.act_window">
+            <field name="name">Apply</field>
+            <field name="res_model">kw_material_management</field>
+            <field name="view_mode">tree,form,pivot,graph</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_materail_request_view_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_materail_request_view_form')})]"/>
+            <field name="search_view_id" ref='kw_inventory.kw_materail_request_view_search'/>
+            <field name="context">{'search_default_grp_by_state':1}</field>
+            <field name="domain">[('create_uid', '=', uid)]</field> 
+        </record>
+
+    
+    <!-- <menuitem id="kw_material_request_process"
+        name="Material Request"
+        parent="purchase.menu_purchase_root"
+        sequence="5"/>
+
+    <menuitem
+        id="menu_material_request"
+        sequence="1"
+        name="Apply"
+        parent="kw_material_request_process"
+        action="kw_material_request_action_window"/>
+
+    <menuitem
+        id="menu_material_release"
+        sequence="4"
+        name="Release Material"
+        parent="kw_material_request_process"
+        groups="kw_inventory.group_store_manager"
+        action="kw_add_product_items_action_window"/> -->
+
+    <!-- Action remark form view -->
+
+    </data>
+</odoo>

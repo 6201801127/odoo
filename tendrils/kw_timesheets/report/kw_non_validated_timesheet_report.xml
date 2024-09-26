@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="non_validated_timesheet_report_tree_view" model="ir.ui.view">
+            <field name="name">kw_nonvalidated_timesheet_report.view.tree</field>
+            <field name="model">kw_nonvalidated_timesheet_report</field>
+            <field name="arch" type="xml">
+                <tree import="0">
+                    <field name="date" readonly="1"/>
+                    <field name="employee_id" readonly="1" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="project_category_id" readonly="1" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="project_id" readonly="1" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="task_id" readonly="1" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="name" readonly="1"/>
+                    <field name="pending_at" readonly="1"/>
+                    <field name="unit_amount" string="Duration (Hours)" sum="Total" readonly="1" widget="timesheet_uom"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="non_validated_timesheet_report_search_view" model="ir.ui.view">
+            <field name="name">non_validates_timesheet_report.search</field>
+            <field name="model">kw_nonvalidated_timesheet_report</field>
+            <field name="arch" type="xml">
+                <search string="Timesheet">
+                    <field name="employee_id"/>
+                    <field name="project_id"/>
+                    <field name="task_id"/>
+                    <field name="name"/>
+                    <field name="date"/>
+                    <separator/>
+                    <separator/>
+                    <filter name="date" string="Date" date="date"/>
+                    <filter string="This Month" name="filter_this_month" domain="[('date','&lt;=',(datetime.date.today()+relativedelta(day=31)).strftime('%Y-%m-%d')),('date','&gt;=',(datetime.date.today()-relativedelta(day=1)).strftime('%Y-%m-%d'))]"/>
+                    <separator/>
+                    <filter string="This Week" name="filter_this_week" domain="[('date', '&lt;=', ((context_today()+relativedelta(weeks=0, weekday=-1)).strftime('%Y-%m-%d'))),('date', '&gt;=', ((context_today()-relativedelta(weeks=1, weekday=0)).strftime('%Y-%m-%d')))]"/>
+                    <separator/>
+                    <filter string="Today" name="filter_today" domain="[('date', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('date', '&lt;=',datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter string="Employee" name="groupby_employee" domain="[]" context="{'group_by':'employee_id'}"/>
+                        <filter string="Project" name="groupby_project" domain="[]" context="{'group_by':'project_id'}"/>
+                        <filter string="Task" name="groupby_task" domain="[]" context="{'group_by':'task_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="kw_non_validated_timesheet_report_action" model="ir.actions.act_window">
+            <field name="name">Non-Validated Timesheets</field>
+            <field name="res_model">kw_nonvalidated_timesheet_report</field>
+            <field name="view_mode">tree</field>
+            <field name="search_view_id" ref="non_validated_timesheet_report_search_view"/>
+            <field name="domain">[('employee_id.user_id','=',uid)]</field>
+            <field name="context">{'search_default_filter_this_month':1,'create': False,'edit':False,'delete':False,'import':False}</field>
+        </record>
+        
+        <menuitem id="non_validated_timesheet_report_user_menu" name="Non-Validated Timesheets Report" parent="kw_timesheets.my_timesheet_user_menu" action="kw_non_validated_timesheet_report_action" sequence="14" groups = "hr_timesheet.group_hr_timesheet_user"/>
+
+    </data>
+</odoo>

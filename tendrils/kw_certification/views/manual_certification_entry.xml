@@ -1,0 +1,134 @@
+<odoo>
+    <data>
+      <!-- list view -->
+      <record model="ir.ui.view" id="kw_manual_certification_list">
+        <field name="name">kw_manual_certification_list</field>
+        <field name="model">kw_manual_certification</field>
+        <field name="arch" type="xml">
+          <tree import="false" delete="false">
+            <field name="create_date" string="Raised Date"/>
+            <field name="date_of_raised" invisible="1"/>
+            <field name="raised_by_id"/>
+            <field name="require_department_id"/>
+            <field name="certification_type_id"/>
+            <field name="technology_id"/>
+            <field name="state"/>
+          </tree>
+        </field>
+      </record>
+
+      <record model="ir.ui.view" id="manual_certification_wizard_upload_form">
+        <field name="name">manual_certification_wizard_upload_form</field>
+        <field name="model">manual_certification_add_wizard</field>
+        <field name="arch" type="xml">
+          <form import="false" delete="false">
+            <sheet>
+              <group>
+                <group>
+                  <field name="employee_id"  options="{'no_create': True, 'no_open': True, 'no_edit': True}" required="1" readonly="1"/>
+                  <field name="manual_certification_record_id" invisible="1"/>
+                  <field name="assign_emp_record_id" invisible="1"/>
+                  <field name="course_type" readonly="1" required="1"/>
+                  <field name="course_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}" readonly="1" required="1"/>
+                  <field name="stream_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}" required="1"/>
+                  <field name="university_name" options="{'no_create': True, 'no_open': True, 'no_edit': True}" required="1"/>
+                </group>
+                <group>
+                  <field name="passing_year" required="1"/>
+                  <field name="division" required="1"/>
+                  <field name="marks_obtained" required="1"/>
+                  <field name="certificate_upload" required="1"/>
+                </group>
+              </group>
+              <footer>
+                <button name="btn_submit_upload_manual" string="Submit" type="object" class="oe_highlight"/>
+                <button string="Cancel"  special="cancel" class = "btn-danger"/>
+              </footer>
+            </sheet>
+          </form>
+        </field>
+      </record>
+      <record model="ir.actions.act_window" id="manual_certification_wizard_window">
+        <field name="name">View Upload</field>
+        <field name="res_model">manual_certification_add_wizard</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="target">new</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+      (0, 0, {'view_mode': 'form', 'view_id': ref('manual_certification_wizard_upload_form')})]"/>
+      </record>
+  
+      <record id="kw_manual_certification_form" model="ir.ui.view">
+        <field name="name">kw_manual_certification_form</field>
+        <field name="model">kw_manual_certification</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+          <form import="false">
+            <header>
+              <field name="state" widget="statusbar"/>
+              <button name="btn_submit" string="Submit" type="object" class="btn-success" context= "{'current_record':id}"
+                    attrs="{'invisible':[('state', 'not in', ['Draft'])]}"/>
+            </header>
+            <sheet>
+              <group>
+                <group>
+                  <field name="date_of_raised" invisible="1"/>
+                  <field name="raised_by_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}" readonly='1'/>
+                  <field name="department_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}" force_save="1" readonly="1"/>
+                  <field name="certification_type_id" required="1" options="{'no_create': True, 'no_open': True, 'no_edit': True}" attrs="{'readonly':[('state', '!=', 'Draft')]}"/>
+                  <field name="technology_id" required="1" options="{'no_create': True, 'no_open': True, 'no_edit': True}" attrs="{'readonly':[('state', '!=', 'Draft')]}"/>
+                  <field name="require_department_id" placeholder="Required For Department....." required="1" options="{'no_create': True, 'no_open': True, 'no_edit': True}" attrs="{'readonly':[('state', '!=', 'Draft')]}" context="{'tree_view_ref': 'kw_manual_certification.department_tree_view'}"/>
+                </group>
+              </group>
+              <group string="Nominate Employees">
+                <field name="assigned_emp_data">
+                  <tree editable="bottom">
+                    <field name="employee_id" required="1"/>
+                    <field name="deg_id"/>
+                    <field name="emp_qualification"/>
+                    <field name="emp_year_of_exp"/>
+                    <field name ="dept_id"/>
+                    <field name="work_email"/>
+                    <field name="certificate_upload" widget="binary" filename="doc_file_name" invisible="1"/>
+                    <field name="status_certification"/>
+                    <field name="manual_certification_entry_id" invisible="1"/>
+                    <field name="show_upload_button" invisible="1"/>
+                    <field name="doc_file_name" invisible="1"/>
+                    <field name="assigned_date" invisible="1"/>
+                    <button name="%(manual_certification_wizard_window)d" string="Upload" type="action" class="btn-success"
+                            attrs="{'invisible': ['|',('show_upload_button', '=', False),('status_certification', '!=', 'Pending')]}"
+                            widget="boolean_button" context="{'default_manual_certification_record_id': manual_certification_entry_id,
+                            'default_assign_emp_record_id':id,
+                            'default_employee_id':employee_id,
+                            }"/>
+                  </tree>
+                </field>
+                <group>
+                </group>
+                <group>
+                </group>
+              </group>
+            </sheet>
+            <div class="oe_chatter" >
+              <field name="message_follower_ids" widget="mail_followers" />
+              <field name="activity_ids" widget="mail_activity" />
+              <field name="message_ids" widget="mail_thread" />
+            </div>
+          </form>
+        </field>
+      </record>
+
+      
+      <record model="ir.actions.act_window" id="kw_manual_certification_action_window">
+        <field name="name">Manual Certification Entry</field>
+        <field name="res_model">kw_manual_certification</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form,search</field>
+        <field name="domain">[('create_uid','=',uid)]</field>
+      </record>
+
+
+
+  
+    </data>
+  </odoo>

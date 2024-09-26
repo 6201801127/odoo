@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- IT, admin Extension status  mail-->
+        <record id="kw_wfh_csm_initiative_authorities_extension_status_email_template" model="mail.template">
+            <field name="name">WFH by HR : Employee Extension notification to IT and Admin</field>
+            <field name="email_from">${object.env.user.email}</field>
+            <field name="subject">WFH request for
+            % if ctx['joined_ids']:
+                ${ctx['joined_ids']} Team
+            %else:
+                the following employees
+            % endif
+            % if ctx['joined_location_ids'] and not ctx['location_type']:
+                of ${ctx['joined_location_ids']}
+            %else:
+
+            % endif
+             |  ${ctx['action']} </field>
+            <field name="email_to">${object.get_IT_Admin_users_mail() or ''} </field>
+            <field name="model_id" ref="kw_wfh.model_kw_wfh"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+
+                      <table border="0">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;padding-left: 5px;">
+
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">Hello</span>
+                                        All,
+                                    </h5>
+
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                        Work From Home option has been ${ctx['action']} for the following employees.
+                                    </p>
+
+                                </div>
+                                &nbsp;
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                <table border="0" cellspacing="0" cellpadding="5" style="border-collapse: collapse;font-size: 16px;">
+                                    
+                                    <tr>
+                                        <td style="color:#676767;height: 34px;" width="200px">
+                                            Employee Name
+                                        </td>
+                                        <td style="color:#676767;height: 34px;">
+                                           Employee Code
+                                        </td>
+                                        <td style="color:#676767;height: 34px;">
+                                           Designation
+                                        </td>
+                                    </tr>
+                                    % for row in ctx['emp_name']:
+                                        <tr>
+                                        % if row.name:
+                                            <td style="color:#676767;height: 34px;" width="200px">
+                                                ${row.name}
+                                            </td>
+                                        % endif
+                                        % if row.emp_code:
+                                            <td style="color:#167b9e;height: 34px;">
+                                                ${row.emp_code}
+                                            </td>
+                                        % endif
+                                        % if row.job_id.name:
+                                            <td style="color:#167b9e;height: 34px;">
+                                                ${row.job_id.name}
+                                            </td>
+                                        % endif
+                                        </tr>
+                                    % endfor
+                                
+                                </table>
+                                </div>
+                                &nbsp;
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                 <table border="0" cellspacing="0" cellpadding="5" style="border-collapse: collapse;font-size: 16px;">
+                                    <tbody style="vertical-align: top;>
+                                    <tr>
+                                        <td style="height: 34px;font-size: 1.6rem;font-weight: unset;color: #444141;padding-bottom: 10px;" width="300px">
+                                           <p style="padding-left: 5;">Details</p>
+                                        </td>
+                                        
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;height: 34px;">
+                                            Reason
+                                        </td>
+                                        <td style="color:#167b9e;height: 34px;">
+                                            ${object.reason_id.reason}
+                                        </td>
+                                    </tr>
+
+                                     <tr>
+                                        <td style="color:#676767;height: 34px;">
+                                            Revised To Date
+                                        </td>
+                                        <td style="color:#167b9e;height: 34px;">
+                                            % if object.revised_to_date:
+                                                ${format_tz(object.revised_to_date, tz='UTC', format='%d-%b-%Y')}
+                                            % else:
+                                                ${format_tz(object.process_id.to_date, tz='UTC', format='%d-%b-%Y')}
+                                            % endif
+                                        </td>
+                                     </tr>
+
+                                    <tr>
+                                        % if object.remark:
+                                            <td style="color:#676767;height: 34px;" width="200px">
+                                                HR remark
+                                            </td>
+                                            <td style="color:#167b9e;height: 34px;">
+                                            ${object.remark}
+                                            </td>
+                                        % endif
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                </div>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;font-size: 16px;color:#676767;padding-left: 1px;">
+                                    <p>Thank You.</p>
+                                    <br/>
+                                    % if object.env.user and object.env.user.signature:
+                                        ${object.env.user.signature | safe}
+                                    % endif
+                                </div>
+
+                                </td>
+                            </tr>
+
+                        </table>
+                        </td>
+                    </tr>
+
+                </table>
+
+
+                    ]]>
+
+            </field>
+        </record>
+<!-- hrd extension mail templated -->
+         <record id="kw_wfh_csm_initiative_hrd_extension_status_email_template" model="mail.template">
+            <field name="name">WFH by HR : Employee Extension Status e-mail template to HRD</field>
+            <field name="email_from">${ctx['mail_from']} </field>
+            <field name="subject">WFH request for
+            % if ctx['joined_ids']:
+                ${ctx['joined_ids']} Team
+            %else:
+                the following employees
+            % endif
+            % if ctx['joined_location_ids'] and not ctx['location_type']:
+                of ${ctx['joined_location_ids']}
+            %else:
+
+            % endif
+             |  ${ctx['action']} </field>
+            <field name="email_to">hrd@csm.tech </field>
+            <field name="model_id" ref="kw_wfh.model_kw_wfh"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+
+                      <table border="0">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;padding-left: 5px;">
+
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">Hello</span>
+                                        All,
+                                    </h5>
+
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                        % if ctx['joined_ids']:
+                                            Work From Home option has been ${ctx['action']} for ${ctx['joined_ids']} Team.
+                                        %else:
+                                            Work From Home option has been ${ctx['action']} for the following employees.
+                                        % endif
+                                    </p>
+
+                                </div>
+                                 &nbsp;
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                <table border="0" cellspacing="0" cellpadding="5" style="border-collapse: collapse;font-size: 16px;">
+                                    
+                                         <tr>
+                                        <td style="color:#676767;height: 34px;" width="200px">
+                                            Employee Name
+                                        </td>
+                                        <td style="color:#676767;height: 34px;">
+                                           Employee Code
+                                        </td>
+                                        <td style="color:#676767;height: 34px;">
+                                           Designation
+                                        </td>
+                                    </tr>
+                                    % for row in ctx['emp_name']:
+                                        <tr>
+                                        % if row.name:
+                                            <td style="color:#676767;height: 34px;" width="200px">
+                                                ${row.name}
+                                            </td>
+                                        % endif
+                                        % if row.emp_code:
+                                            <td style="color:#167b9e;height: 34px;">
+                                                ${row.emp_code}
+                                            </td>
+                                        % endif
+                                        % if row.job_id.name:
+                                            <td style="color:#167b9e;height: 34px;">
+                                                ${row.job_id.name}
+                                            </td>
+                                        % endif
+                                        </tr>
+                                    % endfor
+                                
+                                </table>
+                                </div>
+                                &nbsp;
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                 <table border="0" cellspacing="0" cellpadding="5" style="border-collapse: collapse;font-size: 16px;">
+                                    <tbody style="vertical-align: top;>
+                                    <tr>
+                                        <td style="height: 34px;font-size: 1.6rem;font-weight: unset;color: #444141;padding-bottom: 10px;" width="300px">
+                                            <p style="padding-left: 5;">Details</p>
+                                        </td>
+                                        
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;height: 34px;">
+                                            Reason
+                                        </td>
+                                        <td style="color:#167b9e;height: 34px;">
+                                            ${object.reason_id.reason}
+                                        </td>
+                                    </tr>
+
+                                     <tr>
+                                        <td style="color:#676767;height: 34px;">
+                                            Revised To Date
+                                        </td>
+                                        <td style="color:#167b9e;height: 34px;">
+                                            % if object.revised_to_date:
+                                                ${format_tz(object.revised_to_date, tz='UTC', format='%d-%b-%Y')}
+                                            % else:
+                                                ${format_tz(object.process_id.to_date, tz='UTC', format='%d-%b-%Y')}
+                                            % endif
+                                        </td>
+                                     </tr>
+
+                                    <tr>
+                                        % if object.remark:
+                                            <td style="color:#676767;height: 34px;" width="200px">
+                                                HR remark
+                                            </td>
+                                            <td style="color:#167b9e;height: 34px;">
+                                            ${object.remark}
+                                            </td>
+                                        % endif
+                                    </tr>
+                                    </tbody>
+                                    </div>
+                                </table>
+                                <div style="font-size: 16px;color:#676767;padding-left: 1px;">
+                                    <p>Thank You.</p>
+                                    <br/>
+                                        <p>This is a system generated email. Please do not reply to this mail.</p>
+                                </div>
+                                </td>
+                            </tr>
+
+                        </table>
+                        </td>
+                    </tr>
+
+                </table>
+
+
+                    ]]>
+
+            </field>
+        </record>
+
+         <!-- Hod mail Extension Notification-->
+        <record id="kw_wfh_csm_initiative_hod_extension_notification_email_template" model="mail.template">
+            <field name="name">WFH by HR : Employee Extension Notification to HOD</field>
+            <field name="email_from">${ctx['mail_from']}</field>
+            <field name="subject"> 
+            WFH request for
+            % if ctx['joined_ids']:
+                ${ctx['joined_ids']} Team
+            %else:
+                the following employees
+            % endif
+            % if ctx['joined_location_ids'] and not ctx['location_type']:
+                of ${ctx['joined_location_ids']}
+            %else:
+
+            % endif
+             |  ${ctx['action']}
+            </field>
+            <field name="email_to">${ctx['mail_to']} </field>
+            <field name="model_id" ref="kw_wfh.model_kw_wfh"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+
+                      <table border="0">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;padding-left: 5px;">
+
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">Hello</span>
+                                        % if ctx['hod_name']: 
+                                            ${ctx['hod_name']},
+                                        % endif
+                                    </h5>
+
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                    % if object.department_id and not object.searched_user and object.search_by == 'hierarchy':
+                                        Work From Home option has been ${ctx['action']} for ${ctx['hod_dep']} Team.
+                                    % else:
+                                        Work From Home option has been ${ctx['action']} for the following employees.
+                                    % endif
+                                    </p>
+
+                                </div>
+                                &nbsp;
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                <table border="0" cellspacing="0" cellpadding="5" style="border-collapse: collapse;font-size: 16px;">
+                                      
+                                        <tr>
+                                        <td style="color:#676767;height: 34px;" width="200px">
+                                            Employee Name
+                                        </td>
+                                        <td style="color:#676767;height: 34px;">
+                                           Employee Code
+                                        </td>
+                                        <td style="color:#676767;height: 34px;">
+                                           Designation
+                                        </td>
+                                    </tr>
+                                    % for row in ctx['emp_name']:
+                                        <tr>
+                                        % if row.name:
+                                            <td style="color:#676767;height: 34px;" width="200px">
+                                                ${row.name}
+                                            </td>
+                                        % endif
+                                        % if row.emp_code:
+                                            <td style="color:#167b9e;height: 34px;">
+                                                ${row.emp_code}
+                                            </td>
+                                        % endif
+                                        % if row.job_id.name:
+                                            <td style="color:#167b9e;height: 34px;">
+                                                ${row.job_id.name}
+                                            </td>
+                                        % endif
+                                        </tr>
+                                    % endfor
+                                
+                                </table>
+                                </div>
+                                &nbsp;
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                 <table border="0" cellspacing="0" cellpadding="5" style="border-collapse: collapse;font-size: 16px;">
+                                    <tbody style="vertical-align: top;>
+                                    <tr>
+                                        <td style="height: 34px;font-size: 1.6rem;font-weight: unset;color: #444141;padding-bottom: 10px;" width="300px">
+                                            <p style="padding-left: 5;">Details</p>
+                                        </td>
+                                        
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;height: 34px;">
+                                            Reason
+                                        </td>
+                                        <td style="color:#167b9e;height: 34px;">
+                                            ${object.reason_id.reason}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;height: 34px;">
+                                            From Date
+                                        </td>
+                                        % if object.request_from_date:
+                                            <td style="color:#167b9e;height: 34px;">
+                                                ${format_tz(object.request_from_date, tz='UTC', format='%d-%b-%Y')}                                        
+                                            </td>
+                                        % endif
+                                    </tr>
+                                     <tr>
+                                        <td style="color:#676767;height: 34px;" width="200px">
+                                            Revised To Date
+                                        </td>
+                                        <td style="color:#167b9e;height: 34px;">
+                                            % if object.revised_to_date:
+                                                ${format_tz(object.revised_to_date, tz='UTC', format='%d-%b-%Y')}
+                                            % else:
+                                                ${format_tz(object.process_id.to_date, tz='UTC', format='%d-%b-%Y')}
+                                            % endif
+                                        </td>
+                                     </tr>
+                                    <tr>
+                                        % if object.remark:
+                                            <td style="color:#676767;height: 34px;" width="200px">
+                                                HR remark
+                                            </td>
+                                            <td style="color:#167b9e;height: 34px;">
+                                            ${object.remark}
+                                            </td>
+                                        % endif
+                                    </tr>
+                                </tbody>
+                                </table>
+                                </div>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;font-size: 16px;color:#676767;padding-left: 1px;">
+                                    <p>Thank You.</p>
+                                    <br/>
+                                        <p>This is a system generated email. Please do not reply to this mail.</p>
+                                </div>
+                                </td>
+                            </tr>
+
+                        </table>
+                        </td>
+                    </tr>
+
+                </table>
+
+
+                    ]]>
+
+            </field>
+        </record>
+
+         <!-- RA mail Extension Notification-->
+        <record id="kw_wfh_csm_initiative_ra_extension_notification_email_template" model="mail.template">
+            <field name="name">WFH by HR : Employee Extension Notification to RA</field>
+            <field name="email_from">${ctx['mail_from']}</field>
+            <field name="subject">
+            WFH request for
+            % if ctx['joined_ids']:
+                ${ctx['joined_ids']} Team
+            %else:
+                the following employees
+            % endif
+            % if ctx['joined_location_ids'] and not ctx['location_type']:
+                of ${ctx['joined_location_ids']}
+            %else:
+
+            % endif
+             |  ${ctx['action']}
+            </field>
+            <field name="email_to">${ctx['mail_to']}</field>
+            <field name="model_id" ref="kw_wfh.model_kw_wfh"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+
+                      <table border="0">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;padding-left: 5px;">
+
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">Hello</span>
+                                        % if ctx['ra_name']:
+                                            ${ctx['ra_name']},
+                                        % endif
+                                    </h5>
+
+
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                    % if object.department_id and not object.searched_user and object.search_by == 'hierarchy':
+                                        Work From Home option has been ${ctx['action']} for ${ctx['ra_dept']} Team.
+                                    % else:
+                                        Work From Home option has been ${ctx['action']} for the following employees.
+                                    % endif
+                                    </p>
+
+                                </div>
+                                 &nbsp;
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                <table border="0" cellspacing="0" cellpadding="5" style="border-collapse: collapse;font-size: 16px;">
+                                    
+                                     <tr>
+                                        <td style="color:#676767;height: 34px;" width="200px">
+                                            Employee Name
+                                        </td>
+                                        <td style="color:#676767;height: 34px;" width="200px">
+                                           Employee Code
+                                        </td>
+                                        <td style="color:#676767;height: 34px;" width="200px">
+                                           Designation
+                                        </td>
+                                    </tr>
+                                    % for row in ctx['emp_name']:
+                                        <tr>
+                                        % if row.name:
+                                            <td style="color:#676767;height: 34px;" width="200px">
+                                                ${row.name}
+                                            </td>
+                                        % endif
+                                        % if row.emp_code:
+                                            <td style="color:#167b9e;height: 34px;">
+                                                ${row.emp_code}
+                                            </td>
+                                        % endif
+                                        % if row.job_id.name:
+                                            <td style="color:#167b9e;height: 34px;">
+                                                ${row.job_id.name}
+                                            </td>
+                                        % endif
+                                        </tr>
+                                    % endfor
+                                </table>
+                                </div>
+                                &nbsp;
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                 <table border="0" cellspacing="0" cellpadding="5" style="border-collapse: collapse;font-size: 16px;">
+                                    <tbody style="vertical-align: top;>
+                                    <tr>
+                                        <td style="height: 34px;font-size: 1.6rem;font-weight: unset;color: #444141;padding-bottom: 10px;" width="300px">
+                                            <p style="padding-left: 5;">Details</p>
+                                        </td>
+                                       
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;height: 34px;">
+                                            Reason
+                                        </td>
+                                        <td style="color:#167b9e;height: 34px;">
+                                            ${object.reason_id.reason}
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td style="color:#676767;height: 34px;">
+                                            To Date
+                                        </td>
+                                        % if object.request_to_date:
+                                            <td style="color:#167b9e;height: 34px;">
+                                                ${format_tz(object.request_to_date, tz='UTC', format='%d-%b-%Y')}
+                                            </td>
+                                        % endif
+                                     </tr>
+
+                                     <tr>
+                                        <td style="color:#676767;height: 34px;">
+                                            Revised To Date
+                                        </td>
+                                        <td style="color:#167b9e;height: 34px;">
+                                            % if object.revised_to_date:
+                                                ${format_tz(object.revised_to_date, tz='UTC', format='%d-%b-%Y')}
+                                            % else:
+                                                ${format_tz(object.process_id.to_date, tz='UTC', format='%d-%b-%Y')}
+                                            % endif
+                                        </td>
+                                     </tr>
+                                    <tr>
+                                        % if object.remark:
+                                            <td style="color:#676767;height: 34px;" width="200px">
+                                                HR remark
+                                            </td>
+                                            <td style="color:#167b9e;height: 34px;">
+                                            ${object.remark}
+                                            </td>
+                                        % endif
+                                    </tr>
+                                    </tbody>
+                                    </div>
+                                </table>
+                                <div style="font-size: 16px;color:#676767;padding-left: 1px;">
+                                    <p>Thank You.</p>
+                                    <br/>
+                                        <p>This is a system generated email. Please do not reply to this mail.</p>
+                                </div>
+
+                                </td>
+                            </tr>
+
+                        </table>
+                        </td>
+                    </tr>
+
+                </table>
+
+
+                    ]]>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

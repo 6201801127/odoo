@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+		<record model="ir.ui.view" id="hr_job_inherited">
+			<field name="model">hr.job</field>
+			<field name="inherit_id" ref="hr.view_hr_job_form"/>
+			<field name="arch" type="xml">
+				<field name="user_id" position="replace">
+
+				</field>
+				<xpath expr="//field[@name='hr_responsible_id']" position="after">
+					<field name="expiration"/>
+					<field name="job_code"/>
+					<field name="user_id" options="{'no_create': True}"/>
+				</xpath>
+
+				<xpath expr="//field[@name='address_id']" position="replace">
+					<field name="address_id" context="{'show_address': 1}" domain="[('is_company', '=', True )]"
+					       options="{'always_reload': True, 'no_create': True, 'no_open': True, 'no_edit':True}"/>
+				</xpath>
+
+				<!-- <xpath expr="//field[@name='user_id']" position="after" >
+					<field name="applicant_feedback_form" />
+				</xpath> -->
+			</field>
+		</record>
+
+		<record id="kw_hr_job_tree_in" model="ir.ui.view">
+			<field name="model">hr.job</field>
+			<field name="inherit_id" ref="hr.view_hr_job_tree"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='department_id']" position="after">
+					<field name="job_position_count" invisible="1"/>
+				</xpath>
+			</field>
+		</record>
+
+
+		<record id="view_hr_job_kanban_inherit_kw_published" model="ir.ui.view">
+			<field name="name">hr.job.kanban.inherit</field>
+			<field name="model">hr.job</field>
+			<field name="inherit_id" ref="hr_recruitment.view_hr_job_kanban"/>
+			<field name="arch" type="xml">
+				<xpath expr="//kanban" position="attributes">
+					<attribute name="create">false</attribute>
+				</xpath>
+
+				<field name='manager_id' position="after">
+					<field name="is_published"/>
+				</field>
+
+				<xpath expr="//div[@t-attf-class='o_kanban_card_header']" position="before">
+					<div class="ribbon ribbon-top-right" attrs="{'invisible': [('is_published', '=', False)]}">
+						<span class="o_recruitment_purple">Published</span>
+					</div>
+				</xpath>
+
+				<xpath expr="//div[hasclass('o_recruitment_kanban_boxes')]" position="inside">
+					<div class="o_recruitment_kanban_box o_kanban_primary_bottom bottom_block">
+						<a name="edit_job" type="edit">
+							<span title='Edit'>
+								<i class='fa fa-edit' role="img" aria-label="Edit"/>
+							</span>
+						</a>
+					</div>
+				</xpath>
+				<xpath expr="//div[hasclass('o_recruitment_kanban_boxes')]//div[hasclass('o_recruitment_kanban_box')][3]//span"
+				       position="replace">
+					<field name="website_url" invisible="1"/>
+					<!-- <span>
+						<a t-attf-href="#{record.website_url.raw_value}">Job Description</a>
+					</span> -->
+				</xpath>
+			</field>
+		</record>
+
+		<record id="kw_hr_job_survey_inherit" model="ir.ui.view">
+			<field name="model">hr.job</field>
+			<field name="inherit_id" ref="hr_recruitment_survey.hr_job_survey_inherit"/>
+			<field name="arch" type="xml">
+				<xpath expr="//button[@name='action_print_survey']" position="replace">
+					<button string="Preview" name="action_print_recruitment_survey" type="object"
+					        attrs="{'invisible':[('survey_id','=',False)]}" class="oe_highlight ml-3"/>
+				</xpath>
+			</field>
+		</record>
+	</data>
+	<template id="kw_recruitment_assets_backend" name="kw_recruitment_assets" inherit_id="web.assets_backend">
+		<xpath expr="." position="inside">
+			<link rel="stylesheet" type="text/scss" href="/kw_recruitment/static/src/scss/ribbon.scss"/>
+			<link rel="stylesheet" type="text/scss" href="/kw_recruitment/static/src/scss/hr_job.scss"/>
+		</xpath>
+	</template>
+</odoo>

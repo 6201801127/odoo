@@ -1,0 +1,148 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+    <!-- Material Request -->
+        <record id="kw_product_gatepass_line_view_tree" model="ir.ui.view">
+            <field name="name">kw_product_gatepass_line.view.tree</field>
+            <field name="model">kw_product_gatepass_line</field>
+            <field name="arch" type="xml">
+                <tree>
+                   <field name="product_id" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+                    <field name="gatepass_line" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+                    <field name="description"/>
+                    <field name="uom"/>
+                    <field name="quantity"/>
+                    <!-- <field name="expected_date"/> -->
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_product_gatepass_view_tree" model="ir.ui.view">
+            <field name="name">kw_product_gatepass.view_tree</field>
+            <field name="model">kw_product_gatepass</field>
+            <field name="arch" type="xml">
+                <tree>
+                   <field name="sequence"/>
+                    <field name="po_id"/>
+                    <field name="company_id"/>
+                    <field name="remark"/>
+                    <field name="date"/>
+                    <field name="challan_no"/>
+                    <field name="lorry_driver_phn_no"/>
+                    <field name="lorry_driver_name"/>
+                    <field name="state"/>
+                    <button name="action_checkin_gatepass" attrs="{'invisible': [('state', '!=', 'draft')]}" string="Checkin" icon='fa-check' type="object" class="btn btn-success"/>
+                    <button name="action_checkout_gatepass" attrs="{'invisible': [('state', '!=', 'draft')]}" string="Checkout" icon='fa-check' type="object" class="btn btn-success"/>
+                    <button name="action_reject_gatepass" attrs="{'invisible': [('state', '!=', 'draft')]}" string="Cancel" icon='fa-ban' type="object" class="btn btn-danger"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_product_gatepass_view_form" model="ir.ui.view">
+            <field name="name">kw_product_gatepass.view.form</field>
+            <field name="model">kw_product_gatepass</field>
+            <field name="priority">17</field>
+            <field name="arch" type="xml">
+                <form string="" duplicate="0" >
+                    <header>
+                        <button name="action_checkin_gatepass" attrs="{'invisible': [('state', '!=', 'draft')]}" string="Checkin" icon='fa-check' type="object" class="btn btn-success"/>
+                        <button name="action_checkout_gatepass" attrs="{'invisible': [('state', '!=', 'draft')]}" string="Checkout" icon='fa-check' type="object" class="btn btn-success"/>
+                        <button name="action_reject_gatepass" attrs="{'invisible': [('state', '!=', 'draft')]}" string="Cancel" icon='fa-ban' type="object" class="btn btn-danger"/>
+                        <field name="state" widget="statusbar" statusbar_visible="Draft,checkin,checkout,rejected" readonly="1"/>
+                    </header>
+                    <sheet>
+                        <div style="font-size:30px;color:#7C7BAD;font-weight: bold;">
+                            <field name="sequence" readonly='1'/>
+                        </div>
+                        <group>
+                            <group string="From">
+                                <field name="vendor_ref" string="Vendor Name" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <field name="address" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            </group>
+                            <group string="To">
+                                <field name="company_id" string="Company Name" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <!-- <field name="branch_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/> -->
+                                <field name="company_address" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            </group>
+                            <group string="Order Reference">
+                                <field name="po_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <field name="remark" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <field name="date" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            </group>
+                            <group string="Delivery Details">
+                                <field name="challan_no" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <field name="lorry_driver_phn_no" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <field name="lorry_driver_name" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <field name="received_by_id" string='Received By' attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            </group>
+                            <h1 class="my-3"> Item Details </h1>
+                            <field name="gatepass_line_ids" string="Item Details" context="{'form_view_ref' : 'kw_inventory.kw_product_gatepass_line_view_tree'}" attrs="{'readonly': [('state', '!=', 'draft')]}">
+                                <tree editable='bottom'>
+                                    <field name="product_id"/>
+                                    <field name="gatepass_line" invisible='1'/>
+                                    <field name="description"/>
+                                    <field name="quantity"/>
+                                    <field name="uom"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_product_gatepass_search_view" model="ir.ui.view">
+            <field name="name">Gate Pass.search</field>
+            <field name="model">kw_product_gatepass</field>
+            <field name="arch" type="xml">
+                <search string="Gate pass">
+                    <field string="Sequence" name="sequence"/>
+                    <field string="Vendor Reference" name="vendor_ref" />
+                    <field string="PO" name="po_id" />
+                    <field string="State" name="state" />
+                    <field string="Company" name="company_id"/>
+                    <field string="In/Out date" name="date" />
+                    <field string="Received By" name="received_by_id" />
+                    <field string="Lorry No" name="challan_no" />
+                    <field string="Lorry Driver Phone No" name="lorry_driver_phn_no" />
+                    <field string="Lorry Driver Name" name="lorry_driver_name"/>
+
+                    <filter string="Check-In" name="Check-In" domain="[('state', '=','checkin')]"/>
+                    <filter string="Check-Out" name="Check-Out" domain="[('state', '=','checkout')]"/>
+                    <filter string="Rejected" name="Rejected" domain="[('state', '=','rejected')]"/>
+
+                    <group expand="0" string="Group By">
+                        <filter string="State" name="grp_by_state" domain="" context="{'group_by':'state'}"/>
+                        <filter string="Received By" name="grp_by_received_by_id" domain="" context="{'group_by':'received_by_id'}"/>
+
+                    </group>
+                </search>
+            </field>
+        </record>
+    
+        <record id="kw_product_gatepass_window_action" model="ir.actions.act_window">
+            <field name="name">Gate Pass</field>
+            <field name="res_model">kw_product_gatepass</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_inventory.kw_product_gatepass_view_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_inventory.kw_product_gatepass_view_form')})]"/>
+            <field name="search_view_id" ref='kw_inventory.kw_product_gatepass_search_view'/>
+            <field name="context">{'delete':False,'search_default_grp_by_state':1}</field>
+            <field name="domain">[]</field> 
+        </record>
+    
+    <menuitem id="kw_gatepass_menu"
+        name="Gate-Pass"
+        parent="stock.menu_stock_root"
+        action='kw_product_gatepass_window_action'
+		groups="stock.group_stock_manager"
+        sequence="999"/>
+
+    </data>
+</odoo>

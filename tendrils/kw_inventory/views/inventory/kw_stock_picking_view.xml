@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+		<record model="ir.ui.view" id="kw_stock_picking_inherit_view">
+			<field name="model">stock.picking</field>
+			<field name="inherit_id" ref="stock.view_picking_form"/>
+			<field name="arch" type="xml">
+				<xpath expr="//form/sheet" position="inside">
+					<style>
+						.table-responsive .o_list_view thead tr:nth-child(1) th{
+							background-color: #108fbb !important;
+							color: whitesmoke;
+						}
+					</style>
+				</xpath>
+				<xpath expr="//field[@name='company_id']" position="attributes">
+					<attribute name="options">{'no_create': True, 'no_open': True}</attribute>
+				</xpath>
+				<xpath expr="//field[@name='group_id']" position="attributes">
+					<attribute name="options">{'no_create': True, 'no_open': True}</attribute>
+				</xpath>
+				<xpath expr="//form" position="attributes">
+					<attribute name="delete">0</attribute>
+				</xpath>
+				<xpath expr="//field[@name='origin']" position="after">
+					<field name="po_date" readonly="1" widget="date"/>
+					<field name="mode_of_delivery" attrs="{'readonly': [('state','=','done')]}"/>
+					<field name="deliver_person_name"
+					       attrs="{'readonly': [('state','=','done')],'invisible': [('mode_of_delivery','in',['By Courier'])]}"/>
+					<field name="transporter_code" attrs="{'readonly': [('state','=','done')]}"
+					       options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+					<field name="lr_rr_no" attrs="{'readonly': [('state','=','done')]}"/>
+					<field name="lr_rr_date" attrs="{'readonly': [('state','=','done')]}"/>
+				</xpath>
+				<xpath expr="//field[@name='picking_type_id']" position="attributes">
+					<attribute name="options">{'no_create': True, 'no_open': True}</attribute>
+				</xpath>
+				<xpath expr="//field[@name='location_dest_id']" position="attributes">
+					<attribute name="options">{'no_create': True, 'no_open': True}</attribute>
+				</xpath>
+				<xpath expr="//field[@name='partner_id']" position="attributes">
+					<attribute name="options">{'no_create': True, 'no_open': True}</attribute>
+					<attribute name="required">1</attribute>
+
+				</xpath>
+				<xpath expr="//field[@name='location_id']" position="attributes">
+					<attribute name="options">{'no_create': True, 'no_open': True}</attribute>
+				</xpath>
+				<xpath expr="//field[@name='picking_type_id']" position="after">
+					<field name="invoice_number" attrs="{'readonly': [('state','=','done')]}"/>
+					<field name="invoice_date" attrs="{'readonly': [('state','=','done')]}" />
+					<field name="challan_number" attrs="{'readonly': [('state','=','done')]}" />
+					<field name="challan_date" attrs="{'readonly': [('state','=','done')]}" />
+					<field name="process_location"  attrs="{'readonly': [('state','=','done')]}" invisible='1'/>
+
+					<field name="grn_remark" attrs="{'required': [('process_location','=','grn')],'readonly': [('state','=','done')],'invisible':[('process_location','in',('qc','store'))]}"/>
+					<field name="qc_remark" attrs="{'required': [('process_location','=','qc')],'readonly': [('state','=','done')],'invisible':[('process_location','in',('grn','store'))]}"/>
+					<field name="srv_remark" attrs="{'required': [('process_location','=','store')],'readonly': [('state','=','done')],'invisible':[('process_location','in',('qc','grn'))]}"/>
+					<field name="store_id" string='Store' attrs="{'required': [('process_location','=','store')],'readonly': [('state','=','done')],'invisible':[('process_location','in',('qc','grn'))]}" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+					<field name="csm_price_conf" invisible="1"/>
+					<field name="hide_return_damage" invisible="1"/>
+				</xpath>
+				
+				<xpath expr="//page[2]/field[@name='move_ids_without_package']/tree" position="after">
+					<form>
+						<group>
+							<field name="store_id" readonly='1' options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+							<field name="product_uom" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+							<field name="product_uom_qty" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+							<field name="quantity_done" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+							<field name="price_unit" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+						</group>
+					</form>
+		 		</xpath>
+				<xpath expr="//field[@name='partner_id']" position="attributes">
+					<attribute name="string">Vendor/Supplier Name</attribute>
+				</xpath>
+				<xpath expr="//field[@name='origin']" position="attributes">
+					<attribute name="string">PO Number</attribute>
+					<attribute name="readonly">1</attribute>
+				</xpath>
+				<xpath expr="//page[2]/field[@name='move_ids_without_package']/tree/field[@name='product_uom']"
+				       position="after">
+					<field name="price_unit" attrs="{'column_invisible': ['&amp;',('parent.immediate_transfer', '=', True), ('parent.is_locked', '=', True)],'force_save':'1'}" />
+					
+					<!-- <field name="price_subtotal" attrs="{'column_invisible': [('parent.csm_price_conf', '=', False)]}"/> -->
+				</xpath>
+				<!-- <xpath expr="//page[2]/field[@name='move_ids_without_package']/tree/field[@name='price_unit']" position="after">
+					<field name="taxes_id" string="Taxes" widget="many2many_tags" domain="[('type_tax_use','=','purchase')]" context="{'default_type_tax_use': 'purchase', 'search_view_ref': 'account.account_tax_view_search'}" options="{'no_create': True}"/>
+				</xpath> -->
+				<!-- XPath for action_show_details button -->
+				<xpath expr="//button[@name='action_show_details']" position="attributes">
+					<attribute name="attrs">{'invisible': [('state', '=', 'done')]}</attribute>
+				</xpath>
+
+				
+				<xpath expr="//page[2]/field[@name='move_ids_without_package']/tree/field[@name='product_uom']"
+				       position="attributes">
+					<attribute name="invisible">1</attribute>
+					<attribute name="options">{'no_create': True, 'no_open': True}</attribute>
+
+				</xpath>
+				<xpath expr="//page[2]/field[@name='move_ids_without_package']/tree/field[@name='product_uom_qty']"
+				       position="before">
+					<field name="store_id" readonly='1'/>
+					<field name="product_uom"/>
+				</xpath>
+				<xpath expr="//page[2]/field[@name='move_ids_without_package']/tree/field[@name='name']"
+				       position="attributes">
+					<attribute name="invisible">1</attribute>
+				</xpath>
+				<xpath expr="//page[2]/field[@name='move_ids_without_package']/tree/field[@name='product_id']"
+				       position="after">
+					<field name="l10n_in_hsn_code"/>
+					<field name="name" invisible='1'/>
+				</xpath>
+				<xpath expr="//page[2]/field[@name='move_ids_without_package']/tree/field[@name='product_id']"
+				       position="attributes">
+					<attribute name="string">Product Code</attribute>
+					<attribute name="options">{'no_create': True, 'no_open': True}</attribute>
+
+				</xpath>
+				<xpath expr="//page[2]/field[@name='move_ids_without_package']/tree/field[@name='product_uom_qty']"
+				       position="attributes">
+					<attribute name="string">PO Quantity</attribute>
+					<attribute name="options">{'no_create': True, 'no_open': True}</attribute>
+
+				</xpath>
+
+				<xpath expr="//page[2]/field[@name='move_ids_without_package']/tree/field[@name='quantity_done']"
+				       position="attributes">
+					<attribute name="string">Received Quantity</attribute>
+					<attribute name="readonly">False</attribute>
+					<attribute name="options">{'no_create': True, 'no_open': True}</attribute>
+
+				</xpath>
+				<xpath expr="//page[2]/field[@name='move_ids_without_package']/tree/field[@name='product_uom']"
+				       position="attributes">
+					<attribute name="string">UOM</attribute>
+					<attribute name="options">{'no_create': True, 'no_open': True}</attribute>
+
+				</xpath>
+				<xpath expr="//header/button[@name='do_print_picking']" position="replace">
+				<!-- <button name="do_print_gatepass" string="Print Gate pass" groups="stock.group_stock_user"
+					        type="object" class="btn-primary"
+					        attrs="{'invisible': [('btn_print','!=', 1)]}"/>
+					<button name="send_gatepass_in_mail" string="Send Gate pass" groups="stock.group_stock_user"
+					        type="object" class="btn-primary"
+					        attrs="{'invisible': [('btn_print','!=', 1)]}"/> -->
+
+					<button name="do_print_picking_Inspection" string="Print Inspection" groups="stock.group_stock_user"
+					        type="object" class="btn-primary"
+					        attrs="{'invisible': ['|', '|',('state', '!=', 'done'), ('is_locked', '=', False),('btn_print','!=', 2)]}"/>
+					<button name="do_print_picking_GRN" string="Print GRN" groups="stock.group_stock_user" type="object" class="btn-primary" attrs="{'invisible': ['|',('is_locked', '=', False),('btn_print','!=', 1)]}"/>
+
+					<button name="do_print_picking_SRV" string="Print SRV" groups="stock.group_stock_user" type="object"
+					class="btn-primary" attrs="{'invisible': ['|', '|',('state', '!=', 'done'), ('is_locked', '=', False),('btn_print','!=', 3)]}"/>
+					<field name="btn_print" invisible="1"/>
+				</xpath>
+				<xpath expr="//header/button[@name='%(stock.action_report_delivery)d']" position="replace">
+					<!-- <button name="%(stock.action_report_delivery)d" string="Print" attrs="{'invisible': ['|', '|',('state', '!=', 'done'), ('is_locked', '=', False),('btn_print','!=', 3)]}" type="action" groups="base.group_user"/> -->
+				</xpath>
+				<xpath expr="//header/button[@name='button_scrap']" position="replace">
+                    <button name="button_scrap" type="object" string="Damage" attrs="{'invisible': ['|', '|','|', '&amp;', ('picking_type_code', '!=', 'incoming'), ('state', 'in', ('draft', 'cancel', 'waiting')), '&amp;', ('picking_type_code', '=', 'incoming'), ('state', '!=', 'done'), ('is_locked', '=', False),('hide_return_damage','=',True)]}"/>
+
+				</xpath>
+				<xpath expr="//header/button[@name='%(stock.act_stock_return_picking)d']" position="replace">
+					<field name="is_locked" invisible='1'/>
+					<field name="hide_return_damage" invisible='1'/>
+					<field name="picking_type_code" invisible='1'/>
+					<button name="%(stock.act_stock_return_picking)d" string="Return" attrs="{'invisible': [('state', '!=', 'done')]}" type="action" groups="base.group_user"/>
+				</xpath>
+				<xpath expr="//header/button[@name='action_toggle_is_locked']" position="replace">
+				</xpath>
+				<!-- <xpath expr="//page[2]/field[@name='move_ids_without_package']" position="after">
+					<group class="oe_subtotal_footer oe_right">
+						<field name="amount_total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+						<field name="amount_tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+						<div class="oe_subtotal_footer_separator oe_inline">
+							<label for="full_amount_total"/>
+						</div>
+						<field name="full_amount_total" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>           
+						<field name="amount_total_po" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+					</group>
+					<div class="oe_clear"/>
+				</xpath> -->
+			</field>
+
+		</record>
+
+
+		<!-- <record model="ir.ui.view" id="stock_backorder_confirmation_inherit_view">
+			<field name="model">stock.backorder.confirmation</field>
+			<field name="inherit_id" ref="stock.view_backorder_confirmation"/>
+			<field name="arch" type="xml">
+				<xpath expr="//button[@name='process_cancel_backorder']" position="replace">
+				</xpath>
+			</field>
+		</record> -->
+		<record id="stock_scrap_form_view2_inh" model="ir.ui.view">
+			<field name="model">stock.scrap</field>
+			<field name="inherit_id" ref="stock.stock_scrap_form_view2"/>
+			<field name="arch" type="xml">
+				<xpath expr="//group/group[2]/field[@name='scrap_location_id']" position="attributes">
+					<attribute name="string">Damage Location</attribute>
+				</xpath>
+			</field>
+		</record>
+		<record id="view_picking_withcarrier_out_form_inh" model="ir.ui.view">
+			<field name="name">delivery.stock.picking_withcarrier.form.view</field>
+			<field name="model">stock.picking</field>
+			<field name="inherit_id" ref="delivery.view_picking_withcarrier_out_form"/>
+			<field name="arch" type="xml">
+				<xpath expr="//page[@name='extra']/group/group[2]/div/field[@name='weight']" position="attributes">
+					<attribute name="readonly">False</attribute>
+				</xpath>
+				<xpath expr="//page[@name='extra']/group/group[2]/field[@name='shipping_weight']" position="attributes">
+					<attribute name="readonly">False</attribute>
+				</xpath>
+			</field>
+		</record>
+	</data>
+</odoo>

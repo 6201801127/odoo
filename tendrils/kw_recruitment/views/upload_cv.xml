@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="kw_applicant_upload_cv_tree" model="ir.ui.view">
+        <field name="name">kw_upload_cv.tree</field>
+        <field name="model">kw_upload_cv</field>
+        <field name="arch" type="xml">
+            <tree string="cv tree" create='false' edit='false'>
+                <field name="applicant_id" invisible="0"/>
+                <field name="file_name" invisible="0" string="CV name"/>
+<!--                <field name="documents" filename="file_name" widget="FieldBinary" string="Upload CV"/>-->
+                <field name="url" widget="url"/>
+                <!-- <field name="binary_data"/> -->
+                <button name="call_parse_api" string="Parse CV" type="object" context="{'parser': True}"
+                        class="oe_highlight" attrs="{'invisible': [('applicant_id', '!=',False)]}"/>
+            </tree>
+        </field>
+    </record>
+    <record id="kw_applicant_upload_cv_wizard" model="ir.ui.view">
+        <field name="name">Upload CV</field>
+        <field name="model">kw_upload_cv</field>
+        <field name="arch" type="xml">
+            <form string="cv wizard">
+                <sheet>
+                    <group>
+                        <field name="documents" string='Select file' filename="file_name" widget="FieldBinary"/>
+                        <field name="file_name" invisible="1"/>
+                        <field name="url" widget="url" groups="base.group_no_one"/>
+                    </group>
+                    <footer>
+                        <!-- <button name="call_parse_api" string="Parse CV" type="object" class="oe_highlight" /> -->
+                        <button name="call_parse_api" string="Upload CV" type="object" class="oe_highlight"/>
+                        <button string="Cancel" class="oe_highlight" special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="kw_upload_cv_wizard_action" model="ir.actions.act_window">
+        <field name="name">Upload Curriculum Vitae</field>
+        <field name="res_model">kw_upload_cv</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="kw_applicant_upload_cv_wizard"/>
+        <field name="target">new</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Records Found...
+            </p>
+        </field>
+    </record>
+    <menuitem parent="hr_recruitment.menu_crm_case_categ0_act_job" id="kw_upload_cv_wizard_menu"
+              name="Upload CV" sequence="90"
+              action="kw_upload_cv_wizard_action"
+              groups="hr_recruitment.group_hr_recruitment_manager,kw_recruitment.group_hr_recruitment_consultant,kw_recruitment.group_hr_recruitment_executive"/>
+
+
+    <record id="kw_upload_cv_wizard_action_tree" model="ir.actions.act_window">
+        <field name="name">View All CV</field>
+        <field name="res_model">kw_upload_cv</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <!-- <field name="view_id" ref="kw_applicant_upload_cv_tree"/> -->
+        <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_applicant_upload_cv_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_applicant_upload_cv_wizard')})]"/>
+        <field name="target">current</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Records Found...
+            </p>
+        </field>
+    </record>
+    <menuitem parent="hr_recruitment.menu_crm_case_categ0_act_job"
+              id="kw_upload_cv_wizard_menu_tree"
+              name="View All CV"
+              action="kw_upload_cv_wizard_action_tree"
+              groups="base.group_no_one"
+              sequence="99"/>
+</odoo>

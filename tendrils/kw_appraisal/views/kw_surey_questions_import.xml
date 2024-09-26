@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <record model="ir.ui.view" id="kw_survey_question_form">
+            <field name="name">kw_Form view for survey question</field>
+            <field name="model">survey.question</field>
+            <field name="arch" type="xml">
+                <form string="Survey Question">
+                    <sheet>
+                        <div class="oe_title" style="width: 100%;">
+                            <label for="page_id" string="Page name" class="oe_edit_only"/>
+                            <h1>
+                                <field name="page_id" placeholder="Page Name" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}"/>
+                            </h1>
+                            <label for="question" string="Question name" class="oe_edit_only"/>
+                            <h1>
+                                <field name="question" colspan="4" placeholder="Question Name"/>
+                            </h1>
+                            <separator />
+                        </div>
+                        <group>
+                            <group>
+                                <field name="type" widget="radio" />
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Answers">
+                                <field name="labels_ids" string="Type of answers" context="{'default_question_id': active_id}" attrs="{'invisible': [('type', 'not in', ['simple_choice', 'multiple_choice', 'matrix'])]}">
+                                    <tree editable="bottom">
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="value" string="Choices"/>
+                                        <field name="quizz_mark"/>
+                                    </tree>
+                                </field>
+                                <separator />
+                            </page>
+
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="kw_survey_question_tree">
+            <field name="name">kw Tree view for survey question</field>
+            <field name="model">survey.question</field>
+            <field name="arch" type="xml">
+                <tree string="Survey Question">
+                    <field name="sequence" widget="handle"/>
+                    <field name="question"/>
+                    <field name="page_id"/>
+                    <field name="survey_id"/>
+                    <field name="type"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="kw_action_survey_question_form">
+            <field name="name">Questions</field>
+            <field name="res_model">survey.question</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_survey_question_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('kw_survey_question_form')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_empty_folder">
+                No questions found
+                </p>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_survey_question_form_inherit">
+            <field name="name">survey_question_form_inherit</field>
+            <field name="model">survey.question</field>
+            <field name="inherit_id" ref="survey.survey_question_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='quizz_mark']" position="replace">
+                    <field name="quizz_mark"/>
+                </xpath>
+                <xpath expr="//field[@name='type']" position="after">
+                    <field name="indicator" attrs="{'invisible':[('type','not in',['numerical_box','simple_choice'])]}" force_save='1'/>
+                </xpath>
+            </field>
+        </record>
+
+        <menuitem name="Questions" groups="base.group_no_one" id="kwantify_survey_questions" parent="kwantify_survey_menu" action="kw_action_survey_question_form" sequence="3"/>
+        <record model="ir.ui.menu" id="kw_appraisal.kwantify_survey_questions">
+			<field name="groups_id" eval="[(6, 0, [ref('kw_appraisal.group_appraisal_manager')])]"/>
+		</record>
+
+
+    </data>
+</odoo>

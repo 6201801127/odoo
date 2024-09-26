@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <template id="kw_recruitment_educational_details" name="Educational Details">
+            <t t-call="website.layout">
+                <div class="container mt-2 mb-2">
+                    <div class="card">
+                        <div class="card-body p-0">
+                            <div class="menu-bar">
+                                <div class="col-sm-6 pull-left align-middle">
+                                    <div style="color: #fff;font-size: 32px;padding: 46px 0px;">
+                                        <t t-esc="applicant_name"/>
+                                    </div>
+                                </div>
+                                <ol class="progresss progresss--medium col-sm-6 pull-right">
+                                    <li class="is-active" data-step="1"><span class="progress_name"> Educational Details </span></li>
+                                    <li class="" data-step="2"><span class="progress_name">Work Experience Details </span></li>
+                                    <!-- <li class="progresss__last" data-step="5"><span class="progress_name"> Documents Details</span></li> -->
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="container">
+                    <div class="card bg-white">
+                        <div class="card-body pl-5 pr-5">
+
+                            <!--Start : Message Template -->
+                                <t t-call="kw_recruitment.kwrecruitment_response_message_template"></t>
+                            <!--END : Message Template -->
+
+
+                            <form name="frm_applicant_education" id="frm_applicant_education" class="form-horizontal" method="post" action="/receducationalsavedata" autocomplete="off" enctype="multipart/form-data">
+                                <!-- Mandatory field -->
+                                <h4 class="text-dark">
+                                    <b>Educational Qualification</b>
+                                    <span class="col-sm-4 p-0 text-danger font-weight-bold font-italic pull-right text-right small"> <span class="text-danger "> * </span> indicate mandatory fields </span>
+                                </h4>
+
+                                <t t-set="year_options" t-value="request.env['hr_applicant_edu_qualification'].sudo().get_year_options()"/>
+                                <t t-set="professional_course_id" t-value=""/>
+                                <t t-set="training_course_id" t-value=""/>
+                                <div class="table-responsive">
+                                    <table id="tbledu" class="table table-bordered  mb-5" >
+                                        <thead class="thead-danger">
+                                            <tr>
+                                                <th class="align-left wd-11">Course Name</th>
+                                                <th class="align-left wd-15">Stream <i class="mandatory"> * </i></th>
+                                                <th class="align-left wd-20">Board / Institute / University <i class="mandatory"> * </i></th>
+                                                <th class="align-left wd-15">Specialization</th>
+                                                <th class="align-left wd-10">Passing Year <i class="mandatory"> * </i></th>
+                                                <th class="align-left wd-10">Division / Grade <i class="mandatory"> * </i></th>
+                                                <th class="align-left wd-10">% of marks Obtained <i class="mandatory"> * </i></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-set="cnt" t-value="1"/>
+                                            <t t-foreach="request.env['kwmaster_course_name'].sudo().search([])" t-as="course">
+                                                <t t-if="course.course_type == '2'">
+                                                    <t t-set="professional_course_id" t-value="course.id"/>
+                                                </t>
+                                                <t t-if="course.course_type == '3'">
+                                                    <t t-set="training_course_id" t-value="course.id"/>
+                                                </t>
+                                                <t t-if="course.course_type == '1'">
+                                                    <t t-set="education_course_id" t-value="course.id"/>
+                                                    <t t-set="str_education_course_id" t-value="str(course.id)"/>
+                                                    <tr class="likert">
+                                                        <th scope="row" class="align-left">
+                                                            <t t-esc="course.name"/>
+
+                                                            <input type="hidden" t-att-class="clseducationcourse" t-value="course.id" />
+                                                        </th>
+                                                    
+                                                        <td> 
+                                                            <select  title="Please select stream" t-att-class="'form-control likert-field clseducationstream clsrequired_'+str(cnt)"  t-att-id="'ddlStream' + str_education_course_id" t-att-name="'ddlStream' + str_education_course_id" t-att-placeholder="course.name +' Stream'" >
+                                                                <option value="">Select</option>
+                                                                <t t-foreach="request.env['kwmaster_stream_name'].sudo().search([('course_id','=',course.id)])" t-as="stream">
+                                                                    <option t-att-value="stream.id" t-att-selected="edu and 'ddlStream'+str_education_course_id in edu and stream.id==edu['ddlStream'+str_education_course_id]"><t t-esc="stream.name"/></option>
+                                                                </t>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select title="Please select board / institute / university ⁣"  t-att-class="'form-control likert-field clsrequired_'+str(cnt)" t-att-id="'ddlBoard' + str_education_course_id" t-att-name="'ddlBoard' + str_education_course_id" t-att-placeholder="course.name +' Board'" >
+                                                                <option value="">Select</option>
+                                                                <t t-foreach="request.env['kwmaster_institute_name'].sudo().search([('inst_course_ids','in',course.id)])" t-as="institute"> 
+                                                                    <option t-att-value="institute.id" t-att-selected="edu and 'ddlBoard'+str_education_course_id in edu and institute.id==edu['ddlBoard'+str_education_course_id]"><t t-esc="institute.name"/></option>
+                                                                </t>
+                                                            </select>
+                                                        </td>
+
+                                                        <td>
+                                                            <div  style="overflow-y: auto; overflow-x: hidden; max-height: 70px;" class="clsSpecializationdata">
+                                                                 <t t-if="specialization_master and education_course_id in specialization_master and edu and 'ddlStream'+str_education_course_id in edu ">
+                                                                  <t t-if="edu and 'ddlStream'+str_education_course_id in edu " t-set="education_stram_id" t-value="str(edu['ddlStream'+str_education_course_id])"/>
+                                                                    <t t-foreach="specialization_master[education_course_id]" t-as="specialization_rec">
+                                                                        <!-- <t t-if="edu and 'ddlStream'+str_education_course_id in edu " > -->
+                                                                            <t t-if="(specialization_rec['stream_id'] == edu['ddlStream'+str_education_course_id]) ">
+                                                                                <div class="checkbox">
+                                                                                    <label>
+                                                                                        <input t-att-checked="edu and 'specialization_'+education_stram_id+'_'+str(specialization_rec['id']) in edu and specialization_rec['id'] == edu['specialization_'+education_stram_id+'_'+str(specialization_rec['id'])]"   t-att-value="specialization_rec['id']" type="checkbox" t-att-id="'specialization_' +str(specialization_rec['stream_id'])+'_' +str(specialization_rec['id'])" t-att-name="'specialization_' +str(specialization_rec['stream_id'])+'_' +str(specialization_rec['id'])"  />
+                                                                                        <t t-esc="specialization_rec['name']"/>
+                                                                                    </label>
+                                                                                </div>
+                                                                            </t>
+                                                                        <!-- </t>    -->
+                                                                        <!-- <t t-else="">
+                                                                            <div class="checkbox">
+                                                                                <label>
+                                                                                    <input t-att-value="specialization_rec['id']" type="checkbox" t-att-id="'specialization_' +str(specialization_rec['stream_id'])+'_' +str(specialization_rec['id'])" t-att-name="'specialization_' +str(specialization_rec['stream_id'])+'_' +str(specialization_rec['id'])"  />
+                                                                                    <t t-esc="specialization_rec['name']"/></label>
+                                                                            </div>
+                                                                        </t> -->
+                                                                    </t>
+                                                                 </t>
+                                                            </div>
+                                                        </td>
+
+
+                                                        <td>
+                                                            <select title="Please select passing year"  t-att-class="'form-control likert-field clsrequired_'+str(cnt)" t-att-id="'ddlPYear' + str_education_course_id" t-att-name="'ddlPYear' + str_education_course_id" t-att-placeholder="course.name +' Passing Year'">
+                                                                <option value="">Select</option>
+                                                                <t t-foreach="year_options" t-as="years">
+                                                                    <option t-att-value="years[0]" t-att-selected="edu and 'ddlYear'+str_education_course_id in edu and years[0]==edu['ddlYear'+str_education_course_id]"><t t-esc="years[0]"/></option>
+                                                                </t>
+                                                            </select>
+                                                        </td>
+                                                        <td class="md-form">
+                                                            <t t-if="edu and 'txtGrade'+str_education_course_id in edu">
+                                                                <input type="text" title="Please enter division / grade"  t-att-class="'form-control likert-field gradeval clsrequired_'+str(cnt)"  maxlength="6"
+                                                                       t-att-id="'txtGrade' + str_education_course_id" t-att-name="'txtGrade' + str_education_course_id" t-att-value="edu['txtGrade'+str_education_course_id]" t-att-placeholder="course.name +' Grade'"/>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <input type="text" title="Please enter division / grade " t-att-class="'form-control likert-field gradeval clsrequired_'+str(cnt)" maxlength="6"
+                                                                       t-att-id="'txtGrade' + str_education_course_id" t-att-name="'txtGrade' + str_education_course_id" t-att-placeholder="'Grade'"/>
+                                                            </t>
+                                                        </td>
+                                                        <td class="md-form">
+                                                            <t t-if="edu and 'txtPercent'+str_education_course_id in edu">
+                                                                <input type="text" maxlength="5" title="Please enter % of marks obtained"  t-att-class="'form-control likert-field percentval clsrequired_'+str(cnt)"
+                                                                       t-att-id="'txtPercent' + str_education_course_id" t-att-name="'txtPercent' + str_education_course_id" t-att-value="edu['txtPercent'+str_education_course_id]" t-att-placeholder="'%'"/>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <input type="text" maxlength="5" title="Please enter % of marks obtained"  t-att-class="'form-control likert-field percentval clsrequired_'+str(cnt)"
+                                                                       t-att-id="'txtPercent' + str_education_course_id" t-att-name="'txtPercent' + str_education_course_id" t-att-placeholder="'%'"/>
+                                                            </t>
+                                                        </td>
+                                                    </tr>
+                                                    <t t-set="cnt" t-value="cnt+1"/>
+                                                </t>
+                                            </t>
+                                        </tbody>
+                                    </table>    
+                                </div>
+                                <!--Educational block end-->
+
+                                <h4 class="text-dark"> <b>Professional Qualification</b> </h4>
+                                <div class="table-responsive">
+                                <table id="tblqualification" class="table table-bordered">
+                                    <thead class="thead-danger">
+                                        <tr >
+                                            <th class="align-left wd-11" >Course Name </th>
+                                            <th class="align-left wd-15">Stream</th>
+                                            <th class="align-left wd-20">Board / Institute / University</th>
+                                            <th class="align-left wd-10">Passing Year</th>
+                                            <th class="align-left wd-10">Division / Grade</th>
+                                            <th class="align-left wd-10">% of marks Obtained</th>
+                                            <th class="align-left wd-25">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody id="professional_qualification_block">
+                                        <t t-if="professionalcourse">
+                                            <t t-set="cnt" t-value="0"/>
+                                            <t t-set="len_pcourse" t-value="len(professionalcourse)"/>
+                                            <t t-foreach="professionalcourse" t-as="data">
+                                                <tr class="likert">
+                                                    <th scope="row" class="align-left">Professional</th>
+                                                    <td class="md-form">
+                                                        <select title="Please select stream"  class="form-control likert-field" t-att-id="'prof_stream_'+str(cnt)" t-att-name="'prof_stream_'+str(cnt)" placeholder="Stream">
+                                                            <option value="">Select</option>
+                                                            <t t-foreach="request.env['kwmaster_stream_name'].sudo().search([('course_id','=',professional_course_id)])" t-as="stream">
+                                                                <option t-att-value="stream.id" t-att-selected="stream.id==data.get('ddlprofStream')"><t t-esc="stream.name"/></option>
+                                                            </t>
+                                                        </select>
+                                                    </td>
+                                                    <td class="md-form">
+                                                        <select title="Please select board / institute / university ⁣" class="form-control likert-field" t-att-id="'prof_board_'+str(cnt)" t-att-name="'prof_board_'+str(cnt)" placeholder="Board">
+                                                            <option value="">Select</option>
+                                                            <t t-foreach="request.env['kwmaster_institute_name'].sudo().search([('inst_course_ids','in',professional_course_id)])" t-as="institute">
+                                                                <option t-att-value="institute.id" t-att-selected="institute.id==data.get('ddlprofBoard')"><t t-esc="institute.name"/></option>
+                                                            </t>
+                                                        </select>
+                                                    </td>
+                                                    <td class="md-form">
+                                                        <select title="Please select passing year⁣" class="form-control likert-field" t-att-id="'prof_year_'+str(cnt)" t-att-name="'prof_year_'+str(cnt)" placeholder="Passing Year">
+                                                            <option value="">Select</option>
+                                                            <t t-foreach="year_options" t-as="years">
+                                                                <option t-att-value="years[0]" t-att-selected="years[0]==data.get('ddlprofYear')"><t t-esc="years[0]"/></option>
+                                                            </t>
+                                                        </select>
+                                                    </td>
+                                                    <td class="md-form">
+                                                        <input title="Please enter division / grade"  type="text" class="form-control likert-field gradeval" maxlength="6" t-att-id="'prof_grade_'+str(cnt)" t-att-name="'prof_grade_'+str(cnt)" t-att-value="data.get('txtprofGrade')" placeholder="Grade"/>
+                                                    </td>
+                                                    <td class="md-form">
+                                                        <input title="Please enter % of marks obtained⁣"  type="text" maxlength="5" class="form-control likert-field percentval" t-att-id="'prof_percent_'+str(cnt)" t-att-name="'prof_percent_'+str(cnt)" t-att-value="data.get('txtprofPercent')" placeholder="%" />
+                                                    </td>
+                                                    <td>
+                                                        <center>
+                                                            <button type="button" class="btn btn-danger close_row btn_remove_prof anchor btn-sm pr-3 pl-3"><i class="fa fa-trash"/></button>
+                                                        </center>
+                                                    </td>
+                                                </tr>
+                                                <t t-set="cnt" t-value="cnt+1"/>
+                                            </t>
+                                        </t>
+                                        <t t-else="">
+                                            <tr class="likert">
+                                                <th scope="row">Professional</th>
+                                                <td class="md-form">
+                                                    <select title="Please select stream"  class="form-control likert-field" id="prof_stream_0" name='prof_stream_0' placeholder="Stream">
+                                                        <option value="">Select</option>
+                                                        <t t-foreach="request.env['kwmaster_stream_name'].sudo().search([('course_id','=',professional_course_id)])" t-as="stream">
+                                                            <option t-att-value="stream.id"><t t-esc="stream.name"/></option>
+                                                        </t>
+                                                    </select>
+                                                </td>
+                                                <td class="md-form">
+                                                    <select title="Please select board / institute / university ⁣" class="form-control likert-field" id="prof_board_0" name="prof_board_0" placeholder="Board">
+                                                        <option value="">Select</option>
+                                                        <t t-foreach="request.env['kwmaster_institute_name'].sudo().search([('inst_course_ids','in',professional_course_id)])" t-as="institute">
+                                                            <option t-att-value="institute.id"><t t-esc="institute.name"/></option>
+                                                        </t>
+                                                    </select>
+                                                </td>
+                                                <td class="md-form">
+                                                    <select title="Please select passing year⁣" class="form-control likert-field" id="prof_year_0" name="prof_year_0" placeholder="Passing Year">
+                                                        <option value="">Select</option>
+                                                        <t t-foreach="year_options" t-as="years">
+                                                            <option t-att-value="years[0]"><t t-esc="years[0]"/></option>
+                                                        </t>
+                                                    </select>
+                                                </td>
+                                                <td class="md-form">
+                                                    <input title="Please enter division / grade" type="text" class="form-control likert-field gradeval" maxlength="6" id="prof_grade_0" name="prof_grade_0" placeholder="Grade"/>
+                                                </td>
+                                                <td class="md-form">
+                                                    <input title="Please enter % of marks obtained⁣" type="text" maxlength="5" class="form-control likert-field percentval" id="prof_percent_0" name="prof_percent_0" placeholder="%"/>
+                                                </td>
+                                                <td class="md-form">
+                                                    <center>
+                                                        <button type="button" class="btn btn-danger close_row btn_remove_prof anchor btn-sm pr-3 pl-3"><i class="fa fa-trash"/></button>
+                                                    </center>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="8">
+                                                <button type="button" class="btn btn-success add-row btn_add_prof anchor pull-right btn-sm"> Add More </button>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                </div>
+                                <!--Professional qualification block end-->
+                                <br />
+                                <br />
+
+
+                                <h4 class="text-dark"> <b>Training And Certification</b> </h4>
+                                <div class="table-responsive">
+                                <table id="tblcertification" class="table table-bordered">
+                                    <thead class="thead-danger">
+                                        <tr >
+                                            <th class="align-left wd-11" >Course Name</th>
+                                            <th class="align-left wd-15">Stream</th>
+                                            <th class="align-left wd-20">Board / Institute / University</th>
+                                            <th class="align-left wd-10">Passing Year</th>
+                                            <th class="align-left wd-10">Division / Grade</th>
+                                            <th class="align-left wd-10">% of marks Obtained</th>
+                                             <th class="align-left wd-25">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody id="training_certification_block">
+                                        <t t-if="trainingcourse">
+                                            <t t-set="cnt" t-value="0"/>
+
+                                            <t t-foreach="trainingcourse" t-as="data">
+                                                <tr class='likert'>
+                                                    <th scope="row">Certification</th>
+                                                    <td class="md-form">
+                                                        <select title="Please select stream"  class="form-control likert-field" t-att-id="'cert_stream_'+str(cnt)" t-att-name="'cert_stream_'+str(cnt)" placeholder="Stream">
+                                                            <option value="">Select</option>
+                                                            <t t-foreach="request.env['kwmaster_stream_name'].sudo().search([('course_id','=',training_course_id)])" t-as="stream">
+                                                                <option t-att-value="stream.id" t-att-selected="stream.id==data.get('ddltrainingStream')"><t t-esc="stream.name"/></option>
+                                                            </t>
+                                                        </select>
+                                                    </td>
+                                                    <td class="md-form">
+                                                        <select  title="Please select board / institute / university ⁣"  class="form-control likert-field" t-att-id="'cert_board_'+str(cnt)" t-att-name="'cert_board_'+str(cnt)" placeholder="Board">
+                                                            <option value="">Select</option>
+                                                            <t t-foreach="request.env['kwmaster_institute_name'].sudo().search([('inst_course_ids','in',training_course_id)])" t-as="institute">
+                                                                <option t-att-value="institute.id" t-att-selected="institute.id==data.get('ddltrainingBoard')"><t t-esc="institute.name"/></option>
+                                                            </t>
+                                                        </select>
+                                                    </td>
+                                                    <td class="md-form">
+                                                        <select title="Please select passing year⁣" class="form-control likert-field" t-att-id="'cert_year_'+str(cnt)" t-att-name="'cert_year_'+str(cnt)" placeholder="Passing Year">
+                                                            <option value="">Select</option>
+                                                            <t t-foreach="year_options" t-as="years">
+                                                                <option t-att-value="years[0]" t-att-selected="years[0]==data.get('ddltrainingYear')"><t t-esc="years[0]"/></option>
+                                                            </t>
+                                                        </select>
+                                                    </td>
+                                                    <td class="md-form">
+                                                        <input title="Please enter division / grade" type="text" class="form-control likert-field gradeval" maxlength="6" t-att-id="'cert_grade_'+str(cnt)" t-att-name="'cert_grade_'+str(cnt)" t-att-value="data.get('txttrainingGrade')" placeholder="Grade"/>
+                                                    </td>
+                                                    <td class="md-form">
+                                                        <input title="Please enter % of marks obtained⁣" type="text" maxlength="5" class="form-control likert-field percentval" t-att-id="'cert_percent_'+str(cnt)" t-att-name="'cert_percent_'+str(cnt)" t-att-value="data.get('txttrainingPercent')" placeholder="Percent"/>
+                                                    </td>
+                                                    <td class="md-form">
+                                                        <center>
+                                                            <button type="button" class="btn btn-danger close_row btn_hide_cert anchor btn-sm pr-3 pl-3"><i class="fa fa-trash"/></button>
+                                                        </center>
+                                                    </td>
+                                                </tr>
+                                                <t t-set="cnt" t-value="cnt+1"/>
+                                            </t>
+                                        </t>
+                                        <t t-else="">
+                                            <tr class="likert">
+                                                <th scope="row">Certification</th>
+                                                <td class="md-form">
+                                                    <select title="Please select stream" class="form-control likert-field" id="cert_stream_0" name="cert_stream_0" placeholder="Stream">
+                                                        <option value="">Select</option>
+                                                        <t t-foreach="request.env['kwmaster_stream_name'].sudo().search([('course_id','=',training_course_id)])" t-as="stream">
+                                                            <option t-att-value="stream.id"><t t-esc="stream.name"/></option>
+                                                        </t>
+                                                    </select>
+                                                </td>
+                                                <td class="md-form">
+                                                    <select title="Please select board / institute / university ⁣"  class="form-control likert-field" id="cert_board_0" name="cert_board_0" placeholder="Board">
+                                                        <option value="">Select</option>
+                                                        <t t-foreach="request.env['kwmaster_institute_name'].sudo().search([('inst_course_ids','in',training_course_id)])" t-as="institute">
+                                                            <option t-att-value="institute.id"><t t-esc="institute.name"/></option>
+                                                        </t>
+                                                    </select>
+                                                </td>
+                                                <td class="md-form">
+                                                    <select title="Please select passing year⁣" class="form-control likert-field" id="cert_year_0" name="cert_year_0" placeholder="Passing Year">
+                                                        <option value="">Select</option>
+                                                        <t t-foreach="year_options" t-as="years">
+                                                            <option t-att-value="years[0]"><t t-esc="years[0]"/></option>
+                                                        </t>
+                                                    </select>
+                                                </td>
+                                                <td class="md-form">
+                                                    <input title="Please enter division / grade" type="text" class="form-control likert-field gradeval" maxlength="6" id="cert_grade_0" name="cert_grade_0" placeholder="Grade"/>
+                                                </td>
+                                                <td class="md-form">
+                                                    <input title="Please enter % of marks obtained⁣" type="text" maxlength="5" class="form-control likert-field percentval" id="cert_percent_0" name="cert_percent_0" placeholder="%" value=""/>
+                                                </td>
+                                                <td class="md-form">
+                                                    <center>
+                                                        <button type="button" class="btn btn-danger close_row btn_hide_cert anchor btn-sm pr-3 pl-3"><i class="fa fa-trash"/></button>
+                                                    </center>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="8">
+                                                <button type="button" class="btn btn-success add-row btn_add_cert anchor pull-right btn-sm"> Add More </button>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                </div>
+                                <!--certificate block end-->
+                                <div>
+                                    <button type="submit" class="btn btn-success btn-md" name="draft" value="draft"
+                                            id="btnSubmitED">Save Educational Details
+                                    </button>
+                                    <button type="submit" class="btn btn-success btn-md" name="next" value="next"
+                                            id="btnSubmitEDNext">Save And Next
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <template id="assets_frontend_eductional" name="applicant_edu_assets" inherit_id="kw_recruitment.kw_recruitment_educational_details">
+            <xpath expr="." position="inside">
+                <link href='https://fonts.googleapis.com/css?family=Noto Sans' rel='stylesheet' />
+                <link href="/kwantify_theme/static/src/mdb/css/mdb.min.css" rel="stylesheet"/>
+<!--                <link rel="stylesheet" href="/kw_onboarding/static/src/css/bootstrap-datepicker.min.css"/>-->
+                <link rel="stylesheet" href="/kw_recruitment/static/src/css/applicant.css"/>
+
+                <script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js"/>
+                <script type="text/javascript" src="/kw_recruitment/static/src/lib/jquery.validate.min.js"/>
+                <script type="text/javascript" src="/kw_recruitment/static/src/lib/additional-methods.js"/>
+                <!-- <script type="text/javascript" src="/kw_onboarding/static/src/js/bootstrap-datepicker.min.js"/> -->
+
+                <script type="text/javascript" src="/kw_recruitment/static/src/js/kw_applicant_validation.js"/>
+                <script type="text/javascript" src="/kw_recruitment/static/src/js/kw_applicant_educational_details.js"/>
+                <script type="text/javascript" src="/kw_recruitment/static/src/js/hiring_dashboard.js"/>
+            </xpath>
+        </template>
+    </data>
+</odoo>

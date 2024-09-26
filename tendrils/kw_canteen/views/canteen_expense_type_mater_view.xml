@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <record model="ir.ui.view" id="kw_canteen_expense_master_list">
+            <field name="name">Canteen Expenses</field>
+            <field name="model">kw_canteen_expense_master</field>
+            <field name="arch" type="xml">
+                <tree editable="top">
+                    <field name="expense_date" required="1"/>
+                    <field name="expense_type_id" required="1"/>
+                    <field name="expense_description"/>
+                    <field name="expense_price" required="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="search_view_canteen_expense" model="ir.ui.view">
+            <field name="name">Canteen Expense Search</field>
+            <field name="model">kw_canteen_expense_master</field>
+            <field name="arch" type="xml">
+                <search string="canteen expense head">
+                    <field name="expense_type_id"/>
+                    <filter string="This FY Year" name="this_year_expense_report" domain="[('expense_date', '&gt;', context_today().strftime('%Y') + '/03/31'),
+                    ('expense_date', '&lt;=', (context_today()+relativedelta(years=1)).strftime('%Y')+ '/04/01')]"/>
+            <filter string="Last FY Year" name="last_year_expense_report" domain="[('expense_date', '&lt;=', context_today().strftime('%Y') + '/03/31'),
+                    ('expense_date', '&gt;=', (context_today()-relativedelta(years=1)).strftime('%Y')+ '/04/01')]"/>
+            <separator/>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_canteen_monthly_expense__report_pivot">
+            <field name="name">canteen.monthly.pivot</field>
+            <field name="model">kw_canteen_expense_master</field>
+            <field name="arch" type="xml">
+                <pivot string="Expense Analysis">
+                    <field name="expense_type_id" type="row"/>
+                    <field name="expense_date" interval="month" type="col"/>
+                    <field name="expense_price" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+   
+     
+        <record id="kw_canteen_expense_master_tree_action_window" model="ir.actions.act_window">
+            <field name="name">Canteen Expenses</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kw_canteen_expense_master</field>
+            <field name="view_mode">tree</field>
+            <field name="context">{'search_default_this_year_expense_report': 1}</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    <!-- Add Text Here -->
+                </p><p>
+                    <!-- More details about what a user can do with this object will be OK --> 
+                </p>
+            </field>
+        </record>
+        <!-- <record id="kw_canteen_expense_master_pivot_action_window" model="ir.actions.act_window">
+            <field name="name">Canteen Expenses</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kw_canteen_expense_master</field>
+            <field name="view_mode">pivot</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                </p><p>
+                </p>
+            </field>
+        </record> -->
+
+        <record id="kw_canteen_expense_master_pivot_action_window" model="ir.actions.server">
+			<field name="name">Canteen Expenses</field>
+			<field name="model_id" ref="model_kw_canteen_expense_master"/>
+			<field name="state">code</field>
+            <!-- <field name="context">{'search_default_filter_self_record':1 , 'search_default_this_month_guest_meal':1}</field> -->
+            <!-- <field name="search_view_id" ref="view_kw_canteen_guest_meal_search" /> -->
+			<field name="code">
+				action = model.update_employee_meal_collection()
+			</field>
+		</record>
+    </data>
+</odoo>

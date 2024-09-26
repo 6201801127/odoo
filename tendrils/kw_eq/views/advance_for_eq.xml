@@ -1,0 +1,409 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="kw_advance_for_eq_tree">
+            <field name="name">kw_advance_for_eq.tree</field>
+            <field name="model">kw_advance_for_eq</field>
+            <field name="arch" type="xml">
+                <tree class='customer_tree'>
+                    <field name="applied_by" force_save="1"/>
+                    <field name="eq_id"/>
+                    <field string="Advance Amount" name="advance_amount" />
+                    <field name="advance_month_ids" widget="many2many_tags"/>
+                    <field name="no_of_resource"/>
+                    <field name="contract_close_date"/>
+                    <field name="opp_date"/>
+                    <field name="status"/>
+                    <field name="action_to_be_taken_by_name"/>
+                    <field name="employee_role"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_advance_for_eq_form">
+            <field name="name">kw_advance_for_eq.form</field>
+            <field name="model">kw_advance_for_eq</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="apply_advance_for_eq"  string="Apply" type="object"
+                                class="btn-info" attrs="{'invisible': [('status','!=','Draft')]}"/>
+                        <field name="status" widget="statusbar"
+                               statusbar_visible="Draft,Applied,Approved,Granted,Allocated,Rejected"/>
+                    </header>
+                    <sheet >
+                        <group string="Advance Details" style="background-color: #def2e5;">
+                            <group>
+                                <field name="applied_by" readonly="1" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+                                <field name="eq_id" required='1' attrs="{'readonly': [('status','!=','Draft')]}" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+                                <field name="account_sub_head_id" required='1' attrs="{'readonly': [('status','!=','Draft')]}" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+                                <field name="purchase_cost" required='1'  readonly='1' attrs="{'invisible': [('account_sub_head_id','=','False')]}" force_save='1'/>
+                                <field name="advance_amount" required='1' widget="monetary" attrs="{'readonly': [('status','!=','Draft')]}"/>
+                                <field name="description"  required='1' attrs="{'readonly': [('status','!=','Draft')]}"/>
+                                <field name="advance_month_ids" widget="many2many_tags" required = "1" attrs="{'readonly': [('status','!=','Draft')]}"/>
+                                <field name="no_of_resource" required="1" attrs="{'readonly': [('status','!=','Draft')]}"/>
+                            </group>
+                            <group>
+                                <field name="workorder_id" required='1' options="{'no_create':True,'no_edit':True,'no_open': True,}" context="{'tree_view_ref':'crm.crm_case_tree_view_oppor'}" attrs="{'readonly': [('status','=','Allocated')]}"/>
+                                <field name="contract_close_date" required='1' attrs="{'readonly': [('status','!=','Draft')]}"/>
+                                <field name="opp_date" required='1' attrs="{'readonly': [('status','!=','Draft')]}"/>
+                                <field name="action_to_be_taken_by_name" invisible='1'/>
+                                <field name="action_to_be_taken_by" invisible='1'/>
+
+
+                            </group>
+                        </group>
+                        <group  style="background-color: #def2e5;">
+                            <field name="advance_log_id" readonly="1" style="pointer-events:none;" string='Activity Log'>
+                                <tree class='customer_tree'>
+                                    <field name="action_taken_by" readonly="1"/>
+                                    <field name="log_status" readonly="1"/>
+                                    <field name="action_taken_on" readonly="1"/>
+                                    <field name="action_remark" readonly="1"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                    <group>
+                        <div class="oe_chatter">
+                            <field name="message_follower_ids" widget="mail_followers" />
+                            <field name="activity_ids" widget="mail_activity" />
+                            <field name="message_ids" widget="mail_thread" />
+                        </div>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_advance_for_eq_action">
+            <field name="name">Advance For EQ</field>
+            <field name="res_model">kw_advance_for_eq</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('create_uid', '=', uid)]</field> 
+            <field name="context">{'advance_eq':True}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_advance_for_eq_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_advance_for_eq_form')})]"/>
+        </record>
+
+        <record model="ir.ui.view" id="kw_advance_for_eq_take_action_tree">
+            <field name="name">kw_advance_for_eq.tree</field>
+            <field name="model">kw_advance_for_eq</field>
+            <field name="arch" type="xml">
+                <tree class='customer_tree' create='0' delete='0' import='0'>
+                    <field name="applied_by" force_save="1"/>
+                    <field name="eq_id"/>
+                    <field name="advance_amount"/>
+                    <field name="advance_month_ids" widget="many2many_tags" />
+                    <field name="no_of_resource"/>
+                    <field name="contract_close_date"/>
+                    <field name="opp_date"/>
+                    <field name="status"/>
+                    <field name="action_to_be_taken_by_name"/>
+                    <field name="employee_role"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_advance_for_eq_take_action_form">
+            <field name="name">kw_advance_for_eq.form</field>
+            <field name="model">kw_advance_for_eq</field>
+            <field name="priority" eval="14" />
+            <field name="arch" type="xml">
+                <form create='0' delete='0' import='0' style="background-color: #def2e9;">
+                    <header>
+                        <button name="approve_advance_for_eq" string="Approve" type="object"
+                                class="btn-success" attrs="{'invisible': [('status','!=','Applied')]}"/>
+                        <button name="grant_advance_for_eq" string="Grant" type="object"
+                                class="btn-success" attrs="{'invisible': [('status','!=','Approved')]}"/>
+                        <button name="disburse_advance_for_eq" string="Allocate" type="object"
+                                 class="btn-success" attrs="{'invisible': [('status','!=','Granted')]}"/>
+                        <button name="reject_advance_for_eq" string="Reject" type="object"
+                                class="btn-danger"/>
+                        <field name="status" widget="statusbar"
+                               statusbar_visible="Draft,Applied,Approved,Granted,Allocated,Rejected"/>
+                    </header>
+                    <sheet>
+                        <group string="Advance Details" style="background-color: #def2e5;">
+                            <group>
+                                <field name="applied_by" readonly="1" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+                                <field name="eq_id" attrs="{'readonly': [('status','!=','Draft')]}" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+                                <field name="account_sub_head_id" required='1' attrs="{'readonly': [('status','!=','Draft')]}" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+                                <field name="purchase_cost" required='1' attrs="{'readonly': [('status','!=','Draft')],'invisible': [('account_sub_head_id','=','False')]}"/>
+                                <field name="advance_amount" widget="monetary" required='1'/>
+                                <field name="description"  required='1' attrs="{'readonly': [('status','!=','Draft')]}"/>
+                                <field name="advance_month_ids" widget="many2many_tags" />
+                                <field name="no_of_resource"/>
+                                
+                            </group>
+                            <group>
+                                <field name="workorder_id" required='1' options="{'no_create':True,'no_edit':True,'no_open': True,}" context="{'tree_view_ref':'crm.crm_case_tree_view_oppor'}"/>
+                                <field name="contract_close_date" required='1' />
+                                <field name="opp_date" required='1' />
+                                <field name="is_account" invisible='1'/>
+                                <field name="is_ceo" invisible='1'/>
+                                <button name="view_eq_details" string="View EQ Details" type="object"
+                                 class="btn-success" attrs="{'invisible': [('status','!=','Approved')]}"/>
+                            
+                            </group>
+                        </group>
+                        <group  style="background-color: #def2e5;">
+                            <field name="advance_log_id" readonly="1" style="pointer-events:none;" string='Activity Log'>
+                                <tree class='customer_tree'>
+                                    <field name="action_taken_by" readonly="1"/>
+                                    <field name="log_status" readonly="1"/>
+                                    <field name="action_taken_on" readonly="1"/>
+                                    <field name="action_remark" readonly="1"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                    <group>
+                        <div class="oe_chatter">
+                            <field name="message_follower_ids" widget="mail_followers" />
+                            <field name="activity_ids" widget="mail_activity" />
+                            <field name="message_ids" widget="mail_thread" />
+                        </div>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_advance_for_eq_view_search" model="ir.ui.view">
+            <field name="name">kw_advance_for_eq.search</field>
+            <field name="model">kw_advance_for_eq</field>
+            <field name="arch" type="xml">
+                <search string="">
+                    <field string="Employee" name="applied_by"/>
+                    <field string="Advance Amount" name="advance_amount" />
+                    <field string="Description" name="description" />
+                    <field string="Expected Closing Date" name="contract_close_date" />
+                    <field string="Renewal Date" name="opp_date"/>
+                    <field string="Pending At" name="action_to_be_taken_by_name" />
+                    <field string="Status" name="status"/>
+                    <field name="employee_role" string='Role'/>
+                    <field name="account_sub_head_id" string='Account SubHead'/>
+                    <field name="eq_id" string='Opportunity Name'/>
+                    <field name="workorder_id" string='Workorder Name'/>
+                    <field name="no_of_resource"/>
+
+                    <filter string="Draft" name="draft" domain="[('status', '=','Draft')]"/>
+                    <filter string="Applied" name="applied" domain="[('status', '=','Applied')]"/>
+                    <filter string="Approved" name="approved" domain="[('status', '=','Approved')]"/>
+                    <filter string="Granted" name="granted" domain="[('status', '=','Granted')]"/>
+                    <filter string="Allocated" name="Allocated" domain="[('status', '=','Allocated')]"/>
+                    <filter string="Rejected" name="Rejected" domain="[('status', '=','Rejected')]"/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_account_sub_head_id" string="Account SubHead" domain="" context="{'group_by':'account_sub_head_id'}"/>
+                        <filter name="group_by_workorder_id" string="Workorder" domain="[]" context="{'group_by':'workorder_id'}"/>
+                        <filter name="group_by_eq_id" string="Opportunity" domain="[]" context="{'group_by':'eq_id'}"/>
+                        <filter name="group_by_status" string="Status" domain="[]" context="{'group_by':'status'}"/>
+
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_advance_for_eq_take_action_action">
+            <field name="name">Take Action</field>
+            <field name="res_model">kw_advance_for_eq</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_advance_for_eq_take_action_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_advance_for_eq_take_action_form')})]"/>
+        </record>
+
+        <record id="kw_advance_for_eq_take_server_action" model="ir.actions.server">
+            <field name="name">Take Actions</field>
+            <field name="model_id" ref="model_kw_advance_for_eq" />
+            <field name="state">code</field>
+            <field name="code">
+action = model.render_advance_eq_pending_actions()
+
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_advance_for_eq_report_tree">
+            <field name="name">kw_advance_for_eq.report.tree</field>
+            <field name="model">kw_advance_for_eq</field>
+            <field name="arch" type="xml">
+                <tree class='customer_tree' create='0' delete='0' import='0'>
+                    <field name="applied_by" force_save="1" readonly='1'/>
+                    <field name="eq_id"  readonly='1'/>
+                    <field name="advance_amount" readonly='1'/>
+                    <field name="advance_month_ids" widget="many2many_tags"/>
+                    <field name="no_of_resource"/>
+                    <field name="contract_close_date" readonly='1'/>
+                    <field name="opp_date" readonly='1'/>
+                    <field name="status" readonly='1'/>
+                    <field name="action_to_be_taken_by_name" readonly='1'/>
+                    <field name="employee_role" readonly='1'/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_advance_for_eq_allocated_report_tree">
+            <field name="name">kw_advance_for_eq.report.tree</field>
+            <field name="model">kw_advance_for_eq</field>
+            <field name="arch" type="xml">
+                <tree class='customer_tree' create='0' delete='0' import='0'>
+                    <field name="eq_id"  readonly='1'/>
+                    <field name="applied_by" force_save="1" readonly='1'/>
+                     <field name="advance_month_ids" widget="many2many_tags"/>
+                    <field name="no_of_resource"/>
+                    <field name="account_sub_head_id" readonly='1'/>
+                    <field name="purchase_cost" readonly='1'/>
+                    <field name="advance_amount" readonly='1'/>
+                    <field name="status"/>
+
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_advance_for_eq_allocated_report_action">
+            <field name="name">EQ Advance Allocated Report</field>
+            <field name="res_model">kw_advance_for_eq</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="domain">[('status','=','Allocated')]</field>
+
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_advance_for_eq_allocated_report_tree')}),]"/>
+        </record>
+
+        <record id="kw_advance_for_eq_report_server_action" model="ir.actions.server">
+            <field name="name">Reports</field>
+            <field name="model_id" ref="model_kw_advance_for_eq" />
+            <field name="state">code</field>
+            <field name="code">
+action = model.render_advance_eq_report_actions()
+
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_advance_for_eq_report_action">
+            <field name="name">EQ Advance Report</field>
+            <field name="res_model">kw_advance_for_eq</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_advance_for_eq_report_tree')}),]"/>
+        </record>
+
+
+        <record id="kw_advance_eq_apply_wiz_form" model="ir.ui.view">
+            <field name="name">kw_advance_eq_wizard.form</field>
+            <field name="model">kw_advance_eq_wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                        $(document).ready(function(){
+                            $(".modal-footer").hide();
+                            $(".modal-title").show();
+                            $(".o_form_statusbar").hide();
+                        });
+                    </script>
+                    <div class="row">
+                        <div class="text-center col-sm-12 mx-auto">
+                            <p class="h6 font-weight-light text-left text-justify">
+                                <!-- <group> -->
+                                    <group>
+                                        <field name="remark" required='1'/>
+                                    </group>
+                                <!-- </group> -->
+                            </p>
+                            <button name="action_submit_apply_remark" type="object" class="btn-success mr-2" string="Submit" invisible="not context.get('eq_apply', False) "/>
+                            <button name="action_submit_approve_remark" type="object" class="btn-success mr-2" string="Submit" invisible="not context.get('eq_approve', False) "/>
+                            <button name="action_submit_grant_remark" type="object" class="btn-success mr-2" string="Submit" invisible="not context.get('eq_grant', False) "/>
+                            <button name="action_submit_allocate_remark" type="object" class="btn-success mr-2" string="Submit" invisible="not context.get('eq_allocate', False) "/>
+                            <button name="action_submit_reject_remark" type="object" class="btn-success mr-2" string="Submit" invisible="not context.get('eq_reject', False) "/>
+                            <button string="Cancel" class="btn-danger" special="cancel" style="float:center;"/>
+                        </div>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_advance_eq_log_view_tree" model="ir.ui.view">
+            <field name="name">kw_advance_eq_log.view.tree</field>
+            <field name="model">kw_advance_eq_log</field>
+            <field name="arch" type="xml">
+                <tree create='0' edit='0' delete='0'>
+                    <field name="action_taken_by" />
+                    <field name="log_status" />
+                    <field name="action_taken_on" />
+                    <field name="action_remark" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_advance_eq_log_action_window" model="ir.actions.act_window">
+            <field name="name">Advance EQ Log</field>
+            <field name="res_model">kw_advance_eq_log</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids"
+                eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_advance_eq_log_view_tree')})]" />
+            <field name="context">{}</field>
+            <field name="domain">[]</field>
+        </record>
+       
+
+
+    </data>
+    <data>
+
+        <record id="month1" model="kw_advance_eq_month">
+            <field name="name">January</field>
+            <field name="code">JAN</field>
+        </record>
+        <record id="month2" model="kw_advance_eq_month">
+            <field name="name">February</field>
+            <field name="code">FEB</field>
+        </record>
+        <record id="month3" model="kw_advance_eq_month">
+            <field name="name">March</field>
+            <field name="code">MAR</field>
+        </record>
+        <record id="month4" model="kw_advance_eq_month">
+            <field name="name">April</field>
+            <field name="code">APR</field>
+        </record>
+        <record id="month5" model="kw_advance_eq_month">
+            <field name="name">May</field>
+            <field name="code">MAY</field>
+        </record>
+        <record id="month6" model="kw_advance_eq_month">
+            <field name="name">June</field>
+            <field name="code">JUN</field>
+        </record>
+        <record id="month7" model="kw_advance_eq_month">
+            <field name="name">July</field>
+            <field name="code">JUL</field>
+        </record>
+        <record id="month8" model="kw_advance_eq_month">
+            <field name="name">August</field>
+            <field name="code">AUG</field>
+        </record>
+        <record id="month9" model="kw_advance_eq_month">
+            <field name="name">September</field>
+            <field name="code">SEP</field>
+        </record>
+        <record id="month10" model="kw_advance_eq_month">
+            <field name="name">October</field>
+            <field name="code">OCT</field>
+        </record>
+        <record id="month11" model="kw_advance_eq_month">
+            <field name="name">November</field>
+            <field name="code">NOV</field>
+        </record>
+        <record id="month12" model="kw_advance_eq_month">
+            <field name="name">December</field>
+            <field name="code">DEC</field>
+        </record>
+        
+    </data>
+</odoo>

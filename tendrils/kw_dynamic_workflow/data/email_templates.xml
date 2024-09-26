@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+    <record id="kw_email_template_approval_auto_notification" model="mail.template">
+        <field name="name">Approval Auto Notification</field>
+        <field name="model_id" ref="kw_dynamic_workflow.model_odoo_workflow_node"/>
+        
+        <field name="subject">${ctx['description']|safe} Submitted from ${ctx['pre_stage']} - Ref ${ctx['name']|safe}</field>
+        <field name="email_from">${object.company_id and object.company_id.email or ''|safe}</field>
+        <field name="email_to">${ctx['email_to']|safe}</field>
+        <field name="auto_delete" eval="False"/>
+       <!--  <field name="partner_to">${ctx['partner_to']|safe}</field> -->
+        <field name="body_html">
+          <![CDATA[ <p style="margin: 0px; padding: 0px; font-size: 13px;">
+             Dear User,<br/> <br/>
+             <p>
+                A work station approval request is received. Please find the details below.
+             </p>
+             <p>
+                Employee        : ${ctx['act_record'].employee_id.name} 
+               
+             </p>
+             <br/> <br/>
+             <div style="margin: 0px; padding: 0px;">
+                    Click on following link for more details.
+                    <div style="margin: 16px 0px 16px 0px;">
+                       
+                        <a href="${ctx['redirect_url']}" 
+                            target="_blank"
+                            style="background-color: #875a7b; text-decoration: none; color: #fff; padding: 8px 16px 8px 16px; border-radius: 5px;">Take Action </a>
+                    </div>
+                </div> <br/> Thanks,<br/>
+            ${user.signature | safe}<br/></p> ]]>
+        </field>
+    </record>
+   
+    <record id="kw_mail_template_reject_auto_notification" model="mail.template">
+        <field name="model_id" ref="kw_dynamic_workflow.model_odoo_workflow_node"/>
+        <field name="name">Reject Auto Notification</field>
+        <field name="subject">${ctx['description']|safe} Rejected from ${ctx['pre_stage']} Stage - Ref ${ctx['name']|safe}</field>
+        <field name="email_from">${('"%s" &lt;%s&gt;' % (user.company_id.name, user.company_id.email or user.email))|safe}</field>
+        <field name="email_to">${ctx['email_to']|safe}</field>
+        <!-- <field name="partner_to">${ctx['partner_to']|safe}</field> -->
+        <field name="body_html">
+          <![CDATA[ <p style="margin: 0px; padding: 0px; font-size: 13px;">
+             Hello,<br/> <br/>
+             <p>
+                ${ctx['description']|safe} - Ref ${ctx['name']|safe} Submitted for your Approval or Comment. Please review and put your input.
+             </p>
+             <br/> <br/>
+             <div style="margin: 0px; padding: 0px;">
+                    Click on following link for more details.
+                    <div style="margin: 16px 0px 16px 0px;">
+                       <a href="${ctx['record'].get_url(ctx['rec_res_id'])}" 
+                            target="_blank"
+                            style="background-color: #875a7b; text-decoration: none; color: #fff; padding: 8px 16px 8px 16px; border-radius: 5px;">#${ctx['name']|safe} </a>
+                    </div>
+                </div> <br/> Thanks,<br/>
+            ${user.signature | safe}<br/></p> ]]>
+        </field>
+    </record>
+
+    </data>
+</odoo>

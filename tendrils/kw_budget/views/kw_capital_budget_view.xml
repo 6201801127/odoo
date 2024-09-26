@@ -1,0 +1,1210 @@
+<odoo>
+    <data>
+        <!--        revised amount wizard view -->
+
+        <record id="revised_amount_wizard_form" model="ir.ui.view">
+            <field name="name">revised_amount_wizard_form</field>
+            <field name="model">revised_budget_wizard</field>
+            <field name="arch" type="xml">
+                <form create="false" delete="false">
+                    <header>
+                        <button name="apply_l1" type="object" string="Apply"
+                                class="btn-success" attrs="{'invisible': ['|',('pending_at','!=', 'L1'), ('show_apply', '=' ,False)]}" invisible="context.get('kw_capital_wizard',False)"/>
+
+                        <button name="confirm_l2" type="object" string="Confirm"
+                                class="btn-success" attrs="{'invisible': [('pending_at','!=', 'L2')]}" groups='kw_budget.group_l2_kw_budget'/>
+
+                        <button type="action" name="%(kw_budget.action_kw_budget_revert_wizard)d" string="Revert L2"
+                                class="btn-success" attrs="{'invisible': [('pending_at','!=', 'L2')]}" groups='kw_budget.group_l2_kw_budget'/>
+
+
+                        <button name="cancel_l2" type="object" string="Cancel"
+                                class="btn-danger" attrs="{'invisible': [('pending_at','!=', 'L2')]}" groups='kw_budget.group_l2_kw_budget'/>
+
+                        <button name="confirm_finance" type="object" string="Confirm"
+                                class="btn-success" attrs="{'invisible': [('pending_at','!=', 'Finance')]}" groups='kw_budget.group_finance_kw_budget'/>
+                        <button type="action" name="%(kw_budget.action_kw_budget_revert_wizard)d" string="Revert Finance"
+                                class="btn-success" attrs="{'invisible': [('pending_at','!=', 'Finance')]}" groups='kw_budget.group_finance_kw_budget'/>
+                        <button name="cancel_finance" type="object" string="Cancel"
+                                class="btn-danger" attrs="{'invisible': [('pending_at','!=', 'Finance')]}" groups='kw_budget.group_finance_kw_budget'/>
+
+                        <button name="confirm_cfo" type="object" string="Confirm"
+                                class="btn-success" attrs="{'invisible': [('pending_at','!=', 'cfo')]}" groups='kw_budget.group_cfo_kw_budget'/>
+                        <button type="action" name="%(kw_budget.action_kw_budget_revert_wizard)d" string="Revert Finance(CFO)"
+                                class="btn-success" attrs="{'invisible': [('pending_at','!=', 'cfo')]}" groups='kw_budget.group_cfo_kw_budget'/>
+                        <button name="cancel_cfo" type="object" string="Cancel"
+                                class="btn-danger" attrs="{'invisible': [('pending_at','!=', 'cfo')]}" groups='kw_budget.group_cfo_kw_budget'/>
+
+
+                        <button name="confirm_approver" type="object" string="Confirm"
+                                class="btn-success" attrs="{'invisible': [('pending_at','!=', 'Approver')]}" groups='kw_budget.group_approver_kw_budget'/>
+                        <button type="action" name="%(kw_budget.action_kw_budget_revert_wizard)d" string="Revert Approver"
+                                class="btn-success" attrs="{'invisible': [('pending_at','!=', 'Approver')]}" groups='kw_budget.group_approver_kw_budget'/>
+                        <button name="cancel_approver" type="object" string="Cancel"
+                                class="btn-danger" attrs="{'invisible': [('pending_at','!=', 'Approver')]}" groups='kw_budget.group_approver_kw_budget'/>
+
+                        <field name="pending_at" widget="statusbar" readonly="1" class="btn-success" invisible="1"/>
+
+
+                    </header>
+                    <style>
+
+                        .table-responsive .o_list_view thead tr:nth-child(1) th{
+                        background-color: rgb(95, 196, 234);
+                        color: #4c4c4c;
+                        }
+
+                    </style>
+                    <group>
+                        <field name="for_new_line" widget="checkbox" attrs="{'readonly': [('pending_at','=', 'Validate')]}"/>
+                        <field name="pending_at" invisible="1"/>
+                        <field name="show_apply" invisible="1"/>
+                        <field name="for_revise_line" widget="checkbox" attrs="{'readonly': [('pending_at','=', 'Validate')]}"/>
+                        <field name="capital_budget_id" readonly="1" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    </group>
+                    <group attrs="{'invisible': ['|', ('for_revise_line','!=', True)]}">
+                        <field name="existing_capital_budget_line_ids" attrs="{'readonly': [('pending_at','=', 'Validate')]}" colspan="4" nolabel="1" readonly="1" force_save="1">
+                            <tree editable="bottom">
+                                        <field name="name_of_expenses"/>
+                                        <!-- <field name="expense_type"/> -->
+                                        <field name="date_from"/>
+                                        <field name="date_to"/>
+
+                                        <field name="quantity"/>
+                                        <field name="rate_per_quantity" sum="Total Rate" widget="monetary"/>
+                                        <!--  <f_default_financial_yrield name="fiscal_year_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>  -->
+<!--                                        <field name="amount_required" sum="Amount Take" widget="monetary" invisible="1"/>-->
+                                        <!--  <field name="revise_amount"/>
+                                            <field name="spent_amount"/>  -->
+                                        <field name="total_amount" sum="Total Amount" widget="monetary"/>
+                                        <field name="apr_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="may_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jun_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jul_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="aug_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="sep_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="oct_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="nov_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="dec_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jan_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="feb_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="mar_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="next_fy_year" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <!-- <field name="actual_amount" sum="Actual Amount" widget="monetary" /> -->
+                                        <field name="remark" required="1"/>
+                            </tree>
+                        </field>
+                    </group>
+                    <group attrs="{'invisible': [('for_revise_line','!=', True)]}">
+                        <h1>For Revise Capital Budget</h1>
+                        <field name="revised_amount_ids" attrs="{'readonly': [('pending_at','=', 'Validate')]}" colspan="4" nolabel="1" readonly="0">
+                            <tree editable="bottom">
+                                        <field name="expense_id" domain="[('capital_budget_id', '=', parent.capital_budget_id)]" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <!-- <field name="expense_type"/> -->
+                                        <field name="date_from" readonly="1" force_save="1"/>
+                                        <field name="date_to" readonly="1" force_save="1"/>
+
+                                        <field name="quantity" readonly="1" force_save="1"/>
+                                        <field name="rate_per_quantity" sum="Total Rate" widget="monetary" readonly="1" force_save="1"/>
+                                        <field name="total_amount" sum="Total Amount" widget="monetary" readonly="1" force_save="1"/>
+                                        <field name="apr_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" />
+                                        <field name="may_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jun_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jul_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="aug_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="sep_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="oct_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="nov_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="dec_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jan_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="feb_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="mar_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="next_fy_year" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <!-- <field name="actual_amount" sum="Actual Amount" widget="monetary" /> -->
+                                        <field name="remark" readonly="0"/>
+                            </tree>
+                        </field>
+
+                    </group>
+                    <group attrs="{'invisible': [('for_new_line','!=', True)]}">
+                        <h1> For Add New Budget Lines.</h1>
+                        <field name="capital_budget_line_ids" attrs="{'readonly': [('pending_at','=', 'Validate')]}" colspan="4" nolabel="1">
+                                    <tree string="Budget Lines" editable="bottom" >
+                                        <field name="budgetary_position_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" invisible="1"/>
+                                        <field name="capital_budget_id" invisible="1"/>
+                                        <field name="name_of_expenses"/>
+                                        <!-- <field name="expense_type"/> -->
+                                        <field name="date_from"/>
+                                        <field name="date_to"/>
+
+                                        <field name="quantity"/>
+                                        <field name="rate_per_quantity" sum="Total Rate" widget="monetary"/>
+                                        <!--  <f_default_financial_yrield name="fiscal_year_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>  -->
+                                        <field name="amount_required" sum="Amount Take" widget="monetary" invisible="1"/>
+                                        <!--  <field name="revise_amount"/>
+                                            <field name="spent_amount"/>  -->
+                                        <field name="total_amount" sum="Total Amount" widget="monetary"/>
+                                        <field name="apr_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="may_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jun_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jul_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="aug_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="sep_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="oct_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="nov_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="dec_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jan_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="feb_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="mar_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="next_fy_year" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <!-- <field name="actual_amount" sum="Actual Amount" widget="monetary" /> -->
+                                        <field name="remark" required="1"/>
+                                        <!--                                        <field name="revised_button_boolean" invisible="0"/>-->
+                                        <field name="approved_button_boolean" invisible="1"/>
+                                        <field name="revised_button_hide_boolean" invisible="1"/>
+                                        <!--                                        <field name="revised_invisible_button" invisible="0"/>-->
+                                        <field name="finance_approved_button_boolean" invisible="1"/>
+                                        <field name="approver_approved_button_boolean" invisible="1"/>
+                                        <field name="approver_reverted_button_boolean" invisible="1"/>
+                                        <field name="edit_button_hide_boolean" invisible="1"/>
+                                        <field name="state" invisible="1"/>
+                                        <field name="account_code_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" invisible="0" groups="kw_budget.group_finance_kw_budget"/>
+                                        </tree>
+                                    <form>
+                                        <group>
+                                            <field name="budgetary_position_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" invisible="1"/>
+                                            <field name="name_of_expenses"/>
+                                            <!-- <field name="expense_type"/> -->
+                                            <field name="date_from"/>
+                                            <field name="date_to"/>
+                                            <field name="quantity"/>
+                                            <field name="rate_per_quantity"/>
+                                            <field name="amount_required" invisible="1"/>
+                                            <field name="total_amount" sum="Total Amount" widget="monetary"/>
+                                            <field name="remark"/>
+                                        </group>
+                                    </form>
+                                </field>
+                    </group>
+
+                    <footer>
+                        <button name="confirm_apply" type="object" string="Confirm" class="btn-success" attrs="{'invisible': [('pending_at','!=', 'L1')]}"/>
+                        <button string="Cancel" class="btn-danger" special="cancel" attrs="{'invisible': [('pending_at','!=', 'L1')]}"/>
+                    </footer>
+
+                    <div class="oe_chatter" attrs="{'invisible': [('pending_at','!=', 'L1')]}">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_revised_amount_capital_wizard_tree" model="ir.ui.view">
+            <field name="name">revised_revenue_budget_wizard_tree</field>
+            <field name="model">revised_budget_wizard</field>
+            <field name="arch" type="xml">
+                <tree string="Revenue Budgetary " import='false' create="false">
+                    <field name="capital_budget_id"/>
+                    <field name="create_uid"/>
+                    <field name="budget_department" />
+                    <field name="branch_id"/>
+                    <field name="pending_at"/>
+                    <field name="create_date"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_revised_capital_budget_wizard" model="ir.actions.act_window">
+            <field name="name">Capital Budget/Budget Approval/Approve Additional/Revise</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">revised_budget_wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{}</field>
+        </record>
+
+        <!--        capital view status start -->
+        <record id="capital_revised_amount_wizard_form_2" model="ir.ui.view">
+            <field name="name">revised_amount_wizard_form</field>
+            <field name="model">revised_budget_wizard</field>
+            <field name="arch" type="xml">
+                <form create="false" delete="false">
+
+                    <style>
+
+                        .table-responsive .o_list_view thead tr:nth-child(1) th{
+                        background-color: rgb(95, 196, 234);
+                        color: #4c4c4c;
+                        }
+
+                    </style>
+                    <group>
+                        <field name="for_new_line" widget="checkbox" attrs="{'readonly': [('pending_at','=', 'Validate')]}"/>
+                        <field name="pending_at" invisible="1"/>
+                        <field name="for_revise_line" widget="checkbox" attrs="{'readonly': [('pending_at','=', 'Validate')]}"/>
+                        <field name="capital_budget_id" readonly="1" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    </group>
+                    <group attrs="{'invisible': ['|', ('for_revise_line','!=', True), ('pending_at','!=', 'L1')]}">
+                        <field name="existing_capital_budget_line_ids" attrs="{'readonly': [('pending_at','=', 'Validate')]}" colspan="4" nolabel="1" readonly="1" >
+                            <tree editable="bottom">
+                                        <field name="name_of_expenses"/>
+                                        <!-- <field name="expense_type"/> -->
+                                        <field name="date_from"/>
+                                        <field name="date_to"/>
+
+                                        <field name="quantity"/>
+                                        <field name="rate_per_quantity" sum="Total Rate" widget="monetary"/>
+                                        <!--  <f_default_financial_yrield name="fiscal_year_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>  -->
+<!--                                        <field name="amount_required" sum="Amount Take" widget="monetary" invisible="1"/>-->
+                                        <!--  <field name="revise_amount"/>
+                                            <field name="spent_amount"/>  -->
+                                        <field name="total_amount" sum="Total Amount" widget="monetary"/>
+                                        <field name="apr_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="may_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jun_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jul_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="aug_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="sep_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="oct_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="nov_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="dec_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jan_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="feb_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="mar_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="next_fy_year" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <!-- <field name="actual_amount" sum="Actual Amount" widget="monetary" /> -->
+                                        <field name="remark" required="1"/>
+                            </tree>
+                        </field>
+                    </group>
+                    <group attrs="{'invisible': [('for_revise_line','!=', True)]}">
+                        <h1>For Revise Capital Budget</h1>
+                        <field name="revised_amount_ids" attrs="{'readonly': [('pending_at','=', 'Validate')]}" colspan="4" nolabel="1" readonly="0">
+                            <tree editable="bottom">
+                                        <field name="expense_id" domain="[('capital_budget_id', '=', parent.capital_budget_id)]" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <!-- <field name="expense_type"/> -->
+                                        <field name="date_from" readonly="0"/>
+                                        <field name="date_to" readonly="0"/>
+
+                                        <field name="quantity"/>
+                                        <field name="rate_per_quantity" sum="Total Rate" widget="monetary"/>
+                                        <field name="total_amount" sum="Total Amount" widget="monetary"/>
+                                        <field name="apr_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="may_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jun_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jul_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="aug_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="sep_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="oct_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="nov_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="dec_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jan_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="feb_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="mar_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="next_fy_year" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <!-- <field name="actual_amount" sum="Actual Amount" widget="monetary" /> -->
+                                        <field name="remark" readonly="0"/>
+                            </tree>
+                        </field>
+
+                    </group>
+                    <group attrs="{'invisible': [('for_new_line','!=', True)]}">
+                        <h1> For Add New Budget Lines.</h1>
+                        <field name="capital_budget_line_ids" attrs="{'readonly': [('pending_at','=', 'Validate')]}" colspan="4" nolabel="1">
+                                    <tree string="Budget Lines" editable="bottom" >
+                                        <field name="budgetary_position_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" invisible="1"/>
+                                        <field name="capital_budget_id" invisible="1"/>
+                                        <field name="name_of_expenses"/>
+                                        <!-- <field name="expense_type"/> -->
+                                        <field name="date_from"/>
+                                        <field name="date_to"/>
+
+                                        <field name="quantity"/>
+                                        <field name="rate_per_quantity" sum="Total Rate" widget="monetary"/>
+                                        <!--  <f_default_financial_yrield name="fiscal_year_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>  -->
+                                        <field name="amount_required" sum="Amount Take" widget="monetary" invisible="1"/>
+                                        <!--  <field name="revise_amount"/>
+                                            <field name="spent_amount"/>  -->
+                                        <field name="total_amount" sum="Total Amount" widget="monetary"/>
+                                        <field name="apr_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="may_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jun_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jul_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="aug_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="sep_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="oct_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="nov_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="dec_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jan_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="feb_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="mar_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="next_fy_year" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <!-- <field name="actual_amount" sum="Actual Amount" widget="monetary" /> -->
+                                        <field name="remark" required="1"/>
+                                        <!--                                        <field name="revised_button_boolean" invisible="0"/>-->
+                                        <field name="approved_button_boolean" invisible="1"/>
+                                        <field name="revised_button_hide_boolean" invisible="1"/>
+                                        <!--                                        <field name="revised_invisible_button" invisible="0"/>-->
+                                        <field name="finance_approved_button_boolean" invisible="1"/>
+                                        <field name="approver_approved_button_boolean" invisible="1"/>
+                                        <field name="approver_reverted_button_boolean" invisible="1"/>
+                                        <field name="edit_button_hide_boolean" invisible="1"/>
+                                        <field name="state" invisible="1"/>
+                                        <field name="account_code_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" invisible="0" groups="kw_budget.group_finance_kw_budget"/>
+                                        </tree>
+                                    <form>
+                                        <group>
+                                            <field name="budgetary_position_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" invisible="1"/>
+                                            <field name="name_of_expenses"/>
+                                            <!-- <field name="expense_type"/> -->
+                                            <field name="date_from"/>
+                                            <field name="date_to"/>
+                                            <field name="quantity"/>
+                                            <field name="rate_per_quantity"/>
+                                            <field name="amount_required" invisible="1"/>
+                                            <field name="total_amount" sum="Total Amount" widget="monetary"/>
+                                            <field name="remark"/>
+                                        </group>
+                                    </form>
+                                </field>
+                    </group>
+
+                    <footer>
+                        <button name="confirm_apply" type="object" string="Confirm" class="btn-success" attrs="{'invisible': [('pending_at','!=', 'L1')]}"/>
+                        <button string="Cancel" class="btn-danger" special="cancel" attrs="{'invisible': [('pending_at','!=', 'L1')]}"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+
+        <record model="ir.actions.act_window" id="action_revised_capital_budget_wizard_status">
+            <field name="name">Capital Budget/View Status/Approve Additional/Revise</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">revised_budget_wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_budget.view_revised_amount_capital_wizard_tree')}), (0, 0, {'view_mode': 'form', 'view_id': ref('kw_budget.capital_revised_amount_wizard_form_2')})]"/>
+            <field name="context">{'take_action_view_status':True, 'create': False, 'delete': False, 'edit': False, 'import':False}</field>
+        </record>
+
+<!--       <record id="action_capital_revised_tree_view_id_2" model="ir.actions.act_window.view">-->
+<!--			<field eval="1" name="sequence"/>-->
+<!--			<field name="view_mode">tree</field>-->
+<!--			<field name="view_id" ref="view_revised_amount_capital_wizard_tree"/>-->
+<!--			<field name="act_window_id" ref="action_revised_capital_budget_wizard_status"/>-->
+<!--		</record>-->
+
+<!--        <record id="action_capital_revised_from_view_id_2" model="ir.actions.act_window.view">-->
+<!--			<field eval="2" name="sequence"/>-->
+<!--			<field name="view_mode">tree</field>-->
+<!--			<field name="view_id" ref="capital_revised_amount_wizard_form"/>-->
+<!--			<field name="act_window_id" ref="action_revised_capital_budget_wizard_status"/>-->
+<!--		</record>-->
+
+<!--        capital view status end-->
+
+        <record id="ir_actions_server_menu_revised_capital_budget_wizard" model="ir.actions.server">
+            <field name="sequence" eval="5"/>
+            <field name="state">code</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="model_revised_budget_wizard"/>
+            <field name="code">action = env.get('revised_budget_wizard').open_take_action_capital_budget_lines()</field>
+            <field name="condition">True</field>
+            <field name="name">Capital Budget</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="revised_amount_wizard_action_window">
+            <field name="name">Revised Amount</field>
+            <field name="res_model">revised_budget_wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="revised_amount_wizard_form" />
+        </record>
+        <!--capital budget view and action-->
+        <record id="view_kw_capital_budget_tree" model="ir.ui.view">
+            <field name="name">kw_capital_budget_tree</field>
+            <field name="model">kw_capital_budget</field>
+            <field name="priority" eval="100"/>
+            <field name="arch" type="xml">
+                <tree string="Budgetary" import="0" delete="false">
+                    <!--  <field name="name"/>  -->
+                    <field name="fiscal_year_id"/>
+                    <field name="create_uid"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                    <field name="department_id"/>
+                    <field name="budget_department"/>
+                    <field name="branch_id"/>
+                    <field name="cb_pending_at" invisible="1"/>
+                    <field name="pending_at_ids" readonly="1" widget="many2many_tags"/>
+                    <field name="state"/>
+                    <field name="approver_head_boolean" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="kw_capital_budget_view_form">
+            <field name="name">kw_capital_budget_view_form</field>
+            <field name="model">kw_capital_budget</field>
+            <field name="priority" eval="100"/>
+            <field name="arch" type="xml">
+                <form string="Budget" delete="false">
+                    <header>
+                        <button name="apply_budget" type="object" states="draft" string="Apply" class="btn btn-success"
+                        />
+                        <button name="open_capital_revise_wizard" type="object"
+                                string="Add Budget Lines/Revise" class="btn btn-success"
+                                groups='kw_budget.group_department_head_kw_budget'
+                                attrs="{'invisible': [('take_action_view_bool','!=', True)]}"
+                                context="{'default_capital_id':id}"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <style>
+                        .table-responsive .o_list_view thead tr:nth-child(1) th{
+                        background-color: rgb(95, 196, 234);
+                        color: #4c4c4c;
+                        }
+
+                    </style>
+                    <sheet string="Budget">
+                        <label for="date_from" string="Period" style="font-size:30px;color:rgb(95, 196, 234);"/>
+                        <h1>
+                            <div>
+                                <field name="date_from" required="1" placeholder="Date from" class="oe_inline" attrs="{'readonly':[('state','!=','draft')]}"/>
+                                -
+                                <field name="date_to"  required="1" placeholder="Date to" class="oe_inline" attrs="{'readonly':[('state','!=','draft')]}" nolabel="1"/>
+                            </div>
+                        </h1>
+                        <group name="main">
+                            <group>
+                                <field name="take_action_view_bool" invisible="1"/>
+                                <field name="fiscal_year_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" attrs="{'readonly': [('state','not in', ['draft'])]}" invisible="1" force_save="1"/>
+                                <field name="create_uid" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="department_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="division_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="section_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="branch_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="approver_head_boolean" invisible="1"/>
+                                <field name="revised_boolean" invisible="1"/>
+                                <field name="capital_revised_finance_approval_boolean" invisible="1"/>
+                                <field name="capital_revised_approver_approval_boolean" invisible="1"/>
+                                <field name="add_expense_line_hide_boolean" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="budget_department" options="{'no_create_edit': True,'no_open':True,'no_create':True}"  attrs="{'readonly': [('state','not in', ['draft','to_approve'])]}" required="1"/>
+                                <field name="budget_dept" attrs="{'invisible':[('budget_dept', '=', False)]}" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="budget_division" attrs="{'invisible':[('budget_division', '=', False)]}" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="budget_section" attrs="{'invisible':[('budget_section', '=', False)]}" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Budget Lines">
+                                <group>
+                                <button string="Export Budget Lines" name="print_capital_report" type="object"
+                                        class="oe_highlight" attrs="{'invisible': [('state','in', ['draft', 'to_approve', 'cancel'])]}"/>
+                                </group>
+                                <field name="capital_budget_line_ids" colspan="4" nolabel="1" attrs="{'readonly': [('state','not in', ['draft'])]}">
+                                    <tree string="Budget Lines" editable="bottom" decoration-warning="state in ['to_approve','confirm','approved','re_apply','re_f_approved']" decoration-danger="state=='cancel'" decoration-success="state in ['validate','draft']">
+                                        <field name="budgetary_position_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" invisible="1"/>
+                                        <field name="capital_budget_id" invisible="1"/>
+                                        <field name="sequence_ref" readonly='1'/>
+                                        <field name="name_of_expenses"/>
+                                        <!-- <field name="expense_type"/> -->
+                                        <field name="date_from"/>
+                                        <field name="date_to"/>
+
+                                        <field name="quantity"/>
+                                        <field name="rate_per_quantity" sum="Total Rate" widget="monetary"/>
+                                        <!--  <f_default_financial_yrield name="fiscal_year_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>  -->
+                                        <field name="amount_required" sum="Amount Take" widget="monetary" invisible="1"/>
+                                        <!--  <field name="revise_amount"/>
+                                            <field name="spent_amount"/>  -->
+                                        <field name="total_amount" sum="Total Amount" widget="monetary"/>
+                                        <field name="apr_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="may_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jun_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jul_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="aug_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="sep_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="oct_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="nov_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="dec_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jan_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="feb_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="mar_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="next_fy_year" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <!-- <field name="actual_amount" sum="Actual Amount" widget="monetary" /> -->
+                                        <field name="remark" required="1"/>
+                                        <!--                                        <field name="revised_button_boolean" invisible="0"/>-->
+                                        <field name="approved_button_boolean" invisible="1"/>
+                                        <field name="revised_button_hide_boolean" invisible="1"/>
+                                        <!--                                        <field name="revised_invisible_button" invisible="0"/>-->
+                                        <field name="finance_approved_button_boolean" invisible="1"/>
+                                        <field name="approver_approved_button_boolean" invisible="1"/>
+                                        <field name="approver_reverted_button_boolean" invisible="1"/>
+                                        <field name="edit_button_hide_boolean" invisible="1"/>
+                                        <field name="state" invisible="1"/>
+                                        <field name="account_code_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" invisible="0" groups='kw_budget.group_finance_kw_budget'/>
+<!--                                        <button name="%(revised_amount_wizard_action_window)d" type="action" string="Revise" class="btn-success" groups='kw_budget.group_department_head_kw_budget'-->
+<!--                                                attrs="{'invisible': [('revised_button_hide_boolean','!=', True)]}" context="{'default_expense_id':id}"/>-->
+<!--                                        <button name="edit_budget_button" type="object" string="Edit" class="btn-warning" groups='kw_budget.group_department_head_kw_budget'-->
+<!--                                                attrs="{'invisible': [('edit_button_hide_boolean','!=', True)]}" context="{'default_capital_expense_id':id}"/>-->
+                                        <!-- <button type="object" name="action_open_budget_entries" string="Entries..."
+                                                icon="fa-arrow-circle-o-right" groups="kw_budget.group_finance_kw_budget,kw_budget.group_manager_kw_budget"/> -->
+                                    </tree>
+                                    <form>
+                                        <group>
+                                            <field name="budgetary_position_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" invisible="1"/>
+                                            <field name="name_of_expenses"/>
+                                            <!-- <field name="expense_type"/> -->
+                                            <field name="date_from"/>
+                                            <field name="date_to"/>
+                                            <field name="quantity"/>
+                                            <field name="rate_per_quantity"/>
+                                            <field name="amount_required" invisible="1"/>
+                                            <field name="total_amount" sum="Total Amount" widget="monetary"/>
+                                            <field name="remark"/>
+                                        </group>
+                                    </form>
+                                </field>
+                            </page>
+                        </notebook>
+                        <!--                        <group>-->
+                        <group string="Revise Budget Action Log">
+                            <field name="revise_budget_action_log_ids" colspan="4" nolabel="1" readonly='1'>
+                                <tree string="Revise Budget Action Log" decoration-danger="revise_budget_status in ['rejected_by_finance','rejected_by_approver']">
+                                    <field name="capital_budget_id" invisible="1"/>
+                                    <field name="date" />
+                                    <field name="name_of_expenses" />
+                                    <field name="amount_required" invisible='1'/>
+                                    <field name="applied_by"/>
+                                    <field name="approver_by"/>
+                                    <field name="state"/>
+                                    <field name="revised_amount"/>
+                                    <field name="total_amount"/>
+                                    <field name="revise_budget_status" invisible="1"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <!--                        </group>-->
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="search_capital_budget" model="ir.ui.view">
+            <field name="name">Search Capital Budget</field>
+            <field name="model">kw_capital_budget</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                    <filter name="fiscalyr_filter" string="Current Financial Year"
+                        domain="[ '|', ('date_from', '>=', context_today().strftime('%Y-01-01')), ('date_to', '>=', context_today().strftime('%Y-01-01'))]"
+                        context="{}" readonly="1"/>
+                    <filter name="prev_fiscalyr_filter" string="Previous Financial Year"
+                            domain="[('date_to', '&gt;=', (datetime.datetime.now() - relativedelta(years=1)).strftime('%Y-%m-%d')),
+                                    ('date_to', '&lt;', datetime.datetime.now().strftime('%Y-%m-%d'))]" context="{}" readonly="1"/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_fiscal_year" string="Financial Year" domain="[]" context="{'group_by':'date_from:year,date_to:year'}" />
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!--  actions opening views on models  -->
+        <record model="ir.actions.act_window" id="kw_capital_budget_act_window">
+            <field name="name">Capital Budget/Create New Budget</field>
+            <field name="res_model">kw_capital_budget</field>
+            <field name="view_mode">tree,form,search</field>
+            <field name="view_type">form</field>
+            <field name="domain">[('create_uid','=',uid)]</field>
+            <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_budget.view_kw_capital_budget_tree')}), (0, 0, {'view_mode': 'form', 'view_id': ref('kw_budget.kw_capital_budget_view_form')})]"/>
+            <field name="context">{'capital_budget_create':1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face"> Click to create a new budget. </p>
+                <p> Use budgets to compare actual with expected revenues and costs </p>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_capital_budget_act_window_action">
+            <field name="name">Capital Budget/Additional/Revise Budget</field>
+            <field name="res_model">kw_capital_budget</field>
+            <field name="view_mode">tree,form,search</field>
+            <field name="view_type">form</field>
+            <field name="domain">[('create_uid','=',uid)]</field>
+            <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_budget.view_kw_capital_budget_tree')}), (0, 0, {'view_mode': 'form', 'view_id': ref('kw_budget.kw_capital_budget_view_form')})]"/>
+            <field name="context">{'take_action_view_bool': 1, 'create': False, 'delete': False, 'edit': False, 'import':False}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face"> Click to create a new budget. </p>
+                <p> Use budgets to compare actual with expected revenues and costs </p>
+            </field>
+        </record>
+
+
+        <record id="kw_capital_budget_take_action_tree" model="ir.ui.view">
+            <field name="name">kw_capital_budget_take_action_tree</field>
+            <field name="model">kw_capital_budget</field>
+            <field name="arch" type="xml">
+                <tree string="Budgetary Position" create="false" delete="false" edit="false" import="false">
+                    <!-- <field name="fiscal_year_id"/> -->
+                    <field name="create_uid" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                    <field name="create_uid"/>
+                    <field name="department_id"/>
+                    <field name="branch_id"/>
+                    <field name="cb_pending_at" invisible="1"/>
+                    <field name="pending_at_ids" readonly="1" widget="many2many_tags"/>
+                    <field name="state"/>
+                    <field name="approver_head_boolean" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="kw_capital_budget_take_action_form">
+            <field name="name">kw_capital_budget_take_action_form</field>
+            <field name="model">kw_capital_budget</field>
+            <field name="arch" type="xml">
+                <form string="Budget" create="false" delete="false" edit="true">
+                    <header>
+                        <button string="Approve" name="action_budget_confirm" confirm="Are you sure, you want to Approve?" type="object" class="oe_highlight" attrs="{'invisible': [('approver_head_boolean', '=', False)]}"/>
+                        <button string="Confirm" name="action_budget_validate" confirm="Are you sure, you want to Confirm?" states="approved" type="object" class="oe_highlight" groups="kw_budget.group_finance_kw_budget"/>
+                        <button string="Confirm" name="action_budget_validate_cfo" confirm="Are you sure, you want to Confirm?" states="cfo" type="object" class="oe_highlight" groups="kw_budget.group_cfo_kw_budget"/>
+                        <button string="Validate" name="action_budget_done" confirm="Are you sure, you want to Validate?" states="confirm" type="object" class="oe_highlight" groups="kw_budget.group_approver_kw_budget"/>
+                        <button string="Reset to Draft" name="action_budget_draft" states="confirm" type="object" class="oe_highlight" groups="kw_budget.group_approver_kw_budget"/>
+                        <button string="Cancel Budget" name="action_budget_cancel" attrs="{'invisible': [('state', '!=', 'confirm')]}" type="object" class="btn-danger" groups="kw_budget.group_approver_kw_budget"/>
+                        <button string="Revert Back" type="action" name="%(kw_budget.action_kw_budget_revert_wizard_main_capital)d" class="oe_highlight" attrs="{'invisible': [('approver_head_boolean', '=', False)]}"/>
+                        <button string="Revert Back" type="action" name="%(kw_budget.action_kw_budget_revert_wizard_main_capital)d" class="oe_highlight" attrs="{'invisible': [('revert_finance', '=', False)]}"/>
+                        <button string="Revert Back" type="action" name="%(kw_budget.action_kw_budget_revert_wizard_main_capital)d" class="oe_highlight" attrs="{'invisible': [('revert_cfo', '=', False)]}"/>
+                        <button string="Revert Back" type="action" name="%(kw_budget.action_kw_budget_revert_wizard_main_capital)d" class="oe_highlight" attrs="{'invisible': [('revert_approver', '=', False)]}"/>
+<!--                        <button string="Revert Back" type="action" name="%(kw_budget.action_kw_budget_revert_wizard_main_capital)d" class="oe_highlight" attrs="{'invisible': [('state', 'in', ('draft', 'validate', 'cancel'))]}"/>-->
+<!--                        <button string="Revert Back" type="action" name="%(kw_budget.action_kw_budget_revert_wizard_main_capital)d" class="oe_highlight" attrs="{'invisible': [('state', 'in', ('draft', 'validate', 'cancel'))]}"/>-->
+<!--                        <button string="Revert Back" type="action" name="%(kw_budget.action_kw_budget_revert_wizard_main_capital)d" class="oe_highlight" attrs="{'invisible': [('state', 'in', ('draft', 'validate', 'cancel'))]}"/>-->
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <style>
+                        .table-responsive .o_list_view thead tr:nth-child(1) th{
+                        background-color: rgb(95, 196, 234);
+                        color: #4c4c4c;
+                        }
+
+                    </style>
+                    <sheet string="Budget">
+                        <label for="date_from" string="Period" style="font-size:30px;color:rgb(95, 196, 234);"/>
+                        <div>
+                            <h1>
+                                <field name="date_from"  required="1" placeholder="Date from" class="oe_inline" attrs="{'readonly':[('state','!=','draft')]}"/>
+                                -
+                                <field name="date_to" required="1" placeholder="Date to" class="oe_inline" attrs="{'readonly':[('state','!=','draft')]}" nolabel="1"/>
+                            </h1>
+                        </div>
+                        <group name="main">
+                            <group>
+                                <!--                                <field name="fiscal_year_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" readonly="1"/>-->
+                                <field name="create_uid" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="department_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" readonly="1"/>
+                                <field name="division_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="section_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="branch_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="approver_head_boolean" invisible="1"/>
+                                <field name="revised_boolean" invisible="1"/>
+                                <field name="revert_finance" invisible="1"/>
+                                <field name="revert_cfo" invisible="1"/>
+                                <field name="revert_approver" invisible="1"/>
+                                <field name="capital_revised_finance_approval_boolean" invisible="1"/>
+                                <field name="capital_revised_approver_approval_boolean" invisible="1"/>
+                                <field name="finance_revert_back_boolean" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="budget_department" required="1" options="{'no_create_edit': True,'no_open':True,'no_create':True}"  attrs="{'readonly': [('state','not in', ['draft'])]}"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Budget Lines">
+                                <field name="capital_budget_line_ids" colspan="4" nolabel="1">
+                                    <tree string="Budget Lines" editable="bottom" decoration-warning="state in ['to_approve','confirm','approved','re_apply','re_f_approved']" delete="false" decoration-danger="state=='cancel'" decoration-success="state in ['validate','draft']">
+                                        <field name="budgetary_position_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" invisible="1"/>
+                                        <field name="capital_budget_id" invisible="1"/>
+                                        <field name="name_of_expenses"/>
+                                        <!-- <field name="expense_type"/> -->
+                                        <field name="date_from"/>
+                                        <field name="date_to"/>
+                                        <field name="quantity"/>
+                                        <field name="rate_per_quantity" widget="monetary" sum="Total Rate"/>
+                                        <field name="amount_required" widget="monetary" sum="Amount Re" invisible="1"/>
+                                        <field name="total_amount" sum="Total Amount" widget="monetary"/>
+                                        <!-- <field name="total_amount" sum="Total Amount" widget="monetary"/> -->
+                                        <field name="apr_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="may_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jun_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jul_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="aug_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="sep_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="oct_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="nov_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="dec_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="jan_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="feb_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="mar_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="next_fy_year" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <!-- <field name="actual_amount" sum="Actual Amount" widget="monetary"/> -->
+                                        <field name="remark"/>
+                                        <field name="revised_attempt_button_visible" invisible="1"/>
+                                        <field name="approved_button_boolean" invisible="1"/>
+                                        <field name="revised_button_hide_boolean" invisible="1"/>
+                                        <!--                                        <field name="revised_button_boolean" invisible="0"/>-->
+                                        <field name="approved_button_boolean" invisible="1"/>
+                                        <field name="revised_button_hide_boolean" invisible="1"/>
+                                        <!--                                        <field name="revised_invisible_button" invisible="0"/>-->
+                                        <field name="finance_approved_button_boolean" invisible="1"/>
+                                        <field name="approver_approved_button_boolean" invisible="1"/>
+                                        <field name="approver_reverted_button_boolean" invisible="1"/>
+                                        <field name="edit_button_hide_boolean" invisible="1"/>
+                                        <field name="state" invisible="1"/>
+                                        <field name="account_code_id" groups="kw_budget.group_finance_kw_budget,kw_budget.group_approver_kw_budget"
+                                               options="{'no_create_edit': True,'no_open':True,'no_create':True}" required="1" invisible="0"
+                                />
+                                        <!--                                        <button name="approve_revised_budget" string="Approve" confirm="Are you sure, you want to Approve?" groups="kw_budget.group_approver_kw_budget" class="btn-success"-->
+                                        <!--                                                attrs="{'invisible': ['|', ('revised_attempt_button_visible','!=', True), ('approved_button_boolean','!=', True)]}" type="object"/>-->
+                                        <!--                                        <button name="reject_revised_budget" string="Reject" confirm="Are you sure, you want to Reject?" groups="kw_budget.group_approver_kw_budget" class="btn-danger"-->
+                                        <!--                                                attrs="{'invisible': ['|', ('revised_attempt_button_visible','!=', True), ('approved_button_boolean','!=', True)]}" type="object"/>-->
+                                        <!-- <button type="object" name="action_open_budget_entries" string="Entries..."
+                                                icon="fa-arrow-circle-o-right" groups="kw_budget.group_finance_kw_budget,kw_budget.group_manager_kw_budget, kw_budget.group_approver_kw_budget"/> -->
+                                        <button name="approve_revised_budget"
+                                                string="Approve"
+                                                groups="kw_budget.group_finance_kw_budget" class="btn-success"
+                                                attrs="{'invisible': [('finance_approved_button_boolean','=', False)]}"
+                                                type="object"/>
+
+                                        <button name="reject_revised_budget"
+                                                string="Reject"
+                                                groups="kw_budget.group_finance_kw_budget" class="btn-danger"
+                                                attrs="{'invisible': [('finance_approved_button_boolean','=', False)]}"
+                                                type="object"/>
+
+                                        <button name="approve_revised_budget"
+                                                string="Approve"
+                                                groups="kw_budget.group_approver_kw_budget" class="btn-success"
+                                                attrs="{'invisible': [('approver_approved_button_boolean','=', False)]}"
+                                                type="object"/>
+
+                                        <button name="reject_revised_budget"
+                                                string="Reject"
+                                                groups="kw_budget.group_approver_kw_budget" class="btn-danger"
+                                                attrs="{'invisible': [('approver_approved_button_boolean','=', False)]}"
+                                                type="object"/>
+
+                                        <button name="revised_data_send_back"
+                                                string="Send Back"
+                                                groups="kw_budget.group_approver_kw_budget" class="oe_highlight"
+                                                attrs = "{'invisible': [('approver_approved_button_boolean','=', False)]}"
+                                                type="object"/>
+                                    </tree>
+                                    <form>
+                                        <group>
+                                            <field name="budgetary_position_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" invisible="1"/>
+                                            <field name="name_of_expenses"/>
+                                            <!-- <field name="expense_type"/> -->
+                                            <field name="date_from"/>
+                                            <field name="date_to"/>
+                                            <field name="quantity"/>
+                                            <field name="rate_per_quantity"/>
+                                            <field name="amount_required" invisible="1"/>
+                                            <field name="total_amount" sum="Total Amount" widget="monetary"/>
+                                            <field name="remark"/>
+                                        </group>
+                                    </form>
+                                </field>
+                            </page>
+                        </notebook>
+                        <!--                        <group>-->
+                        <group string="Revise Budget Action Log">
+                            <field name="revise_budget_action_log_ids" colspan="4" nolabel="1" readonly='1'>
+                                <tree string="Revise Budget Action Log" decoration-danger="revise_budget_status in ['rejected_by_finance','rejected_by_approver']">
+                                    <field name="capital_budget_id" invisible="1"/>
+                                    <field name="date" />
+                                    <field name="name_of_expenses" />
+                                    <field name="amount_required"  invisible="1"/>
+                                    <field name="applied_by"/>
+                                    <field name="approver_by"/>
+                                    <field name="state"/>
+                                    <field name="revised_amount"/>
+                                    <field name="total_amount"/>
+                                    <field name="revise_budget_status" invisible="1"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <!--                        </group>-->
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+        <!--  actions opening views on models  -->
+        <record model="ir.actions.act_window" id="kw_capital_budget_take_action_window">
+            <field name="name">Capital Budget/Budget Approval/Approve New</field>
+            <field name="res_model">kw_capital_budget</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="context">{'take_action_capital_budget':True}</field>
+            <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_budget.kw_capital_budget_take_action_tree')}), (0, 0, {'view_mode': 'form', 'view_id': ref('kw_budget.kw_capital_budget_take_action_form')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face"> Click to create a new budget. </p>
+                <p> Use budgets to compare actual with expected revenues and costs </p>
+            </field>
+        </record>
+        <record id="view_kw_capital_budget_line_tree" model="ir.ui.view">
+            <field name="name">Capital line tree</field>
+            <field name="model">kw_capital_budget_line</field>
+            <field name="arch" type="xml">
+                <tree string="Budgetary">
+                    <field name="name_of_expenses"/>
+                    <field name="amount_required" invisible="1"/>
+                    <field name="revise_amount"/>
+                    <field name="spent_amount"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                    <field name="remark"/>
+                </tree>
+            </field>
+        </record>
+
+         <!-- wizard for split  views on models -->
+         <record id="split_capital_budget_wizard_tree" model="ir.ui.view">
+            <field name="name">split_capital_budget_wizard_tree</field>
+            <field name="model">split_capital_budget_wizard</field>
+            <field name="arch" type="xml">
+                <form string="Budget" create='false' delete='false'>
+                <sheet>
+                <group>
+                    <field name="capital_budget_id" invisible = '1'/>
+                    <!-- <field name="name_of_expenses" /> -->
+                </group>
+                <group string="Exisiting Budget Lines">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Narration</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Date From</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Date To</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Quantity</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Rate per Quantity</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Total Amount</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Apr</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">May</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Jun</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Jul</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Aug</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Sept</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Oct</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Nov</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Dec</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Jan</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Feb</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Mar</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Remarks</td>
+                            <td style="background-color: rgb(95, 196, 234);color: #4c4c4c;">Account Code</td>
+                        </tr>
+                        <tr>
+                            <td><field name="name_of_expenses"/></td>
+                            <td><field name="date_from"/></td>
+                            <td><field name="date_to"/></td>
+                            <td><field name="quantity"/></td>
+                            <td><field name="rate_per_quantity"/></td>
+                            <td><field name="total_amount" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/></td>
+                            <td><field name="apr_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" /></td>
+                            <td><field name="may_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/></td>
+                            <td><field name="jun_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" /></td>
+                            <td><field name="jul_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/></td>
+                            <td><field name="aug_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/></td>
+                            <td><field name="sep_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" /></td>
+                            <td><field name="oct_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" /></td>
+                            <td><field name="nov_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" /></td>
+                            <td><field name="dec_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/></td>
+                            <td><field name="jan_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" /></td>
+                            <td><field name="feb_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" /></td>
+                            <td><field name="mar_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" /></td>
+                             <td><field name="remark"/></td>
+                            <td><field name="account_code_id"/></td>
+                        </tr>
+                    </table>
+                </group>
+                <group string="Split Budget Lines">
+                    <field name="budget_line_ids" nolabel="1">
+                        <tree editable="bottom">
+                            <field name="name_of_expenses" />
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="quantity"/>
+                            <field name="rate_per_quantity" widget="monetary" sum="Total Rate"/>
+                            <field name="total_amount" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                            <field name="apr_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" />
+                            <field name="may_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                            <field name="jun_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" />
+                            <field name="jul_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                            <field name="aug_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                            <field name="sep_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" />
+                            <field name="oct_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" />
+                            <field name="nov_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" />
+                            <field name="dec_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                            <field name="jan_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" />
+                            <field name="feb_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" />
+                            <field name="mar_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" />
+                            <field name="remark"  required='1'/>
+                            <field name="account_code_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"
+                                    groups="kw_budget.group_finance_kw_budget,kw_budget.group_approver_kw_budget" required='1'/>
+                        </tree>
+                    </field>
+                </group>
+                </sheet>
+                <footer>
+                    <button name="split_capital_budget" confirm="Are you sure, you want to Split Budget?" type="object" string="Split" class="btn-success"/>
+                    <button string="Cancel" class="btn-danger" special="cancel"/>
+                </footer>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="split_capital_budget_wizard_action_window">
+            <field name="name">Capital Budget Updated</field>
+            <field name="res_model">split_capital_budget_wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_type">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="split_capital_budget_wizard_tree" />
+        </record>
+
+        <!--        capital budget view status -->
+        <record id="kw_capital_view_tree" model="ir.ui.view">
+            <field name="name">kw_capital_view_tree</field>
+            <field name="model">kw_capital_budget</field>
+            <field name="arch" type="xml">
+                <tree string="Budgetary Position" create="false" delete="false" edit="false" import="false">
+                    <!--  <field name="name"/>  -->
+                    <!-- <field name="fiscal_year_id"/> -->
+                    <field name="create_uid" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                    <field name="create_uid"/>
+                    <field name="department_id"/>
+                    <field name="budget_department"/>
+                    <field name="branch_id"/>
+                    <field name="cb_pending_at" invisible="1"/>
+                    <field name="pending_at_ids" readonly="1" widget="many2many_tags"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="kw_capital_budget_view_status_form">
+            <field name="name">kw_capital_budget_view_status_form</field>
+            <field name="model">kw_capital_budget</field>
+            <field name="arch" type="xml">
+                <form string="Budget" create="false" delete="false" >
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                        <button string="Generate ID" name="action_capital_budget_generate_id" confirm="Are you sure, you want to Generate id?"  type="object"  class="btn-success" groups="kw_budget.group_finance_kw_budget" />
+                    </header>
+                    <style>
+                        .table-responsive .o_list_view thead tr:nth-child(1) th{
+                        background-color: rgb(95, 196, 234);
+                        color: #4c4c4c;
+                        }
+
+                    </style>
+                    <sheet string="Budget">
+                        <label for="date_from" string="Period" style="font-size:30px;color:rgb(95, 196, 234);"/>
+                        <div>
+                            <h1>
+                                <field name="date_from" placeholder="Date from" class="oe_inline" attrs="{'readonly':[('state','!=','draft')]}"/>
+                                -
+                                <field name="date_to" placeholder="Date to" class="oe_inline" attrs="{'readonly':[('state','!=','draft')]}" nolabel="1"/>
+                            </h1>
+                        </div>
+                        <group name="main">
+                            <group>
+                                <!--                                <field name="fiscal_year_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" readonly="1"/>-->
+                                <field name="create_uid" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="department_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" readonly="1"/>
+                                <field name="division_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="section_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="branch_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="revised_boolean" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="budget_department" required="1" options="{'no_create_edit': True,'no_open':True,'no_create':True}" readonly ='1'/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Budget Lines">
+                                <field name="capital_budget_line_ids" colspan="4" nolabel="1">
+                                    <tree string="Budget Lines" editable="bottom" delete='false'>
+                                        <field name="budgetary_position_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" invisible="1"/>
+                                        <field name="capital_budget_id" invisible="1"/>
+                                         <field name="sequence_ref" readonly ='1'/>
+                                        <field name="name_of_expenses" readonly ='1'/>
+                                        <!-- <field name="expense_type"/> -->
+                                        <field name="date_from" readonly ='1'/>
+                                        <field name="date_to" readonly ='1'/>
+                                        <field name="quantity" readonly ='1'/>
+                                        <field name="rate_per_quantity" sum="Total Rate" widget="monetary" readonly ='1'/>
+                                        <field name="amount_required" sum="Amount Re" widget="monetary" invisible="1"/>
+                                        <field name="total_amount" sum="Total Amount" widget="monetary" readonly ='1'/>
+                                        <!-- <field name="total_amount" sum="Total Amount" widget="monetary"/> -->
+                                        <field name="apr_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" readonly ='1'/>
+                                        <field name="may_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" readonly ='1'/>
+                                        <field name="jun_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" readonly ='1'/>
+                                        <field name="jul_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" readonly ='1'/>
+                                        <field name="aug_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" readonly ='1'/>
+                                        <field name="sep_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" readonly ='1'/>
+                                        <field name="oct_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" readonly ='1'/>
+                                        <field name="nov_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" readonly ='1'/>
+                                        <field name="dec_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" readonly ='1'/>
+                                        <field name="jan_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" readonly ='1'/>
+                                        <field name="feb_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" readonly ='1'/>
+                                        <field name="mar_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" readonly ='1'/>
+                                        <field name="next_fy_year" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary" readonly ='1'/>
+                                        <!-- <field name="actual_amount" sum="Actual Amount" widget="monetary" /> -->
+                                        <field name="remark" readonly ='1'/>
+                                        <field name="hide_split_button_boolean" invisible="1"/>
+                                        <field name="revised_attempt_button_visible" invisible="1"/>
+                                        <field name="account_code_id" required="1" invisible="0" options="{'no_create_edit': True,'no_open':True,'no_create':True}"
+                                               groups="kw_budget.group_finance_kw_budget,kw_budget.group_approver_kw_budget"/>
+                                        <!-- <button type="object" name="action_open_budget_entries" string="Entries..."
+                                                icon="fa-arrow-circle-o-right" groups="kw_budget.group_finance_kw_budget,kw_budget.group_manager_kw_budget,kw_budget.group_approver_kw_budget"/> -->
+                                         <button type="action"  name="%(split_capital_budget_wizard_action_window)d"  string="Split"  class="btn-success"  groups="kw_budget.group_finance_kw_budget"  attrs="{'invisible': [('hide_split_button_boolean','=', True)]}"/>
+                                    </tree>
+                                    <form>
+                                        <group>
+                                            <field name="budgetary_position_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" invisible="1"/>
+                                            <field name="name_of_expenses"/>
+                                            <!-- <field name="expense_type"/> -->
+                                            <field name="date_from"/>
+                                            <field name="date_to"/>
+                                            <field name="quantity"/>
+                                            <field name="rate_per_quantity"/>
+                                            <field name="amount_required" invisible="1"/>
+                                            <field name="total_amount" sum="Total Amount" widget="monetary"/>
+                                            <field name="remark"/>
+                                        </group>
+                                    </form>
+                                </field>
+                            </page>
+                        </notebook>
+                        <group>
+                            <group string="Revise Budget Action Log">
+                                <field name="revise_budget_action_log_ids" colspan="4" nolabel="1" readonly='1'>
+                                    <tree string="Revise Budget Action Log" decoration-danger="revise_budget_status in ['rejected_by_finance','rejected_by_approver']">
+                                        <field name="capital_budget_id" invisible="1"/>
+                                        <field name="name_of_expenses" />
+                                        <field name="total_amount"/>
+                                        <field name="approver_by"/>
+                                        <field name="amount_required"  invisible="1" />
+                                        <field name="revised_amount"/>
+                                        <field name="revise_budget_status" invisible="1"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <!--  actions opening views on models  -->
+        <record model="ir.actions.act_window" id="kw_capital_budget_view_window">
+            <field name="name">Capital Budget/View Status</field>
+            <field name="res_model">kw_capital_budget</field>
+            <field name="view_mode">tree,form,search</field>
+            <field name="view_type">form</field>
+            <field name="domain">[('state', '!=', 'draft')]</field>
+            <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_budget.kw_capital_view_tree')}), (0, 0, {'view_mode': 'form', 'view_id': ref('kw_budget.kw_capital_budget_view_status_form')})]"/>
+            <field name="context">{'view_status_capital_budget': 1}</field>
+        </record>
+
+
+
+
+        <record id="view_kw_capital_budget_line_tree" model="ir.ui.view">
+            <field name="name">kw_capital_budget_line</field>
+            <field name="model">kw_capital_budget_line</field>
+            <field name="arch" type="xml">
+                <tree string="Capital Budget Report" editable="bottom">
+                    <field name="name_of_expenses"/>
+                    <!-- <field name="expense_type"/> -->
+                    <field name="total_amount"/>
+                    <!-- <field name="actual_amount" readonly="1" sum="total"/> -->
+                    <field name="remark" />
+                    <field name="account_code_id"  invisible="0" options="{'no_open':True}"/>
+                </tree>
+            </field>
+        </record>
+
+        <!--        add line capital budget expense view-->
+        <record model="ir.ui.view" id="kw_capital_budget_form_new_line">
+            <field name="name">kw_capital_budget_form_new_line_form</field>
+            <field name="model">kw_capital_budget</field>
+            <field name="arch" type="xml">
+                <form string="Budget">
+                    <group>
+                        <field name="capital_budget_line_ids" colspan="4" nolabel="1">
+                            <tree string="Budget Lines" editable="bottom">
+                                <field name="budgetary_position_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" invisible="1"/>
+                                <field name="capital_budget_id" invisible="1"/>
+                                <field name="name_of_expenses"/>
+                                <!-- <field name="expense_type"/> -->
+                                <field name="date_from"/>
+                                <field name="date_to"/>
+                                <field name="quantity"/>
+                                <field name="rate_per_quantity" sum="Total Rate" widget="monetary"/>
+                                <field name="amount_required" sum="Amount Re" widget="monetary" invisible="1"/>
+                                <field name="total_amount" sum="Total Amount" widget="monetary"/>
+                                <field name="total_amount" sum="Total Amount" widget="monetary"/>
+                                <field name="apr_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                <field name="may_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                <field name="jun_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                <field name="jul_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                <field name="aug_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                <field name="sep_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                <field name="oct_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                <field name="nov_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                <field name="dec_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                <field name="jan_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                <field name="feb_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                <field name="mar_budget" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                <field name="next_fy_year" sum="Total" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                <field name="remark"/>
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="budgetary_position_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" invisible="1"/>
+                                    <field name="name_of_expenses"/>
+                                    <!-- <field name="expense_type"/> -->
+                                    <field name="date_from"/>
+                                    <field name="date_to"/>
+                                    <field name="quantity"/>
+                                    <field name="rate_per_quantity"/>
+                                    <field name="amount_required" invisible="1"/>
+                                    <field name="total_amount" sum="Total Amount" widget="monetary"/>
+                                    <field name="remark"/>
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <footer>
+                        <button name="capital_revised_add_line_submit" type="object" string="Confirm" class="btn-success"/>
+                        <button string="Cancel" class="btn-danger" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+    </data>
+</odoo>

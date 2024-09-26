@@ -1,0 +1,159 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <record id="view_stock_quant_inherited_tree" model="ir.ui.view">
+            <field name="name">stock.quant.tree</field>
+            <field name="model">stock.quant</field>
+            <field name="inherit_id" ref="stock.view_stock_quant_tree" />
+            <field name="mode">primary</field>
+            <field name="arch" type="xml">
+                <xpath expr="//tree/field[@name='lot_id']" position="after">
+                    <field name="is_issued"/>
+                    <!-- <field name="serial_type"/> -->
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_stock_quant_inherited_form" model="ir.ui.view">
+            <field name="name">stock.quant.form</field>
+            <field name="model">stock.quant</field>
+            <field name="inherit_id" ref="stock.view_stock_quant_form" />
+            <field name="mode">primary</field>
+            <field name="arch" type="xml">
+                <xpath expr="//form/sheet/group/group/field[@name='lot_id']" position="after">
+                    <field name="is_issued" readonly='1'/>
+                    <!-- <field name="serial_type" readonly='1'/> -->
+                </xpath>
+            </field>
+        </record>
+
+        
+        
+    <!-- Material Master -->
+   
+        <record id="kw_stock_master_action_window" model="ir.actions.act_window">
+            <field name="name">Stock Master</field>
+            <field name="res_model">stock.quant</field>
+            <field name="view_mode">tree,form,pivot,graph</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('stock.view_stock_quant_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('stock.view_stock_quant_form')})]"/>
+            <field name="context">{'search_default_internal_loc': 1, 'search_default_locationgroup':1}</field>
+            <field name="domain">[]</field> 
+        </record>
+  
+
+    <record id="view_production_lot_tree_inherited" model="ir.ui.view">
+        <field name="name">stock.production.lot.tree</field>
+        <field name="model">stock.production.lot</field>
+        <field name="arch" type="xml">
+            <tree string="Lots/Serial Numbers">
+                <field name="name"/>
+                <field name="ref"/>
+                <field name="material_type" />
+                <field name="product_id"/>
+                <field name="product_name" />
+                <field name="create_date"/>
+                <field name="product_uom_id"/>
+                <field name="quant_ids"/>
+                <field name="product_qty"/>
+                <field name="employee_id" />
+                <field name="is_grn" />
+                <field name="is_asset" />
+                <field name="is_issued" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_production_lot_form_inherited" model="ir.ui.view">
+        <field name="name">stock.production.lot.form</field>
+        <field name="model">stock.production.lot</field>
+        <field name="arch" type="xml">
+            <form string="Lots/Serial Numbers">
+                <sheet>
+                <div class="oe_button_box" name="button_box">
+                    <button class="oe_stat_button" name="action_view_po"
+                        type="object" icon="fa-shopping-cart" attrs="{'invisible': [('purchase_order_count', '=', 0)]}" help="Purchase Orders">
+                        <div class="o_field_widget o_stat_info">
+                            <span class="o_stat_value">
+                                <field name="purchase_order_count" widget="statinfo" nolabel="1" class="mr4"/>
+                            </span>
+                            <span class="o_stat_text">Purchase Orders</span>
+                        </div>
+                    </button>
+                    <button name="%(stock.lot_open_quants)d" icon="fa-arrows" class="oe_stat_button" string="Locate" type="action"/>
+                    <button name="%(stock.action_stock_report)d" icon="fa-arrow-up" class="oe_stat_button" string="Traceability Report" type="action"/>
+                </div>
+                <div class="oe_title">
+                    <label for="name" class="oe_edit_only"/>
+                    <h1>
+                        <field name="name" placeholder="e.g. LOT/0001/20121"/>
+                    </h1>
+                </div>
+                <group name="main_group">
+                    <group>
+                        <field name="material_type" />
+                        <field name="product_id" help="Product this lot/serial number contains. You cannot change it anymore if it has already been moved."/>
+                        <field name="product_name" />
+                            <label for="product_qty"/>
+                            <div class="o_row">
+                                <field name="product_qty"/>
+                                <field name="product_uom_id"/>
+                            </div>
+                    </group>
+                    <group>
+                        <field name="employee_id" />
+                        <field name="is_grn" />
+                        <field name="is_asset" />
+                        <field name="is_issued" />
+                        <field name="ref"/>
+                        <field name="create_date"/>
+                    </group>
+                    <br></br><br></br>
+                        <field name="quant_ids"/>
+                </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_production_lot_form_inherited" model="ir.actions.act_window">
+        <field name="name">Lots/Serial Master</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">stock.production.lot</field>
+        <field name="view_ids"
+                   eval="[(5, 0, 0),
+                          (0, 0, {'view_mode': 'tree', 'view_id': ref('view_production_lot_tree_inherited')}),
+                          (0, 0, {'view_mode': 'form', 'view_id': ref('view_production_lot_form_inherited')})]"/>
+        <field name="search_view_id" ref="stock.search_product_lot_filter"/>
+        <field name="context">{'search_default_group_by_product': 1}</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Add a lot/serial number
+          </p><p>
+            This is the list of all the production lots you recorded. When
+            you select a lot, you can get the traceability of the products contained in lot.
+          </p>
+        </field>
+    </record>
+
+    <menuitem action="action_production_lot_form_inherited" id="menu_action_production_lot_form_inherited"
+        parent="kw_inventory.kw_purchase_master" 
+        sequence="4"/>
+
+
+
+    <menuitem
+        id="menu_stock_master"
+        sequence="3"
+        name="Stock Master"
+        parent="kw_inventory.kw_purchase_master"
+        action="kw_stock_master_action_window"/>
+
+    </data>
+</odoo>

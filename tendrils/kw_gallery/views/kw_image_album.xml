@@ -1,0 +1,204 @@
+<odoo>
+	<!-- actions views Opening-->
+	<record id="kw_image_albums_actions_window" model="ir.actions.act_window">
+		<field name="name">My Album</field>
+		<field name="res_model">kw_image_albums</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">kanban,tree,form</field>
+		<field name="domain">[("status", "in", ["1","2",'3']),('create_uid','=',uid)]</field>
+		<field name="context">{'show_button': False}</field>
+
+		<field name="help" type="html">
+			<p class="o_view_nocontent_smiling_face">
+				Add an album ...
+			</p><p>
+			This is the view of all the albums that you were created..
+		</p>
+		</field>
+	</record>
+	<!-- actions views Ending-->
+
+	<!-- explicit tree view definition Opening -->
+	<record model="ir.ui.view" id="kw_image_album_tree">
+		<field name="name">kw album tree</field>
+		<field name="model">kw_image_albums</field>
+		<field name="arch" type="xml">
+			<tree>
+				<field name="category_name"/>
+				<field name="name"/>
+				<field name="description"/>
+				<field name="no_of_pictures"/>
+				<field name="status"/>
+			</tree>
+		</field>
+	</record>
+	<!-- explicit tree view definition Opening -->
+
+	<!-- explicit form view definition Opening -->
+	<record model="ir.ui.view" id="kw_image_album_form">
+		<field name="name">kw album form </field>
+		<field name="model">kw_image_albums</field>
+		<field name="arch" type="xml">
+			<form>
+				<header>
+					<button name="post_album" attrs="{'invisible':['|',('status', '=','2'),('status', '=','3')]}" string="Post" status="1" class="oe_highlight oe_read_only" type="object" />
+					<button name="keep_in_draft_album" attrs="{'invisible':['|',('status', '=','1'),('status', '=','3')]}" string="Keep in draft" status="2" class="oe_highlight oe_read_only" type="object"/>
+					<!-- <button name="p" type="object" string="Delete"/>    -->
+					<field name="status" widget="statusbar" />
+				</header>
+				<sheet>
+					<!-- <div class="oe_button_box" name="button_box">
+						<button name="upload_image" type="object" class="oe_stat_button" icon="fa-upload">
+							Upload Images &#x2063;
+						</button>
+					</div> -->
+					<group>
+						<group name="group-left">
+							<field name="category_name" required="1" options="{'no_open': True,'no_create': True, 'no_edit': True}"/>
+							<field name="name" required="1"/>
+						</group>
+					</group>
+					<group>
+						<field name="description" />
+						<field name="no_of_pictures" readonly="1"/>
+					</group>
+					<button name="get_upload_images"  string="Upload Images"  type="object"  class="oe_highlight"/>
+					<notebook>
+						<page string='Pictures'>
+
+							<div>
+
+								<button name="btn_demo" type="object" string="Publish All"
+										invisible="not context.get('show_button', True)" class="oe_highlight"/>&amp;nbsp;&amp;nbsp;
+
+								<button name="unpublish_image" type="object" string="Unpublish All"
+										invisible="not context.get('show_button', True)" class="oe_highlight"/>
+							</div>
+
+
+							<field name="gallery_id">
+
+								<tree>
+									<field name="image" widget="image"
+										   options="{'preview_image': 'image', 'size': [50, 50]}"/>
+									<field name="video"/>
+									<field name="title"/>
+									<field name="image_status"/>
+									<button name="unpublish_image" invisible="not context.get('show_button', True)"
+											attrs="{'invisible':[('image_status', '=','2')]}" string="Unpublish"
+											image_status="1" class="oe_highlight" type="object"/>
+									<button name="publish_image" invisible="not context.get('show_button', True)"
+											attrs="{'invisible':[('image_status', '=','1')]}" string="Publish"
+											image_status="2" class="oe_highlight" type="object"/>
+
+								</tree>
+							</field>
+
+						</page>
+					</notebook>
+				</sheet>
+			</form>
+		</field>
+	</record>
+	<!-- explicit form view definition Ending -->
+
+	<record id="kw_image_album_form_inherit" model="ir.ui.view">
+		<field name="name">kw album form inherit</field>
+		<field name="model">kw_image_albums</field>
+		<field name="inherit_id" ref="kw_gallery.kw_image_album_form"/>
+		<field name="arch" type="xml">
+			<form position="attributes">
+				<attribute name="duplicate">0</attribute>
+			</form>
+		</field>
+	</record>
+
+	<!-- explicit kanabn view definition Opening -->
+	<record model="ir.ui.view" id="kw_action_website_kanban">
+		<field name="name"> Kw Gallery kanban</field>
+		<field name="model">kw_image_albums</field>
+		<field name="arch" type="xml">
+			<kanban>
+				<field name="id"/>
+				<field name="category_name"/>
+				<field name="name"/>
+				<field name="description"/>
+				<field name="no_of_pictures"/>
+				<field name="create_uid"/>
+				<field name="create_date"/>
+				<field name="color" />
+				<templates>
+					<t t-name="kanban-box">
+						<div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click">
+							<div class="o_kanban_record_top">
+								<div class="o_kanban_record_headings">
+									<h4 style="display: inline-block;width:180px;white-space: nowrap;overflow: hidden !important;text-overflow: ellipsis;">
+										<i class='fa fa-folder text-primary'></i>
+										<b aria-label="Album name" title="Album name"> <t t-esc="record.name.value"/></b>
+									</h4>
+									<h6>
+										<i class="fa fa-list-alt text-primary" role="img"/>
+										<b aria-label="Category name" title="Category name"> <t t-esc="record.category_name.value"/></b>
+									</h6>
+								</div>
+								<h3 aria-label="Current status" title="Current status"><field name="status" widget="label_selection" options="{'classes': {'1': 'danger', '3': 'success', '2': 'info'}}"/></h3>
+							</div>
+							<div class="o_kanban_record_bottom">
+								<div class="oe_kanban_bottom_left">
+									<span aria-label="Created on" title="Created on"><i class="fa fa-clock-o" role="img"/> <t t-esc="record.create_date.value"/></span>
+								</div>
+								<div class="oe_kanban_bottom_right">
+									<span aria-label="Created by" title="Created by"><i class="fa fa-user" style='margin-right:5px;' role="img"/><t t-esc="record.create_uid.value"/></span>
+								</div>
+							</div>
+						</div>
+					</t>
+				</templates>
+			</kanban>
+		</field>
+	</record>
+	<!-- explicit kanban view definition Ending -->
+
+	<record id="kw_image_album_search_view" model="ir.ui.view">
+		<field name="name">Kw category search</field>
+		<field name="model">kw_image_albums</field>
+		<field name="arch" type="xml">
+			<search string="Search Developers">
+				<field name="name" string = "Album name"/>
+				<field name="status" string = "Status"/>
+				<field name="description" string = "Description"/>
+				<field name="category_name" string = "Category name"/>
+				<filter string="Published albums" name="status" domain="[('status','=','3')]" />
+				<filter string="UnPublished albums" name="status" domain="[('status','=','2')]" />
+				<group expand="1" string="Group By">
+					<filter string="Created by" name="create_uid" context="{'group_by':'create_uid'}"/>
+					<filter string="Status" name="status" context="{'group_by':'status'}"/>
+				</group>
+			</search>
+		</field>
+	</record>
+
+
+	<!--	Wizard view for Upload Many Images-->
+	<record id="kw_upload_many_images_form" model="ir.ui.view">
+		<field name="name">Upload Image</field>
+		<field name="model">kw_upload_images_wizard</field>
+		<field name="type">form</field>
+		<field name="arch" type="xml">
+			<form string="Upload Images">
+				<sheet>
+					<group>
+						<field name="image_ids" widget="many2many_binary"/>
+						<field name="gallery_id" invisible="1"/>
+						<field name="title"/>
+					</group>
+				</sheet>
+				<footer>
+					<button string='Submit' name="upload_image" type="object" class="btn-primary"/>
+					<button string="Cancel" class="btn-danger" special="cancel"/>
+				</footer>
+			</form>
+		</field>
+	</record>
+
+</odoo>

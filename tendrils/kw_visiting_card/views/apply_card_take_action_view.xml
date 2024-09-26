@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="kw_apply_card_take_action_tree_view" model="ir.ui.view">
+            <field name="model">kw_visiting_card_apply</field>
+            <field name="arch" type="xml">
+                <tree import="false" create="false" edit="false" delete="false" default_order='create_date desc'>
+                    <field name="emp_name"/>
+                    <!-- <field name="emp_code" /> -->
+                    <field name="applied_date"/>
+                    <field name="date_when_required"/>
+                    <field name="no_of_cards_required"/>
+                    <field name="manager_access" invisible="1"/>
+                    <field name="ra_access" invisible="1"/>
+                    <!-- <field name="pending_time"/> -->
+                    <field name="state"/>
+                    <!-- <field name="to_be_taken_by" /> -->
+                    <button name="button_take_action" string="Take Action" class="oe_highlight " type="object"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_apply_card_take_action_form_view" model="ir.ui.view">
+            <field name="model">kw_visiting_card_apply</field>
+            <field name="arch" type="xml">
+                <form string="" create="false" action="false" delete="false">
+                    <script>
+                        $(document).ready(function(){
+                            status=  $("[aria-pressed=true]").text().trim();
+                           console.log(status);
+                            if ( !(status === 'Applied' || status === 'Approved'))
+                            {
+                                $('.o_form_button_edit').hide();
+                            }
+
+                        });
+                    </script>
+                    <header>
+                        <field name="state"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="visiting_card_for" widget="radio" options="{'horizontal': true}"/>
+                                <field name="emp_name" attrs="{'invisible': [('visiting_card_for','=','self')]}"
+                                       domain='[("parent_id.user_id","in",[uid])]'
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="manager_access" invisible="1"/>
+                                <field name="ra_access" invisible="1"/>
+                                <field name="applied_date"/>
+                                <field name="date_when_required"/>
+                                <field name="no_of_cards_required"/>
+                                <field name="remark"/>
+                                <field name="admin_remark" groups="kw_visiting_card.group_kw_visiting_card_user"
+                                       attrs="{'invisible': ['&amp;',('state','!=','Approved'),'&amp;',('state','!=','Send for Printing'),'&amp;',('state','!=','Delivered'),'&amp;',('state','!=','Hold'),('state','!=','Rejected')]}"/>
+                            </group>
+                            <group>
+                                <field name="card_details"/>
+                            </group>
+                            <group>
+                                <field name="action_count" invisible="1"/>
+                                <field name="action_ids" attrs="{'invisible': [('action_count','=', False)]}"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_apply_card_take_action_act_window" model="ir.actions.act_window">
+            <field name="name">Take Action</field>
+            <field name="res_model">kw_visiting_card_apply</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="search_view_id" ref="kw_apply_card_search_view"/>
+            <field name="context">{"ra_access_check": 1,}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_apply_card_take_action_tree_view')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_apply_card_take_action_form_view')})]"/>
+            <field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					No visiting card Application...
+				</p>
+			</field>
+        </record>
+        <menuitem id="kw_visiting_apply_take_action_menu"
+                  action="kw_apply_card_take_action_act_window"
+                  name="Take Action"
+                  parent="kw_visiting_card_parent_menu"
+                  sequence="3"/>
+    </data>
+</odoo>

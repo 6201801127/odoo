@@ -1,0 +1,154 @@
+<odoo>
+    <data>
+        <!-- Local visit take action list view -->
+        <record model="ir.ui.view" id="kw_lv_take_action_list">
+            <field name="name">Local Visit take action</field>
+            <field name="model">kw_lv_apply</field>
+            <field name="arch" type="xml">
+                <tree string="Local Visit take action Form" import='false' decoration-muted="state=='rejected'" create='0' edit='0' delete='0'>
+                    <field name="emp_name"/>
+                    <field name="visit_category"/>
+                    <field name="visit_date"/>
+                    <field name="expected_in_time"/>
+                    <field name="out_time"/>
+                    <field name="actual_in_time"/>
+                    <field name="state" invisible="1"/>
+                    <field name="ra_access" invisible="1"/>
+                    <field name="status" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Local visit take action form view -->
+        <record model="ir.ui.view" id="kw_lv_take_action_form">
+            <field name="name">Local Visit take action</field>
+            <field name="model">kw_lv_apply</field>
+            <field name="arch" type="xml">
+                <form string="Local Visit take action Form" create='false' delete='false' duplicate='false'>
+                <field name="status" invisible="1"/>
+                <field name="compute_price" invisible='1'/>
+                <field name="stage_id" invisible="1"/>
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="lv_for" readonly='1' invisible="1" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="applied_by" readonly='1' attrs="{'invisible':[('lv_for', 'in',['self'])]}"/>
+                                <field name="emp_name" readonly='1' options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string='Visit Details'>
+                                <field name="ra_access" invisible="1"/>
+                                <field name="office_details" invisible='1'/>
+                                <field name="visit_details" invisible="1"/>
+                                <field name="auto_calculation" invisible='1'/>
+                                <field name="visit_category" readonly='1' options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="business_ids" readonly='1' attrs="{'invisible':[('visit_details', 'in',['no',False])]}" context="{'form_view_ref':'kw_local_visit.kw_lv_business_form2'}">
+                                    <tree>
+                                        <field name="activity_name" />
+                                        <field name="sub_category" />
+                                        <field name="visit_for" />
+                                        <field name="crm_id" />
+                                        <field name="purpose" />
+                                        <field name="location" />
+                                        <field name="meeting_id"/>
+                                    </tree>
+                                </field>
+                                <field name="location" readonly='1' attrs="{'invisible':[('visit_details', '=', 'yes')]}"/>
+                                <field name="organization_name" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly='1' attrs="{'invisible': ['|',('visit_details', '=', 'yes'),('office_details','in',['no',False])]}"/>
+                                <field name="contact_person" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly='1' attrs="{'invisible': ['|',('visit_details', '=', 'yes'),('office_details','in',['no',False])]}"/>
+                                <field name="purpose" readonly='1' attrs="{'invisible':[('visit_details', '=', 'yes')]}"/>
+                                <field name="visit_date" readonly='1'/>
+                            </group>
+                            <group string='Office Out &amp; In Details'>
+                                <field name="visit_date" readonly='1' invisible='1'/>
+                                <field name="expected_in_time" readonly='1'/>
+                                <field name="out_time" readonly='1'/>
+                                <field name="actual_in_time" readonly='1'/>
+                                <field name="vehicle_arrange" readonly='1' widget="radio" options="{'horizontal': true}"/>
+                                <field name="vehicle_out_time" readonly='1' attrs="{'invisible': [('vehicle_arrange','=','own')]}"/>
+                                <field name="vehicle_in_time" readonly='1' attrs="{'invisible': [('vehicle_arrange','=','own')]}"/>
+                                <field name="intimate_to" readonly='1' options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="visiting_with" readonly='1' widget="radio" options="{'horizontal': true}" />
+                                <field name="parent_lv_ids" string='Group Employees' readonly='1' attrs="{'invisible': [('visiting_with','=','individual')]}" options="{'no_open': True,'no_create':True,'no_edit':True}">
+                                    <tree>
+                                        <field name="emp_name" style="pointer-events:none;"/>
+                                        <field name="out_time" style="pointer-events:none;"/>
+                                        <field name="actual_in_time" style="pointer-events:none;"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                        <group>
+                            <group string='Vehicle Details'>
+                                <field name="vehicle_type" readonly='1' options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="total_km" attrs="{'readonly': [('state','not in',['applied'])]}"/>
+                                <field name="price" force_save="1" attrs="{'readonly': ['|',('auto_calculation','=',True),('state','not in',['applied'])]}"/>
+                            </group>
+                            <group string='Remarks'>
+                                <field name="remarks" string='Office In Remark' readonly='1'/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="kw_lv_take_action_search" model="ir.ui.view">
+            <field name="name">Local Visit take action</field>
+            <field name="model">kw_lv_apply</field>
+            <field name="arch" type="xml">
+                <search>
+                    <filter string="Visit Date" name="visit_date" date="visit_date"/>
+                    <separator/>
+                    <!-- SEARCH -->
+                    <field name="emp_name"/>
+                    <field name="applied_by"/>
+                    <!-- GROUP BY -->
+                    <group expand="0" string="Group By">
+                        <!-- <filter string="Visit Status" name="visit_status" context="{'group_by':'status'}"/> -->
+                        <filter string="Visit Category" name="visit_category" context="{'group_by':'visit_category'}"/>
+                        <!-- <filter string="Visit Date" name="visit_date" context="{'group_by':'visit_date'}"/> -->
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Local visit take_action actions window -->
+        <record model="ir.actions.act_window" id="kw_lv_take_action_act_window_new">
+            <field name="name">Local Visit Take Action</field>
+            <field name="res_model">kw_lv_apply</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">['&amp;',('state', 'in', ['applied']),'|','&amp;',('emp_name.parent_id.user_id', '=', uid),('second_approver_bool', '=', False),
+                '&amp;',('second_approver_bool', '=', True),('emp_name.parent_id.parent_id.user_id', '=', uid)]</field>
+            <!-- <field name="domain">['&amp;',('state', 'in', ['applied']),'|','|',
+                            '&amp;','&amp;',('emp_name.parent_id.user_id', '=', uid),('emp_name.coach_id', '=', False),('second_approver_bool', '=', False),
+                            '&amp;','&amp;',('emp_name.coach_id.user_id', '=', uid),('emp_name.coach_id', '!=', False),('second_approver_bool', '=', False),
+                            '&amp;',('second_approver_bool', '=', True),('emp_name.parent_id.parent_id.user_id', '=', uid)]</field> -->
+            <field name="search_view_id" ref="kw_lv_take_action_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No take action local visit(s) Here...
+                </p>
+            </field>
+        </record>
+
+        <record id="action_kw_lv_apply_take_action_act_window_view_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kw_lv_take_action_list"/>
+            <field name="act_window_id" ref="kw_lv_take_action_act_window_new"/>
+        </record>
+
+        <record id="action_kw_lv_apply_take_action_act_window_view_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="kw_lv_take_action_form"/>
+            <field name="act_window_id" ref="kw_lv_take_action_act_window_new"/>
+        </record>
+
+    </data>
+</odoo>

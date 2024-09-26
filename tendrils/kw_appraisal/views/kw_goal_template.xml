@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <template id="kw_goal_template" name="Goal">
+            <t t-call="website.layout">
+                <div class="wrap">
+                    <div class="container mb-3">
+                        <div class="row ">
+                            <div class="col-sm-12 mx-auto">
+                                <div class="card mt-3">
+                                    <div class="card-header text-uppercase font-weight-bold text-center white-text ">
+                                    goal status
+                                    </div>
+                                    <div class="card-body ">
+                                        <div class="col-sm-12">
+                                            <div class="">
+                                                <div class="mb-3 float-left logedin-user">
+                                                    <img t-attf-src="data:image_small/*;base64,{{emp_id.image_small}}"/>
+                                                    <div class="info">
+                                                        <p class="m-0 font-weight-bold h4">
+                                                            <span t-esc="emp_id.name+ ' ('+ emp_id.emp_code +')' "/>
+                                                        </p>
+                                                        <p class="m-0 badge badge-pill badge-primary">
+                                                            <span t-esc="emp_id.job_id.name"/>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <span class="col-sm-4 p-0 text-danger font-weight-bold font-italic small pull-right text-right"> * indicate mandatory fields </span>
+                                            </div>
+                                            <div class="clearfix"/>
+                                            <form id="goal_form" name="goal_form" t-att-action="'/kw/goal/submit/'" method="post">
+                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                <input type="hidden" name="goal_survey" id="goal_survey" t-att-value="survey_id"/>
+                                                <input type="hidden" name="appraisal_year" id="appraisal_year" t-att-value="appraisal_year"/>
+                                                <input type="hidden" name="employee_name" id="employee_name" t-att-value="employee_name"/>
+                                                <input type="hidden" name="empl_id" id="empl_id" t-att-value="empl_id"/>
+                                                <input type="hidden" name="token" id="token" t-att-value="token"/>
+                                                <input type="hidden" name="goal_data_vals" id="goal_data_vals" t-att-value="goal_data_vals"/>
+                                                <input type="hidden" name="manager_record" id="manager_record" t-att-value="manager_record"/>
+                                                <input type="hidden" name="collaborator_record" id="collaborator_record" t-att-value="collaborator_record"/>
+
+                                                <div t-if="goal_data_vals">
+                                                    <h6 class="alert alert-info al text-dark">Goal Accomplishment : Please update the status of previous goals set by clicking against the appropriate milestones.</h6>
+                                                    <t t-foreach="goal_data_vals" t-as="goals">
+                                                        <div class="form-group">
+                                                            <label class="text-uppercase" for="goal_name_vals">Goal :</label>
+                                                            <br/>
+                                                            <span t-esc="goals.name" class="col-md-12" id="goal_name_vals" name="goal_name_vals" readonly="1"/>
+                                                        </div>
+                                                        <div class="form-group row ml-0">
+                                                            <label class="text-uppercase">Milestones :</label>
+                                                            <div t-foreach="goals.milestone_id" t-as="milestones" class="row col-sm-12" style="left: 1%;">
+                                                                <div class="funkyradio">
+                                                                    <div class="funkyradio-primary">
+                                                                        <t t-if="milestones.status and not manager_record and not collaborator_record">
+                                                                            <input type="checkbox" checked="checked" t-att-id="milestones.id" t-att-name="milestones.id"/>
+                                                                        </t>
+                                                                        <t t-if="not milestones.status and not manager_record and not collaborator_record">
+                                                                            <input type="checkbox" t-att-id="milestones.id" t-att-name="milestones.id"/>
+                                                                        </t>
+                                                                        <t t-if="milestones.status and manager_record or milestones.status and collaborator_record">
+                                                                            <input type="checkbox" checked="checked" t-att-id="milestones.id" t-att-name="milestones.id" onclick="return false"/>
+                                                                        </t>
+                                                                        <t t-if="not milestones.status and manager_record or not milestones.status and collaborator_record">
+                                                                            <input type="checkbox" t-att-id="milestones.id" t-att-name="milestones.id" onclick="return false"/>
+                                                                        </t>
+                                                                        <label t-att-for="milestones.id" t-raw="milestones.name" class="milestone_label" t-if="not manager_record and not collaborator_record"/>
+                                                                        <label t-raw="milestones.name" class="milestone_label" t-if="manager_record or collaborator_record"/>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </t>
+                                                </div>
+                                                
+                                                <h6 class="alert alert-info al text-dark mb-4">Goal Plan : Please set goals for the next appraisal period along with the milestones.</h6>
+                                                <t t-foreach="current_goal_data_vals" t-as="currevt_goals">
+                                                    <div class="md-form">
+                                                        <input t-att-value="currevt_goals.name" class="form-control col-md-12 goal_name" type="text" id="goal_name" name="goal_name" required="true"/>
+                                                        <label for="goal_name" class="font-weight-bold "><span class="text-uppercase">Goal </span><span class="text-danger">*</span>
+                                                         <span class="text-danger font-italic small font-weight-bold">(Project/Functional goals, Individual goals, On the job development goals)</span>
+
+                                                        </label>
+                                                    </div>
+                                                    <div class="md-form row ml-0">
+                                                        <div class="col-lg-6 col-md-6 col-sm-12 pl-0 pr-4">
+                                                            <input class="form-control" type="text" id="milestone_name" name="milestone_name"/>
+                                                            <label for="milestone_name" class="font-weight-bold text-uppercase">Milestones <span class="text-danger">*</span>
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-lg-4 col-md-6 col-sm-12 pl-0">
+                                                            <input class="form-control" type="text" readonly="1" id="milestone_date" name="milestone_date" placeholder="Target Date"/>
+                                                        </div>
+                                                        <button type="button" id="addRow" class="btn badge btn-primary "> Add </button>
+                                                    </div>
+                                                  
+                                                    <div class="table-responsive">
+                                                        <table class="table table-hover table-bordered miltable table-sm mt-5 mb-5" id="miltable">
+                                                            <thead class="thead-orange">
+                                                                <tr>
+                                                                    <th scope="col" class="" width="50%">Milestone </th>
+                                                                    <th scope="col" class="" width="40%">Target Date </th>
+                                                                    <th class="text-right" width="5%">
+                                                                        <i class="fa fa-edit" style="font-size: large;"/>
+                                                                    </th>
+                                                                    <th class="text-right" width="5%">
+                                                                        <i class="fa fa-trash" style="font-size: large;"/>
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr t-foreach="currevt_goals.milestone_id" t-as="curreny_milestones">
+                                                                    <td t-raw="curreny_milestones.name"/>
+                                                                    <td t-if="curreny_milestones.milestone_date" t-esc="time.strftime('%d-%b-%Y', time.strptime(str(curreny_milestones.milestone_date),'%Y-%m-%d'))"/>
+                                                                    <td t-else=""/>
+                                                                    <td class="text-right">
+                                                                        <i class="fa fa-edit edit_row text-right" style="font-size: large;" name="edit_record"/>
+                                                                    </td>
+                                                                    <td class="text-right">
+                                                                        <i class="fa fa-trash chkboxes text-right" style="font-size: large;" name="record"/>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="md-form">
+                                                        <label class="black-text">Need Training (if any) : <span class="text-danger">*</span>
+                                                        </label>
+                                                        <textarea class="md-textarea form-control" t-if="currevt_goals.training" t-field="currevt_goals.training" id="training" name="training" type="text"/>
+                                                        <textarea class="md-textarea form-control" t-if="not currevt_goals.training" id="training" name="training" type="text"/>
+                                                    </div>
+                                                    <t t-foreach="manager_record" t-as="manager" t-if="manager.partner_id.id == request.env.user.partner_id.id">
+                                                        <label>LM Score : <span class="text-danger">*</span>
+                                                        </label>
+                                                        <select class="form-control lm required mb-2" t-if="not currevt_goals.lm_score" id="score">
+                                                            <option disabled="1" selected="1">Select</option>
+                                                            <option value="Ignorant">Ignorant</option>
+                                                            <option value="Learner">Learner</option>
+                                                            <option value="Practitioner">Practitioner</option>
+                                                            <option value="Expert">Expert</option>
+                                                            <option value="Role Model">Role Model</option>
+                                                        </select>
+                                                        <select class="form-control lm mb-2" id="score" t-if="currevt_goals.lm_score">
+                                                            <option t-att-selected="'Ignorant'==currevt_goals.lm_score" value="Ignorant">Ignorant</option>
+                                                            <option t-att-selected="'Learner'==currevt_goals.lm_score" value="Learner">Learner</option>
+                                                            <option t-att-selected="'Practitioner'==currevt_goals.lm_score" value="Practitioner">Practitioner</option>
+                                                            <option t-att-selected="'Expert'==currevt_goals.lm_score" value="Expert">Expert</option>
+                                                            <option t-att-selected="'Role Model'==currevt_goals.lm_score" value="Role Model">Role Model</option>
+                                                        </select>
+                                                        <div class="md-form">
+                                                            <label class="black-text">LM Remark : <span class="text-danger">*</span>
+                                                            </label>
+                                                            <textarea class="md-textarea form-control" t-if="currevt_goals.lm_remarks" t-field="currevt_goals.lm_remarks" id="lm_remark" name="lm_remark" type="text"/>
+                                                            <textarea class="md-textarea form-control" t-if="not currevt_goals.lm_remarks" id="lm_remark" name="lm_remark" type="text" required="true"/>
+                                                        </div>
+                                                        <t t-foreach="current_goal_data_vals" t-as="current_goals" t-if="current_goals.ulm_remarks">
+                                                            <div class="md-form">
+                                                                <label class="black-text">ULM Remark :</label>
+                                                                <textarea t-field="current_goals.ulm_remarks" id="ulm_remark" name="ulm_remark" class="md-textarea form-control" type="text" readonly="1"/>
+                                                            </div>
+                                                        </t>
+                                                    </t>
+                                                    <t t-foreach="collaborator_record" t-as="collaborator" t-if="collaborator.partner_id.id == request.env.user.partner_id.id">
+                                                        <t t-foreach="current_goal_data_vals" t-as="current_goals">
+                                                            <label>LM Score :</label>
+                                                            <input type="text" id="score" t-att-value="current_goals.lm_score" class="form-control" readonly="1"/>
+                                                            <div class="md-form">
+                                                                <label class="black-text">LM Remark :</label>
+                                                                <textarea t-field="current_goals.lm_remarks" id="lm_remark" name="lm_remark" class="md-textarea form-control" type="text" readonly="1"/>
+                                                            </div>
+                                                        </t>
+                                                        <div class="md-form">
+                                                            <label class="black-text">ULM Remark : <span class="text-danger">*</span>
+                                                            </label>
+                                                            <textarea t-if="currevt_goals.ulm_remarks" t-field="currevt_goals.ulm_remarks" id="ulm_remark" name="ulm_remark" class="md-textarea form-control" type="text"/>
+                                                            <textarea t-if="not currevt_goals.ulm_remarks" id="ulm_remark" name="ulm_remark" class="md-textarea form-control" type="text" required="true"/>
+                                                        </div>
+                                                    </t>
+                                                </t>
+                                                <div t-if="not current_goal_data_vals">
+                                                    <div class="md-form">
+                                                        <input class="form-control col-md-12 goal_name" type="text" id="goal_name" name="goal_name" required="true"/>
+                                                       <label for="goal_name" class="font-weight-bold "><span class="text-uppercase">Goal </span><span class="text-danger">*</span>
+                                                         <span class="text-danger font-italic small font-weight-bold">(Project/Functional goals, Individual goals, On the job development goals)</span>
+
+                                                        </label>
+                                                    </div>
+                                                    <div class="md-form row ml-0">
+                                                        <div class="col-lg-6 col-md-6 col-sm-12 pl-0 pr-4">
+                                                            <input class="form-control" type="text" id="milestone_name" name="milestone_name"/>
+                                                            <label for="milestone_name" class="font-weight-bold text-uppercase">Milestones <span class="text-danger">*</span>
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-lg-4 col-md-6 col-sm-12 pl-0">
+                                                            <input class="form-control" type="text" readonly="1" id="milestone_date" name="milestone_date" placeholder="Target Date"/>
+                                                        </div>
+                                                        <button type="button" id="addRow" class="btn badge btn-primary "> Add </button>
+                                                    </div>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-hover table-bordered table-sm miltable" id="miltable">
+                                                            <thead class="thead-orange">
+                                                                <tr>
+                                                                    <th width="50%">Milestone </th>
+                                                                    <th width="40%">Target Date </th>
+                                                                    <th class="text-right" width="5%">
+                                                                        <i class="fa fa-edit" style="font-size: large;"/>
+                                                                    </th>
+                                                                    <th class="text-right" width="5%">
+                                                                        <i class="fa fa-trash" style="font-size: large;"/>
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody/>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="md-form" t-if="not current_goal_data_vals">
+                                                    <label class="black-text">Need Training (if any) : <span class="text-danger">*</span>
+                                                    </label>
+                                                    <textarea class="md-textarea form-control" id="training" name="training" type="text" required="true"/>
+                                                </div>
+                                                <div class="text-center">
+                                                    <button type="button" id="save_draft" class="btn badge btn-primary">Save as Draft</button>
+                                                    <button type="submit" id="submit_button" class="btn badge btn-info">Next Page</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+        <template id="kw_survey_assets_goal" inherit_id="kw_appraisal.kw_goal_template">
+            <xpath expr="." position="inside">
+                <link href="/kwantify_theme/static/src/mdb/css/mdb.min.css?v=12" rel="stylesheet"/>
+                <script type="text/javascript" src="/kw_appraisal/static/src/js/kw_goal.js?v=12"/>
+                <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous"/>
+                <link href="/kw_appraisal/static/src/css/front_style.css?v=12" rel="stylesheet"/>
+                <style>
+                    table.table.table-bordered tbody tr:hover { background-color: #d1ecf1;}
+                </style>
+                <script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js?v=12"/>
+                <script type="text/javascript" src="/kw_appraisal/static/src/lib/sweetalert_new.js?v=12"/>
+            </xpath>
+        </template>
+    </data>
+</odoo>

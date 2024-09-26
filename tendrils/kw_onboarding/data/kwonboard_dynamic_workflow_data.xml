@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="kwonboard_dynamic_workflow_main" model="odoo.workflow">
+            <field name="name">Employee On-boarding Workflow</field>
+            <field name="activities_add" eval="True"/>
+            <field name="followers_add" eval="False"/>
+            <field name="mail_thread_add" eval="False"/>
+            <field name="remove_default_attrs_mod" eval="False"/>
+            <field name="model_id" ref="kw_onboarding.model_kwonboard_enrollment"/>
+        </record>
+
+        <record id="kwonboard_dynamic_workflow_node_1" model="odoo.workflow.node">
+            <field name="name">Enrolled</field>
+            <field name="workflow_id" ref="kwonboard_dynamic_workflow_main"/>
+            <field name="node_name">1</field>
+            <field name="sequence" eval="1"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_start" eval="True"/>
+        </record>
+        <record id="kwonboard_send_enroll_mail" model="odoo.workflow.node.button">
+            <field name="sequence" eval="16"/>
+            <field name="workflow_id" ref="kwonboard_dynamic_workflow_main"/>
+            <field name="name">Send Invitation</field>
+            <field name="node_id" ref="kwonboard_dynamic_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|', ('state', '!=', '1'), '&amp;', ('check_officer', '=', True), ('check_manager', '=', False)]"/>
+            <field name="need_confirm" eval="True"/>
+            <field name="confirm_msg">Are you sure, you want to send invitation?</field>
+            <!-- <field name="btn_hide_group" eval="group_kw_onboarding_manager"/> -->
+            <field name="condition_code">
+if user.has_group("kw_onboarding.group_kw_onboarding_manager") or user.has_group("kw_onboarding.group_kw_onboarding_officer"):
+    result = True
+else:
+    warning("Only Onboarding Manager/Officer can take action !")
+    result = False
+                </field>
+                <field name="action_type">code</field>
+                <field name="code">
+obj.send_invitation()
+                </field>
+                <field name="btn_class">btn-success</field>
+        </record>
+        <record id="kwonboard_dynamic_workflow_node_2" model="odoo.workflow.node">
+            <field name="name">Profile Submitted</field>
+            <field name="workflow_id" ref="kwonboard_dynamic_workflow_main"/>
+            <field name="node_name">2</field>
+            <field name="sequence" eval="2"/>
+            <field name="is_visible" eval="True"/>
+        </record>
+        <record id="kwonboard_dynamic_workflow_node_3" model="odoo.workflow.node">
+            <field name="name">Configuration</field>
+            <field name="workflow_id" ref="kwonboard_dynamic_workflow_main"/>
+            <field name="node_name">3</field>
+            <field name="sequence" eval="3"/>
+            <field name="is_visible" eval="False"/>
+        </record>
+        <record id="kwonboard_dynamic_workflow_node_4" model="odoo.workflow.node">
+            <field name="name">Configured</field>
+            <field name="workflow_id" ref="kwonboard_dynamic_workflow_main"/>
+            <field name="node_name">4</field>
+            <field name="sequence" eval="4"/>
+            <field name="is_visible" eval="True"/>
+        </record>
+        <record id="kwonboard_dynamic_workflow_node_5" model="odoo.workflow.node">
+            <field name="name">Authenticated</field>
+            <field name="workflow_id" ref="kwonboard_dynamic_workflow_main"/>
+            <field name="node_name">5</field>
+            <field name="sequence" eval="5"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+        <record id="kwonboard_dynamic_workflow_node_6" model="odoo.workflow.node">
+            <field name="name">Rejected</field>
+            <field name="workflow_id" ref="kwonboard_dynamic_workflow_main"/>
+            <field name="node_name">6</field>
+            <field name="sequence" eval="6"/>
+            <field name="is_visible" eval="False"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+             
+        <record id="kwonboard_dynamic_workflow_button_1" model="odoo.workflow.node.button">
+            <field name="sequence" eval="10"/>
+            <field name="workflow_id" ref="kwonboard_dynamic_workflow_main"/>
+            <field name="name">Submit for Configuration</field>
+            <field name="node_id" ref="kwonboard_dynamic_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|','|','|','|', ('state', '!=', '2'), ('check_admin', '=', False), ('check_it', '=', False), ('check_finance', '=', False),('check_rcm_onboard','=',False)]"/>
+            <field name="need_confirm" eval="True"/>
+            <field name="confirm_msg">Are you sure, you want to submit?</field>
+            <!-- <field name="btn_hide_group" eval="group_kw_onboarding_manager"/> -->
+            <field name="condition_code">
+if obj.system_configuration:
+    result = True
+else :
+    warning("Please choose the required configurations")
+    result = False
+                </field>
+                <field name="action_type">code</field>
+                <field name="code">
+obj.complete_env_mapping()
+                </field>
+                <field name="btn_class">btn-success</field>
+        </record>
+
+        <record id="kwonboard_dynamic_workflow_button_2" model="odoo.workflow.node.button">
+            <field name="sequence" eval="11"/>
+            <field name="workflow_id" ref="kwonboard_dynamic_workflow_main"/>
+            <field name="name">Submit Admin Settings</field>
+            <field name="node_id" ref="kwonboard_dynamic_workflow_node_3"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('check_admin','=',False),'|',('admin_setting_status', '=',True),'|',('user_grp_id_card', '=',False),('state', '!=', '3')]"/>
+            <field name="need_confirm" eval="True"/>
+            <field name="confirm_msg">Are you sure, you want to submit?</field>
+            <!-- <field name="btn_hide_group" eval="group_kw_onboarding_admin,group_kw_onboarding_manager"/> -->
+            <field name="condition_code">
+if user.has_group("kw_onboarding.group_kw_onboarding_admin") or user.has_group("kw_onboarding.group_kw_onboarding_manager"):
+    result = True
+else :
+    warning("You are not authorized user to take action. ")
+    result = False
+                </field>
+                <field name="action_type">code</field>
+                <field name="code">
+obj.complete_admin_setting()
+                </field>
+                <field name="btn_class">btn-success</field>
+        </record>
+
+        <record id="kwonboard_dynamic_workflow_button_3" model="odoo.workflow.node.button">
+            <field name="sequence" eval="12"/>
+            <field name="workflow_id" ref="kwonboard_dynamic_workflow_main"/>
+            <field name="name">Submit IT Settings</field>
+            <field name="node_id" ref="kwonboard_dynamic_workflow_node_3"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('check_it','=',False),'|',('display_nsa_btn', '=', False),('state', '!=', '3')]"/>
+            <field name="need_confirm" eval="True"/>
+            <field name="confirm_msg">Are you sure, you want to submit?</field>
+            <!-- <field name="btn_hide_group" eval="group_kw_onboarding_nsa,group_kw_onboarding_manager"/> -->
+            <field name="condition_code">
+if user.has_group("kw_onboarding.group_kw_onboarding_nsa") or user.has_group("kw_onboarding.group_kw_onboarding_manager"):
+    result = True
+else:
+    warning("Only IT user can take action !")
+    result = False
+                </field>
+                <field name="action_type">code</field>
+                <field name="code">
+obj.complete_nsa_setting()
+                </field>
+                <field name="btn_class">btn-success</field>
+        </record>
+        
+        <record id="kwonboard_dynamic_workflow_button_4" model="odoo.workflow.node.button">
+            <field name="sequence" eval="13"/>
+            <field name="workflow_id" ref="kwonboard_dynamic_workflow_main"/>
+            <field name="name">Submit Finance Settings</field>
+            <field name="node_id" ref="kwonboard_dynamic_workflow_node_3"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('check_finance','=',False),'|',('user_grp_budget', '=',False),'|',('finance_setting_status', '=', True),('state', '!=', '3')]"/>
+            <field name="need_confirm" eval="True"/>
+            <field name="confirm_msg">Are you sure, you want to submit?</field>
+            <!-- <field name="btn_hide_group" eval="group_kw_onboarding_finance,group_kw_onboarding_manager"/> -->
+            <field name="condition_code">
+if user.has_group("kw_onboarding.group_kw_onboarding_finance") or user.has_group("kw_onboarding.group_kw_onboarding_manager"):
+    result = True
+else:
+    warning("Only IT User/HR Manager can take action !")
+    result = False
+                </field>
+                <field name="action_type">code</field>
+                <field name="code">
+obj.complete_finance_setting()
+                </field>
+                <field name="btn_class">btn-success</field>
+        </record>
+        <record id="kwonboard_dynamic_workflow_button_8" model="odoo.workflow.node.button">
+            <field name="sequence" eval="14"/>
+            <field name="workflow_id" ref="kwonboard_dynamic_workflow_main"/>
+            <field name="name">Submit RCM Settings</field>
+            <field name="node_id" ref="kwonboard_dynamic_workflow_node_3"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('check_rcm_onboard','=',False),'|',('user_grp_sbu', '=',False),'|',('rcm_setting_status', '=', True),('state', '!=', '3')]"/>
+            <field name="need_confirm" eval="True"/>
+            <field name="confirm_msg">Are you sure, you want to submit?</field>
+            <!-- <field name="btn_hide_group" eval="group_kw_onboarding_finance,group_kw_onboarding_manager"/> -->
+            <field name="condition_code">
+if user.has_group("kw_onboarding.group_kw_onboarding_rcm"):
+    result = True
+else:
+    warning("Only RCM user/HR Manager can take action !")
+    result = False
+                </field>
+                <field name="action_type">code</field>
+                <field name="code">
+obj.complete_rcm_setting()
+                </field>
+                <field name="btn_class">btn-success</field>
+        </record>
+
+        <record id="kwonboard_dynamic_workflow_button_5" model="odoo.workflow.node.button">
+            <field name="sequence" eval="15"/>
+            <field name="workflow_id" ref="kwonboard_dynamic_workflow_main"/>
+            <field name="name">Authenticate</field>
+            <field name="node_id" ref="kwonboard_dynamic_workflow_node_4"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|', ('state', '!=', '4'), ('check_manager', '=', False)]"/>
+            <field name="need_confirm" eval="True"/>
+            <field name="confirm_msg">Are you sure, you want to authenticate?</field>
+            <!-- <field name="btn_hide_group" eval="group_kw_onboarding_manager"/> -->
+            <field name="condition_code">
+if user.has_group("kw_onboarding.group_kw_onboarding_manager") or user.has_group("kw_onboarding.group_kw_onboarding_officer"):
+    result = True
+else:
+    warning("Only Onboarding Manager/Officer can take action !")
+    result = False
+                </field>
+                <field name="action_type">code</field>
+                <field name="code">
+obj.make_enrole_to_employee()
+                </field>
+                <field name="btn_class">btn-success</field>
+        </record>
+
+        <record id="kwonboard_dynamic_workflow_button_6" model="odoo.workflow.node.button">
+            <field name="sequence" eval="16"/>
+            <field name="workflow_id" ref="kwonboard_dynamic_workflow_main"/>
+            <field name="name">Reject</field>
+            <field name="node_id" ref="kwonboard_dynamic_workflow_node_6"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('state', 'in', ['5', '6']), '&amp;', ('check_manager', '=', False), ('check_officer', '=', False)]"/>
+            <field name="need_confirm" eval="True"/>
+            <field name="confirm_msg">Are you sure, you want to reject?</field>
+            <field name="condition_code">
+if user.has_group("kw_onboarding.group_kw_onboarding_manager") or user.has_group("kw_onboarding.group_kw_onboarding_officer"):
+    result = True
+else:
+    warning("Only Onboarding Manager/Officer can take action !")
+    result = False
+                </field>
+                <field name="action_type">code</field>
+                <field name="code">
+obj.reject_enroll()
+                </field>
+                <field name="btn_class">btn-danger</field>
+        </record>
+
+    </data>
+</odoo>

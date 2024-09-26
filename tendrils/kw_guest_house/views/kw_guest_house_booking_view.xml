@@ -1,0 +1,268 @@
+<odoo>
+  <data>
+    <record model="ir.ui.view" id="kw_guest_house_booking_list">
+      <field name="name">kw_guest_house_booking_admin_list</field>
+      <field name="model">kw_guest_house_booking</field>
+      <field name="arch" type="xml">
+        <tree decoration-muted="(state in ('approved') and check_manager_boolean)">
+          <field name="booking_id"/>
+          <field name="requested_by_id"/>
+          <field name="country_id"/>
+          <field name="guest_house_id"/>
+          <field name="room_type"/>
+          <field name="room_id" attrs="{'invisible':[('check_manager_boolean', '=', False), ('state', 'in', ['draft', 'applied'])]}"/>
+          <field name="booking_type" attrs="{'invisible':['|', ('room_type', '=', 'single'), '&amp;', ('check_manager_boolean', '=', False), ('state', 'in', ['draft', 'applied'])]}"/>
+          <field name="check_in_date_time"/>
+          <field name="check_out_date_time"/>
+          <field name="pending_at" widget='many2many_tags' options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}"/>
+          <field name="state"/>
+          <button name="button_feedback" string="Feedback" type="object" class="btn btn-primary" attrs="{'invisible':[('feedback_button_access_boolean', '=', False)]}"/>
+          <field name="check_manager_boolean" invisible="1"/>
+          <field name="feedback_button_access_boolean" invisible="1"/>
+        </tree>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="kw_guest_house_booking_form">
+      <field name="name">kw_guest_house_booking_admin_form</field>
+      <field name="model">kw_guest_house_booking</field>
+      <field name="arch" type="xml">
+        <form>
+          <header>
+            <field name="state" widget="statusbar"/>
+            <button name="button_applied" string="Apply" type="object" class="btn btn-primary" states='draft' groups="kw_guest_house.guest_house_user_group" confirm="Are you sure to apply ?"/>
+            <button name="button_cancelled" string="Cancel" type="object" class="btn btn-danger" groups="kw_guest_house.guest_house_user_group" attrs="{'invisible':[('user_cancel_boolean', '=', False)]}"/>
+            <button name="button_approved" string="Approve" type="object" class="btn btn-success" attrs="{'invisible': [('manager_approve_reject_boolean', '=', False), ('manager_approve_cancel_boolean', '=', False)]}"/>
+            <button name="button_rejected" string="Reject" type="object" class="btn btn-danger" attrs="{'invisible': [('manager_approve_reject_boolean', '=', False)]}"/>
+          </header>
+          <sheet>
+            <div class="parent-container" style="display: flex; justify-content: space-between;">
+              <div style="display: inline-block;">
+                <div class="oe_title" style="display: inline-block;">
+                  <label for="number" string="Booking ID" style="font-size:30px;color:rgb(95, 196, 234);"/>
+                  <h1>
+                    <field name="booking_id" nolabel="1"/>
+                  </h1>
+                </div>
+              </div>
+              <div class="oe_title warnings" style="display: inline-block; align-self: flex-end;">
+                <p style='color:red; font-weight:bold; margin-bottom:0' attrs="{'invisible':[('show_warning_for_single', '=', False)]}">**There is no single type rooms in the Guest House.</p>
+                <p style='color:red; font-weight:bold; margin-bottom:0' attrs="{'invisible':[('show_warning_for_double', '=', False)]}">**There is no double type rooms in the Guest House.</p>
+              </div>
+            </div>
+            <group col='2'>
+              <group>
+                <field name="requested_by_id" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}" required="1"/>
+                <field name="company_id" invisible="1" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}"/>
+                <field name="guest_type" attrs="{'readonly':[('state', '!=', 'draft')]}" options="{'horizontal':True}" widget="radio"/>
+                <field name="tour_ref_id" context="{'by_code':1}" options="{'always_reload': True, 'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}"  attrs="{'readonly':[('state', '!=', 'draft')], 'invisible':[('guest_type', 'in', ['new_joinee', 'guest', 'admin'])], 'required':[('guest_type', 'in', ['self', 'team'])]}" position="attributes">
+                    <attribute name="context">{'tree_view_ref': 'kw_guest_house.kw_tour_custom_list'}</attribute>
+                </field>
+                <!-- <field name="other_employee_ids" attrs="{'readonly':[('state', '!=', 'draft')], 'invisible':[('guest_type', '!=', 'team')], 'required':[('guest_type', '=', 'team')]}" widget="many2many_tags" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}" domain = "[('id','!=',requested_by_id)]"/> -->
+                <field name="no_of_guests" attrs="{'readonly':[('state', '!=', 'draft')], 'invisible':[('guest_type', '!=', 'guest')], 'required':[('guest_type', '=', 'guest')]}" widget="integer"/>
+                <field name="requesting_for_id"  attrs="{'readonly':[('state', '!=', 'draft')], 'invisible':[('guest_type', 'not in', ['admin'])], 'required':[('guest_type', 'in', ['admin'])]}" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}"/>
+                <field name="requesting_for" attrs="{'readonly':[('state', '!=', 'draft')], 'invisible':[('guest_type', 'not in', ['new_joinee'])], 'required':[('guest_type', 'in', ['new_joinee'])]}"/>
+                <field name="user_to_notify_ids" attrs="{'readonly':[('state', '!=', 'draft')], 'invisible':[('guest_type', 'not in', ['new_joinee'])], 'required':[('guest_type', 'in', ['new_joinee'])]}" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}" widget='many2many_tags'/>
+                <field name="description"  attrs="{'readonly':[('state', '!=', 'draft')], 'invisible':[('guest_type', 'in', ['self', 'team'])], 'required':[('guest_type', 'in', ['guest', 'new_joinee', 'admin'])]}"/>
+                <field name="country_id" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}" required="1"  attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                <field name="state_id" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}" required="1"  attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                <field name="city_id" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}" required="0"  attrs="{'readonly':[('state', '!=', 'draft')]}" invisible="1"/>
+                <field name="check_in_date_time" required="1"  attrs="{'readonly':[('check_manager_boolean', '=', False), ('state', '!=', 'draft')]}"/>
+                <field name="check_out_date_time" required="1"  attrs="{'readonly':[('check_manager_boolean', '=', False), ('state', '!=', 'draft')]}"/>
+              </group>
+              <group>
+                <field name="guest_house_id" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}"  attrs="{'readonly':[('state', '!=', 'draft')]}" required="1"/>
+                <field name="guest_house_address"/>
+                <field name="contact_person_1" attrs="{'invisible': [('contact_person_1', '=', False)]}"/>
+                <field name="contact_person_2" attrs="{'invisible': [('contact_person_2', '=', False)]}"/>
+                <field name="facilities_ids" widget='many2many_tags' required="1"/>
+                <field name="room_type" required="1" attrs="{'readonly':[('check_manager_boolean', '=', False), ('state', '!=', 'draft')]}"/>
+                <field name="booking_type" options="{'horizontal':True}" widget="radio" attrs="{'invisible':['|', '|', ('room_type', '=', 'single'), ('room_type', '=', False), '&amp;', ('check_manager_boolean', '=', False), ('state', 'in', ['draft', 'applied'])], 'readonly':[('check_manager_boolean', '=', False), ('state', '!=', 'draft')], 'required':[('check_manager_boolean', '=', True)]}"/>
+                <field name="available_room_ids" widget="many2many_tags" invisible="1"/>
+                <field name="room_id" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}" domain = "[('id', 'in', available_room_ids)]" attrs="{'invisible':[('guest_house_auto_access_boolean', '=', False), ('guest_house_manual_access_boolean', '=', False)], 'readonly':[('check_manager_boolean', '=', False), ('state', '!=', 'draft')]}"/> 
+                <field name="remarks" attrs="{'readonly':[('state', '!=', 'draft')]}" required="1"/>
+
+                <field name="test_css" invisible="1"/>
+                <field name="check_manager_boolean" invisible="1"/>
+                <field name="user_cancel_boolean" invisible="1"/>
+                <field name="manager_approve_reject_boolean" invisible="1"/>
+                <field name="manager_approve_cancel_boolean" invisible="1"/>
+                <field name="show_table_boolean_manager" invisible="1"/>
+                <field name="show_table_boolean_user" invisible="1"/>
+                <field name="guest_house_auto_access_boolean" invisible="1"/>
+                <field name="guest_house_manual_access_boolean" invisible="1"/>
+                <field name="show_warning_for_single" invisible="1"/>
+                <field name="show_warning_for_double" invisible="1"/>
+              </group>
+            </group>
+            <notebook attrs="{'invisible':[('guest_house_id', '=', False)]}">
+              <page string="Guest House Info" name="guest_house_info_page">
+                <h2 style="color: #7C7BAD; margin-top: 15px; margin-bottom: 10px;" attrs="{'invisible': [('show_table_boolean_manager', '=', False), ('show_table_boolean_user', '=', False)]}">Room Availability</h2>
+                <field name="room_availability" style="overflow-x: auto; max-width: 100%;" attrs="{'invisible': [('show_table_boolean_manager', '=', False), ('show_table_boolean_user', '=', False)]}"/>
+                <h2 style="color: #7C7BAD; margin-top: 25px; margin-bottom: 10px;">Photos</h2>
+                <field name="photo_ids">
+                  <!-- <kanban class="oe_background_grey o_kanban_dashboard">
+                    <templates>
+                      <t t-name="kanban-box">
+                        <div class="custom-kanban-card">
+                          <div class="custom-kanban-content">
+                            <div class="custom-kanban-photo">
+                              <field class='custom-kanban-image' name='photo' widget='image'/>
+                            </div>
+                          </div>
+                        </div>
+                      </t>
+                    </templates>
+                  </kanban> -->
+                  <kanban class="oe_background_grey o_kanban_dashboard">
+                    <templates>
+                        <t t-name="kanban-box">
+                          <div class="custom-kanban-card" style="border: 0px solid #dddddd; border-radius: 4px; overflow: hidden; height: 128px; width: 200px;">
+                              <div class="custom-kanban-photo-container" style="height: 120px; width: 198px; margin-left: -9px; max-width: none; overflow: hidden; border-radius: 2px;">
+                                  <field class='custom-kanban-image' name='photo' widget='image'/>
+                              </div>
+                          </div>
+                        </t>
+                    </templates>
+                  </kanban>
+                </field>
+              </page>
+            </notebook>
+            <group col='2'>
+              <group string="Action Log Details">
+                <field name="action_log_ids" readonly="1" nolabel='1'>
+                  <tree>
+                    <field name="date"/>
+                    <field name="action_by"/>
+                    <field name="remark"/>
+                    <field name="state"/>
+                  </tree>
+                  <form>
+                    <group>
+                      <field name="date"/>
+                      <field name="action_by"/>
+                      <field name="remark"/>
+                      <field name="state"/>
+                    </group>
+                  </form>
+                </field>
+              </group>
+            </group>
+          </sheet>
+          <div class="oe_chatter" >
+            <field name="message_follower_ids" widget="mail_followers" />
+            <field name="activity_ids" widget="mail_activity" />
+            <field name="message_ids" widget="mail_thread" />
+          </div>
+        </form>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="guest_house_booking_wizard_form">
+      <field name="name">guest_house_booking_wizard_form</field>
+      <field name="model">guest_house_booking_wizard</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group>
+              <field name="remarks"/>
+            </group>
+            <footer>
+              <center>
+                <button string="Confirm" name="proceed_with_remark" type="object" class="oe_highlight"/>
+                <button string="Cancel" class="btn btn-default" special="cancel"/>
+              </center>
+            </footer>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+
+    <record model="ir.ui.view" id="guest_house_feedback_wizard_form">
+      <field name="name">guest_house_feedback_wizard_form</field>
+      <field name="model">guest_house_feedback_wizard</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group col="2">
+                <group>
+                    <field name="booking_id" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}" readonly="1"/>
+                    <field name="requested_by_id" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}"/>
+                    <field name="guest_house"/>
+                    <field name="guest_house_address"/>
+                    <field name="country"/>
+                    <field name="state"/>
+                </group>
+                <group>
+                    <field name="guest_type"/>
+                    <field name="tour_ref" attrs="{'invisible':[('guest_type', '!=', 'self')]}"/>
+                    <field name="no_of_guests" attrs="{'invisible':[('guest_type', '!=', 'guest')]}"/>
+                    <field name="requesting_for" attrs="{'invisible':[('guest_type', '!=', 'new_joinee')]}"/>
+                    <field name="check_in_date_time"/>
+                    <field name="check_out_date_time"/>
+                    <field name="room_type"/>
+                    <field name="booking_type" attrs="{'invisible':[('room_type', '!=', 'double')]}"/>
+                    <field name="room_no"/>
+                </group>
+            </group>
+            <group string="Rating">
+                <field name="rating" widget="priority" nolabel="1" style="font-size: 20px;"/>
+            </group>
+            <group string="Feedback">
+                <field name="feedback" nolabel='1' required="1"/>
+            </group>
+            <footer>
+              <center>
+                <button string="Submit" name="proceed_with_feedback" type="object" class="oe_highlight"/>
+                <button string="Cancel" class="btn btn-default" special="cancel"/>
+              </center>
+            </footer>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+
+    <record model="ir.ui.view" id="kw_guest_house_booking_search">
+      <field name="name">kw_guest_house_booking_search</field>
+      <field name="model">kw_guest_house_booking</field>
+      <field name="arch" type="xml">
+        <search>
+          <field name="requested_by_id"/>
+          <field name="guest_type"/>
+          <field name="country_id"/>
+          <field name="guest_house_id"/>
+          <field name="check_in_date_time"/>
+          <filter string="My Bookings" name="filter_my_records" domain="[('create_uid', '=', uid)]"/>
+          <filter string="This Month" name="filter_current_month" domain="[('check_in_date_time','&lt;',(context_today()+relativedelta(months=1)).strftime('%%Y-%%m-01')), ('check_in_date_time','&gt;=',time.strftime('%%Y-%%m-01'))]"/>
+          <filter string="To Take Action" name="filter_to_take_action_records" domain="[('state', 'in', ['applied', 'cancellation_requested'])]" groups="kw_guest_house.guest_house_manager_group"/>
+          <group expand='0' string="Group By">
+            <filter string="Guest Type" name="Guest Type" domain="[]" context="{'group_by':'guest_type'}"/>
+            <filter string="Location" name="Location" domain="[]" context="{'group_by':'country_id'}"/>
+            <filter string="Guest House" name="Guest House" domain="[]" context="{'group_by':'guest_house_id'}"/>
+          </group>
+        </search>
+      </field>
+    </record>
+
+
+    <record model="ir.actions.act_window" id="apply_server_actions_window">
+      <field name="name">Book Guest House</field>
+      <field name="res_model">kw_guest_house_booking</field>
+      <field name="view_mode">tree,form,search</field>
+      <field name="view_type">form</field>
+      <field name="context">{'search_default_filter_my_records':1,'apply':1}</field>
+      <field name="domain">[]</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="take_action_window">
+      <field name="name">Take Action</field>
+      <field name="res_model">kw_guest_house_booking</field>
+      <field name="view_mode">tree,form,search</field>
+      <field name="view_type">form</field>
+      <field name="context">{'search_default_filter_to_take_action_records':1, 'take_action':1, 'create': False, 'delete': False, 'copy': False}</field>
+      <field name="domain">[]</field>
+    </record>
+  </data>
+</odoo>

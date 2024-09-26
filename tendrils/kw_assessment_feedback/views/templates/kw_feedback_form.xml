@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <template id="kw_feedback_form" name="Feedback Form">
+            <t t-call="website.layout">
+                <div class="container mt16">
+                    <div class="card">
+                        <div class="csm card-header">
+                            <div class="d-flex justify-content-between  mt-2">
+                                <div>
+                                    <div class=" logedin-user">
+                                        <span class="h5 white-text font-italic" style="font-size:12px;"> Assessee:</span>
+                                    </div>
+                                    <div class="clearfix"/>
+                                    <div class="mb-1  logedin-user">
+                                        <img t-attf-src="data:image_small/*;base64,{{feedback.assessee_id.image_small}}"/>
+                                        <div class="info">
+                                            <p class="m-0 font-weight-bold h4 white-text">
+                                                <span t-esc='feedback.assessee_id.name'/> (<t t-esc='feedback.assessee_id.emp_code' />)
+                                            </p>
+                                            <p class="m-0 badge badge-pill badge-warning p-2" style="background-color: #f7941d !important;">
+                                                <span t-esc='feedback.assessee_id.job_id.name' />
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"/>
+                                </div>
+
+                                <div>
+                                    <div class="logedin-user mb-4">
+                                    </div>
+                                    <div class="clearfix"/>
+                                    <div class="mb-1 logedin-user">
+                                        <div class="info">
+                                            <p class="m-0 font-weight-bold h4 white-text">
+                                                <span t-esc="feedback.feedback_details_id.assessment_tagging_id.name" />
+                                            </p>
+                                            <p class="m-0 badge badge-pill badge-warning p-2 float-right" style="background-color: #f7941d !important;">
+                                                <span t-esc="feedback.period_id.name" />
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"/>
+                                </div>
+                                <!-- <div t-field="page.description"/> -->
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <form role="form" id='kw_assessment_feedback_form' method="post" t-att-name="'%s_%s' % (feedback.id, feedback.assessee_id.id)" t-att-action="'/kw/feedback/submit/%s' % (slug(feedback))" t-att-data-prefill="'/kw/feedback/prefill/%s/%s' % (slug(feedback),token)">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="hidden" name="assessee_id" t-att-value="feedback.assessee_id.id" />
+                                <input type="hidden" id='feedback' name="feedback" t-att-value="feedback.id" />
+                                <input type="hidden" id='token' name="token" t-att-value="token" />
+
+                                <div class='clearfix mb-3'/>
+                                <t t-set='total_score' t-value='0' />
+                                <t t-set='max_value' t-value='0' />
+
+                                <div t-foreach="feedback.survey_id.page_ids" t-as="page" class="table-responsive">
+                                    <p t-esc="page.title" class="font-weight-bold h3" />
+                                    <table class="table table-hover  table-bordered miltable table-sm" id="miltable">
+                                        <thead class="thead-csm">
+                                            <tr>
+                                                <th scope="col" class="font-weight-bold text-left">Competencies</th>
+                                                <th scope="col" width="10%" class="font-weight-bold text-center">Total Score</th>
+                                                <th scope="col" width="10%" class="font-weight-bold text-center">Your Score</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            
+                                            <tr t-foreach='page.question_ids' t-as='question'>
+                                                <t t-set="total_score_prefix" t-value="'%s' % (question.id)" />
+
+                                                <t t-set="prefix" t-value="'%s_%s_%s' % (feedback.survey_id.id, page.id, question.id)" />
+                                                <t t-set="remark_prefix" t-value="'%s_%s' % (prefix, 'remark')" />
+                                                <td scope="col" class="text-left align-middle" style="font-weight: 400; padding-top:.1rem; padding-bottom:.1rem;">
+                                                    <span t-field='question.question' />
+                                                    <span t-if="question.constr_mandatory" class="font-weight-bold text-danger">*</span>
+                                                </td>
+                                                <td scope="col" class="text-center align-middle feedback_assessment_mark" 
+                                                    style="font-weight:400; padding-top:.1rem; padding-bottom:.1rem;" id='feedback_assessment_mark'>
+
+                                                    <t t-set='total_score' t-value='total_score + question.validation_max_float_value' />
+                                                    <t t-set='max_value' t-value='question.validation_max_float_value' />
+                                                   
+                                                    <span class='assessment_max_value' t-field='question.validation_max_float_value' t-att-maxval='max_value' />
+
+                                                    
+                                                </td>
+                                                <td scope="col" t-att-id="prefix" style="padding-top:.1rem; padding-bottom:.1rem;"
+                                                 class='feedback_assessment_items' >
+                                                    <t t-if="question.type == 'free_text'">
+                                                        <t t-call="kw_assessment_feedback.feedback_free_text"/>
+                                                    </t>
+                                                    <t t-if="question.type == 'textbox'">
+                                                        <t t-call="kw_assessment_feedback.feedback_textbox"/>
+                                                    </t>
+                                                    <t t-if="question.type == 'numerical_box'">
+                                                        <t t-call="kw_assessment_feedback.feedback_numerical_box"/>
+                                                    </t>
+                                                    <t t-if="question.type == 'date'">
+                                                        <t t-call="kw_assessment_feedback.feedback_date"/>
+                                                    </t>
+                                                    <t t-if="question.type == 'simple_choice'">
+                                                        <t t-call="kw_assessment_feedback.feedback_simple_choice"/>
+                                                    </t>
+                                                    <t t-if="question.type == 'multiple_choice'">
+                                                        <t t-call="survey.multiple_choice"/>
+                                                    </t>
+                                                    <t t-if="question.type == 'matrix'">
+                                                        <t t-call="kw_assessment_feedback.feedback_matrix"/>
+                                                    </t>
+                                                    <div class="js_errzone text-danger font-weight-bold font-italic" style="display:none;" role="alert"></div>
+                                                </td>
+                                            </tr>
+                                            
+                                        </tbody>
+                                    </table>                                    
+                                </div>
+
+
+                                <div class='row'>
+                                   
+                                    <div class='col text-right'>
+                                        <span style="font-weight:bold;">
+                                        Avg. Score (in %):
+                                            <input type='hidden' id='assessment_total_score' t-att-value="total_score" />
+                                        </span>
+                                    </div>
+                                    <div class='col-lg-3 col-md-5 col-sm-12 pl-0'>
+                                        <span id="totalScoreInput" />
+                                    </div>
+                                </div>
+                                <div class='row'>
+                                    <div class='col text-right'>
+                                        <span style="font-weight:bold;">Performance Grade:</span>
+                                    </div>
+                                    <div class='col-lg-3 col-md-5 col-sm-12 pl-0'>
+                                        <span id="performance_grade" />
+                                        <select class="form-control drp" id='performance_weightage_id' style="display:none;">
+                                            <option selected="1" value="">Select</option>
+                                            <t t-foreach="weightage" t-as="weight">
+                                                <option t-att-value="weight.id" t-att-from="weight.from_range" t-att-to="weight.to_range">
+                                                    <t t-esc="weight.display_name"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                
+                                <h4 class="alert alert-info text-dark mb-4 feedback-border">Feedback </h4>
+                                <label for="positive" class="h6">Positive:<span class="font-weight-bold text-danger">*</span>
+                                </label>
+                                <div class="md-form m-0">
+                                    <textarea id='positive' t-att-name="'%s_%s' % (feedback.id, 'positive_remark')" required="required" class='md-textarea form-control col-md-12 py-0'></textarea>
+                                </div>
+
+                                <label for="weak_areas" class="h6">Weak Areas:<span class="font-weight-bold text-danger">*</span>
+                                </label>
+                                <div class="md-form m-0">
+                                    <textarea id='weak_areas' t-att-name="'%s_%s' % (feedback.id, 'weakareas_remark')" required="required" class='md-textarea form-control col-md-12 py-0'></textarea>
+                                </div>
+
+                                <label for="suggestions" class="h6">Suggestions to improve the weaknesses:<span class="font-weight-bold text-danger">*</span>
+                                </label>
+                                <div class="md-form m-0">
+                                    <textarea id='suggestions' t-att-name="'%s_%s' % (feedback.id, 'suggestions_remark')" required="required" class='md-textarea form-control col-md-12 py-0'></textarea>
+                                </div>
+
+                                <div class="d-flex align-items-center flex-row justify-content-center">
+                                    <button type="button" id ='save_as_draft' class="btn btn-warning badge" name="submit_feedback" value="save_as_draft" style="background-color: #f7941d !important;">
+                                        <i class="fa fa-arrow-left" />
+                                    Back</button>
+                                    <button t-if='feedback.feedback_details_id.assessment_tagging_id.is_goal' type="button" id ='back_to_goal' class="btn btn-success badge" name="back_to_goal" value="back_to_goal" style="background-color: #1df728 !important;">
+                                        <i class="fa fa-arrow-left" />
+                                    Back to goal</button>
+                                    <button type="submit" id='finish' class="btn btn-primary badge" name="submit_feedback" value="finish" style="background-color: #198fbb !important;">Submit</button>
+                                </div>
+                            </form>
+                            <div class='mt-4'>
+                                <span style='font-weight:bold;font-size:15px'>Performance Criteria</span>
+                            </div>
+                            <table class='table table-border table-hover mt-4'>
+                                <thead style='background-color:#d1ecf1'>
+                                    <tr >
+                                        <td style='font-weight:bold;'>
+                                            Name
+                                        </td>
+                                        <td style='font-weight:bold;'>
+                                            Value
+                                        </td>
+                                        <td style='font-weight:bold;'>
+                                            From Range(in % )
+                                        </td>
+
+                                        <td style='font-weight:bold;'>
+                                            To Range(in % )
+                                        </td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach='weightage' t-as='weight'>
+                                        <tr>
+                                            <td style='font-weight:bold;'>
+                                                <t t-esc='weight.name' />
+                                            </td>
+                                            <td style='font-weight:bold;'>
+                                                <t t-esc='weight.value' />
+
+                                            </td>
+                                            <td style='font-weight:bold;'>
+                                                <t t-esc='weight.render_float_or_int(weight.from_range)' />
+                                            </td>
+
+                                            <td style='font-weight:bold;'>
+                                                <t t-esc='weight.render_float_or_int(weight.to_range)' />
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <template id="feedback_free_text" name="Free text box">
+            <div class="md-form m-0">
+                <textarea class="md-textarea form-control" t-att-id='prefix' rows="1" t-att-name="prefix"></textarea>
+            </div>
+        </template>
+
+        <template id="feedback_textbox" name="Text box">
+            <div class="md-form m-0">
+                <input type="text" class="form-control" t-att-name="prefix"/>
+            </div>
+        </template>
+
+        <template id="feedback_numerical_box" name="Numerical box">
+            <div class="md-form m-0">
+                <input type="number" step="any" class="form-control" t-att-name="prefix"/>
+            </div>
+        </template>
+
+        <template id="feedback_date" name="Date box">
+            <div class="form-group">
+                <div class="input-group date" t-attf-id="datetimepicker_#{question.id}" data-target-input="nearest" t-att-data-mindate="question.validation_min_date" t-att-data-maxdate="question.validation_max_date">
+                    <input type="text" class="form-control datetimepicker-input" t-attf-data-target="#datetimepicker_#{question.id}" t-att-name="prefix"/>
+                    <div class="input-group-append" t-attf-data-target="#datetimepicker_#{question.id}" data-toggle="datetimepicker">
+                        <div class="input-group-text">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template id="feedback_simple_choice" name="Simple choice">
+            <div t-if="question.display_mode == 'dropdown' and token" class="js_drop row">
+                <div class="col-lg-12">
+                    <select class="form-control" t-att-name="prefix">
+                        <option disabled="1" selected="1" value="">Choose...</option>
+                        <t t-foreach='question.labels_ids' t-as='label'>
+                            <option t-att-value='label.id'>
+                                <t t-esc='label.value'/>
+                            </option>
+                        </t>
+                        <t t-if='question.comments_allowed and question.comment_count_as_answer'>
+                            <option class="js_other_option" value="-1">
+                                <span t-esc="question.comments_message" />
+                            </option>
+                        </t>
+                    </select>
+                </div>
+                <div t-if='question.comments_allowed and question.comment_count_as_answer' class="col-lg-6">
+                    <input type="text" class="form-control" t-att-name="'%s_%s' % (prefix, 'comment')" data-oe-survey-othert="1"/>
+                </div>
+                <div t-if='question.comments_allowed and not question.comment_count_as_answer' class="col-lg-12 mt16">
+                    <span t-field="question.comments_message"/>
+                    <input type="text" class="form-control" t-att-name="'%s_%s' % (prefix, 'comment')"/>
+                </div>
+            </div>
+            <div t-if="question.display_mode == 'columns' or not token" class="row js_radio">
+                <div t-foreach='question.labels_ids' t-as='label' t-attf-class="col-lg-#{question.column_nb}">
+                    <label t-att-class="' bg-success ' if quizz_correction and label.quizz_mark > 0.0 else None">
+                        <input type="radio" t-att-name="prefix" t-att-value='label.id' />
+                        <span t-field='label.value'/>
+                    </label>
+                </div>
+                <div t-if='question.comments_allowed and question.comment_count_as_answer' class="js_comments col-lg-12">
+                    <label>
+                        <input type="radio" t-att-name="prefix" value="-1"/>
+                        <span t-field="question.comments_message" />
+                    </label>
+                    <input type="text" class="form-control" t-att-name="'%s_%s' % (prefix, 'comment')"/>
+                </div>
+                <div t-if='question.comments_allowed and not question.comment_count_as_answer' class="col-lg-12">
+                    <span t-field="question.comments_message"/>
+                    <input type="text" class="form-control" t-att-name="'%s_%s' % (prefix, 'comment')" data-oe-survey-othert="1"/>
+                </div>
+            </div>
+        </template>
+
+        <template id="feedback_multiple_choice" name="Multiple choice">
+            <div class="row">
+                <div t-foreach='question.labels_ids' t-as='label' t-attf-class="col-lg-#{question.column_nb}">
+                    <label t-att-class="' bg-success ' if quizz_correction and label.quizz_mark > 0.0 else None">
+                        <input type="checkbox" t-att-name="'%s_%s' % (prefix, label.id)" t-att-value='label.id' />
+                        <span t-field='label.value'/>
+                    </label>
+                </div>
+                <div t-if='question.comments_allowed and question.comment_count_as_answer' class="js_ck_comments col-lg-12">
+                    <label>
+                        <input type="checkbox" t-att-name="'%s_%s' % (prefix, -1)" value="-1" />
+                        <span t-field="question.comments_message" />
+                    </label>
+                    <input type="text" class="form-control" t-att-name="'%s_%s' % (prefix, 'comment')"/>
+                </div>
+                <div t-if='question.comments_allowed and not question.comment_count_as_answer' class="col-lg-12">
+                    <span t-field="question.comments_message"/>
+                    <input type="text" class="form-control" t-att-name="'%s_%s' % (prefix, 'comment')" data-oe-survey-othert="1"/>
+                </div>
+            </div>
+        </template>
+
+        <template id="feedback_matrix" name="Matrix">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th t-foreach="question.labels_ids" t-as="col_label">
+                            <span t-field="col_label.value" />
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="question.labels_ids_2" t-as="row_label">
+                        <th>
+                            <span t-field="row_label.value" />
+                        </th>
+                        <td t-foreach="question.labels_ids" t-as="col_label">
+                            <input t-if="question.matrix_subtype == 'simple'" type="radio" t-att-name="'%s_%s' % (prefix, row_label.id)" t-att-value='col_label.id' />
+                            <input t-if="question.matrix_subtype == 'multiple'" type="checkbox" t-att-name="'%s_%s_%s' % (prefix, row_label.id, col_label.id)" t-att-value='col_label.id' />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div t-if='question.comments_allowed'>
+                <span t-field="question.comments_message"/>
+                <input type="text" class="form-control" t-att-name="'%s_%s' % (prefix, 'comment')" />
+            </div>
+        </template>
+
+        <template id="kw_assessment_feedback_assets" inherit_id="kw_assessment_feedback.kw_feedback_form">
+            <xpath expr="." position="inside">
+                <script src="/web/static/lib/nvd3/d3.v3.js"/>
+                <script src="/web/static/lib/nvd3/nv.d3.js"/>
+                <script type="text/javascript" src="/web/static/src/js/chrome/public_root_widget.js"/>
+                <script type="text/javascript" src="/web/static/src/js/fields/field_utils.js"/>
+                <script type="text/javascript" src="/kw_assessment_feedback/static/src/js/kw_feedback.js"/>
+                <script type="text/javascript" src="/kw_assessment_feedback/static/src/js/save_as_draft.js"/>
+                <link href="/kw_assessment_feedback/static/src/css/front_style.css" rel="stylesheet"/>
+
+                <t t-call="web._assets_frontend_helpers"/>
+                <link href="/web/static/lib/nvd3/nv.d3.css" rel="stylesheet" type="text/css"/>
+                <t t-call="web._assets_bootstrap"/>
+                <link rel="stylesheet" type="text/less" href="/web/static/src/scss/fonts.scss"/>
+
+                <link rel="stylesheet" type="text/less" href="/web_editor/static/src/scss/web_editor.common.scss"/>
+                <link href="/kwantify_theme/static/src/mdb/css/mdb.min.css?v=12" rel="stylesheet"/>
+                <script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js?v=12"/>
+
+                <script type="text/javascript" src="/kw_assessment_feedback/static/src/lib/sweetalert_new.js?v=12"/>
+                <script type="text/javascript" src="/kw_assessment_feedback/static/src/lib/additional-methods.js?v=12"/>
+                <script type="text/javascript" src="/kw_assessment_feedback/static/src/lib/jquery.validate.min.js?v=12"/>
+                <link rel="stylesheet" href="https://jqueryvalidation.org/files/demo/site-demos.css" />
+                <script type="text/javascript" src='/kw_assessment_feedback/static/src/js/calc_total_score.js?v=13' />
+                 
+
+
+            </xpath>
+        </template>
+
+    </data>
+</odoo>

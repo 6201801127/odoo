@@ -1,0 +1,1985 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+		<record id="resignation_view_report" model="ir.ui.view">
+			<field name="name">Offboarding Report</field>
+			<field name="model">kw_resignation</field>
+			<field name="priority" eval="70"/>
+			<field name="arch" type="xml">
+				<tree import="false"
+				      create="false"
+				      delete='false'
+				      default_order='id desc'
+				      decoration-warning="state == 'reject'"
+				      decoration-success="state == 'grant'"
+                      decoration-danger="manual_closing == True or state == 'cancel'">
+					<field name="sort" invisible='1'/>
+					<field name="manual_closing" invisible='1'/>
+					<field name="year_last_working_date" invisible='1'/>
+					<field name="month_last_working_date"/>
+					<field name="report_employement_type"/>
+					<field name="base_branch_id"/>
+					<field name="department_id" options="{'no_create': True, 'no_edit':True, 'no_open':True}"
+					       readonly="1"/>
+					<field name="division"/>
+					<field name="section"/>
+					<field name="practise"/>
+					<field name="applicant_name" string="Name" class="font-weight-bold"/>
+					<field name="applicant_code" string="Emp Code"/>
+					<field name="job_id" string='Designation'/>
+					<field name="gender"/>
+					<field name="ra"/>
+					<field name="date_of_joining"/>
+					<!-- <field name="create_date" string="Apply Date" widget="date"/> -->
+					<field name="effective_form" string="Effective From Date"/>
+					<field name="last_working_date" string='Exit Date'/>
+					<field name="tenure_at_csm" string='Tenure At CSM'/>
+					<field name="offboarding_type"/>
+					<field name="reg_type" string='Resignation Reason'/>
+					<field name="user_id" invisible="1"/>
+					<field name="forward_by" invisible="1"/>
+					<field name="state"/>
+					<field name="offboarding_process_status"/>
+					<field name="action_to_be_taken_by" invisible="1"/>
+					<field name="fiscal_yr" invisible='1'/>
+					<button name="%(kw_eos.kw_eos_extend_date_wizard_act_window)d"
+							type="action"
+							string="Extend Date"
+					        context="{'current_record_id':id}"
+							groups="kw_eos.group_kw_eos_manager"
+					        class="btn-success"/>
+					<button name="view_clearance_details"
+                            type="object"
+							groups="kw_eos.group_kw_eos_manager"
+                            string="View Clearance Details"
+                            class="oe_highlight" />
+				</tree>
+			</field>
+		</record>
+
+		<record id="report_form" model="ir.ui.view">
+			<field name="name">Report</field>
+			<field name="model">kw_resignation</field>
+			<field name="priority" eval="285"/>
+			<field name="arch" type="xml">
+				<form string="Report" create="false" edit="false" import="false" delete='false'>
+					<header>
+						<field name="state" widget="statusbar"/>
+					</header>
+					<script>
+						$(document).ready(function(){
+						$(".o_form_statusbar").hide();
+						});
+					</script>
+					<sheet>
+						<group>
+							<group>
+								<field name="fiscal_yr" invisible='1'/>
+								<field name="state" invisible='1'/>
+								<field name="budget_submit" invisible='1'/>
+								<field name="is_finance_user" invisible='1'/>
+								<field name="done_by_finance" invisible="1"/>
+								<field name="check_contract_create_user" invisible="1"/>
+								<field name="eos_status" invisible="1"/>
+								<field name="report_check" invisible="1"/>
+								<field name="logged_user" invisible="1"/>
+								<field name="user_id" invisible="1"/>
+								<field name="is_RA" invisible="1"/>
+								<field name="is_dept_manager" invisible="1"/>
+
+
+								<!-- New Fields -->
+								<field name="contract_check" invisible='1'/>
+								<field name="dept_head_check" invisible='1'/>
+								<field name="is_manager" invisible='1'/>
+								<field name="applicant_user_id_check" invisible="1"/>
+								<field name="ra_cancel_aprv_btn_check" invisible="1"/>
+								<field name="show_btn_apply" invisible="1"/>
+								<field name="show_btn_foward" invisible="1"/>
+								<field name="show_btn_confirm" invisible="1"/>
+								<field name="show_btn_hold" invisible="1"/>
+								<field name="hide_btn_cancel" invisible="1"/>
+								<field name="cancel_process" invisible="1"/>
+								<field name="show_cancel_apply" invisible="1"/>
+								<field name="show_cancel_foward" invisible="1"/>
+								<field name="show_cancel_confirm" invisible="1"/>
+								<field name="show_cancel_hold" invisible="1"/>
+
+								<field name="offboard_type_reg" invisible='1'/>
+								<field name="contract_closure_check" invisible='1'/>
+								<field name="retirement_check" invisible='1'/>
+								<field name="termination_check" invisible='1'/>
+								<field name="demise_check" invisible='1'/>
+								<field name="check_apply_for_self" invisible='1'/>
+								<field name="retirement_document_name" invisible='1'/>
+								<field name="hide_apply_for" invisible="1"/>
+								<field name="document_name" invisible="1"/>
+
+								<field name="applicant_name"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}"/>
+								<field name="applicant_code" string='Emp Code'/>
+								<field name="offboarding_type"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}"
+								       attrs="{'readonly':[('state','!=', 'apply')]}"/>
+								<field name="apply_for" widget='radio'
+								       attrs="{'invisible':[('hide_apply_for','=', True)],'readonly':[('state','!=', 'apply')]}"
+								       options="{'horizontal': true}"/>
+
+								<!-- <field name="manager_applicant_id" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'invisible':[('check_apply_for_self','=', True)], 'required':[('check_apply_for_self','=', False)], 'readonly':[('state','!=', 'apply')]}"/> -->
+								<field name="applicant_id"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}"
+								       attrs="{'invisible':[('apply_for','=', 'self')],'required':[('apply_for','=','others')],'readonly':[('id','!=', False)]}"
+								       domain="[('parent_id','in',uid.employee_ids)]"/>
+
+
+								<field name="reg_type"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}"
+								       attrs="{'invisible':[('offboard_type_reg','=',False)],'readonly':[('state','!=', 'apply')],'required':[('offboard_type_reg','=',True)]}"/>
+								<field name="reason"
+								       attrs="{'invisible':[('offboard_type_reg','=',False)],'required':[('offboard_type_reg','=',True)],'readonly':[('state','!=', 'apply')]}"/>
+								<field name="contract_extend" widget='radio' options="{'horizontal': true}"
+								       invisible='1'/>
+								<field name='start_date' attrs="{'invisible':[('contract_closure_check','=',False)]}"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}"/>
+								<field name='end_date' attrs="{'invisible':[('contract_closure_check','=',False)]}"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}"/>
+								<field name='new_contract_end_date'
+								       attrs="{'invisible':[('contract_extend','=','no')],'required':[('contract_extend','=','yes')],'readonly':[('state','!=', 'apply')]}"/>
+								<field name="contract_closure" string="Remarks"
+								       attrs="{'invisible':[('contract_closure_check','=',False)],'readonly':[('state','!=', 'apply')]}"/>
+
+
+
+								<field name="major_activity"
+								       attrs="{'invisible':[('retirement_check','=',False)],'readonly':[('state','!=', 'apply')]}"/>
+								<field name="retirement"
+								       attrs="{'invisible':[('retirement_check','=',False)],'readonly':[('state','!=', 'apply')]}"
+								       string="Remarks"/>
+								<field name="retirement_document" filename='retirement_document_name'
+								       attrs="{'invisible':[('retirement_check','=',False)],'readonly':[('state','!=', 'apply')]}"
+								       invisible="1"/>
+
+								<field name="retain" options="{'horizontal': true}" widget="radio"
+								       attrs="{'invisible':[('retirement_check','=',False)],'readonly':[('state','!=', 'apply')]}"
+								       groups='kw_eos.group_kw_eos_officer,kw_eos.group_kw_eos_manager'/>
+
+								<field name="ret_job_id"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}"
+								       attrs="{'readonly':[('state','!=', 'apply')],'invisible':[('retain','=', 'no')]}"/>
+								<field name="ret_department_id"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}"
+								       attrs="{'readonly':[('state','!=', 'apply')],'invisible':[('retain','=', 'no')]}"/>
+								<field name="ret_division"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}"
+								       attrs="{'readonly':[('state','!=', 'apply')],'invisible':[('retain','=', 'no')]}"/>
+								<field name="ret_section"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}"
+								       attrs="{'readonly':[('state','!=', 'apply')],'invisible':[('retain','=', 'no')]}"/>
+								<field name="ret_practise"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}"
+								       attrs="{'readonly':[('state','!=', 'apply')],'invisible':[('retain','=', 'no')]}"/>
+								<field name="ret_employeement_type"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}"
+								       attrs="{'readonly':[('state','!=', 'apply')],'invisible':[('retain','=', 'no')]}"/>
+								<field name="new_current_ctc"
+								       attrs="{'readonly':[('state','!=', 'apply')],'invisible':[('retain','=', 'no')]}"/>
+								<!-- <field name="hra"  attrs="{'readonly':[('state','!=', 'apply')],'invisible':[('retain','=', 'no')]}" />
+								<field name="conveyance"  attrs="{'readonly':[('state','!=', 'apply')],'invisible':[('retain','=', 'no')]}" />
+								<field name="current_basic"  attrs="{'readonly':[('state','!=', 'apply')],'invisible':[('retain','=', 'no')]}" /> -->
+
+
+
+
+								<!-- <field name="termination" attrs="{'invisible':[('termination_check','=',False)]}"/> -->
+								<field name="termination_reason"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}"
+								       attrs="{'invisible':[('termination_check','=',False)],'required':[('termination_check','=',True)],'readonly':[('state','!=', 'apply')]}"/>
+								<field name="termination_remark"
+								       attrs="{'invisible':[('termination_check','=',False)],'required':[('termination_check','=',True)],'readonly':[('state','!=', 'apply')]}"/>
+								<field name="upload_related_document" filename='document_name'
+								       string='Upload Related Document'
+								       attrs="{'invisible':[('termination_check','=',False)],'required':[('termination_check','=',True)],'readonly':[('state','!=', 'apply')]}"/>
+								<label for='upload_related_document'
+								       attrs="{'invisible':['|',('termination_check','=',False),('id','>', 0)]}"
+								       style='font-weight: normal;' class='text-danger'
+								       string='(Only .jpeg, .jpg and .png format are allowed.)'/>
+
+								<!-- <field name="demise" attrs="{'invisible':[('demise_check','=',False)]}"/> -->
+								<field name="demise_reason"
+								       attrs="{'invisible':[('demise_check','=',False)],'required':[('demise_check','=',True)],'readonly':[('state','!=', 'apply')]}"/>
+
+								<field name="ret_contract_start_date"
+								       attrs="{'invisible':['|',('retain','=', 'no'),('retirement_check','=',False)],'readonly':[('state','!=', 'apply')],'required':True}"/>
+								<field name="ret_contract_end_date"
+								       attrs="{'invisible':['|',('retain','=', 'no'),('retirement_check','=',False)],'readonly':[('state','!=', 'apply')],'required':True}"/>
+
+								<field name="effective_form"
+								       attrs="{'invisible':['|','|',('retain','=', 'yes'),('contract_closure_check','!=',False),('demise_check','=',True)],'readonly':[('state','!=', 'apply')],'required':True}"/>
+								<field name="last_working_date" required='1'
+								       attrs="{'invisible':['|',('retain','=', 'yes'),('contract_closure_check','!=',False)],'readonly':['|',('apply_for','=', 'self'),('state','in', ['grant','reject'])]}"
+								       force_save="1"/>
+								<field name="kt_required"
+								       attrs="{'invisible':['|','|',('retain','=', 'yes'),('demise_check','=', True),('contract_extend','=','yes')],'readonly':[('state','!=', 'apply')]}"
+								       options="{'horizontal': true}" widget="radio"/>
+							</group>
+							<group>
+
+								<field name="department_id"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}" readonly="1"
+								       attrs="{'invisible':[('retain','=', 'yes')]}"/>
+								<field name="division"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}" readonly="1"
+								       attrs="{'invisible':[('retain','=', 'yes')]}"/>
+								<field name="section"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}" readonly="1"
+								       attrs="{'invisible':[('retain','=', 'yes')]}"/>
+								<field name="practise"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}" readonly="1"
+								       attrs="{'invisible':[('retain','=', 'yes')]}"/>
+								<field name="job_id"
+								       options="{'no_create': True, 'no_edit':True, 'no_open':True}" readonly="1"
+								       attrs="{'invisible':[('retain','=', 'yes')]}"/>
+								<field name="date_of_joining" widget="date" readonly="1"
+								       attrs="{'invisible':[('retain','=', 'yes')]}"/>
+							</group>
+						</group>
+						<group>
+							<group>
+								<field name="resignation_ids">
+									<tree create='0' edit='0' delete='0'>
+										<field name="applicant_id"/>
+										<field name="state"/>
+										<field name="date"/>
+										<field name="remark"/>
+										<field name="last_working_date"/>
+									</tree>
+									<form create='0' edit='0' delete='0'>
+										<group>
+											<field name="applicant_id"
+											       options="{'no_create': True, 'no_edit':True, 'no_open':True}"/>
+											<field name="state"/>
+											<field name="date"/>
+											<field name="remark"/>
+											<field name="last_working_date"/>
+										</group>
+									</form>
+								</field>
+							</group>
+						</group>
+						<notebook>
+							<page name="budget_setting" string="Budget Setting"
+							      attrs="{'invisible':['|','|',('retirement_check','=',False),('is_finance_user','=',False),('is_manager','=',False)]}">
+								<group>
+									<group>
+										<field name="emp_role"
+										       options="{'no_create': True, 'no_edit':True, 'no_open':True}"
+										       attrs="{'readonly': [('is_manager','=',True)],'required': [('is_finance_user', '=', True)]}"/>
+										<field name="emp_category"
+										       options="{'no_create': True, 'no_edit':True, 'no_open':True}"
+										       attrs="{'readonly': [('is_manager','=',True)],'required': [('is_finance_user', '=', True)]}"/>
+										<field name="employement_type"
+										       options="{'no_create': True, 'no_edit':True, 'no_open':True}"
+										       attrs="{'readonly': [('is_manager','=',True)],'required': [('is_finance_user', '=', True)]}"/>
+									</group>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+					<div class="oe_chatter">
+						<field name="message_follower_ids" widget="mail_followers"/>
+						<field name="activity_ids" widget="mail_activity"/>
+						<field name="message_ids" widget="mail_thread"/>
+					</div>
+				</form>
+			</field>
+		</record>
+
+		<record id="offboarding_report_search_view" model="ir.ui.view">
+			<field name="name">Offboarding Report</field>
+			<field name="model">kw_resignation</field>
+			<field name="priority" eval="72"/>
+			<field name="arch" type="xml">
+				<search string="Search Items">
+					<field name="applicant_id"/>
+					<field name="last_working_date"/>
+					<field name="effective_form"/>
+					<field name="department_id"/>
+					<field name="month_last_working_date"/>
+					<field name="year_last_working_date"/>
+					<field name="employement_type"/>
+					<field name="offboarding_type"/>
+					<field name="base_branch_id"/>
+					<field name="gender"/>
+					<field name="state"/>
+					<field name="fiscal_yr"/>
+					<!-- <filter string="BSS" name="dept_check" domain="[('applicant_id.department_id','=', 'BSS')]"/> -->
+					<field name="report_check" invisible="1"/>
+					<filter string="Last working day" name="filter_joining_date" date="last_working_date"/>
+					<filter string="Effective from day" name="filter_joining_date" date="effective_form"/>
+
+					<!-- <filter string="Current Year" domain="[('start_date', 'like',context_today().strftime('%Y'))]" name="this_year_start_date"/>
+					<separator/>
+					<filter string="This Month" domain="[('start_date', 'like',context_today().strftime('%Y-%m'))]" name="this_month_start_date"/>
+					 <filter string="January" domain="[('month_last_working_date', 'ilike','January')]" name="January_month"/>
+					 <filter string="February" domain="[('month_last_working_date', 'ilike','February')]" name="February_month"/>
+					 <filter string="March" domain="[('month_last_working_date', 'ilike','March')]" name="March_month"/>
+					 <filter string="April" domain="[('month_last_working_date', 'ilike','April')]" name="April_month"/>
+					 <filter string="May" domain="[('month_last_working_date', 'ilike','May')]" name="May_month"/>
+					 <filter string="June" domain="[('month_last_working_date', 'ilike','June')]" name="June_month"/>
+					 <filter string="July" domain="[('month_last_working_date', 'ilike','July')]" name="July_month"/>
+					 <filter string="August" domain="[('month_last_working_date', 'ilike','August')]" name="August_month"/>
+					 <filter string="September" domain="[('month_last_working_date', 'ilike','September')]" name="september_month"/>
+					 <filter string="October" domain="[('month_last_working_date', 'ilike','October')]" name="october_month"/>
+					 <filter string="November" domain="[('month_last_working_date', 'ilike','November')]" name="november_month"/>
+					 <filter string="December" domain="[('month_last_working_date', 'ilike','December')]" name="december_month"/> -->
+					<separator/>
+					<filter string="Bhubaneshwar" invisible="1"
+					        domain="[('base_branch_id.alias', 'ilike','Bhubaneswar')]" name="bhubaneshwar_branch"/>
+					<separator/>
+					<filter name="employment_type_fte" string="FTE" domain="[('employement_type.code','=','P')]"/>
+					<filter name="employment_type_ret" string="RET"
+					        domain="[('employement_type.code','in',['S','C'])]"/>
+					<!-- <filter name="employment_type_off_shore" string="Outsourced" domain="[('employement_type.code','=','O')]"/> -->
+					<filter name="employment_type_contractual" string="Contractual"
+					        domain="[('employement_type.code','=','CE')]"/>
+					<separator/>
+					<filter name="offboarding_type_res" string="Resignation"
+					        domain="[('offboarding_type.code','=','reg')]"/>
+					<filter name="offboarding_type_cont" string="Contract Closure"
+					        domain="[('offboarding_type.code','=','con')]"/>
+					<filter name="offboarding_type_ret" string="Retirement"
+					        domain="[('offboarding_type.code','=','ret')]"/>
+					<filter name="offboarding_type_ter" string="Termination"
+					        domain="[('offboarding_type.code','=','ter')]"/>
+					<filter name="offboarding_type_dem" string="Demise" domain="[('offboarding_type.code','=','dem')]"/>
+					<separator/>
+					<filter name="state_appply" string="Applied" domain="[('state','=','apply')]"/>
+					<filter name="state_approve" string="Approved" domain="[('state','=','confirm')]"/>
+					<filter name="state_forward" string="Forward" domain="[('state','=','forward')]"/>
+					<filter name="state_grant" string="Granted" domain="[('state','=','grant')]"/>
+					<filter name="state_reject_cancel" string="Reject/Cancel"
+					        domain="[('state','in',['reject','cancel'])]"/>
+
+				</search>
+			</field>
+		</record>
+
+		<record id="resignation_view_report_action" model="ir.actions.act_window">
+			<field name="name">Offboarding Report</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kw_resignation</field>
+			<field name="view_mode">tree</field>
+			<field name="view_type">form</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('resignation_view_report')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('report_form')})]"/>
+			<field name="domain">[]</field>
+			<field name="context">{"report":True,'search_default_this_year_start_date':1}</field>
+			<field name="search_view_id" ref="offboarding_report_search_view"/>
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					Records not available.
+				</p>
+				<p>
+
+				</p>
+			</field>
+		</record>
+
+		<!-- server action to call views and wizard report -->
+		<record id="kw_resignation_server_action_new" model="ir.actions.server">
+			<field name="name">Offboarding Report</field>
+			<field name="condition">True</field>
+			<field name="model_id" ref="kw_eos.model_kw_resignation"/>
+			<field name="state">code</field>
+			<field name="code"> 
+                action = model.offboarding_report_render()
+			</field>
+		</record>
+
+		<record id="cancellation_view_report_action" model="ir.actions.act_window">
+			<field name="name">Cancelled Resignation</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kw_resignation</field>
+			<field name="view_mode">tree</field>
+			<field name="view_type">form</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+    (0, 0, {'view_mode': 'tree', 'view_id': ref('resignation_view_report')}),]"/>
+			<field name="domain">[('cancel_process','=', True)]</field>
+			<field name="context">{"report":True}</field>
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					Records not available.
+				</p>
+				<p>
+
+				</p>
+			</field>
+		</record>
+		<record id="eos_view_report" model="ir.ui.view">
+			<field name="name">EOS Report</field>
+			<field name="model">kw_end_of_service</field>
+			<field name="priority" eval="73"/>
+			<field name="arch" type="xml">
+				<tree import="false" create="false">
+					<field name="service_from"/>
+					<field name="service_to"/>
+					<field name="address" invisible="1"/>
+					<field name="phone"/>
+					<field name="email"/>
+					<field name="applicant_id" class="font-weight-bold" string="Applied For"/>
+					<field name="state"/>
+					<field name="action_to_be_taken_by" invisible="1"/>
+				</tree>
+			</field>
+		</record>
+
+		<!-- kw_resignation_master action window -->
+		<record id="eos_view_report_action" model="ir.actions.act_window">
+			<field name="name">End of Service</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kw_end_of_service</field>
+			<field name="view_mode">tree</field>
+			<field name="view_type">form</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+    (0, 0, {'view_mode': 'tree', 'view_id': ref('eos_view_report')}),]"/>
+			<field name="domain">[]</field>
+			<field name="context"></field>
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					Records not available.
+				</p>
+				<p>
+
+				</p>
+			</field>
+		</record>
+
+		<record id="ra_view_report" model="ir.ui.view">
+			<field name="name">Subordinates Report</field>
+			<field name="model">kw_resignation</field>
+			<field name="priority" eval="74"/>
+			<field name="arch" type="xml">
+				<tree import="false" create="false">
+					<field name="report_check" invisible="1"/>
+					<field name="applicant_id" string="Applicant's Name"/>
+					<field name="department_id"
+                           options="{'no_create': True, 'no_edit':True, 'no_open':True}"
+					       readonly="1"/>
+					<field name="division"/>
+					<field name="section"/>
+					<field name="practise"/>
+					<field name="job_id"/>
+					<field name="create_date" string="Apply Date" widget="date"/>
+					<field name="offboarding_type"/>
+					<field name="reason" invisible="1"/>
+					<field name="effective_form" string="Effective From Date"/>
+					<field name="last_working_date" string='Last Date'/>
+					<field name="user_id" invisible="1"/>
+					<field name="forward_by" invisible="1"/>
+					<field name="state"/>
+					<field name="action_to_be_taken_by" invisible="1"/>
+				</tree>
+			</field>
+		</record>
+
+		<!-- <record id="ra_report_search_view" model="ir.ui.view">
+			<field name="name">Offboarding Report</field>
+			<field name="model">kw_resignation</field>
+			<field name="arch" type="xml">
+				 <search string="Search Items">
+					<field name="applicant_id"/>
+					<field name="department_id"/>
+					<field name="division"/>
+					<field name="section"/>
+					<field name="practise"/>
+					<field name="job_id"/>
+					<field name="create_date"/>
+					<field name="offboarding_type"/>
+					<field name="last_working_date"/>
+					<field name="state"/>
+			   </search>
+			</field>
+		</record> -->
+
+		<record id="ra_view_report_action" model="ir.actions.act_window">
+			<field name="name">Subordinates Report</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kw_resignation</field>
+			<field name="view_mode">tree</field>
+			<field name="view_type">form</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+    (0, 0, {'view_mode': 'tree', 'view_id': ref('ra_view_report')}),
+    (0, 0, {'view_mode': 'form', 'view_id': ref('report_form')})]"/>
+			<field name="domain">[('applicant_id.parent_id.user_id','=',uid)]</field>
+			<field name="context">{"report":True,'group_by':'offboarding_type'}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Records not available.
+                </p>
+                <p>
+
+                </p>
+            </field>
+        </record>
+
+		<record id="view_hr_employee_clearance_report_tree" model="ir.ui.view">
+			<field name="name">hr.employee.clearance.report.tree</field>
+			<field name="model">hr.employee.clearance</field>
+			<field name="priority" eval="8"/>
+			<field name="arch" type="xml">
+				<tree string="Employee Clearances" create='false' edit='false' import="false">
+					<!-- <field name="name" /> -->
+					<field name="check_manager" invisible='1'/>
+					<field name="emp_rec_readonly" invisible='1'/>
+					<field class="font-weight-bodl" name="employee_id"/>
+					<field name="offboarding_type"/>
+                    <field name="check_eos_status" string='EOS Status' invisible='1'/>
+                    <field name="check_eos_pending_status" string='EOS Pending Status' invisible='1'/>
+                    <field name="compute_eos_status" string='EOS Status'/>
+					<field name="department_id"/>
+					<field name="division"/>
+					<field name="section"/>
+					<field name="practise"/>
+					<field name="job_id"/>
+					<field name="date_of_joining"/>
+					<field name="create_date" widget="date" string='Applied On'/>
+					<field name="effective_from"/>
+					<field name="last_day_of_service"/>
+					<field name="company_id" groups="base.group_multi_company" invisible='1'/>
+					<field name="done_by_ra" string='Clearance by RA'/>
+					<field name="done_by_it" string='Clearance by IT'/>
+					<field name="done_by_admin" string='Clearance by Admin'/>
+					<field name="done_by_account" string='Clearance by Finance'/>
+					<button name="view_emp_eos_form"
+                            type="object"
+                            string="View Employee Feedback"
+                            class="oe_highlight"
+					        attrs="{'invisible':['|',('check_manager','=',False),('emp_rec_readonly','=',True)]}"/>
+				</tree>
+			</field>
+		</record>
+
+		<record id="view_hr_employee_clearance_report_form" model="ir.ui.view">
+			<field name="name">hr.employee.clearance.form</field>
+			<field name="model">hr.employee.clearance</field>
+			<field name="priority">1000</field>
+			<field name="arch" type="xml">
+				<form create="false" edit='false'>
+					<header>
+						<field name="done_by_hr" invisible='1'/>
+						<field name="done_by_emp" invisible='1'/>
+						<field name="check_parent" invisible='1'/>
+						<field name="check_all_done" invisible='1'/>
+						<!-- <field name="stage_id" widget="statusbar" /> -->
+					</header>
+					<sheet>
+						<!-- <div class="oe_title">
+							<h1>
+								<field name="name" invisible='1'/>
+							</h1>
+						</div> -->
+						<group>
+							<group>
+								<field name="employee_id" attrs="{'readonly':[('id','>', 0)]}"
+								       options="{'no_create': True, 'no_edit':True, 'no_open': True}"/>
+								<field name="job_id" options="{'no_create': True, 'no_edit':True, 'no_open': True}"/>
+								<!-- <field name="job_grade_id"/> -->
+								<field name="department_id" options="{'no_create': True, 'no_edit':True, 'no_open': True}"/>
+								<field name="line_manager" options="{'no_create': True, 'no_edit':True, 'no_open': True}"/>
+							</group>
+							<group>
+								<field name="resignation_id" attrs="{'readonly':[('id','>', 0)]}"
+								       options="{'no_create': True, 'no_edit':True, 'no_open': True}"/>
+								<field name="want_laptop_accessories_details" invisible="1"/>
+								<field name="create_date" widget="date" string='Applied On'/>
+								<field name="effective_from"/>
+								<field name="last_day_of_service" attrs="{'readonly':[('id','>', 0)]}"
+								       options="{'no_create': True, 'no_edit':True, 'no_open': True}"/>
+								<field name="date_of_joining" attrs="{'readonly':[('id','>', 0)]}"
+								       options="{'no_create': True, 'no_edit':True, 'no_open': True}"/>
+								<field name="company_id" groups="base.group_multi_company"
+								       attrs="{'readonly':[('id','>', 0)]}"
+								       options="{'no_create': True, 'no_edit':True, 'no_open': True}"
+								       invisible='1'/>
+								<!-- <field name="responsibility_center_id" /> -->
+							</group>
+						</group>
+                        <notebook>
+                            <field name="current_user" invisible='1'/>
+                            <field name="check_manager" invisible='1'/>
+                            <field name="emp_rec_readonly" invisible='1'/>
+                            <page string="BY EMPLOYEE"
+                                  attrs="{'invisible':['|',('check_manager','=',False),('current_user','=', False)]}"
+                                  invisible='1'>
+                                <group col='3'>
+                                    <field name="handover_all_reports" widget="radio"
+                                           attrs="{'readonly':['|',('emp_rec_readonly','=',False),('done_by_emp','=',True)]}"
+                                           string='1.  I have handed over all reports/assignments carried out while holding this position to my RA.	'/>
+                                    <field name="surrender_items" widget="radio"
+                                           attrs="{'readonly':['|',('emp_rec_readonly','=',False),('done_by_emp','=',True)]}"
+                                           string="2.  I have surrendered all items which were entrusted to me during my employment"/>
+                                    <field name="cleared_all_matters" widget="radio"
+                                           attrs="{'readonly':['|',('emp_rec_readonly','=',False),('done_by_emp','=',True)]}"
+                                           string="3.  I have cleared all matters pertaining to advances and expenditures with the Finance department. I understand that any outstanding amounts will be deducted from my final dues.	"/>
+                                    <field name="comments"
+                                           attrs="{'readonly':['|',('emp_rec_readonly','=',False),('done_by_emp','=',True)]}"
+                                           string="Comment by Employee"/>
+                                    <field name="employee_clearance_date"
+                                           attrs="{'readonly':['|',('emp_rec_readonly','=',False),('done_by_emp','=',True)]}"
+                                           string="Date"/>
+                                </group>
+                            </page>
+
+                            <page string="RA"
+                                  groups="kw_employee.group_hr_ra,kw_eos.group_kw_eos_manager,kw_eos.group_kw_eos_officer">
+                                <group>
+                                    <group>
+                                        <table class="" style="width:100%; margin-top: 14px;">
+                                            <tbody>
+                                                <tr style='border-left: 1px solid #eee;'>
+                                                    <td style="width:100%;">
+                                                        <div class=" table-responsive">
+                                                            <field name="all_ps_handover_report" invisible='1'/>
+                                                            <field name="lm_signature" invisible='1'/>
+                                                            <field name="done_by_ra" invisible='1'/>
+
+                                                            <group>
+                                                                <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th class="o_column_sortable" width="50%%">
+                                                                                Activity
+                                                                            </th>
+                                                                            <th class="o_column_sortable">Status</th>
+                                                                            <th class="o_column_sortable">Comment</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody class="ui-sortable">
+                                                                        <tr>
+                                                                            <td scope="row">All work-related documents
+                                                                                and handover report
+                                                                            </td>
+                                                                            <td>
+                                                                                <field name='all_work_documents_handover_report'
+                                                                                       attrs="{'readonly': ['|',('done_by_ra', '=', True),('check_manager','=',True)],'required': [('check_parent','=',True)]}"
+                                                                                       string="1. All work-related documents and handover report"
+                                                                                       readonly='1'/>
+                                                                            </td>
+                                                                            <td>
+                                                                                <field name='ra_daocumnt_clearance'
+                                                                                       attrs="{'readonly': ['|',('done_by_ra', '=', True),('check_manager','=',True)],'required': [('check_parent','=',True)]}"
+                                                                                       string="comments" readonly='1'/>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td scope="row">Clearance by RA</td>
+                                                                            <field name="cleared_by_line_manager_unit"
+                                                                                   attrs="{'readonly': ['|',('done_by_ra', '=', True),('check_manager','=',True)],'required': [('check_parent','=',True)]}"
+                                                                                   string="2. Clearance by RA"
+                                                                                   readonly='1'/>
+                                                                            <td>
+                                                                                <field name="comments_by_line_manager"
+                                                                                       attrs="{'readonly': ['|',('done_by_ra', '=', True),('check_manager','=',True)],'required': [('check_parent','=',True)]}"
+                                                                                       string="Comments" readonly='1'/>
+                                                                            </td>
+                                                                        </tr>
+
+                                                                        <tr>
+                                                                            <td></td>
+                                                                            <td></td>
+                                                                            <td></td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </group>
+                                                            <group>
+                                                                <group>
+                                                                    <field name="completed_date_by_line_manager"
+                                                                           attrs="{'readonly': ['|',('done_by_ra', '=', True),('check_manager','=',True)]}"
+                                                                           string="Clearance Date" readonly='1'/>
+                                                                </group>
+                                                            </group>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </group>
+                                </group>
+                            </page>
+
+                            <page string="ADMIN"
+                                  groups="kw_onboarding.group_kw_onboarding_admin,kw_eos.group_kw_eos_manager,kw_eos.group_kw_eos_officer">
+                                <div class="font-weight-bold">
+                                    Please indicate if the following has been handed over:
+                                </div>
+                                <group>
+                                    <group>
+                                        <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                                            <field name="check_admin_user" invisible='1'/>
+                                            <field name="done_by_admin" invisible='1'/>
+                                            <field name="cell_phone_accessories" readonly="1" invisible='1'/>
+                                            <thead>
+                                                <tr>
+                                                    <th class="o_column_sortable" width="50%%">Activity</th>
+                                                    <th class="o_column_sortable">Status</th>
+                                                    <th class="o_column_sortable">Comment</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="ui-sortable">
+                                                <tr>
+                                                    <td scope="row">Business Cards</td>
+                                                    <td>
+                                                        <field name="business_cards"
+                                                               attrs="{'readonly': ['|',('done_by_admin', '=', True),('check_manager','=',True)],'required': [('check_admin_user', '=', True)]}"
+                                                               string="1. Business Cards" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name='business_card_clearance_cmmt'
+                                                               attrs="{'readonly': ['|',('done_by_admin', '=', True),('check_manager','=',True)],'required': [('check_admin_user', '=', True)]}"
+                                                               string="comments" readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Access card /ID card</td>
+                                                    <td>
+                                                        <field name="access_cards"
+                                                               attrs="{'readonly': ['|',('done_by_admin', '=', True),('check_manager','=',True)],'required': [('check_admin_user', '=', True)]}"
+                                                               string="2. Access card /ID card" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="id_card_clearance_cmmt"
+                                                               attrs="{'readonly': ['|',('done_by_admin', '=', True),('check_manager','=',True)],'required': [('check_admin_user', '=', True)]}"
+                                                               string="Comments" readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Drawer/Cabinet keys</td>
+                                                    <td>
+                                                        <field name="drawer_cabinet_keys"
+                                                               attrs="{'readonly': ['|',('done_by_admin', '=', True),('check_manager','=',True)],'required': [('check_admin_user', '=', True)]}"
+                                                               string="3. Drawer/Cabinet keys" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="drawerkeys_clearance_cmmt"
+                                                               attrs="{'readonly': ['|',('done_by_admin', '=', True),('check_manager','=',True)],'required': [('check_admin_user', '=', True)]}"
+                                                               string="Date" readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Clearance by Admin</td>
+                                                    <td>
+                                                        <field name="cleared_by_administration_unit"
+                                                               attrs="{'readonly': ['|',('done_by_admin', '=', True),('check_manager','=',True)],'required': [('check_admin_user', '=', True)]}"
+                                                               string="4. Clearance by Admin" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="comments_by_administration_unit"
+                                                               attrs="{'readonly': ['|',('done_by_admin', '=', True),('check_manager','=',True)],'required': [('check_admin_user', '=', True)]}"
+                                                               string="Comment by Admin" readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </group>
+                                </group>
+                                <group>
+                                    <group>
+                                        <group>
+                                            <field name="ict_administration_date"
+                                                   attrs="{'readonly': ['|',('done_by_admin', '=', True),('check_manager','=',True)]}"
+                                                   string="Clearance Date" readonly='1'/>
+                                        </group>
+                                    </group>
+                                </group>
+                            </page>
+
+                            <page string="FINANCE"
+                                  groups="kw_onboarding.group_kw_onboarding_finance,kw_eos.group_kw_eos_manager,kw_eos.group_kw_eos_officer">
+                                <div class="font-weight-bold">
+                                    Please indicate if the following has been cleared:
+                                </div>
+                                <field name="check_account_user" invisible='1'/>
+                                <field name="done_by_account" invisible='1'/>
+                                <field name="emp_tax_given" invisible='1'/>
+                                <group>
+                                    <group>
+                                        <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                                            <field name="check_admin_user" invisible='1'/>
+                                            <thead>
+                                                <tr>
+                                                    <th class="o_column_sortable" width="50%%">Activity</th>
+                                                    <th class="o_column_sortable">Status</th>
+                                                    <th class="o_column_sortable">Comment</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="ui-sortable">
+                                                <tr>
+                                                    <td>Clearance by Finance</td>
+                                                    <td>
+                                                        <field name="cleared_by_account_unit" attrs="{'readonly': ['|',('done_by_account', '=', True),('check_manager','=',True)],
+										       'required': [('check_account_user', '=', True)]}"
+                                                               string="Clearance by Finance" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="comments_by_account_unit" attrs="{'readonly': ['|',('done_by_account', '=', True),('check_manager','=',True)],
+										       'required': [('check_account_user', '=', True)]}" readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Salary Advance</td>
+                                                    <td>
+                                                        <field name="oa_salary_advance" attrs="{'readonly': ['|',('done_by_account', '=', True),('check_manager','=',True)],
+											       'required': [('check_account_user', '=', True)]}"
+                                                               string="1.Salary advance" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="comment_salary_advance"
+                                                               attrs="{'readonly': ['|',('done_by_account', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Tour Advance</td>
+                                                    <td>
+                                                        <field name="oa_travel_advance" attrs="{'readonly': ['|',('done_by_account', '=', True),('check_manager','=',True)],
+											       'required': [('check_account_user', '=', True)]}"
+                                                               string="2.Tour advance" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="comment_travel_advance"
+                                                               attrs="{'readonly': ['|',('done_by_account', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Petty Cash</td>
+                                                    <td>
+                                                        <field name="petty_cash" attrs="{'readonly': ['|',('done_by_account', '=', True),('check_manager','=',True)],
+											       'required': [('check_account_user', '=', True)]}"
+                                                               string="3. Drawer/Cabinet keys" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="comment_petty_cash"
+                                                               attrs="{'readonly': ['|',('done_by_account', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </group>
+                                </group>
+                                <style>
+                                .o_form_view .o_group {
+                                        display: inline-block;
+                                        width: 100%;
+                                        margin: 0px 0;
+                                    }
+                                    </style>
+                                <group attrs="{'invisible': [('emp_tax_given', '=', False)]}">
+                                    <table class="table table-sm table-hover table-striped " style="width:50%;">
+                                        <tbody class="ui-sortable">
+                                            <tr>
+                                                <td style="width:50%;">Income Tax Declaration</td>
+                                                <td style="width:12%;">
+                                                    <field name="cleared_income_tax_declaration"
+                                                        attrs="{'readonly': ['|', ('done_by_account', '=', True), ('check_manager', '=', True)], 'required': [('check_account_user', '=', True),('emp_tax_given', '=', True)]}" 
+                                                        string="Income Tax Declaration"/>
+                                                </td>
+                                                <td>
+                                                    <field name="comments_income_tax_declaration"
+                                                        attrs="{'readonly': ['|', ('done_by_account', '=', True), ('check_manager', '=', True)], 'required': [('check_account_user', '=', True),('emp_tax_given', '=', True)]}" />
+                                                </td>
+                                            </tr>
+                                            <tr >
+                                                <td style="width:50%;">Income Tax Recovery</td>
+                                                <td style="width:12%;">
+                                                    <field name="cleared_income_tax_recovery"
+                                                            attrs="{'readonly': ['|',('done_by_account', '=', True),('check_manager','=',True)],'required': [('check_account_user', '=', True),('emp_tax_given', '=', True)]}"
+                                                            string="Income Tax Recovery"/>
+                                                </td>
+                                                <td>
+                                                    <field name="comments_income_tax_recovery"
+                                                            attrs="{'readonly': ['|',('done_by_account', '=', True),('check_manager','=',True)],'required': [('check_account_user', '=', True),('emp_tax_given', '=', True)]}"/>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </group>
+                                <group>
+                                    <group>
+                                        <group>
+                                            <field name="ict_account_date" string="Clearance Date"
+                                                   attrs="{'readonly': ['|',('done_by_account', '=', True),('check_manager','=',True)]}"
+                                                   readonly='1'/>
+                                        </group>
+                                    </group>
+                                </group>
+                            </page>
+
+                            <page string="IT"
+                                  groups="kw_onboarding.group_kw_onboarding_nsa,kw_eos.group_kw_eos_manager,kw_eos.group_kw_eos_officer">
+                                <div class="font-weight-bold" colspan="12">
+                                    Please indicate if the following equipment has been handed over:
+                                </div>
+                                <field name="check_it_user" invisible='1'/>
+                                <field name="done_by_it" invisible='1'/>
+
+                                <group>
+                                    <group>
+                                        <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                                            <field name="check_admin_user" invisible='1'/>
+                                            <thead>
+                                                <tr>
+                                                    <th class="o_column_sortable" width="50%%">Activity</th>
+                                                    <th class="o_column_sortable">Status</th>
+                                                    <th class="o_column_sortable">Comment</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="ui-sortable">
+                                                <tr>
+                                                    <td scope="row">System Submitted</td>
+                                                    <td>
+                                                        <field name="laptop"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="computer_clearance_cmnt"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td scope="row">Mouse</td>
+                                                    <td>
+                                                        <field name="mouse"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="mouse_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Keyboard</td>
+                                                    <td>
+                                                        <field name="key_board"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="key_board_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Pen Drive</td>
+                                                    <td>
+                                                        <field name="pendrive"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="pendrive_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Data Card</td>
+                                                    <td>
+                                                        <field name="data_card"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="data_card_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Mobile</td>
+                                                    <td>
+                                                        <field name="mobile"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="mobile_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Laptop Bag</td>
+                                                    <td>
+                                                        <field name="laptop_bag"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="laptop_bag_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Closed Server Access</td>
+                                                    <td>
+                                                        <field name="closed_server_access"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="closed_server_access_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Shared Folder</td>
+                                                    <td>
+                                                        <field name="shared_folder"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="shared_folder_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Database</td>
+                                                    <td>
+                                                        <field name="database"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="database_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Server Instances</td>
+                                                    <td>
+                                                        <field name="server_instance"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="server_instance_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Access to Email, MIS, Biometric system etc.</td>
+                                                    <td>
+                                                        <field name="systems_disabled"
+                                                               string="2. Access to Email, MIS, Biometric system etc."
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               force_save='1' readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="email_clearance_cmnt"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Email Forward To</td>
+                                                    <td>
+                                                        <field name="email_forward_to" string="3. Email Forward To"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               options="{'no_create': True, 'no_edit':True, 'no_open': True}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="email_forward_to_comment"
+                                                               string='4. Forward comment'
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               options="{'no_create': True, 'no_edit':True, 'no_open': True}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td scope="row">IP Phone</td>
+                                                    <td>
+                                                        <field name="ip_phone"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="ip_phone_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Ext. No.</td>
+                                                    <td>
+                                                        <field name="ext_no"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="ext_no_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Abbr. Dialling</td>
+                                                    <td>
+                                                        <field name="abbr_dialling"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="abbr_dialling_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Call Forwarding</td>
+                                                    <td>
+                                                        <field name="call_forwarding"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="call_forwarding_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">VPN Access</td>
+                                                    <td>
+                                                        <field name="vpn_access"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="vpn_access_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">WiFi Access to Mobile</td>
+                                                    <td>
+                                                        <field name="wifi_access_to_mobile"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="wifi_access_to_mobile_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">CUG Connection</td>
+                                                    <td>
+                                                        <field name="cug_connection"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="cug_connection_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Project Backup</td>
+                                                    <td>
+                                                        <field name="project_backup"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="project_backup_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Other Backup</td>
+                                                    <td>
+                                                        <field name="other_backup"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="other_backup_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">Others</td>
+                                                    <td>
+                                                        <field name="other"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="1. Computer" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="other_comment"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Exit From CSM Whatsapp Group</td>
+                                                    <td>
+                                                        <field name="exit_official_whatsapp_group"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="5. Exit From CSM Whatsapp Group" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="whatapp_clearance_cmnt"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="5. Exit From CSM Whatsapp Group" readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Clearance by IT</td>
+                                                    <td>
+                                                        <field name="cleared_by_it_unit"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="6. Cleared by IT" style="width:75%"
+                                                               readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="comments_by_it_unit"
+                                                               attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                               string="Comment by IT" readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </group>
+                                </group>
+                                <group>
+                                    <group>
+                                        <group>
+                                            <field name="ict_unit_date" string="Date"
+                                                   attrs="{'readonly': ['|',('done_by_it', '=', True),('check_manager','=',True)]}"
+                                                   readonly='1'/>
+                                        </group>
+                                    </group>
+                                </group>
+                            </page>
+
+                            <page string="HR" groups="kw_eos.group_kw_eos_manager,kw_eos.group_kw_eos_officer">
+                                <group>
+                                    <group>
+                                        <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                                            <field name="check_admin_user" invisible='1'/>
+                                            <thead>
+                                                <tr>
+                                                    <th class="o_column_sortable" width="50%%">Activity</th>
+                                                    <th class="o_column_sortable">Status</th>
+                                                    <th class="o_column_sortable">Comment</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="ui-sortable">
+                                                <field name="check_hr_user" invisible='1'/>
+                                                <tr>
+                                                    <td scope="row">EOS Status</td>
+                                                    <td>
+                                                        <field name="compute_eos_status" string='1. EOS Status'
+                                                               readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="hr_eos_clearance"
+                                                               attrs="{'readonly': ['|',('done_by_hr','=',True),('check_manager','=',False)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td scope="row">RA Clearance</td>
+                                                    <td>
+                                                        <field name="done_by_ra" readonly="1" string='2. RA Clearance'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="hr_ra_clearance"
+                                                               attrs="{'readonly': ['|',('done_by_hr','=',True),('check_manager','=',False)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Admin Clearance</td>
+                                                    <td>
+                                                        <field name="done_by_admin" readonly="1"
+                                                               string='3. Admin Clearance'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="hr_admin_clearance"
+                                                               attrs="{'readonly': ['|',('done_by_hr','=',True),('check_manager','=',False)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>IT Clearance</td>
+                                                    <td>
+                                                        <field name="done_by_it" readonly="1" string='4. IT Clearance'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="hr_it_clearance"
+                                                               attrs="{'readonly': ['|',('done_by_hr','=',True),('check_manager','=',False)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Finance Clearance</td>
+                                                    <td>
+                                                        <field name="done_by_account" readonly="1"
+                                                               string='5. Finance Clearance'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="hr_finance_clearance"
+                                                               attrs="{'readonly': ['|',('done_by_hr','=',True),('check_manager','=',False)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Eligibility for Re-hire</td>
+                                                    <td>
+                                                        <field name="re_hire_eligibility" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="reason_for_re_hire"
+                                                               attrs="{'readonly': [('check_manager','=',False)],'required': [('re_hire_eligibility', '=', False)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Are the Exit formalities and Full &amp; Final Settlement is complete</td>
+                                                    <td>
+                                                        <field name="is_exit_settlement_complete" readonly='1'/>
+                                                    </td>
+                                                    <td>
+                                                        <field name="reason_exit_settlement"
+                                                               attrs="{'readonly': ['|',('is_exit_settlement_complete','=',False),('check_manager','=',False)]}"
+                                                               readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Feedback on account of Disciplinary/Ethical/Integrity conduct on the job</td>
+                                                    <td></td>
+                                                    <td>
+                                                        <field name="feedback" readonly='1'
+                                                               attrs="{'readonly': [('check_manager','=',False)]}"
+                                                               string='Feedback on account of Disciplinary/Ethical/Integrity conduct on the job'/>
+                                                    </td>
+                                                </tr>
+												<tr>
+                                                    <td>Comments by HR</td>
+                                                    <td></td>
+                                                    <td>
+                                                        <field name="comments_by_hr_unit"
+                                                               attrs="{'readonly': ['|',('done_by_hr','=',True),('check_manager','=',False)],'required': [('check_hr_user', '=', True)]}"
+                                                               string='Comments by HR' readonly='1'/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </group>
+                                </group>
+                                <group>
+                                    <group>
+                                        <group>
+                                            <field name="hr_unit_date" string="Exit Date"
+                                                   attrs="{'readonly': [('check_manager','=',False)]}" readonly='1'/>
+                                            <field name="attrition_type" attrs="{'readonly': [('check_manager','=',False)]}"/>
+                                            <field name="involuntary_reason" attrs="{'readonly': [('check_manager','=',False)],'invisible':[('attrition_type','!=','involuntary')],'required':[('attrition_type','=','involuntary')]}"/>
+                                        </group>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		<record id="eos_report_clearance_action" model="ir.actions.act_window">
+			<field name="name">Clearance Report</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">hr.employee.clearance</field>
+			<field name="view_mode">tree</field>
+			<field name="view_type">form</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+    (0, 0, {'view_mode': 'tree', 'view_id': ref('view_hr_employee_clearance_report_tree')}),
+    (0, 0, {'view_mode': 'form', 'view_id': ref('view_hr_employee_clearance_report_form')})]"/>
+			<field name="domain">[]</field>
+			<field name="context">{'clearance_report':True}</field>
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					Records not available.
+				</p>
+			</field>
+		</record>
+
+		<record id="view_employee_exit_interview_report_tree" model="ir.ui.view">
+			<field name="name">employee.exit.interview.tree</field>
+			<field name="model">employee.exit.interview</field>
+			<field name="priority" eval="8"/>
+			<field name="arch" type="xml">
+				<tree string="Employee Exit Interview" create='false' edit='false' default_order="create_date desc">
+					<field name="reg_ref_no"/>
+					<field name="employee_name" class="font-weight-bold"/>
+					<field name="employee_code"/>
+					<field name="department_id"/>
+					<field name="division"/>
+					<field name="section"/>
+					<field name="practise"/>
+					<field name="job_title"/>
+					<!-- <field name="manager_id"/> -->
+					<field name="create_date" widget='date' string='Create Date'/>
+					<!-- <field name="stage_id"/> -->
+				</tree>
+			</field>
+		</record>
+
+		<!-- Exit Interview Form View -->
+		<record id="view_employee_exit_interview_report_form" model="ir.ui.view">
+			<field name="name">employee.exit.interview.form</field>
+			<field name="model">employee.exit.interview</field>
+			<field name="arch" type="xml">
+				<form string="Employee Exit Interview" create='false' edit='false'>
+					<header>
+						<!-- <button name="action_approve"  string="Submit to HR Manager" type="object"/> -->
+					</header>
+					<sheet>
+						<div class="oe_title">
+							<h1>
+								<field name="name" invisible="1"/>
+							</h1>
+						</div>
+						<group>
+							<group>
+								<field name="employee_id" readonly="1"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+								<field name="job_title" string='Designation'  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+								<field name="department_id"  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+								<!-- <field name="manager_id"/>
+								<field name="resignation_id"/> -->
+							</group>
+							<group>
+								<!-- <label style="font-weight: bold" class="oe_inline" for="from_date" string="Duration of Service"/>
+								<div><field name="from_date" style="width:30% !important;"  class="oe_inline" /> - <field name="to_date" style="width:30% !important;" class="oe_inline" /></div>
+								<field name="date_of_completion"  />
+								<field name="company_id" groups="base.group_multi_company" />
+								<field name="responsibility_center_id"/>
+								<field name="reason_for_leaving_id"  options="{'no_create': True, 'no_open': True}" required="1" /> -->
+							</group>
+						</group>
+						<notebook>
+							<page string="Exit interview questions">
+                                <h5>1. What are the reasons for leaving?</h5>
+                                <group>
+                                    <group col='3'>
+                                        <h5>
+                                            <field name="reason_leaving" nolabel="1."/>
+                                        </h5>
+                                    </group>
+                                </group>
+                                <br></br>
+								<h5>2. Did dissatisfaction with any of the following factors influence your decision to
+									leave?
+								</h5>
+                                <div class=" table-responsive" style="width:70%">
+                                    <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                                        <tbody class="ui-sortable">
+                                            <tr>
+                                                <td scope="row" style="width: 55%;">Type Of Work</td>
+                                                <td>
+										            <field name="type_of_work" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Working Conditions (Setting, schedule, Travel, Flexibility)</td>
+                                                <td>
+										            <field name="working_conditions" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Pay</td>
+                                                <td>
+										            <field name="pay" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Supervisor</td>
+                                                <td>
+                                                    <field name="supervisor" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Location</td>
+                                                <td>
+										            <field name="location" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Cost of living in area</td>
+                                                <td>
+										            <field name="cost_of_living" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Additional Comments</td>
+                                                <td>
+										            <field name="additional_comments"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+								<br></br>
+								<h5>
+									<span>3. Please rate the following aspects of the job you are vacating.</span>
+									<span>(Use the 1-5 Scale below. 1-Very Poor, 2-Poor, 3-Average, 4-Good,
+										5-Excellent)
+									</span>
+								</h5>
+                                <div class=" table-responsive" style="width:70%">
+                                    <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                                        <tbody class="ui-sortable">
+                                            <tr>
+                                                <td scope="row" style="width: 55%;">Type of work performed</td>
+                                                <td>
+            										<field name="type_of_work_performed" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Fairness of workload</td>
+                                                <td>
+            										<field name="fairness_work_load" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Salary</td>
+                                                <td>
+            										<field name="salary" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Working Conditions</td>
+                                                <td>
+            										<field name="working_condition" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Infra Provided</td>
+                                                <td>
+            										<field name="infra_provided" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Training Received</td>
+                                                <td>
+            										<field name="training_received" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Co-Workers</td>
+                                                <td>
+										            <field name="co_workers" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Additional Comments</td>
+                                                <td>
+            										<field name="additional_comments_3"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+								<br></br>
+								<h5>
+									<span>4. Please rate your line manager on the following factors.</span>
+									<span>(Use the 1-5 scale below. 1-Never, 2-Seldom, 3-Often, 4-Usually, 5-Always)
+									</span>
+								</h5>
+                                <div class=" table-responsive" style="width:70%">
+                                    <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                                        <tbody class="ui-sortable">
+                                            <tr>
+                                                <td scope="row" style="width: 55%;">Gave usable performance feedback</td>
+                                                <td>
+            										<field name="performance_feedback" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Recognized accomplishments</td>
+                                                <td>
+            										<field name="accomplishments" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Clearly Communicated Expectations</td>
+                                                <td>
+            										<field name="communicated_expectations" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Treated you fairly and respectfully</td>
+                                                <td>
+            										<field name="treated_you" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Coached,Trained &amp; Developed you</td>
+                                                <td>
+            										<field name="coached" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Resolved Concerns promptly</td>
+                                                <td>
+            										<field name="resolved_concerns" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Listened to suggestions &amp; feedback</td>
+                                                <td>
+            										<field name="listened_suggestions" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Supported work-life balance</td>
+                                                <td>
+            										<field name="worklife_balance" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Provided Appropriate &amp; Challenging assignment</td>
+                                                <td>
+            										<field name="Provided_assignment" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Your Suggestions for your Line Manager</td>
+                                                <td>
+            										<field name="additional_comments_4"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+								<br></br>
+								<h5>
+									<span>5. Please Rate Your Upper line manager on the following factors.</span>
+									<span>(Use the 1-5 scale below. 1-Never, 2-Seldom, 3-Often, 4-Usually, 5-Always)
+									</span>
+								</h5>
+                                <div class=" table-responsive" style="width:70%">
+                                    <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                                        <tbody class="ui-sortable">
+                                            <tr>
+                                                <td scope="row" style="width: 55%;">Gave usable performance feedback</td>
+                                                <td>
+            										<field name="upper_performance_feedback" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Recognized accomplishments</td>
+                                                <td>
+            										<field name="upper_accomplishments" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Clearly Communicated Expectations</td>
+                                                <td>
+            										<field name="upper_communicated_expectations" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Treated you fairly and respectfully</td>
+                                                <td>
+            										<field name="upper_treated_you" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Coached,Trained &amp; Developed you</td>
+                                                <td>
+            										<field name="upper_coached" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Resolved Concerns promptly</td>
+                                                <td>
+            										<field name="upper_resolved_concerns" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Listened to suggestions &amp; feedback</td>
+                                                <td>
+            										<field name="upper_listened_suggestions" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Supported work-life balance</td>
+                                                <td>
+            										<field name="upper_worklife_balance" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Provided Appropriate &amp; Challenging assignment</td>
+                                                <td>
+            										<field name="upper_Provided_assignment" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Your Suggestions for your Line Manager</td>
+                                                <td>
+            										<field name="additional_comments_5"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <br></br>
+								<h5>
+									<span>6. Please Rate management on the following Parameters.</span>
+									<span>(Use the 1-5 scale below. 1-Never, 2-Seldom, 3-Often, 4-Usually, 5-Always)
+									</span>
+								</h5>
+                                 <div class=" table-responsive" style="width:70%">
+                                    <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                                        <tbody class="ui-sortable">
+                                            <tr>
+                                                <td scope="row" style="width: 55%;">Give Fair and equal treatment</td>
+                                                <td>
+            										<field name="equal_treatment" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Was available to discuss job related issues</td>
+                                                <td>
+            										<field name="discuss_issues" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Encouraged Feedback and suggestions</td>
+                                                <td>
+            										<field name="encourageed_feedback" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Maintained consistent policies and practices</td>
+                                                <td>
+            										<field name="consistent_policies" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Provided recognition for achievements</td>
+                                                <td>
+            										<field name="recognition" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Gave opportunities to develop</td>
+                                                <td>
+                                                    <field name="gave_opportunities" widget="radio" options="{'horizontal': true}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row">Your Suggestions on improvement in our Management style</td>
+                                                <td>
+            										<field name="additional_comments_6"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <br></br>
+
+                                 <div class=" table-responsive" style="width:70%">
+                                    <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                                        <tbody class="ui-sortable">
+                                            <tr>
+                                                <td scope="row" style="width: 55%;"><strong>Personal contact Number</strong></td>
+                                                <td>
+            										<field name="contact_no"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="row" ><strong>Personal Email ID</strong></td>
+                                                <td>
+            										<field name="email"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record id="eos_report_feedback_action" model="ir.actions.act_window">
+			<field name="name">Feedback Report</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">employee.exit.interview</field>
+			<field name="view_mode">tree</field>
+			<field name="view_type">form</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+    (0, 0, {'view_mode': 'tree', 'view_id': ref('view_employee_exit_interview_report_tree')}),
+    (0, 0, {'view_mode': 'form', 'view_id': ref('view_employee_exit_interview_report_form')})]"/>
+			<!-- <field name="domain">[]</field> -->
+			<field name="context">{'feedback_report':True}</field>
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					Records not available.
+				</p>
+			</field>
+		</record>
+		<!-- server action to call views and wizard feedback report -->
+		<record id="kw_feedback_server_action" model="ir.actions.server">
+			<field name="name">Feedback Report</field>
+			<field name="condition">True</field>
+			<field name="model_id" ref="kw_eos.model_employee_exit_interview"/>
+			<field name="state">code</field>
+			<field name="code">
+if env.user.has_group('kw_eos.group_kw_eos_user') and \
+    not env.user.has_group('kw_eos.group_kw_eos_manager') and \
+    not env.user.has_group('kw_employee.group_hr_ra') and \
+    not env.user.has_group('kw_onboarding.group_kw_onboarding_finance') and \
+    not env.user.has_group('kw_onboarding.group_kw_onboarding_admin') and \
+    not env.user.has_group('kw_onboarding.group_kw_onboarding_nsa') and \
+    not env.user.has_group('kw_eos.group_kw_eos_officer') and \
+    not env.user.has_group('kw_eos.group_kw_eos_resource_head') and \
+    not env.user.has_group('kw_wfh.group_hr_hod') and \
+	not env.user.has_group('kw_eos.group_kw_eos_report_manager'):
+    tree_view_id = env.ref('kw_eos.view_employee_exit_interview_report_tree').id
+    form_view_id = env.ref('kw_eos.view_employee_exit_interview_report_form').id
+    action = {
+        'type': 'ir.actions.act_window',
+        'name' : 'Feedback Report',
+        'view_type': 'form',
+        'view_mode': 'form,tree',
+        'views': [(tree_view_id, 'tree'), (form_view_id,'form')],
+        'res_model': 'employee.exit.interview',
+        'domain':[('employee_id.user_id','=',env.user.employee_ids.user_id.id)],
+    }
+else:
+    form_view_id = env.ref('kw_eos.eos_feedback_wizard_view').id
+    action = {
+        'type': 'ir.actions.act_window',
+        'name' : 'Feedback Report',
+        'view_mode': 'form',
+        'view_mode': 'form',
+        'res_model': 'eos_feedback_wizard',
+        'views': [(form_view_id,'form')],
+        'target': 'new',
+    }
+			</field>
+		</record>
+		<!-- Clearance -->
+		<record id="kw_clearance_server_action" model="ir.actions.server">
+			<field name="name">Clearance Report</field>
+			<field name="condition">True</field>
+			<field name="model_id" ref="kw_eos.model_hr_employee_clearance"/>
+			<field name="state">code</field>
+			<field name="code">
+if env.user.has_group('kw_eos.group_kw_eos_user') and \
+    not env.user.has_group('kw_eos.group_kw_eos_manager') and \
+    not env.user.has_group('kw_employee.group_hr_ra') and \
+    not env.user.has_group('kw_onboarding.group_kw_onboarding_finance') and \
+    not env.user.has_group('kw_onboarding.group_kw_onboarding_admin') and \
+    not env.user.has_group('kw_onboarding.group_kw_onboarding_nsa') and \
+    not env.user.has_group('kw_eos.group_kw_eos_officer') and \
+    not env.user.has_group('kw_eos.group_kw_eos_resource_head') and \
+    not env.user.has_group('kw_wfh.group_hr_hod') and \
+	not env.user.has_group('kw_eos.group_kw_eos_report_manager'):
+    tree_view_id = env.ref('kw_eos.view_hr_employee_clearance_report_tree').id
+    form_view_id = env.ref('kw_eos.view_hr_employee_clearance_report_form').id
+    action = {
+        'type': 'ir.actions.act_window',
+        'name' : 'Clearance Report',
+        'view_type': 'form',
+        'view_mode': 'form,tree',
+        'views': [(tree_view_id, 'tree'), (form_view_id,'form')],
+        'res_model': 'hr.employee.clearance',
+        'domain':[('employee_id.user_id','=',env.user.employee_ids.user_id.id)],
+    }
+else:
+    form_view_id = env.ref('kw_eos.eos_clearance_wizard_view').id
+    action = {
+        'type': 'ir.actions.act_window',
+        'name' : 'Clearance Report',
+        'view_mode': 'form',
+        'view_mode': 'form',
+        'res_model': 'eos_clearance_wizard',
+        'views': [(form_view_id,'form')],
+        'target': 'new',
+    }
+			</field>
+		</record>
+	</data>
+</odoo>

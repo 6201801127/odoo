@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <record id="kw_hr_leave_cancel_approve_mail" model="mail.template">
+            <field name="name">Leave Cancel Approve Mail.</field>
+            <field name="model_id" ref="model_kw_cancel_leave"/>
+            <field name="subject">Leave Cancel | Approved | ${object.approved_leave_id.employee_id.display_name or ''}</field>
+            <field name="email_from">${(user.email or '')|safe}</field>
+            <field name="email_to">${(object.approved_leave_id.employee_id.work_email if object.approved_leave_id.employee_id else ''|safe)}</field>
+            <field name="email_cc">${(object.approver_id.work_email if object.approver_id.user_id != user else ''|safe)}</field>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+			
+			<![CDATA[
+					<table border="0">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">Dear</span>
+                                        ${object.approved_leave_id.employee_id.name or ''},
+                                    </h5>
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                        Your Leave cancellation request has been approved by ${object.approver_id.display_name or ''}.
+                                    </p>	
+                                </div>							
+                                <table border="0" style="border-collapse: collapse;font-size: 16px;">
+                                	% if object.approved_leave_id.employee_id.department_id:
+	                                    <tr>
+	                                        <td style="color:#676767;padding-left: 20px;height: 34px;" width="200px">
+	                                           Department
+	                                        </td>
+	                                        <td style="color:#167b9e;height: 34px;">
+	                                            ${object.approved_leave_id.employee_id.department_id.name if object.approved_leave_id.employee_id.department_id else ''}
+	                                        </td>
+	                                    </tr>
+                                    % endif
+                                    % if object.approved_leave_id.employee_id.division:
+	                                     <tr>
+	                                        <td style="color:#676767;padding-left: 20px;height: 34px;" width="200px">
+	                                            Division
+	                                        </td>
+	                                        <td style="color:#167b9e;height: 34px;">
+	                                            ${object.approved_leave_id.employee_id.division.name if object.approved_leave_id.employee_id.division else ''}
+	                                        </td>
+	                                    </tr>
+                                    % endif
+                                    % if object.approved_leave_id.employee_id.section:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;height: 34px;" width="200px">
+                                                Section
+                                            </td>
+                                            <td style="color:#167b9e;height: 34px;">
+                                                ${object.approved_leave_id.employee_id.section.name if object.approved_leave_id.employee_id.section else ''}
+                                            </td>
+                                        </tr>
+                                    % endif
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;height: 34px;" width="200px">
+                                            Leave Type
+                                        </td>
+                                        <td style="color:#167b9e;height: 34px;">
+                                            ${object.approved_leave_id.holiday_status_id.name}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;height: 34px;" width="200px">
+                                            From
+                                        </td>
+                                        <td style="color:#167b9e;height: 34px;">
+                                            ${format_tz(object.approved_leave_id.request_date_from, format='%d-%b-%Y')}    ${dict(object.fields_get(allfields=['from_half_day'])['from_half_day']['selection'])[object.from_half_day] if object.request_unit_half else ''}
+                                             </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;height: 34px;" width="200px">
+                                            To
+                                        </td>
+                                        <td style="color:#167b9e;height: 34px;">
+                                            ${format_tz(object.approved_leave_id.request_date_to, format='%d-%b-%Y')}   ${dict(object.fields_get(allfields=['to_half_day'])['to_half_day']['selection'])[object.to_half_day] if object.request_unit_half else ''}  
+                                             </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;height: 34px;" width="200px">
+                                            Total Day(s)
+                                        </td>
+                                        <td style="color:#167b9e;height: 34px;">
+                                            ${('%.2f' % object.approved_leave_id.number_of_days).rstrip('0').rstrip('.')}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;height: 34px;" width="200px">
+                                            Reason of Cancellation
+                                        </td>
+                                        <td style="color:#167b9e;height: 34px;">
+                                            ${object.description}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;height: 34px;" width="200px">
+                                            Authority Remark
+                                        </td>
+                                        <td style="color:#167b9e;height: 34px;">
+                                            ${object.comment}
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                        Please login to Tendrils to take action.<br/>
+                                        ---------------------------------------------------
+                                        <br/>
+                                        This is a system generated mail. Please do not reply to this email. 
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                ]]>
+			</field>
+			<field name="auto_delete" eval="False"/>
+			<field name="user_signature" eval="False"/>
+			       </record>
+    </data>
+</odoo>

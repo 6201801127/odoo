@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+      <record id="kw_service_register_tree" model="ir.ui.view">
+        <field name="name">kw_service_register.tree</field>
+        <field name="model">kw_service_register</field>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <tree create='false' delete='false' editable="bottom">
+                <field name="sequence_number" string='Service Ref.' readonly='1' />
+                <field name="po_reference" string='PO Ref.' readonly='1' />
+                <field name="product_type" string='Service Type' readonly='1' />
+                <field name="product_code" readonly='1' options="{'no_quick_create':True,'no_create':True,'no_edit':True,'no_open': True,}" />
+                <field name="partner_id" readonly='1' options="{'no_quick_create':True,'no_create':True,'no_edit':True,'no_open': True,}" />
+                <field name="quantity" string='Quantity' readonly='1' />
+                <field name="product_uom" string='UoM' readonly='1' />
+                <field name="price" string='Unit Price' readonly='1' />
+                <field name="department_id" readonly='1' options="{'no_quick_create':True,'no_create':True,'no_edit':True,'no_open': True,}"/>
+                <field name="employee_id" attrs="{'readonly': [('status', '=', 'Issued')]}" options="{'no_quick_create':True,'no_create':True,'no_edit':True,'no_open': True,}" />
+                <field name="status" readonly='1' />
+                <button name="service_issue" attrs="{'invisible': [('status', '=', 'Issued')]}" string="Issue" type="object" class="btn btn-success"/>
+                <button name="service_return" attrs="{'invisible': [('status', '!=', 'Issued')]}" string="Release" type="object" class="btn btn-info"/>
+
+            </tree>
+        </field>
+    </record>
+
+    <record id="kw_service_register_search" model="ir.ui.view">
+        <field name="name">kw_service_register.search</field>
+        <field name="model">kw_service_register</field>
+        <field name="arch" type="xml">
+            <search string="" >
+                <field name="sequence_number" />
+                <field name="po_reference" />
+                <field name="product_type" />
+                <field name="product_code" />
+                <field name="partner_id" />
+                <field name="department_id" />
+                <field name="employee_id" />
+                <field name="status" />
+                <filter string="Issued" domain="[('status','=','Issued')]" name="status_issued"/>
+                <separator/>
+                <filter string="Not Issued" domain="[('status','=','Not-Issued')]" name="status_not_issued"/>
+                <group expand="0" string="Group By">
+                    <filter name="status" string="Status" domain="[]" context="{'group_by':'status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="kw_issue_service_form" model="ir.ui.view">
+        <field name="name">kw_service_register.form</field>
+        <field name="model">kw_service_register</field>
+        <field name="arch" type="xml">
+            <form>
+                <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                </script>
+                <div class="row">
+                    <div class="text-center col-sm-12 mx-auto">
+                        <p class="h6 font-weight-light text-left text-justify">
+                            <group>
+                                <group>
+                                    <field name="product_code" required='1' options="{'no_quick_create':True,'no_create':True,'no_edit':True,'no_open': True,}"/>
+                                    <field name="department_id" required='1' domain="[('dept_type.code','=','department')]" options="{'no_quick_create':True,'no_create':True,'no_edit':True,'no_open': True,}"/>
+                                    <field name="employee_id"  options="{'no_quick_create':True,'no_create':True,'no_edit':True,'no_open': True,}"/>
+                                    <field name="issue_remark"  required='1'/>
+                                </group>
+                            </group>
+                        </p>
+                        <button type="object"  name="service_issue_action" class="btn-success mr-2" style="float:left;">Issue</button>
+                        <button string="Cancel" class="btn-danger" special="cancel" style="float:left;"/>
+                    </div>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="kw_return_service_form" model="ir.ui.view">
+        <field name="name">kw_service_register.form</field>
+        <field name="model">kw_service_register</field>
+        <field name="arch" type="xml">
+            <form>
+                <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                </script>
+                <div class="row">
+                    <div class="text-center col-sm-12 mx-auto">
+                        <p class="h6 font-weight-light text-left text-justify">
+                            <group>
+                                <group>
+                                    <field name="return_remark"  required='1'/>
+                                </group>
+                            </group>
+                        </p>
+                        <button type="object"  name="service_return_action" class="btn-success mr-2" style="float:left;">Return</button>
+                        <button string="Cancel" class="btn-danger" special="cancel" style="float:left;"/>
+                    </div>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="kw_service_register_action" model="ir.actions.act_window">
+      <field name="name">Service Register</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">kw_service_register</field>
+      <field name="search_view_id" ref="kw_inventory.kw_service_register_search"/> 
+      <field name="domain">[]</field>
+      <field name="context">{'search_default_status_not_issued':1}</field>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+        </p>
+      </field>
+    </record>
+
+</odoo>

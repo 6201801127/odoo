@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="res_partner_vendor_inherited_view">
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+               <xpath expr="//form/sheet" position="before">
+					<header>
+                        <field name="vendor_state" widget="statusbar" statusbar_visible="applied,approved"/>
+                        <button name="apply_for_vendor" attrs="{'invisible': [('vendor_state', 'in', ['applied','approved'])]}" string="Apply" type="object" class="btn btn-primary"/>
+                        <button name="approve_vendor" attrs="{'invisible': [('vendor_state', 'in', ['draft','approved'])]}" string="Approve" type="object" class="btn btn-success" groups='account.group_account_manager'/>
+                    </header>
+				</xpath>
+            </field>
+        </record>
+        <record id="vendor_approval_action_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Vendor Approval</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="view_type">form</field>
+            <!-- <field name="target">current</field> -->
+            <field name="domain">[('vendor_state','=','applied')]</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    No Record Found
+                </p>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="purchase_order_form_inherit_vendor">
+            <field name="name">purchase.order.form.inherits</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="replace">
+                    <field name="partner_id" context="{'search_default_supplier':1, 'default_supplier':1, 'default_customer':0}" domain="[('supplier','=',True), ('parent_id', '=', False),('vendor_state','=','approved')]"  force_save="1" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                    </field>
+            
+                </field>
+        </record>
+        <record model="ir.ui.view" id="kw_material_request_quotation_wizard_view_inherited">
+            <field name="name">kw_material_request_quotation_wizard.form.inherits</field>
+            <field name="model">kw_material_request_quotation_wizard</field>
+            <field name="inherit_id" ref="kw_inventory.kw_material_request_quotation_wizard_view"/>
+            <field name="arch" type="xml">
+                <field name="vendor_ids" position="replace">
+                    <field name="vendor_ids" domain="[('supplier','=',True),('parent_id','=',False),('vendor_state','=','approved')]" widget="many2many_tags" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                    </field>
+            
+                </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_inventory_quotation_view_inherited">
+            <field name="name">kw_quotation.form.inherits</field>
+            <field name="model">kw_quotation</field>
+            <field name="inherit_id" ref="kw_inventory.kw_quotation_view_form"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="replace">
+                    <field name="partner_id" domain="[('supplier','=',True),('parent_id', '=', False),('vendor_state','=','approved')]"  options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                    </field>
+            
+                </field>
+        </record>
+        
+        <menuitem id="menu_procurement_management_supplier_approval" name="Vendors Approval"
+            parent="purchase.menu_procurement_management"
+            action="kw_inventory.vendor_approval_action_window" sequence="16" groups='account.group_account_manager'/>
+    </data>
+</odoo>

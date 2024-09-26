@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="kwonboard_new_joinee_workflow_main" model="odoo.workflow">
+            <field name="name">Employee New Joinee Workflow</field>
+            <field name="activities_add" eval="True"/>
+            <field name="followers_add" eval="False"/>
+            <field name="mail_thread_add" eval="False"/>
+            <field name="remove_default_attrs_mod" eval="False"/>
+            <field name="model_id" ref="kw_onboarding.model_kwonboard_new_joinee"/>
+        </record>
+
+        <record id="kwonboard_new_joinee_workflow_node_1" model="odoo.workflow.node">
+            <field name="name">Draft</field>
+            <field name="workflow_id" ref="kwonboard_new_joinee_workflow_main"/>
+            <field name="node_name">1</field>
+            <field name="sequence" eval="1"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_start" eval="True"/>
+        </record>
+
+        <record id="kwonboard_new_joinee_workflow_node_2" model="odoo.workflow.node">
+            <field name="name">Authenticated</field>
+            <field name="workflow_id" ref="kwonboard_new_joinee_workflow_main"/>
+            <field name="node_name">2</field>
+            <field name="sequence" eval="2"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+        <record id="kwonboard_new_joinee_workflow_node_3" model="odoo.workflow.node">
+            <field name="name">Cancelled</field>
+            <field name="workflow_id" ref="kwonboard_new_joinee_workflow_main"/>
+            <field name="node_name">3</field>
+            <field name="sequence" eval="3"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+        <record id="kwonboard_new_joinee_workflow_button_1" model="odoo.workflow.node.button">
+            <field name="sequence" eval="10"/>
+            <field name="workflow_id" ref="kwonboard_new_joinee_workflow_main"/>
+            <field name="name">Authenticate</field>
+            <field name="node_id" ref="kwonboard_dynamic_workflow_node_2"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="btn_hide_domain" eval="[('state', '!=', 'draft')]"/>
+            <field name="condition_code">
+if user.has_group("kw_onboarding.group_kw_onboarding_manager"):
+    result = True
+else:
+    warning("Only Onboarding Manager can take action !")
+    result = False
+                </field>
+                <field name="action_type">code</field>
+                <field name="code">
+obj.new_joinee_authenticate()
+                </field>
+        </record>
+
+        <record id="kwonboard_new_joinee_workflow_button_2" model="odoo.workflow.node.button">
+            <field name="sequence" eval="11"/>
+            <field name="workflow_id" ref="kwonboard_new_joinee_workflow_main"/>
+            <field name="name">Cancel</field>
+            <field name="node_id" ref="kwonboard_dynamic_workflow_node_3"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="btn_hide_domain" eval="[('state', '!=', 'draft')]"/>
+            <field name="condition_code">
+if user.has_group("kw_onboarding.group_kw_onboarding_manager"):
+    result = True
+else:
+    warning("Only Onboarding Manager can take action !")
+    result = False
+                </field>
+                <field name="action_type">code</field>
+                <field name="code">
+obj.new_joinee_cancel()
+                </field>
+        </record>
+        
+    </data>
+</odoo>

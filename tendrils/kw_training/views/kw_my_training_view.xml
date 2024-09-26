@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="kw_training_my_training_kanban_view" model="ir.ui.view">
+            <field name="name">My Training</field>
+            <field name="model">kw_training</field>
+            <field name="arch" type="xml">
+                <kanban create="false" edit="false" delete="false" import="false">
+                    <field name ="name"/>
+                    <field name ="start_date"/>
+                    <field name ="end_date"/>
+                    <field name="instructor_type"/>
+                    <field name="is_trainer"/>
+                    <field name="is_participant"/>
+                    <field name="trainer_session_count"/>
+                    <field name="test_available" />
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_card oe_kanban_global_click" t-attf-style="border-left: 5px solid {{ record.is_participant.raw_value ? '#108fbb;' : '#4cea25;' }}">
+
+                                <div class="oe_kanban_body">
+                                    <div class="font-weight-bold h2 text-center mb-3">
+                                        <field name="name"/>
+                                    </div>
+                                    <span class="text-left font-weight-bold">From : <field name="start_date"/>
+                                    </span>
+                                    <span class="text-right font-weight-bold" style="float:right;">To : <field name="end_date"/>
+                                    </span>
+                                    <div class="d-flex justify-content-bottom mt-3">
+                                        <div class="col-4 border-right text-center">
+                                            <span class="font-weight-bold h5 clearfix">
+                                                <field name="session_count"/>
+                                            </span>
+                                            <span class="text-muted h6">Sessions</span>
+                                        </div>
+                                        <t t-if="record.is_participant.raw_value==true">
+                                            <div class="col-4 border-right text-center">
+                                                <span class="font-weight-bold h5 clearfix">
+                                                    <field name="subjects_attended"/>
+                                                </span>
+                                                <span class="text-muted h6">Attended</span>
+                                            </div>
+
+                                        </t>
+                                        <t t-if="record.is_trainer.raw_value==true">
+                                            <div class="col-4 border-right text-center">
+                                                <span class="font-weight-bold h5 clearfix">
+                                                    <field name="trainer_session_count"/>
+                                                </span>
+                                                <span class="text-muted h6">Taken</span>
+                                            </div>
+                                        </t>
+                                        <div class="col-4 text-center">
+                                            <span class="font-weight-bold h5 clearfix">
+                                                <field name="material_count"/>
+                                            </span>
+                                            <span class="text-muted h6">Contents</span>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix" />
+                                    <div name="button_section" class="text-center">
+                                        <button class="btn btn-primary" name="action_training_test" type="object" 
+                                            attrs="{'invisible': [('test_available','=',False)]}">
+                                            Take Test
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="kw_training_my_training_form" model="ir.ui.view">
+            <field name="name">kw_training_my_training.form</field>
+            <field name="model">kw_training</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form create="false" edit="false" delete="false" duplicate="false">
+                    <sheet>
+                        <field name="total_feedback_given" invisible="1"/>
+                        <field name="subjects_attended" invisible="1"/>
+                        <field name="session_count" invisible="1"/>
+                        <field name="material_count" invisible="1"/>
+                        <field name="is_participant" invisible="1"/>
+                        <field name="is_trainer" invisible="1"/>
+                        <field name="instructor_type" invisible="1"/>
+                        <field name="subjects_attended" invisible="1"/>
+                        <field name="total_subjects" invisible="1"/>
+                        <field name="total_feedback_given" invisible="1"/>
+                        <field name="assessment_ids" invisible="1"/>
+                        <div class="oe_button_box" name="button_box" style="width:100%;margin-top:-16px;margin-right:-16px;">
+
+                            <button name="view_my_training_session" class="oe_stat_button" 
+                            attrs="{'invisible': [('session_count', '=', 0)]}" icon="fa-calendar" type="object">
+                                <div class="o_stat_info font-weight-bold">
+                                    <span class="o_stat_text">
+                                        <field name="session_count"/>
+                                        Session(s)
+                                    </span>
+                                </div>
+                            </button>
+
+                            <button name="view_my_training_material" class="oe_stat_button" attrs="{'invisible': [('material_count', '=', 0)]}" icon="fa-folder-open" type="object">
+                                <div class="o_stat_info font-weight-bold">
+                                    <span class="o_stat_text">
+                                        <field name="material_count"/>
+                                        Content(s)
+                                    </span>
+                                </div>
+                            </button>
+
+                            <button name="view_training_participant_feedback" type="object" attrs="{'invisible': ['|',('total_feedback_given', '=', 0),('is_trainer','=',True)]}" class="oe_stat_button" icon="fa-comments">
+                                <div class="o_stat_info font-weight-bold">
+                                    <field name="total_feedback_given"/>
+                                    <span class="o_stat_text">Feedback(s)</span>
+                                </div>
+                            </button>
+
+                            <button name="give_feedback" type="object" attrs="{'invisible': ['|',('subjects_attended','==', 0),('is_participant','=',False)]}" class="oe_stat_button" icon="fa-comments">
+                                <div class="o_stat_info font-weight-bold">
+                                    <span class="o_stat_text">Give Feedback</span>
+                                </div>
+                            </button>
+
+                            <!-- assessment section -->
+
+                            <button name="action_redirect_assessment" type="object" attrs="{'invisible': [('assessment_ids','=', [])]}" class="oe_stat_button" icon="fa-pencil">
+                                <div class="o_stat_info font-weight-bold">
+                                    <span class="o_stat_text">Assessment</span>
+                                </div>
+                            </button>
+
+                        </div>
+                        <group>
+                            <field name="name"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_training_my_training_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">My Training</field>
+            <field name="res_model">kw_training</field>
+            <field name="view_mode">kanban,form</field>
+            <field name="view_type">form</field>
+            <field name="domain">[('plan_ids.state','=','approved'),'|',('plan_ids.participant_ids.user_id','in',[uid]),('plan_ids.internal_user_ids.user_id','in',[uid])]</field>
+            <field name="context">{'search_default_current_financial_year':1}</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    No training(s) found..
+                </p>
+            </field>
+        </record>
+
+        <record id="kw_training_my_training_kanban_view_act_window_kanban" model="ir.actions.act_window.view">
+            <field name="view_mode">kanban</field>
+            <field name="view_id" ref="kw_training_my_training_kanban_view"/>
+            <field name="act_window_id" ref="kw_training_my_training_act_window"/>
+        </record>
+
+        <record id="kw_training_my_training_kanban_view_act_window_form" model="ir.actions.act_window.view">
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="kw_training_my_training_form"/>
+            <field name="act_window_id" ref="kw_training_my_training_act_window"/>
+        </record>
+
+        <record id="view_kw_training_my_training_search" model="ir.ui.view">
+            <field name="name">view.kw_training_my_training.search</field>
+            <field name="model">kw_training</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <filter string="Current Financial Year" name="current_financial_year" domain="[('current_financial_year','=','current')]"/>
+                    <separator/>
+                    <filter string="Participant" name="training_participant" domain="[('plan_ids.participant_ids.user_id','in',[uid])]"/>
+                    <filter string="Trainer" name="training_trainer" domain="[('plan_ids.internal_user_ids.user_id','in',[uid])]"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter string="Training Start Date" name="start_date" domain="[]" context="{'group_by':'start_date'}"/>
+                        <filter string="Training Start Date" name="start_date_filter" date="start_date"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <menuitem name="My Training" parent="menu_kw_training_root" id="menu_kw_training_my_training" action="kw_training_my_training_act_window" sequence="1"/>
+
+    </data>
+</odoo>
+        

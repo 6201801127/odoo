@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="sr_tasks_management_form" model="ir.ui.view">
+            <field name="name">task_management form</field>
+            <field name="model">kw_task_management</field>
+            <field name="arch" type="xml">
+                <form duplicate='false' edit='false'>
+                    <header>
+                        <!-- <button name="btn_assign" string="Assign" type="object" class="btn-primary" stage="Draft"
+                                attrs="{'invisible': [('stage', 'not in', ('Draft'))]}"
+                                confirm="Are you sure, you want to Assign?"/> -->
+                        <button name="btn_extend_effort_hour" string="Extend Effort Hour" type="object"
+                                class="btn-primary" stage="Draft"
+                                attrs="{'invisible': ['|',('stage', '!=', 'Assigned'),('extend_effort_hour_bool', '=',True)]}"
+                                context="{'active_id':id}"/>
+
+                        <field name="stage" widget="statusbar"
+                               statusbar_visible="Assigned,Report,Complete"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group string="">
+                                <div>
+                                    <h2>
+                                        <field name="reference_no_txt" readonly='1'
+                                               attrs="{'invisible': ['|',('id', '=', False),('stage','=','Draft')]}"/>
+                                    </h2>
+                                </div>
+                                <field name="store_resume_end_time" invisible="1"/>
+                                <field name="assign_to_report_bool" invisible="1"/>
+                                <field name="store_pause_time" invisible="1"/>
+                                <field name="extend_effort_hour_bool" invisible='1'/>
+                                <field name="reported_start_bool" invisible="1"/>
+                                <field name="assigned_to" required="1"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="task_raised_by" invisible="1"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="raised_department_id" invisible="1"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="reference_no" readonly='1'
+                                       attrs="{'invisible': ['|',('id', '=', False),('stage','=','Draft')]}"
+                                       invisible="1"/>
+                                <field name="assign_task_date" attrs="{'readonly': [('stage', '!=', 'Draft'),('reported_start_bool', '=', True)]}"
+                                       options="{'datepicker':{'minDate': 'now'}}" autocomplete="off"/>
+                                <!-- <field name="assigned_hours" readonly='1' widget="float_time"/>
+                                <field name="remaining_hour" widget="float_time"/> -->
+                                <!-- <field name="expected_date_time"/> -->
+                                <field name="task_name"
+                                       required="1"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft'),('reported_start_bool', '=', True)]}"/>
+                                <field name="can_see_advanced_fields" invisible="1"/>
+                                <field name="task_type" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       required="1" context="{'tree_view_ref':'task_management.kw_task_type_master_list_view'}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft'),('reported_start_bool', '=', True)]}"/>
+                                <field name="project_id"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'readonly': [('reported_start_bool', '=', True)],'invisible': [('can_see_advanced_fields', '=', False)],'required': [('can_see_advanced_fields','=', True)]}"/>
+
+                                <field name="project_code" readonly='1'
+                                       attrs="{'readonly': [('stage', '!=', 'Draft'),('reported_start_bool', '=', True)],'invisible': [('can_see_advanced_fields', '=', False)]}"/>
+
+                                <field name="module_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft'),('reported_start_bool', '=', True)],'invisible': [('can_see_advanced_fields', '=', False)]}"/>
+                                <field name="description" required="1"
+                                attrs="{'readonly': [('stage', '!=', 'Draft'),('reported_start_bool', '=', True)]}"/>
+                                <field name="estimated_hour" required="1"
+                                attrs="{'readonly': [('stage', '!=', 'Draft'),('reported_start_bool', '=', True)]}" widget="float_time"/>
+                                <field name="notify_to" widget="many2many_tags"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft'),('reported_start_bool', '=', True)]}"/>
+                            </group>
+                            <group>
+                            </group>
+
+                            <group string="Task Log">
+                                <field name="sr_task_log_ids" nolabel="1" style="pointer-events:none;">
+                                    <tree editable="bottom" create='false' readonly="1"
+                                          style="pointer-events:none;">
+                                        <field name="start_datetime"/>
+                                        <field name="end_datetime"/>
+                                        <field name="task_duration" widget="float_time"/>
+                                        <field name="action"/>
+                                        <field name="stage_comments"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <group string='Action Log' attrs="{'invisible': [('extend_effort_hour_bool', '=', False)]}" widget="float_time">
+                                    <field name="actual_ticket_hour" readonly="1" widget="float_time"/>            
+                                    <field name="extended_hour" readonly="1" widget="float_time"/>            
+                                    <field name="extend_effort_comment" readonly="1"/>
+                                </group>
+                            </group>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_sr_tasks_management_list" model="ir.ui.view">
+            <field name="name">task_management list</field>
+            <field name="model">kw_task_management</field>
+            <field name="arch" type="xml">
+                <tree default_order='sorting_order,id desc,stage asc' import='0' decoration-danger="stage=='Reject'"
+                    decoration-success="stage == 'Complete'">
+                    <field name="reference_no" invisible='1'/>
+                    <field name="reference_no_txt" readonly='1'/>
+                    <field name='project_task_name'/>
+                    <field name='assign_task_date' string="Assigned On"/>
+                    <field name="estimated_hour" widget="float_time"/>
+                    <field name="task_duration" widget="float_time" string="Actual Hour"/>
+                    <field name="assigned_to"/>
+                    <field name="stage" />
+                </tree>
+            </field>
+        </record>
+
+        <!-- ===========================TAKE ACTION VIEW================================================= -->
+        <record id="sr_tasks_management_takeaction_form" model="ir.ui.view">
+            <field name="name">task_management take action form</field>
+            <field name="model">kw_task_management</field>
+            <field name="arch" type="xml">
+                <form duplicate='false' create='false' edit='false'>
+                    <header>
+                        <!-- <button name="btn_report" string="Report" type="object" class="btn-primary" stage="Assigned"
+                                attrs="{'invisible': [('stage', 'not in', ('Assigned'))]}" context="{'current_proj':project_id}"/> -->
+                        <!-- <button name="btn_start" string="Start" type="object" class="btn-primary" stage="Assigned"
+                                    attrs="{'invisible': ['|','|',('stage', 'not in', ('Assigned')),('reported_start_bool','=',True),('assign_to_bool','=', False)]}"/>
+                        <button name="btn_stop" string="Stop" type="object" class="btn-danger" stage="Assigned"
+                                attrs="{'invisible': ['|','|',('reported_start_bool','=',False),('stage', 'in', ('Report','Complete','Reject')),('assign_to_bool','=', False)]}" context="{'current_proj':project_id}"/> -->
+                        <button name="btn_acknowledge" string="Acknowledge" type="object" class="btn-success"
+                                stage="Report"
+                                attrs="{'invisible': ['|',('stage', 'not in', ('Report')),('task_raised_by_bool' ,'=', False)]}"
+                                context="{'active_id':id}"/>
+
+                        <field name="stage" widget="statusbar"
+                               statusbar_visible="Assigned,Report,Complete,Reject"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <field name="task_raised_by_bool" invisible = "1"/>
+                            <!-- <field name="assign_task_id"/> -->
+                            <field name="assign_to_bool" invisible = "1"/>
+                            <field name="reference_no" invisible = "1"/>
+                            <field name="reference_no_txt" string="Ticket No."/>
+                            <field name="assign_task_date" readonly='1'/>
+                            <field name="task_raised_by" readonly='1'
+                                   options="{'no_open': True,'no_create':True,'no_edit':True}" string="Assigned By"
+                                   invisible="1"/>
+                            <field name="assigned_to" readonly='1'
+                                   options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name='task_name' readonly='1'
+                            attrs="{'invisible': [('can_see_advanced_fields', '=', True)]}"/>
+                            <field name="project_id" readonly='1'
+                                   options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                   attrs="{'invisible': [('can_see_advanced_fields', '=', False)]}"/>
+                            <field name="project_code" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                   attrs="{'invisible': [('can_see_advanced_fields', '=', False)]}"/>
+                            <field name="module_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                   attrs="{'invisible': [('can_see_advanced_fields', '=', False)]}"/>
+                            <field name="description"/>
+                            <field name="estimated_hour" readonly='1' widget="float_time"/>
+                            <field name="notify_to" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                   widget="many2many_tags" readonly='1'/>
+                            <field name="start_datetime_task"/>
+                            <field name="end_datetime_task"/>
+                            <field  name="task_duration" widget="float_time"/>
+                            <field name="can_see_advanced_fields" invisible="1"/>
+                            <field name="reported_start_bool" invisible="1"/>
+                        </group>
+                        <group>
+                        <group>
+                            <field name="sr_task_log_ids" nolabel="1" style="pointer-events:none;">
+                                <tree editable="bottom" create='false' readonly="1"
+                                      >
+                                    <field name="start_datetime"/>
+                                    <field name="end_datetime"/>
+                                    <field name="task_duration" widget="float_time"/>
+                                    <field name="action"/>
+                                    <field name="stage_comments"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </group>
+                        <group string='Action Log'>
+                            <!-- <field name="actual_hour"/> -->
+                            <field name="comment" attrs="{'invisible':[('stage','!=','Report')]}"/>
+                            <field name="ack_comment" attrs="{'invisible':[('stage','!=','Complete')]}"/>
+                            <field name="reopen_comment" attrs="{'invisible':[('stage','!=','Reopen')]}"/>
+                            <field name="reject_comment" attrs="{'invisible':[('stage','!=','Reject')]}"/>
+                            
+                        </group>
+
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_sr_tasks_management_takeaction_list" model="ir.ui.view">
+            <field name="name">task_management takeaction list</field>
+            <field name="model">kw_task_management</field>
+            <field name="arch" type="xml">
+                <tree default_order='id desc' import='0' create='0'>
+                    <field name="reference_no" invisible ="1"/>
+                    <field name="reference_no_txt"/>
+                    <field name='project_task_name'/>
+                    <field name='assign_task_date' string="Assigned On"/>
+                    <field name="estimated_hour" widget="float_time"/>
+                    <field name="assigned_to" string="Reported By"/>
+                    <field name="store_stop_time" string="Reported On"/>
+                    <field name="stage"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="task_management_takeaction" model="ir.actions.act_window">
+            <field name="name">Take Action</field>
+            <field name="res_model">kw_task_management</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('task_raised_by.user_id', '=', uid), ('stage', '=', 'Report')]</field>
+
+            <field name="view_ids" eval="[(5, 0, 0),
+                     (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_sr_tasks_management_takeaction_list')}),
+                     (0, 0, {'view_mode': 'form', 'view_id': ref('sr_tasks_management_takeaction_form')})]"/>
+        </record>
+
+
+    <!-- ===========================MY TICKET VIEW================================================= -->
+        <record id="my_task_takeaction_form" model="ir.ui.view">
+            <field name="name">My Task task_management form</field>
+            <field name="model">kw_task_management</field>
+            <field name="arch" type="xml">
+                <form duplicate='false' create='false' edit='false'>
+                    <header>
+                        <button name="btn_start" string="Start" type="object" class="btn-primary" stage="Assigned"
+                                attrs="{'invisible': ['|',('stage', 'not in', ('Assigned')),('reported_start_bool','=',True)]}"
+                                confirm="Are you sure to acknowledge and start the task?"/>
+                        <button name="btn_pause" string="Pause" type="object" class="btn btn-warning" stage="Assigned"
+                                attrs="{'invisible': ['|','|',('reported_start_bool','=',False),('reported_pause_bool','=',True),('stage', 'not in', ('Assigned'))]}"/>
+
+                        <button name="btn_resume" string="Resume" type="object" class="btn btn-warning" stage="Assigned"
+                                attrs="{'invisible': ['|','|',('reported_start_bool','=',False),('reported_pause_bool','=',False),('reported_resume_bool','=', True)]}"/>
+
+                        <button name="btn_stop" string="Stop" type="object" class="btn-danger" stage="Assigned"
+                                attrs="{'invisible': ['|','|',('reported_start_bool','=',False),('reported_pause_bool','=',True),('stage', 'not in', ('Assigned'))]}"
+                                context="{'current_proj':project_id,'active_id':id}"
+                                style='margin-left:16px;'/>
+
+                        <field name="stage" widget="statusbar"
+                               statusbar_visible="Assigned,Report,Complete"/>
+                    </header>
+                    <sheet>
+
+                        <div>
+                            <h2>
+                                <field name="reference_no_txt" readonly='1'
+                                       attrs="{'invisible': ['|',('id', '=', False),('stage','=','Draft')]}"/>
+                            </h2>
+                        </div>
+
+                        <group>
+                            <field name="can_see_advanced_fields" invisible="1"/>
+                            <field name="reported_start_bool" invisible="1"/>
+                            <field name="reported_pause_bool" invisible="1"/>
+                            <field name="reported_resume_bool" invisible="1"/>
+                            <!-- <field name="resume_pause_bool" invisible="1"/> -->
+                            <!-- <field name="is_stop_bool" invisible="1"/> -->
+                            <group>
+                                <field name="task_raised_by_bool" invisible="1"/>
+                                <field name="assign_to_bool" invisible="1"/>
+                                <field name="reference_no" invisible="1"/>
+
+                                <field name="assign_task_date" readonly='1'/>
+                                <field name="task_raised_by" readonly='1'
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       string="Assigned By"/>
+                                <field name='task_name' readonly='1'
+                                       attrs="{'invisible': [('can_see_advanced_fields', '=', True)]}"/>
+                                <field name="project_id" readonly='1'
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'invisible': [('can_see_advanced_fields', '=', False)]}"/>
+                                <field name="project_code" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'invisible': [('can_see_advanced_fields', '=', False)]}"/>
+                                <field name="module_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'invisible': ['|', ('can_see_advanced_fields', '=', False), ('module_id', '=', False)]}"/>
+                                <field name="description"/>
+                                <field name="estimated_hour" readonly='1' widget="float_time"/>
+                                <field name="assigned_to" readonly='1'
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}" invisible="1"/>
+                                <field name="notify_to" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       widget="many2many_tags" readonly='1'/>
+                                <field name="extend_effort_hour_bool" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="start_datetime_task"/>
+                                <field name="end_datetime_task"/>
+                                <field name="task_duration" widget="float_time"/>
+                            </group>
+                            
+                        </group>
+                        <group>
+                            <field name="comment" attrs="{'invisible':[('stage','!=','Report')]}" />
+                            <field name="ack_comment" attrs="{'invisible':[('stage','!=','Complete')]}"/>
+                            <field name="reopen_comment" attrs="{'invisible':[('stage','!=','Reopen')]}"/>
+                            <field name="reject_comment" attrs="{'invisible':[('stage','!=','Reject')]}"/>
+                        </group>
+                        <group string="Task Log">
+                            <group>
+                                <field name="sr_task_log_ids" nolabel="1" style="pointer-events:none;">
+                                    <tree editable="bottom" create='false' readonly="1">
+                                        <field name="start_datetime"/>
+                                        <field name="end_datetime"/>
+                                        <field name="task_duration" widget="float_time"/>
+                                        <field name="action"/>
+                                        <field name="stage_comments"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                        <group string='Action Log' attrs="{'invisible': [('extend_effort_hour_bool', '=', False)]}">
+                            <field name="actual_ticket_hour" readonly="1" widget="float_time"/>            
+                            <field name="extended_hour" readonly="1" widget="float_time"/>            
+                            <field name="extend_effort_comment" readonly="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="my_task_takeaction_list" model="ir.ui.view">
+            <field name="name">My Task Take Action List</field>
+            <field name="model">kw_task_management</field>
+            <field name="arch" type="xml">
+                <tree default_order='sorting_order,id desc,stage asc' import='0' create='0'  decoration-danger="stage=='Reject'"
+                decoration-success="stage == 'Complete'">
+                    <field name="reference_no" invisible ="1"/>
+                    <field name="reference_no_txt"/>
+                    <field name='project_task_name'/>
+                    <field name='assign_task_date' string="Assigned On"/>
+                    <field name="estimated_hour" widget="float_time"/>
+                    <field name="task_duration" widget="float_time" string = 'Actual Hour'/>
+                    <field name="task_raised_by" string='Assigned By'/>
+                    <field name="stage"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="my_task_management_takeaction" model="ir.actions.act_window">
+            <field name="name">My Tickets</field>
+            <field name="res_model">kw_task_management</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('assigned_to.user_id', '=', uid),('assign_task_date','&lt;=',datetime.datetime.now())]</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                     (0, 0, {'view_mode': 'tree', 'view_id': ref('my_task_takeaction_list')}),
+                     (0, 0, {'view_mode': 'form', 'view_id': ref('my_task_takeaction_form')})]"/>
+        </record>
+        <record id="kw_task_management_take_action" model="ir.actions.act_window">
+            <field name="name">Assign Task</field>
+            <field name="res_model">kw_task_management</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('create_uid','=',uid)]</field>
+            <!-- <field name="context">{'delete':True}</field> -->
+            <field name="view_ids" eval="[(5, 0, 0),
+                     (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_sr_tasks_management_list')}),
+                     (0, 0, {'view_mode': 'form', 'view_id': ref('sr_tasks_management_form')})]"/>
+        </record>
+
+        
+        <menuitem name="Take Action"
+                  id="sr_tasks_management_takeaction_menu"
+                  parent='task_request_management_parent_menu'
+                  action="task_management_takeaction"
+                  sequence="2"/>
+
+        <menuitem name="Assign Task"
+                  id="sr_tasks_management_apply_menu"
+                  parent='task_request_management_parent_menu'
+                  action="kw_task_management_take_action"
+                  sequence="1"/>
+        <menuitem name="My Tickets"
+                  id="mytask_management_sub_menu"
+                  parent='my_task_menu'
+                  action="my_task_management_takeaction"
+                  sequence="1"/>
+
+    </data>
+</odoo>

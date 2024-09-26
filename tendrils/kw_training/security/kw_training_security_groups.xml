@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record model="ir.module.category" id="module_category_kw_training">
+            <field name="name">Training</field>
+            <field name="description">User access level for training</field>
+            <field name="sequence">12</field>
+        </record>
+
+        <record id="group_kw_training_employee" model="res.groups">
+            <field name="name">Employee</field>
+            <field name="category_id" ref="kw_training.module_category_kw_training"/>
+        </record>
+
+        <record id="group_kw_training_trainer" model="res.groups">
+            <field name="name">Trainer</field>
+            <field name="category_id" ref="kw_training.module_category_kw_training"/>
+            <field name="implied_ids" eval="[(4, ref('group_kw_training_employee'))]"/>
+        </record>
+        
+        <record id="group_kw_training_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="category_id" ref="kw_training.module_category_kw_training"/>
+            <field name="implied_ids" eval="[(4, ref('group_kw_training_trainer'))]"/>
+            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        </record>
+
+        <record id="base.default_user" model="res.users">
+            <field name="groups_id" eval="[(4,ref('kw_training.group_kw_training_employee'))]"/>
+        </record>
+        <!-- start : for kw_training model-->
+        <record model="ir.rule" id="kw_training_employee_trainer_rule">
+            <field name="name">Training : Employee and Trainer view own trainings</field>
+            <field name="model_id" ref="model_kw_training"/>
+            <field name="domain_force">[('plan_ids.state','=','approved'),'|',('plan_ids.participant_ids.user_id','in',user.ids),('plan_ids.internal_user_ids.user_id','in',user.ids)]</field>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_employee')),(4, ref('group_kw_training_trainer'))]"/>
+        </record>
+        
+        <record model="ir.rule" id="kw_training_manager_group_rule">
+            <field name="name">Training : Manager Can Access all Trainings</field>
+            <field name="model_id" ref="model_kw_training"/>
+            <field name="domain_force">[(1, '=' , 1)]</field>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_manager'))]"/>
+        </record>
+        <!-- end : for kw_training model-->
+        <!-- start : for kw_training_plan model-->
+        <record model="ir.rule" id="kw_training_plan_employee_trainer_rule">
+            <field name="name">Training Plan : Employee and Trainer view those trainings where they are participant and trainer</field>
+            <field name="model_id" ref="model_kw_training_plan"/>
+            <field name="domain_force">['|',('participant_ids.user_id','in',user.ids),('internal_user_ids.user_id','in',user.ids)]</field>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_employee')),(4, ref('group_kw_training_trainer'))]"/>
+        </record>
+        
+        <record model="ir.rule" id="kw_training_plan_manager_group_rule">
+            <field name="name">Training Plan : Manager Can Access all Plans</field>
+            <field name="model_id" ref="model_kw_training_plan"/>
+            <field name="domain_force">[(1, '=' , 1)]</field>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_manager'))]"/>
+        </record>
+        <!-- end : for kw_training_plan model-->
+        <!-- start : for kw_training_schedule model -->
+        <record model="ir.rule" id="kw_training_schedule_employee_trainer_rule">
+            <field name="name">Training Sessions : Employee and Trainer view those sessions where they are participant and trainer of training</field>
+            <field name="model_id" ref="model_kw_training_schedule"/>
+            <field name="domain_force">[('training_id.plan_ids.state','=','approved'),'|',('training_id.plan_ids.participant_ids.user_id','in',user.ids),('training_id.plan_ids.internal_user_ids.user_id','in',user.ids)]</field>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_employee')),(4, ref('group_kw_training_trainer'))]"/>
+        </record>
+        
+        <record model="ir.rule" id="kw_training_schedule_manager_group_rule">
+            <field name="name">Training Sessions : Manager Can Access all Sessions</field>
+            <field name="model_id" ref="model_kw_training_schedule"/>
+            <field name="domain_force">[(1, '=' , 1)]</field>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_manager'))]"/>
+        </record>
+        <!-- end : for kw_training_schedule model --> 
+        
+        <!-- start : for kw_training_material model -->
+        <record model="ir.rule" id="kw_training_material_employee_trainer_rule">
+            <field name="name">Training Materials : Employee and Trainer view those materials where they are participant and trainer of training</field>
+            <field name="model_id" ref="model_kw_training_material"/>
+            <field name="domain_force">[('training_id.plan_ids.state','=','approved'),'|',('training_id.plan_ids.participant_ids.user_id','in',user.ids),('training_id.plan_ids.internal_user_ids.user_id','in',user.ids)]</field>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_employee')),(4, ref('group_kw_training_trainer'))]"/>
+        </record>
+        
+        <record model="ir.rule" id="kw_training_material_manager_group_rule">
+            <field name="name">Training Sessions : Manager Can Access all materials</field>
+            <field name="model_id" ref="model_kw_training_material"/>
+            <field name="domain_force">[(1, '=' , 1)]</field>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_manager'))]"/>
+        </record>
+        <!-- end : for kw_training_material model -->
+        
+        <!-- start : for kw_training_feedback model -->
+        <record model="ir.rule" id="kw_training_feedback_employee_rule">
+            <field name="name">Training Feedback : Employee view own feedbacks only</field>
+            <field name="model_id" ref="model_kw_training_feedback"/>
+            <field name="domain_force">[('create_uid','=',user.id)]</field>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_employee'))]"/>
+        </record>
+
+        <record model="ir.rule" id="kw_training_feedback_manager_group_rule">
+            <field name="name">Training Feedback : Manager can access all feedbacks</field>
+            <field name="model_id" ref="model_kw_training_feedback"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_manager'))]"/>
+        </record>
+        <!-- end : for kw_training_feedback model -->
+        
+        <!-- start : for kw_training_assessment model -->
+        <record model="ir.rule" id="kw_training_assessment_employee_trainer_rule">
+            <field name="name">Training Assessment : Employee view own feedbacks only</field>
+            <field name="model_id" ref="model_kw_training_assessment"/>
+            <field name="domain_force">[('training_id.plan_ids.state','=','approved'),'|',('training_id.plan_ids.participant_ids.user_id','in',user.ids),('training_id.plan_ids.internal_user_ids.user_id','in',user.ids)]</field>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_employee')),(4, ref('group_kw_training_trainer'))]"/>
+        </record>
+
+        <record model="ir.rule" id="kw_training_assessment_manager_group_rule">
+            <field name="name">Training Assessment : Manager can access all feedbacks</field>
+            <field name="model_id" ref="model_kw_training_assessment"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_manager'))]"/>
+        </record>
+        <!-- end : for kw_training_assessment model -->
+        
+        <!-- start : for kw_training_score model -->
+        <record model="ir.rule" id="kw_training_score_employee_trainer_rule">
+            <field name="name">Training Score : Employee and Trainer view participated or taken training score only</field>
+            <field name="model_id" ref="model_kw_training_score"/>
+            <field name="domain_force">[('assessment_id.training_id.plan_ids.state','=','approved'),'|',('assessment_id.training_id.plan_ids.participant_ids.user_id','in',user.ids),('assessment_id.training_id.plan_ids.internal_user_ids.user_id','in',user.ids)]</field>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_employee')),(4, ref('group_kw_training_trainer'))]"/>
+        </record>
+
+        <record model="ir.rule" id="kw_training_score_manager_group_rule">
+            <field name="name">Training Score : Manager can access all Scores</field>
+            <field name="model_id" ref="model_kw_training_score"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_manager'))]"/>
+        </record>
+        <!-- end : for kw_training_score model -->
+        
+        <!-- start : for kw_training_score_details model -->
+        <record model="ir.rule" id="kw_training_score_details_employee_trainer_rule">
+            <field name="name">Training Score Details: Employee View own and Trainer View All Score Details</field>
+            <field name="model_id" ref="model_kw_training_score_details"/>
+            <field name="domain_force">['&amp;',('score_id.assessment_id.training_id.plan_ids.state','=','approved'),
+                                              '|',('participant_id.user_id','in',user.ids),
+                                              ('score_id.assessment_id.training_id.plan_ids.internal_user_ids.user_id','in',user.ids)]</field>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_employee')),(4, ref('group_kw_training_trainer'))]"/>
+        </record>
+
+        <record model="ir.rule" id="kw_training_score_details_manager_group_rule">
+            <field name="name">Training Score Details: Manager can access all Score Details</field>
+            <field name="model_id" ref="model_kw_training_score_details"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_manager'))]"/>
+        </record>
+        <!-- end : for kw_training_score_details model -->
+        
+        <!-- start : for kw_training_attendance model -->
+        <record model="ir.rule" id="kw_training_attendance_employee_trainer_rule">
+            <field name="name">Training Attendance: Employee and Trainer view own attendance</field>
+            <field name="model_id" ref="model_kw_training_attendance"/>
+            <field name="domain_force">[('training_id.plan_ids.state','=','approved'),'|',('training_id.plan_ids.internal_user_ids.user_id','in',user.ids),('training_id.plan_ids.participant_ids.user_id','in',user.ids)]</field>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_employee')),(4, ref('group_kw_training_trainer'))]"/>
+        </record>
+
+        <record model="ir.rule" id="kw_training_attendance_manager_group_rule">
+            <field name="name">Training Attendance: Manager can access all Attendances</field>
+            <field name="model_id" ref="model_kw_training_attendance"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_manager'))]"/>
+        </record>
+        <!-- end : for kw_training_attendance model -->
+        
+        <!-- start : for kw_training_attendance_details model -->
+        <record model="ir.rule" id="kw_training_attendance_details_employee_trainer_rule">
+            <field name="name">Training Attendance Details: Employee and Trainer view own attendance details</field>
+            <field name="model_id" ref="model_kw_training_attendance_details"/>
+            <field name="domain_force">[('participant_id.user_id','in',user.ids)]</field>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_employee')),(4, ref('group_kw_training_trainer'))]"/>
+        </record>
+
+        <record model="ir.rule" id="kw_training_attendance_details_manager_group_rule">
+            <field name="name">Training Attendance Details: Manager can access all Attendance Details</field>
+            <field name="model_id" ref="model_kw_training_attendance_details"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+            <field name="groups" eval="[(4, ref('group_kw_training_manager'))]"/>
+        </record>
+        <!-- end : for kw_training_attendance_details model -->
+        
+        <!-- start : survey access rights -->
+        <record id="survey_training_manager_access" model="ir.rule">
+            <field name="name">Training Manager Survey access rights</field>
+            <field name="model_id" ref="survey.model_survey_survey"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_kw_training_manager'))]"/>
+            <field eval="1" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="1" name="perm_create"/>
+        </record>
+        
+        <record id="survey_input_training_manager_access" model="ir.rule">
+            <field name="name">Training Manager Survey Input access rights</field>
+            <field name="model_id" ref="survey.model_survey_user_input"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_kw_training_manager'))]"/>
+            <field eval="1" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="1" name="perm_create"/>
+        </record>
+        <!-- end : survey access rights -->
+    </data>
+</odoo>

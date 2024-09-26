@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+<odoo>
+	<data>
+        <record id="training_plan_applied_mail" model="mail.template">
+            <field name="name">Training Plan: Applied</field>
+            <field name="model_id" ref="kw_training.model_kw_training_plan"/>
+            <field name="subject">${object.training_id.name} - Plan Approval Reminder</field>
+            <field name="email_from">tendrils@csm.tech</field>
+            <field name="email_to" >${object.get_ra_email() or ''}</field>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                    <table border="0">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">
+                                            Hello
+                                            % if object.employee_id and object.employee_id.parent_id:
+                                                ${object.employee_id.parent_id.name}
+                                            % endif
+                                        </span>
+                                    </h5>
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                        New training plan has been added by
+                                        % if object.employee_id:
+                                            ${object.employee_id.name}.
+                                        % endif
+                                    </p>
+                                </div>
+
+                                <table border="0" style="border-collapse: collapse;font-size: 16px;">
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Title
+                                        </td>
+                                        <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.training_id.name}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Start Date
+                                        </td>
+                                        <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(object.period_from, format='%d-%b-%Y')}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            End Date
+                                        </td>
+                                        <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(object.period_to, format='%d-%b-%Y')}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Instructor Type
+                                        </td>
+                                        <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.instructor_type.capitalize()}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                ]]>
+            </field>
+            <field name="auto_delete" eval="False"/>
+            <field name="user_signature" eval="False"/>
+        </record>
+
+        <record id="training_plan_action_mail" model="mail.template">
+            <field name="name">Training Plan: 
+            % if object.state=='approved':
+                Approved
+            % endif
+            % if object.state=='rejected':
+                Rejected
+            % endif 
+            </field>
+            <field name="model_id" ref="kw_training.model_kw_training_plan"/>
+            <field name="subject">${object.training_id.name} - Plan 
+            % if object.state=='approved':
+                Approved
+            % endif
+            % if object.state=='rejected':
+                Rejected
+            % endif</field>
+            <field name="email_from">tendrils@csm.tech</field>
+            <field name="email_to" >${object.employee_id.work_email or ''}</field>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                    <table border="0">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">
+                                            Hello
+                                            % if object.employee_id.name:
+                                                ${object.employee_id.name}
+                                            % endif
+                                        </span>
+                                    </h5>
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                        Your training plan has been
+                                        % if object.state=='approved':
+                                            approved
+                                        % endif
+                                        % if object.state=='rejected':
+                                            rejected
+                                        % endif
+                                        by
+                                        % if object.employee_id and object.employee_id.parent_id:
+                                            ${object.employee_id.parent_id.name}.
+                                        % endif
+                                    </p>
+                                </div>
+
+                                <table border="0" style="border-collapse: collapse;font-size: 16px;">
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Title
+                                        </td>
+                                        <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.training_id.name}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Start Date
+                                        </td>
+                                        <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(object.period_from, format='%d-%b-%Y')}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            End Date
+                                        </td>
+                                        <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(object.period_to, format='%d-%b-%Y')}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Instructor Type
+                                        </td>
+                                        <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.instructor_type.capitalize()}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                ]]>
+            </field>
+            <field name="auto_delete" eval="False"/>
+            <field name="user_signature" eval="False"/>
+        </record>
+	</data>
+</odoo>

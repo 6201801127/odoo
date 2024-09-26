@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+
+        <record id="hr_payroll.hr_rule_basic" model="hr.salary.rule">
+            <field name="name">Basic Salary</field>
+            <field name="sequence" eval="1"/>
+            <field name="code">BASIC</field>
+            <field name="category_id" ref="hr_payroll.BASIC"/>
+            <field name="condition_select">none</field>
+            <field name="amount_select">code</field>
+            <field name="parent_id" ref="hr_payroll.structure_base"/>
+            <field name="amount_python_compute">result = contract.current_basic</field>
+        </record>
+
+        
+
+        
+
+        <record id="l10n_in_hr_payroll.hr_payslip_line_professional_tax" model="hr.salary.rule">
+            <field name="code">PTD</field>
+            <field name="name">Professional Tax</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <field name="condition_select">none</field>
+            <!-- <field name="condition_python">result = contract.wage &gt;= 3000 </field> -->
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_professionaltax(categories.GROSS,payslip.employee_id,contract.is_consolidated,employee.date_of_joining,payslip.date_to.year,payslip.date_to.month,payslip.date_from)</field>
+            <field name="register_id" ref="l10n_in_hr_payroll.hr_professional_tax_deduction_register"/>
+            <field eval="17" name="sequence"/>
+            <field name="note">Workers living in states that impose the professional tax must submit a payment each half-year for the right to practice a profession or trade. It applies equally to employees who work for the national or state government, and those employed by private corporations. The professional tax uses a six-month accounting system, which divides the year into two periods, beginning on April 1 and October 1.</field>
+        </record>
+
+        <record id="CTC" model="hr.salary.rule.category">
+            <field name="name">CTC</field>
+            <field name="code">CTC</field>
+        </record>
+
+        <record id="VARDED" model="hr.salary.rule.category">
+            <field name="name">Variable Deduction</field>
+            <field name="code">VARDED</field>
+        </record>
+           
+        <record id="hr_salary_rule_ctc" model="hr.salary.rule">
+            <field name="name">CTC</field>
+            <field name="sequence" eval="550"/>
+            <field name="code">CTC</field>
+            <field name="category_id" ref="payroll_inherit.CTC"/>
+            <field name="condition_select">none</field>
+            <field name="amount_select">code</field>
+            <field name="parent_id" ref="hr_payroll.structure_base"/>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_ctc(payslip.id,categories.BASIC,categories.GROSS,contract.enable_gratuity,contract.is_consolidated,payslip.enable_49,contract.enable_epf,contract.pf_deduction,contract.employer_pf)</field>
+        </record>
+
+        
+
+        <record id="hr_payroll.hr_rule_net" model="hr.salary.rule">
+            <field name="name">Net Salary</field>
+            <field name="sequence" eval="500"/>
+            <field name="code">NET</field>
+            <field name="category_id" ref="hr_payroll.NET"/>
+            <field name="condition_select">none</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = categories.GROSS - round(categories.DED + categories.VARDED)</field>
+            <field name="register_id" ref="hr_payroll.contrib_register_employees"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_payslip_rule_epf" model="hr.salary.rule">
+            <field name="code">EEPF</field>
+            <field name="name">Employee PF Cont</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <!-- <field name="amount_select">fix</field>
+            <field eval="00.0" name="amount_fix"/> -->
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_employee_pf(payslip.id,categories.BASIC,contract.is_consolidated,contract.enable_epf,contract.pf_deduction,contract.epf_percent)</field>
+            <field name="sequence" eval="30"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_salary_rule_houserentallowancemetro_nonmetro" model="hr.salary.rule">
+            <field name="code">HRAMN</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_round_amount(categories.BASIC *contract.house_rent_allowance_metro_nonmetro/100)</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="name">House Rent Allowance</field>
+            <field name="register_id" ref="l10n_in_hr_payroll.hr_houserent_allowance_register"/>
+            <field name="sequence" eval="2"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_salary_trans_allownce" model="hr.salary.rule">
+            <field name="code">TCA</field>
+            <field name="name">Transport/Conveyance Allownace</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_round_amount((categories.BASIC)*contract.conveyance/100)</field>
+            <field name="sequence" eval="3"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_salary_rule_bonus" model="hr.salary.rule">
+            <field name="code">PBONUS</field>
+            <field name="name">Productivity Bonus</field>
+            <field name="category_id" ref="payroll_inherit.FIXBONUS"/>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.productivity</field>
+            <field name="sequence" eval="4"/>
+        </record>
+
+        <!-- <record id="l10n_in_hr_payroll.hr_payslip_rule_erpf" model="hr.salary.rule">
+            <field name="code">EPF</field>
+            <field name="name">Employer's PF Contribution</field>
+            <field name="category_id" ref="payroll_inherit.CONTRIBUTION"/>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_employer_pf(payslip.id,categories.BASIC)</field>
+            <field name="sequence" eval="228"/>
+            </record> -->
+
+      <record id="hr_payslip_rule_dependant" model="hr.salary.rule">
+            <field name="code">HID</field>
+            <field name="name">Health Insurance Dependant</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <field name="condition_select">none</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_dependantinsurance(payslip.id,payslip.employee_id,payslip.date_to.year,payslip.date_to.month,payslip.date_to,payslip.date_from)</field>
+            <field name="sequence" eval="18"/>
+        </record>
+    
+        <record id="l10n_in_hr_payroll.hr_payslip_rule_cmt" model="hr.salary.rule">
+            <field name="name">Health Insurance Self</field>
+            <field name="amount_select">code</field>
+            <field name="condition_select">none</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_selfinsurance(payslip.id,payslip.employee_id,payslip.date_to.year,payslip.date_to.month,payslip.date_start,payslip.date_to)</field>
+            <field name="appears_on_payslip" eval="True"/>
+            <field name="sequence" eval="22"/>
+        </record>
+        
+         <record id="l10n_in_hr_payroll.hr_salary_rule_food_coupon" model="hr.salary.rule">
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_lunchexp(payslip.id,'FC',payslip.employee_id,payslip.date_to.year,payslip.date_to.month)</field>
+            <field name="code">FC</field>
+            <field name="category_id" ref="payroll_inherit.VARDED"/>
+            <field name="name">Canteen Expenses</field>
+            <field name="sequence" eval="221"/>
+         </record>
+         <record id="hr_salary_rule_other_ded" model="hr.salary.rule">
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_lunchexp(payslip.id,'OD',payslip.employee_id,payslip.date_to.year,payslip.date_to.month)</field>
+            <field name="code">OD</field>
+            <field name="category_id" ref="payroll_inherit.VARDED"/>
+            <field name="name">Other Deduction</field>
+            <field name="sequence" eval="222"/>
+         </record>
+
+         
+
+         <!-- <record id="l10n_in_hr_payroll.hr_payslip_rule_tds" model="hr.salary.rule">
+            <field name="code">TDS</field>
+            <field name="name">Tax Deducted at Source</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <field name="condition_select">none</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_tds(payslip.id)</field>
+            <field name="register_id" ref="l10n_in_hr_payroll.hr_tds_register"/>
+            <field name="sequence" eval="16"/>
+            <field name="note">As per income tax rules, all payment which are taxable in nature should be done after deduction of taxes at the source itself. Hence employer compute income tax on salary payment and deduct it every month. This TDS is based on employee’s saving/investment declaration at the start of year. If investments for tax saving is not done, large amount may be deducted in last few months.</field>
+        </record> -->
+        <record id="l10n_in_hr_payroll.hr_payroll_rule_city1" model="hr.salary.rule">
+            <field name="code">CBDA</field>
+            <field name="name">City Compensatory Allowance</field>
+            <field name="category_id" ref="VARALW"/>
+            <field name="condition_select">none</field>
+            <field name="sequence" eval="6"/>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_allowance('CBDA',payslip.employee_id,payslip.date_to.year,payslip.date_to.month)</field>
+            <field name="note">This allowance is paid to Employees who are posted in big cities. The purpose is to compensate the high cost of living in cities like Mumbai, Delhi, etc. However it is Fully Taxable.</field>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_payroll_rule_city1" model="hr.salary.rule">
+            <field name="code">CBDA</field>
+            <field name="name">City Compensatory Allowance</field>
+            <field name="category_id" ref="VARALW"/>
+            <field name="condition_select">none</field>
+            <field name="sequence" eval="6"/>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_allowance('CBDA',payslip.employee_id,payslip.date_to.year,payslip.date_to.month)</field>
+            <field name="note">This allowance is paid to Employees who are posted in big cities. The purpose is to compensate the high cost of living in cities like Mumbai, Delhi, etc. However it is Fully Taxable.</field>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_salary_rule_le" model="hr.salary.rule">
+            <field name="code">LE</field>
+            <field name="name">Leave Encashment</field>
+            <field name="category_id" ref="VARALW"/>
+            <field name="condition_select">none</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_allowance('LE',payslip.employee_id,payslip.date_to.year,payslip.date_to.month)</field>
+            <field name="sequence" eval="8"/>
+            <field name="note">Payment by way of leave encashment received by Central and State Govt.employees at the time of retirement in respect of the period of earned leave at credit is fully exempt. In case of other employees, the exemption is to be limited to minimum of all below:
+    1.The actual amount received
+    2.The cash equivalent of leave balance (max 30 days per year of service)
+    3.Maximum of 10 months of leave encashment, based on last 10 months average salary
+    4.Rs. 3 Lakh</field>
+        </record>
+        <record id="hr_payroll_arrear" model="hr.salary.rule">
+            <field name="code">ARRE</field>
+            <field name="name">Arrears</field>
+            <field name="category_id" ref="VARALW"/>
+            <field name="condition_select">none</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_allowance('ARRE',payslip.employee_id,payslip.date_to.year,payslip.date_to.month)</field>
+            <field name="sequence" eval="8"/>
+        </record>
+
+         <record id="l10n_in_hr_payroll.hr_salary_rule_arrears" model="hr.salary.rule">
+            <field name="code">INC</field>
+            <field name="name">Incentive</field>
+            <field name="category_id" ref="VARALW"/>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_allowance('INC',payslip.employee_id,payslip.date_to.year,payslip.date_to.month)</field>
+            <field name="sequence" eval="7"/>
+            <!-- <field name="note">Generally arrears are fully taxable, but employee may claim exemption u/s 89(1).
+One would need to compute income tax on the arrears if it would have been received in actual year.
+Now difference of income tax between payment year and actual year would be allowed for deduction.</field> -->
+        </record>
+        <!-- <record id="l10n_in_hr_payroll.hr_salary_rule_lta" model="hr.salary.rule">
+            <field name="code">LTA</field>
+            <field name="name">Leave Travel Allowance</field>
+            <field name="category_id" ref="VARALW"/>
+            <field name="amount_select">percentage</field>
+            <field name="amount_percentage_base">contract.wage</field>
+            <field name="amount_percentage" eval="8.33"/>
+            <field name="sequence" eval="29"/>
+            <field name="note">As per Income tax rules of India, if transport bills for LTA are not provided,the amount will be taxed. E.g. If an employee has LTA allowance as Rs 50,000 in his CTC(cost to company),and he provides proofs of Rs 40,000 (boarding pass,air tickets, taxi vouchers) then income tax will be deducted for rest of the Rs 10,000. Does not matter whats the amount of LTA in an employee’s package, income tax laws only permits domestic air tickets only for LTA claim.</field>
+        </record> -->
+
+        <record id="l10n_in_hr_payroll.hr_payroll_rule_child1" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_salary_rule_lta" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_salary_rule_da" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_payroll_rule_child2" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_salary_rule_special" model="hr.salary.rule">
+            <field name="active" eval="False"/>   
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_payroll_rule_metrocity" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_payroll_rule_nonmetrocity" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_payslip_rule_ernps" model="hr.salary.rule">
+           <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_payslip_rule_ode" model="hr.salary.rule">
+           <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_payslip_rule_dla" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_payslip_rule_cgti" model="hr.salary.rule">
+           <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_payslip_rule_lwf_employer" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_payslip_rule_lwf_employee" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_salary_rule_food_coupon_ded" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_payslip_rule_cpt" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_payslip_rule_vpf" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+         <record id="l10n_in_hr_payroll.hr_payslip_rule_enps" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+         <record id="l10n_in_hr_payroll.hr_salary_rule_uniform_junior" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_salary_rule_driver" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_salary_rule_internet" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_payroll_rule_car" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+         <record id="l10n_in_hr_payroll.hr_salary_rule_prof_develope" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+         <record id="l10n_in_hr_payroll.hr_salary_rule_telephone" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+         <record id="l10n_in_hr_payroll.hr_salary_rule_uniform_senior" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_salary_rule_journals" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+         <record id="l10n_in_hr_payroll.hr_salary_rule_medical" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+         <record id="l10n_in_hr_payroll.hr_salary_rule_performance" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_salary_rule_medical_allow" model="hr.salary.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

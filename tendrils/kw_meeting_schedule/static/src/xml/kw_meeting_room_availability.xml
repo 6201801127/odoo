@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="meeting_room_availability" xml:space="preserve">
+
+    <t t-name="kwmeeting_room_availability">
+        <div class="row">
+            <div class="col-md-12" > 
+                <div class="d-flex justify-content-between mb-4">
+                    <!-- <button name="btn_check_availability" class="btn btn-primary btn_check_availability" >Check Availability</button> -->
+                    <div> </div> 
+                    <div class="row" t-if="room_master_data">
+                        <div class="color-block gray"/> <span class="font-weight-bold ml-1 mr-3" > Selected Slot </span>
+                        <div class="color-block success"/> <span class="font-weight-bold ml-1 mr-3" > Booked </span>
+                        <div class="color-block overlapping"/> <span class="font-weight-bold ml-1 mr-3" >Overlapping</span>
+                    </div>
+                </div>
+            
+            <style>
+                
+                .color-block.success { height:20px; width: 20px; background-color: #80b918; border: 1px solid #ddd;}
+                .color-block.gray { height: 20px;width: 20px;background-color: #ccc;border: 1px solid #ddd;
+                    background-image: repeating-linear-gradient(-45deg, rgba(0,0,0, 0.30), rgba(0,0,0, 0.30) 2px, transparent 5px, transparent 4px);}
+                .color-block.overlapping { height:20px; width: 20px;  background-color: #80b918;
+                background-image: repeating-linear-gradient(-45deg, rgba(0,0,0, 0.30), rgba(0,0,0, 0.30) 2px, transparent 5px, transparent 4px);
+                }
+                .bg-gray {background-color: #ccc !important;color: #1f4265;}
+                .meeting_tbody {display:block;height: 300px;overflow:auto;position: relative;}
+                thead.meeting_thead, .meeting_tbody tr {display:table;width:100%;table-layout:fixed;}
+                thead.meeting_thead {background-color: #108fbb;color: #fff;}
+
+                .fixed_header th, .fixed_header td {padding: 0.5rem;vertical-align: top;border-top: 1px solid #dee2e6;}
+
+                .meeting_tbody td {font-size: smaller;}
+                .bg-meeting-success {background-color: #80b918 !important;color: #000;}
+                .bg-meeting-selected {background-image: repeating-linear-gradient(-45deg, rgba(0,0,0, 0.30), rgba(0,0,0, 0.30) 2px, transparent 5px, transparent 4px);}
+            </style>
+                <table class="table table-bordered fixed_header" cellspacing="0" width="100%" t-if="room_master_data">
+                    <thead class="meeting_thead">
+                        <tr>
+                            <th style="width:80px;height:30px;margin-top:-4px;top:24px;">Time</th>
+                            <t t-if="room_master_data">
+                                <th t-foreach="room_master_data" t-as="room_data">
+                                    <t  t-esc="room_data.name"/> 
+                                </th>
+                            </t>
+                        </tr>
+                    </thead>
+                    <tbody class="meeting_tbody">
+                       <t t-if="event_data">
+                            <t t-foreach="event_data" t-as="events">
+                                <tr t-attf-class="#{(events.event_overlap_sts ==0)? '' : 'scroll_pos'}"  >
+
+                                    <td style="width:80px;height:30px;margin-top:-4px;top:24px;" ><t t-esc="events.time_wd_timezone"/></td> 
+                                    <t t-foreach="room_master_data" t-as="room_data">
+                                        <!-- <t t-set="var" t-value="1"/> -->
+                                        <t t-if="events.room_info[room_data.id] and events.room_info[room_data.id].event_id"> 
+                                            <td  t-attf-class="bg-meeting-success #{(events.event_overlap_sts ==0 and room_data.id==selected_room_id) or (room_data.id!=selected_room_id)? ' ' : ' bg-meeting-selected'}" data-toggle="popover" t-attf-title="#{events.room_info[room_data.id].event_details}" t-attf-data-content="#{events.room_info[room_data.id].event_details}" >
+                                                <t t-esc="events.room_info[room_data.id].name"/>
+                                                <!--   <t  t-esc="events.event_overlap_sts"/><t  t-esc="selected_room_id"/>  -->
+                                            </td>
+                                        </t>
+                                        <t t-else="">
+                                            <td  t-attf-class=" #{(events.event_overlap_sts ==1 and room_data.id==selected_room_id)? ' bg-meeting-selected' : ''}"></td>
+                                        </t>
+                                    </t>
+                                </tr>
+                            </t>
+                        </t> 
+                       
+                    </tbody>
+                </table>
+
+                <!-- START : Recurring meeting room availability -->
+
+                <table class="table table-bordered fixed_header" cellspacing="0" width="100%" t-if="recurring_event_data">
+                    <thead class="meeting_thead">
+                        <tr>
+                            <th style="width:80px;height:30px;margin-top:-4px;top:24px;">Date</th>
+                            <th>Availability</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody class="meeting_tbody" >
+                        <t t-if="recurring_event_data">
+                          
+                            <t t-foreach="recurring_event_data" t-as="events">
+                                <tr >
+                                    <td style="width:80px;height:30px;margin-top:-4px;top:24px;" t-attf-class=" #{events.availability ==1 ? ' bg-success' : 'bg-danger'}"><t t-esc="events.event_date"/></td>                                    
+
+                                    <td  t-attf-class=" #{events.availability ==1 ? ' bg-success' : 'bg-danger'}"  >
+
+                                        <!-- <t t-if="events.room_info[room_data.id] and events.room_info[room_data.id].event_id">
+                                            <t  t-esc="events.room_info[room_data.id].name"/> 
+                                        </t> --> 
+
+                                        <t t-if="events.availability ==1">Available</t>
+                                        <t t-else="">Sorry ! This time slot is not available
+                                            <t t-if="events.event_details"> 
+                                                <!-- <t t-foreach="events.event_details" t-as="rec_event_data" > -->
+                                                (<t  t-esc="events.event_details.name"/> <t  t-esc="events.event_details.display_time"/> )
+                                                <!--  </t> -->
+                                            </t>
+                                        </t>
+                                    </td>
+
+                                    <td t-attf-class=" #{events.availability ==1 ? ' bg-success' : 'bg-warning'}">
+                                       <t t-if="events.availability !=1">This date will be skipped</t>
+                                    </td>
+                                </tr>
+                            </t>
+                        </t> 
+                       
+                    </tbody>
+                </table>
+                <!-- END : Recurring meeting room availability --> 
+
+            </div>
+        </div>
+
+    </t>
+</templates>

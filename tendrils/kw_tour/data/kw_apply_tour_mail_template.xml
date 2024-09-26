@@ -1,0 +1,1518 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="kw_tour_apply_email_template" model="mail.template">
+            <field name="name">Tour Applied Mail Template</field>
+            <field name="email_from">${user.email or object.create_uid.email}</field>
+            <!-- <field name="subject">Tour Request Of ${object.employee_id.name} (${object.employee_id.emp_code}) | Applied</field> -->
+            <field name="subject">
+            %if object.csg_group_tour_boolean == True:
+               TOUR Request of ${object.employee_id.name} (${object.employee_id.emp_code}) | Applied by ${object.create_uid.name}
+            %else
+                Tour Request Of ${object.employee_id.name} (${object.employee_id.emp_code}) | Applied
+            % endif
+            </field>
+<!--            <field name="email_to">${(object.employee_id and object.employee_id.parent_id and object.employee_id.parent_id.work_email or ''|safe)}</field>-->
+            <field name="email_to">${(ctx.get('manager_email') or ''|safe)}</field>
+            <field name="email_cc">${(ctx.get('email_cc') or ''|safe)}</field>
+            <field name="model_id" ref="kw_tour.model_kw_tour"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                    <table border="0">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">
+<!--                                            Dear  ${(object.employee_id and object.employee_id.parent_id and object.employee_id.parent_id.name or ''|safe)}-->
+                                            Dear ${(ctx.get('manager_name') or ''|safe)}
+                                        </span>
+                                    </h5>
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                        % if object.status=='Rescheduled':
+                                            Tour has been rescheduled
+                                        % else
+                                            Tour application has been applied
+                                        % endif
+                                            by <b> ${object.employee_id.name}.
+                                    </p>
+                                </div>
+
+                                <table border="0" style="border-collapse: collapse;font-size: 16px;margin-bottom:1em;">
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Name
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.employee_id.name}
+                                        </td>
+                                    </tr>
+
+                                    %if object.csg_group_tour_boolean == True:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Applied By
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.create_uid.name}
+                                            </td>
+                                        </tr>
+                                    %endif
+
+                                    %if object.employee_id.department_id:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Department
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.department_id.name}
+                                            </td>
+                                        </tr>
+                                    %endif
+                                    
+                                    %if object.employee_id.division:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Division
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.division.name}
+                                            </td>
+                                        </tr>
+                                    %endif
+
+                                    %if object.employee_id.section:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Section
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.section.name}
+                                            </td>
+                                        </tr>
+                                    %endif
+
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Reason For Travel
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.purpose}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Originating Place
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.city_id.name}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Tour Commencement Date
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(object.date_travel, format='%d-%b-%Y')}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Return Date
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(object.date_return, format='%d-%b-%Y')}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Budget Head
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            %if object.budget_head_id:
+                                                ${object.budget_head_id.name}
+                                            %else
+                                                ${object.budget_head}
+                                            %endif
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Local Currency
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            %if object.can_apply_inr:
+                                                INR
+                                            %endif
+                                            %if object.can_apply_usd:
+                                                %if object.can_apply_inr:
+                                                    , USD
+                                                %else
+                                                    USD
+                                                %endif  
+                                            %endif
+                                        </td>
+                                    </tr>
+                                    
+                                </table>
+
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">
+                                        Travel Details
+                                        </span>
+                                    </h5>
+                                </div>
+
+                                <table border="1" style="border-collapse: collapse;font-size: 16px;margin-bottom:1em;">
+                                    <tr>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                From Date
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                From Country
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                From City
+                                        </td>
+
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                To Date
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                To Country
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                To City
+                                        </td>
+
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                Travel Arrangement
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                Accomodation Arrangement
+                                        </td>
+
+                                    </tr>
+                                    %for detail in object.tour_detail_ids:
+                                    <tr>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${format_tz(detail.from_date, format='%d-%b-%Y')}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.from_country_id.name}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.from_city_id.name}
+                                        </td>
+
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${format_tz(detail.to_date, format='%d-%b-%Y')}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.to_country_id.name}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.to_city_id.name}
+                                        </td>
+
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.travel_arrangement}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.accomodation_arrangement}
+                                        </td>
+                                    </tr>
+                                    %endfor
+
+                                </table>
+
+                                <table border="0" style="border-collapse: collapse;font-size: 16px;margin-bottom:1em;">
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="250px">
+                                            Advance Request (in INR)
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.advance}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="250px">
+                                            Advance Request (in USD)
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.advance_usd}
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <table border="0" style="width: 100%;">
+                                        <tr>
+                                            <td>
+                                                <a href="/tour/approve?token=${'token' in ctx and ctx['token'] or ''}" target="_blank" style="padding: .5rem 3rem;border-radius: .2em;border: none;color: #fff;background-color: #30a20f;font-size: 16px;margin-top: 1.5rem;display:inline-block;white-space: nowrap;text-decoration: NONE;">
+                                                                        Approve
+                                                </a>
+                                            </td>
+
+                                            <td>
+                                                <a href="/tour/reject?token=${'token' in ctx and ctx['token'] or ''}" target="_blank" style="padding: .5rem 3rem;border-radius: .2em;border: none;color: #fff;background-color: #ff0000;font-size: 16px;margin-top:1.5rem;display:inline-block;white-space: nowrap;text-decoration: NONE;">
+                                                                    Reject
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            
+                            </td>
+                        </tr>
+                    </table>
+             ]]>
+            </field>
+        </record>
+
+        <record id="kw_tour_apply_without_ra_email_template" model="mail.template">
+            <field name="name">Tour Applied Mail Template</field>
+            <field name="email_from">${user.email or object.create_uid.email}</field>
+            <field name="subject">TOUR Request Of ${object.employee_id.name} (${object.employee_id.emp_code}) | Applied</field>
+            <field name="email_to">${(ctx.get('email_users') or '' |safe)}</field>
+            <field name="email_cc">${(object.employee_id.coach_id.work_email if object.employee_id and object.employee_id.coach_id else ''|safe)}</field>
+            <field name="model_id" ref="kw_tour.model_kw_tour"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                    <table border="0">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">
+                                            Hi  ${(object.employee_id and object.employee_id.parent_id and object.employee_id.parent_id.name or ''|safe)}
+                                        </span>
+                                    </h5>
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                        % if object.status=='Rescheduled':
+                                            Tour has been rescheduled
+                                        % else
+                                            Tour application has been applied
+                                        % endif
+                                            by <b> ${object.employee_id.name}.
+                                    </p>
+                                </div>
+
+                                <table border="0" style="border-collapse: collapse;font-size: 16px;margin-bottom:1em;">
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Name
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.employee_id.name or ''|safe}
+                                        </td>
+                                    </tr>
+
+                                    %if object.employee_id.department_id:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Department
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.department_id.name or ''|safe}
+                                            </td>
+                                        </tr>
+                                    %endif
+
+                                    %if object.employee_id.division:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Division
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.division.name or ''|safe}
+                                            </td>
+                                        </tr>
+                                    %endif
+
+                                    %if object.employee_id.section:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Section
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.section.name or ''|safe}
+                                            </td>
+                                        </tr>
+                                    %endif
+
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Reason For Travel
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.purpose}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Originating Place
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.city_id.name}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Tour Commencement Date
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(object.date_travel, format='%d-%b-%Y')}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Return Date
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(object.date_return, format='%d-%b-%Y')}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Budget Head
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            %if object.budget_head_id:
+                                                ${object.budget_head_id.name}
+                                            %else
+                                                ${object.budget_head}
+                                            %endif
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Local Currency
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            %if object.can_apply_inr:
+                                                INR
+                                            %endif
+                                            %if object.can_apply_usd:
+                                                %if object.can_apply_inr:
+                                                    , USD
+                                                %else
+                                                    USD
+                                                %endif  
+                                            %endif
+                                        </td>
+                                    </tr>
+                                    
+                                </table>
+
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">
+                                        Travel Details
+                                        </span>
+                                    </h5>
+                                </div>
+
+                                <table border="1" style="border-collapse: collapse;font-size: 16px;margin-bottom:1em;">
+                                    <tr>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                From Date
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                From Country
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                From City
+                                        </td>
+
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                To Date
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                To Country
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                To City
+                                        </td>
+
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                Travel Arrangement
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                Accomodation Arrangement
+                                        </td>
+
+                                    </tr>
+                                    %for detail in object.tour_detail_ids:
+                                    <tr>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${format_tz(detail.from_date, format='%d-%b-%Y')}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.from_country_id.name}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.from_city_id.name}
+                                        </td>
+
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${format_tz(detail.to_date, format='%d-%b-%Y')}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.to_country_id.name}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.to_city_id.name}
+                                        </td>
+
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.travel_arrangement}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.accomodation_arrangement}
+                                        </td>
+                                    </tr>
+                                    %endfor
+
+                                </table>
+
+                                <table border="0" style="border-collapse: collapse;font-size: 16px;margin-bottom:1em;">
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="250px">
+                                            Advance Request (in INR)
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.advance}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="250px">
+                                            Advance Request (in USD)
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.advance_usd}
+                                        </td>
+                                    </tr>
+                                </table>
+
+                            </td>
+                        </tr>
+                    </table>
+             ]]>
+            </field>
+        </record>
+
+        <record id="kw_tour_forward_mail_template" model="mail.template">
+            <field name="name">Tour Forwarded Mail Template</field>
+            <field name="email_from">${user.email or object.create_uid.email}</field>
+            <field name="subject">TOUR Request Of ${object.employee_id.name} (${object.employee_id.emp_code}) | Forwarded</field>
+            <field name="email_to">${object.final_approver_id.work_email}</field>
+<!--            <field name="email_cc">${(object.employee_id.parent_id.work_email if object.employee_id and object.employee_id.parent_id else ''|safe)}</field>-->
+            <field name="email_cc">${(ctx.get('email_cc') or ''|safe)}</field>
+            <field name="model_id" ref="kw_tour.model_kw_tour"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                    <table border="0">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">
+                                            Dear ${object.final_approver_id.name} 
+                                        </span>
+                                    </h5>
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                         Tour application has been forwarded by <b>${(ctx.get('user_name') or ''|safe)}
+                                    </p>
+                                </div>
+
+                                <table border="0" style="border-collapse: collapse;font-size: 16px;margin-bottom:1em;">
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Name
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.employee_id.name}
+                                        </td>
+                                    </tr>
+
+                                    %if object.employee_id.department_id:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Department
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.department_id.name}
+                                            </td>
+                                        </tr>
+                                    %endif
+
+                                    %if object.employee_id.division:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Division
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.division.name}
+                                            </td>
+                                        </tr>
+                                    %endif
+
+                                    %if object.employee_id.section:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Section
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.section.name}
+                                            </td>
+                                        </tr>
+                                    %endif
+                                
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Reason For Travel
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.purpose}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Originating Place
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.city_id.name}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Tour Commencement Date
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(object.date_travel, format='%d-%b-%Y')}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Return Date
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(object.date_return, format='%d-%b-%Y')}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Budget Head
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            %if object.budget_head_id:
+                                                ${object.budget_head_id.name}
+                                            %else
+                                                ${object.budget_head}
+                                            %endif
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Local Currency
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            %if object.can_apply_inr:
+                                                INR
+                                            %endif
+                                            %if object.can_apply_usd:
+                                                %if object.can_apply_inr:
+                                                    , USD
+                                                %else
+                                                    USD
+                                                %endif  
+                                            %endif
+                                        </td>
+                                    </tr>
+
+                                </table>
+
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">
+                                        Travel Details
+                                        </span>
+                                    </h5>
+                                </div>
+
+                                <table border="1" style="border-collapse: collapse;font-size: 16px;margin-bottom:1em;">
+                                    <tr>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                From Date
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                From Country
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                From City
+                                        </td>
+
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                To Date
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                To Country
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                To City
+                                        </td>
+
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                Travel Arrangement
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                Accomodation Arrangement
+                                        </td>
+
+                                    </tr>
+                                    %for detail in object.tour_detail_ids:
+                                    <tr>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${format_tz(detail.from_date, format='%d-%b-%Y')}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.from_country_id.name}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.from_city_id.name}
+                                        </td>
+
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${format_tz(detail.to_date, format='%d-%b-%Y')}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.to_country_id.name}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.to_city_id.name}
+                                        </td>
+
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.travel_arrangement}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.accomodation_arrangement}
+                                        </td>
+                                    </tr>
+                                    %endfor
+
+                                </table>
+
+                                <table border="0" style="border-collapse: collapse;font-size: 16px;margin-bottom:1em;">
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="250px">
+                                            Advance Request (in INR)
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.advance}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="250px">
+                                            Advance Request (in USD)
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.advance_usd}
+                                        </td>
+                                    </tr>
+                                </table>
+
+                            </td>
+                        </tr>
+                    </table>
+                ]]>
+            </field>
+        </record>
+
+        <!-- Below template works for RA Approve, Traveldesk Approve , Forwarded Approve-->
+        <record id="kw_tour_approve_mail_template" model="mail.template">
+            <field name="name">Tor Application Approved Notification To Users</field>
+            <field name="email_from">${user.email or object.create_uid.email}</field>
+            <field name="subject">TOUR Request of  ${object.employee_id.name} (${object.employee_id.emp_code}) |
+            % if object.state in ['Approved']:
+                Approved
+            % elif object.state in ['Traveldesk Approved','Finance Approved']:
+                Granted by Traveldesk
+            %else
+                ${object.state}
+            % endif
+            </field>
+            <field name="email_to">${(ctx.get('email_users') or '' |safe)}</field>
+            <field name="email_cc">${(ctx.get('email_cc_users') or '' |safe)}</field>
+            <field name="model_id" ref="kw_tour.model_kw_tour"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                    <table border="0">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">
+                                            Dear All
+                                        </span>
+                                    </h5>
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                        % if object.status=='Rescheduled':
+                                            Tour reschedule
+                                        % else
+                                            Tour 
+                                        % endif
+                                        application of <b> ${object.employee_id.name}</b> has been approved by <b> ${(ctx.get('action_user','') |safe)}</b>.
+                                    </p>
+                                </div>
+
+                                <table border="0" style="border-collapse: collapse;font-size: 16px;margin-bottom:1em;">
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Name
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.employee_id.name or ''|safe}
+                                        </td>
+                                    </tr>
+
+                                    %if object.employee_id.department_id:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Department
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.department_id.name or ''|safe}
+                                            </td>
+                                        </tr>
+                                    %endif
+
+                                    %if object.employee_id.division
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Division
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.division.name or ''|safe}
+                                            </td>
+                                        </tr>
+                                    %endif
+
+                                    %if object.employee_id.section:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Section
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.section.name or ''|safe}
+                                            </td>
+                                        </tr>
+                                    %endif
+
+                                
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Reason For Travel
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.purpose}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Originating Place
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.city_id.name}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Tour Commencement Date
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(object.date_travel, format='%d-%b-%Y')}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Return Date
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(object.date_return, format='%d-%b-%Y')}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Budget Head
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            %if object.budget_head_id:
+                                                ${object.budget_head_id.name}
+                                            %else
+                                                ${object.budget_head}
+                                            %endif
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Local Currency
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            %if object.can_apply_inr:
+                                                INR
+                                            %endif
+                                            %if object.can_apply_usd:
+                                                %if object.can_apply_inr:
+                                                    , USD
+                                                %else
+                                                    USD
+                                                %endif  
+                                            %endif
+                                        </td>
+                                    </tr>
+
+                                </table>
+
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">
+                                        Travel Details
+                                        </span>
+                                    </h5>
+                                </div>
+
+                                <table border="1" style="border-collapse: collapse;font-size: 16px;margin-bottom:1em;">
+                                    <tr>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                From Date
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                From Country
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                From City
+                                        </td>
+
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                To Date
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                To Country
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                To City
+                                        </td>
+
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                Travel Arrangement
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                Accomodation Arrangement
+                                        </td>
+
+                                    </tr>
+                                    %for detail in object.tour_detail_ids:
+                                    <tr>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${format_tz(detail.from_date, format='%d-%b-%Y')}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.from_country_id.name}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.from_city_id.name}
+                                        </td>
+
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${format_tz(detail.to_date, format='%d-%b-%Y')}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.to_country_id.name}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.to_city_id.name}
+                                        </td>
+
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.travel_arrangement}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.accomodation_arrangement}
+                                        </td>
+                                    </tr>
+                                    %endfor
+
+                                </table>
+
+                                <table border="0" style="border-collapse: collapse;font-size: 16px;margin-bottom:1em;">
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="250px">
+                                            Advance Request (in INR)
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.advance}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="250px">
+                                            Advance Request (in USD)
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.advance_usd}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                ]]>
+            </field>
+        </record>
+        
+        <!-- Below template works for any case reject and finance approve -->
+        <record id="kw_tour_finance_approve_reject_email_template" model="mail.template">
+            <field name="name">Tour Finance Approved Or Rejected Mail Template</field>
+            <field name="email_from">${user.email or object.create_uid.email}</field>
+            <field name="subject">Tour Request of ${object.employee_id.name} (${object.employee_id.emp_code}) | 
+            % if object.state=='Finance Approved':
+                Granted by Finance
+            % else
+                ${object.state} by Finance
+            % endif
+            </field>
+            <field name="email_to">${(object.employee_id and object.employee_id.work_email or ''|safe)}</field>
+            <field name="email_cc">${(ctx.get('email_cc_users') or '' |safe)}</field>
+            <field name="model_id" ref="kw_tour.model_kw_tour"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                    <table border="0">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">
+                                            Dear ${(object.employee_id and object.employee_id.name or ''|safe)}
+                                        </span>
+                                    </h5>
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                        % if object.status=='Rescheduled':
+                                            Tour reschedule has been ${object.state.lower()} by ${ctx['user_name']}( Finance Dept ).
+                                        % elif object.state=='Finance Approved':
+                                            Your tour application has been approved by ${ctx['user_name']}( Finance Dept ).
+                                        % else
+                                            Your tour application has been ${object.state.lower()} by ${ctx['user_name']}( Finance Dept ).
+                                        % endif
+                                    </p>
+                                </div>
+
+                                <table border="0" style="border-collapse: collapse;font-size: 16px;margin-bottom:1em;">
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Name
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.employee_id.name}
+                                        </td>
+                                    </tr>
+
+                                    %if object.employee_id.department_id:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Department
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.department_id.name}
+                                            </td>
+                                        </tr>
+                                    %endif
+
+                                    %if object.employee_id.division:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Division
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.division.name}
+                                            </td>
+                                        </tr>
+                                    %endif
+
+                                    %if object.employee_id.section:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Section
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.section.name}
+                                            </td>
+                                        </tr>
+                                    %endif
+                                
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Reason For Travel
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.purpose}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Originating Place
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.city_id.name}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Tour Commencement Date
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(object.date_travel, format='%d-%b-%Y')}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Return Date
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(object.date_return, format='%d-%b-%Y')}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Budget Head
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            %if object.budget_head_id:
+                                                ${object.budget_head_id.name}
+                                            %else
+                                                ${object.budget_head}
+                                            %endif
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Local Currency
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            %if object.can_apply_inr:
+                                                INR
+                                            %endif
+                                            %if object.can_apply_usd:
+                                                %if object.can_apply_inr:
+                                                    , USD
+                                                %else
+                                                    USD
+                                                %endif  
+                                            %endif
+                                        </td>
+                                    </tr>
+
+                                </table>
+
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">
+                                        Travel Details
+                                        </span>
+                                    </h5>
+                                </div>
+
+                                <table border="1" style="border-collapse: collapse;font-size: 16px;margin-bottom:1em;">
+                                    <tr>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                From Date
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                From Country
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                From City
+                                        </td>
+
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                To Date
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                To Country
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                To City
+                                        </td>
+
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                Travel Arrangement
+                                        </td>
+                                        <td style="color:#676767; padding-left: 20px;height: 34px;">
+                                                Accomodation Arrangement
+                                        </td>
+
+                                    </tr>
+                                    %for detail in object.tour_detail_ids:
+                                    <tr>
+                                        <td style="color:#167b9e; padding-left:20px;;height: 34px;">
+                                                    ${format_tz(detail.from_date, format='%d-%b-%Y')}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.from_country_id.name}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.from_city_id.name}
+                                        </td>
+
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${format_tz(detail.to_date, format='%d-%b-%Y')}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.to_country_id.name}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.to_city_id.name}
+                                        </td>
+
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.travel_arrangement}
+                                        </td>
+                                        <td style="color:#167b9e; padding-left:20px;height: 34px;">
+                                                    ${detail.accomodation_arrangement}
+                                        </td>
+                                    </tr>
+                                    %endfor
+
+                                </table>
+
+                                <table border="0" style="border-collapse: collapse;font-size: 16px;margin-bottom:1em;">
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="250px">
+                                            Advance Request (in INR)
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.advance}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="250px">
+                                            Advance Request (in USD)
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.advance_usd}
+                                        </td>
+                                    </tr>
+                                </table>
+
+                            </td>
+                        </tr>
+                    </table>
+                ]]>
+            </field>
+        </record>
+        
+         <!-- Below template works for Guest house notification  -->
+         <record id="kw_tour_guesthouse_notification_email_template" model="mail.template">
+            <field name="name">Tour Guest House Notification Mail Template</field>
+            <field name="email_from">${user.email or object.create_uid.email}</field>
+            <field name="subject">Guest House Reservation for ${object.employee_id.name} (${object.employee_id.emp_code})</field>
+            <field name="email_to">${(ctx.get('spoc_users','') |safe)}</field>
+            <field name="email_cc">${(ctx.get('email_users','') |safe)}</field>
+            <field name="model_id" ref="kw_tour.model_kw_tour"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                    <table border="0">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">
+                                            Hi
+                                        </span>
+                                    </h5>
+                                   <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                            Guest house has been reserved for ${object.employee_id.name}.
+                                        </p>
+                                </div>
+
+                                <table border="0" style="border-collapse: collapse;font-size: 16px;">
+                                    % for acc in ctx.get('booking_ids'):
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Guest House Name
+                                            </td>
+                                            <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${acc.guest_house_id.name}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Location
+                                            </td>
+                                            <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${acc.guest_house_id.city_id.name}
+                                            </td>
+                                        </tr>
+                                        %if acc.tour_id.employee_id.department_id:
+                                            <tr>
+                                                <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                    Department
+                                                </td>
+                                                <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                    ${acc.tour_id.employee_id.department_id.name}
+                                                </td>
+                                            </tr>
+                                        %endif
+
+                                        %if acc.tour_id.employee_id.division:
+                                            <tr>
+                                                <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                    Division
+                                                </td>
+                                                <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                    ${acc.tour_id.employee_id.division.name}
+                                                </td>
+                                            </tr>
+                                        %endif
+
+                                        %if acc.tour_id.employee_id.section:
+                                            <tr>
+                                                <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                    Section
+                                                </td>
+                                                <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                    ${acc.tour_id.employee_id.section.name}
+                                                </td>
+                                            </tr>
+                                        %endif
+                                       
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Mobile No
+                                            </td>
+                                            <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${acc.tour_id.employee_id.mobile_phone}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            From
+                                            </td>
+                                            <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(acc.check_in_time, format='%d-%b-%Y %I:%M %p')}
+                                            
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            To
+                                            </td>
+                                            <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(acc.check_out_time, format='%d-%b-%Y %I:%M %p')}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            No. Of Days
+                                            </td>
+                                            <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${acc.no_of_night}
+                                            </td>
+                                        </tr>
+                                    % endfor
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                ]]>
+            </field>
+        </record>
+        
+        <record id="kw_tour_guesthouse_notification_traveller_email_template" model="mail.template">
+            <field name="name">Tour Guest House Traveller Notification Mail Template</field>
+            <field name="email_from">${user.email or object.create_uid.email}</field>
+            <field name="subject">Guest House Reservation for ${(ctx.get('booking_id').city_id.name if ctx.get('booking_id') else '' |safe)}.</field>
+            <field name="email_to">${(object.employee_id and object.employee_id.work_email or ''|safe)}</field>
+            <field name="email_cc">${(ctx.get('email_cc_users','') |safe)}</field>
+            <field name="model_id" ref="kw_tour.model_kw_tour"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                    <table border="0">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">
+                                            Dear ${object.employee_id.name}
+                                        </span>
+                                    </h5>
+                                   <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                        Guest house has been reserved at  ${(ctx.get('booking_id').city_id.name if ctx.get('booking_id') else '' |safe)}
+                                </div>
+
+                                <table border="0" style="border-collapse: collapse;font-size: 16px;">
+                                    % for acc in ctx.get('booking_id'):
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Guest House Name
+                                            </td>
+                                            <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${acc.guest_house_id.name}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Location & Address
+                                            </td>
+                                            <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${acc.guest_house_id.city_id.name}
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Contact Person
+                                            </td>
+                                            <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${acc.guest_house_id.spoc_person_id.name}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Mobile No
+                                            </td>
+                                            <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${acc.guest_house_id.spoc_person_id.mobile or '' | safe}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            From
+                                            </td>
+                                            <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(acc.check_in_time, format='%d-%b-%Y %I:%M %p')}
+                                            
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            To
+                                            </td>
+                                            <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${format_tz(acc.check_out_time, format='%d-%b-%Y %I:%M %p')}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            No. Of Days
+                                            </td>
+                                            <td style="color:#167b9e;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${acc.no_of_night}
+                                            </td>
+                                        </tr>
+                                    % endfor
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                ]]>
+            </field>
+        </record>
+
+        <record id="kw_tour_revert_traveldesk_email_template" model="mail.template">
+            <field name="name">Tour Revert Notification Mail Template</field>
+            <field name="email_from">${user.email or object.create_uid.email}</field>
+            <field name="subject">TOUR Request of  ${object.employee_id.name} | (${object.employee_id.emp_code}) | Reverted back</field>
+            <field name="email_to">${(object.employee_id and object.employee_id.work_email or ''|safe)}</field>
+            <!-- <field name="email_cc">${(ctx.get('email_cc_users','') |safe)}</field> -->
+            <field name="model_id" ref="kw_tour.model_kw_tour"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                    <table border="0">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">
+                                            Dear ${object.employee_id.name}
+                                        </span>
+                                    </h5>
+                                   <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                       Your tour application has been Reverted back by Traveldesk.
+                                </div>
+                                  <table border="0" style="border-collapse: collapse;font-size: 16px;margin-bottom:1em;">
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Name
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.employee_id.name}
+                                        </td>
+                                    </tr>
+
+                                    %if object.employee_id.department_id:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Department
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.department_id.name}
+                                            </td>
+                                        </tr>
+                                    %endif
+
+                                    %if object.employee_id.division:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Division
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.division.name}
+                                            </td>
+                                        </tr>
+                                    %endif
+
+                                    %if object.employee_id.section:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                                Section
+                                            </td>
+                                            <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                                ${object.employee_id.section.name}
+                                            </td>
+                                        </tr>
+                                    %endif
+                                
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Tour Reference No.
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.code}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;"width="200px">
+                                            Reason for Revert
+                                        </td>
+                                        <td style="color:#167b9e;padding-left: 20px;border-bottom: 1px solid #ebe5e5;height: 34px;">
+                                            ${object.remark}
+                                        </td>
+                                    </tr>
+                                </table>                   
+                ]]>
+            </field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="kw_project_timesheet_tree_view" model="ir.ui.view">
+            <field name="name">Project Timesheet Tree View</field>
+            <field name="model">account.analytic.line</field>
+            <field name="type">tree</field>
+            <field name="priority" eval="100" />
+            <field name="arch" type="xml">
+                <tree import="0">
+                    <field name="employee_id" string="Employee" />
+                    <field name="department_id" />
+                    <field name="job_id" />
+                    <field name="date"/>
+                    <field name="emp_category_id"/>
+                    <field name="project_id"/>
+                    <field name="project_manager_id" />
+                    <field name="approved_by"/>
+                    <field name="task_id"/>
+                    <field name="name"/>
+                    <field name="unit_amount"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Search view for "model" -->
+        <record id="kw_project_timesheet_view_search" model="ir.ui.view">
+            <field name="name">Project Timesheet Search View</field>
+            <field name="model">account.analytic.line</field>
+            <field name="type">search</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="arch" type="xml">
+                <search string="employee_search">
+                    <field name="employee_id" string="Employee" />
+                    <field name="department_id" />
+                    <field name="job_id" />
+                    <field name="date"/>
+                    <field name="emp_category_id"/>
+                    <field name="project_id"/>
+                    <field name="project_manager_id" />
+                    <field name="approved_by"/>
+                    <field name="task_id"/>
+                    <field name="name"/>
+                    <field name="unit_amount"/>
+                    <filter string="This Month" domain="[('date', 'like',context_today().strftime('%Y-%m'))]" name="this_month_filter_timesheet"/>
+                    <separator/>
+                    <filter string="This Week" name="filter_this_week" domain="[('date', '&lt;=', ((context_today()+relativedelta(weeks=0, weekday=-1)).strftime('%Y-%m-%d'))),('date', '&gt;=', ((context_today()-relativedelta(weeks=1, weekday=0)).strftime('%Y-%m-%d')))]"/>
+                    <separator/>
+                    <filter string="Today" name="filter_today" domain="[('date', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('date', '&lt;=',datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>
+                    
+
+                    <group expand="0" string="Group By">
+                        <filter name="group_employee_id" string="Employee" context="{'group_by':'employee_id'}"/>
+                        <filter name="group_project_id" string="Project" context="{'group_by':'project_id'}"/>
+                        <filter name="group_task_id" string="Task" context="{'group_by':'task_id'}"/>
+                        <filter string="Project" name="group_by_filter_project" domain="[]" context="{'group_by':'project_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        
+        <!-- Main window action for "model" -->
+        <record id="kw_project_timesheet_view_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Project Wise Timesheet</field>
+            <field name="res_model">account.analytic.line</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kw_project_timesheet_tree_view"/>
+            <field name="search_view_id" ref="kw_project_timesheet_view_search"/>
+            <field name="view_type">form</field>
+            <field name="domain">['|','|',('project_id.emp_id.user_id', '=', uid),('project_id.sbu_id.representative_id.user_id', '=', uid),('parent_task_id.tl_employee_id.user_id', '=', uid)]</field>
+            <field name="context">{'search_default_this_month_filter_timesheet':1,'search_default_group_by_filter_project':1,'create':False,'edit':False,'delete':False}</field>
+        </record>
+
+
+        <menuitem id="kw_project_timesheet_menu" name="Project Wise Timesheet" parent="hr_timesheet.menu_timesheets_reports"
+        action="kw_project_timesheet_view_act_window" sequence="9"/>
+    </data>
+</odoo>

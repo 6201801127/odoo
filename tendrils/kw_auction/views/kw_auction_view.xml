@@ -1,0 +1,340 @@
+<odoo>
+  <data>
+  
+
+    <record model="ir.ui.view" id="kw_auction_list">
+      <field name="name">kw_auction_list</field>
+      <field name="model">kw_auction</field>
+      <field name="arch" type="xml">
+        <tree import="0">
+          <field name="auction_ref_id"/>
+          <field name="item_name"/>
+          <field name="item_model"/>
+          <field name="fa_code"/>
+          <field name="serial_no"/>
+          <field name="item_configuration"/>
+          <field name="reserve_price"/>
+          <field name="highest_bid"/>
+          <field name="booked_by_id"/>
+          <field name="booked_on"/>
+          <field name="state"/>
+          <field name="pending_at_ids" widget='many2many_tags'/>
+        </tree>
+      </field>
+    </record>
+
+
+    <record model="ir.ui.view" id="kw_auction_form">
+      <field name="name">kw_auction_form</field>
+      <field name="model">kw_auction</field>
+      <field name="arch" type="xml">
+        <form>
+          <header>
+            <field name="state" widget="statusbar"/>
+            <button name="button_auction_open_request" string="Request For Auction" type="object" class="btn btn-primary" groups='kw_auction.kw_auction_store_manager_group' attrs="{'invisible':[('auction_request_button_show_hide_boolean', '=', False)]}" icon="fa-chevron-circle-right"/>
+            <button name="button_auction_reserve" string="Reserve" type="object" class="btn btn-info" groups='kw_auction.kw_auction_IT_head_group' attrs="{'invisible':[('auction_reserve_button_show_hide_boolean', '=', False)]}" icon="fa-lock"/>
+            <button name="button_auction_open_approve" string="Approve" type="object" class="btn btn-success" groups='kw_auction.kw_auction_IT_head_group' confirm="Are you sure to send this item for auction?" attrs="{'invisible':[('auction_request_approve_button_show_hide_boolean', '=', False)]}" icon="fa-thumbs-up"/>
+            <button name="button_auction_request_reject" string="Reject" type="object" class="btn btn-danger" groups='kw_auction.kw_auction_IT_head_group' attrs="{'invisible':[('auction_request_reject_button_show_hide_boolean', '=', False)]}" icon="fa-thumbs-down"/>
+            <button name="button_auction_bid" string="Bid" type="object" class="btn btn-success" attrs="{'invisible':[('bid_button_show_hide_boolean', '=', False)]}" icon="fa-hand-paper-o"/>
+            <button name="button_auction_release" string="Release" type="object" class="btn btn-warning" attrs="{'invisible':[('release_button_show_hide_boolean', '=', False)]}" groups='kw_auction.kw_auction_store_manager_group' icon="fa-unlock"/>
+            <button name="button_auction_request_to_completed" string="Request To Complete" type="object" class="btn btn-primary" attrs="{'invisible':[('request_to_complete_button_show_hide_boolean', '=', False)]}" groups='kw_auction.kw_auction_store_manager_group' icon="fa-chevron-circle-right"/>
+            <button name="button_auction_completed" string="Complete" type="object" class="btn btn-success" attrs="{'invisible':[('complete_button_show_hide_boolean', '=', False)]}" groups='kw_auction.kw_auction_IT_head_group' icon="fa-check-circle"/>
+          </header>
+          <sheet>
+          <div class="oe_title">
+              <label for="number" string="Reference ID" style="font-size:25px;color:#1f64bd;"/>
+              <h2>
+                  <field name="auction_ref_id" nolabel="1"/>
+              </h2>
+          </div>
+            <group string="Lot Details" style="background: rgb(255,249,134); background: radial-gradient(circle, rgba(255,249,134,0.9682072658164829) 0%, rgba(252,253,250,1) 98%, rgba(252,253,254,1) 98%);" col="2">
+              <group>
+                <field name="item_name" required="1" attrs="{'readonly':[('state', 'not in', ['draft', 'requested'])]}"/>
+                <field name="item_model" required="1" attrs="{'readonly':[('state', 'not in', ['draft', 'requested'])]}"/>
+                <field name="fa_code" attrs="{'readonly':[('state', 'not in', ['draft', 'requested'])]}"/>
+                <field name="serial_no" attrs="{'readonly':[('state', 'not in', ['draft', 'requested'])]}"/>
+                <field name="item_configuration" required="1" attrs="{'readonly':[('state', 'not in', ['draft', 'requested'])]}"/>
+                <field name="auction_duration" invisible='1'/>
+              </group>
+              <group>
+                <field name="used_by_id" required="1" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}" attrs="{'readonly':[('state', 'not in', ['draft', 'requested'])]}"/>
+                <field name="description" required="1" attrs="{'readonly':[('state', 'not in', ['draft', 'requested'])]}"/>
+                <field name="reserve_price" required="1" attrs="{'readonly':[('state', 'not in', ['draft', 'requested'])]}"/>
+                <field name="highest_bid" required="1" attrs="{'invisible':[('state', 'not in', ['pending_at_auction'])], 'readonly':[('state', 'not in', ['draft', 'requested'])]}"/>
+                <field name="auction_request_button_show_hide_boolean" invisible="1"/>
+                <field name="auction_reserve_button_show_hide_boolean" invisible="1"/>
+                <field name="auction_request_approve_button_show_hide_boolean" invisible="1"/>
+                <field name="auction_request_reject_button_show_hide_boolean" invisible="1"/>
+                <field name="bid_button_show_hide_boolean" invisible="1"/>
+                <field name="release_button_show_hide_boolean" invisible="1"/>
+                <field name="request_to_complete_button_show_hide_boolean" invisible="1"/>
+                <field name="complete_button_show_hide_boolean" invisible="1"/>
+                <field name="test_css" invisible="1"/>
+              </group>
+            </group>
+            <group col="2">
+              <group style="background: rgb(192,223,157); background: radial-gradient(circle, rgba(192,223,157,0.9738095067128414) 0%, rgba(255,255,255,1) 97%, rgba(253,254,252,1) 100%);" string="Buyer Information"  attrs="{'invisible':[('booked_by_id', '=', False)]}">
+                <field name="final_bid" required="1" attrs="{'invisible':[('booked_by_id', '=', False)], 'readonly':[('state', 'not in', ['draft', 'requested'])]}"/>
+                <field name="booked_by_id" readonly="1" attrs="{'invisible':[('booked_by_id', '=', False)], 'readonly':[('state', 'not in', ['draft', 'requested'])]}" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}"/>
+                <field name="booked_on" readonly="1" attrs="{'invisible':[('booked_on', '=', False)], 'readonly':[('state', 'not in', ['draft', 'requested'])]}"/>
+              </group>
+            </group>
+              <notebook>
+                <page string="Photos">
+                  <p style='color: red;' states='draft,requested'> # Please fill the required fields before adding photos.</p>
+                  <group>
+                    <button name="get_upload_images"  string="Select Photos"  type="object"  class="oe_highlight" states='draft,requested'/>
+                  </group>
+                  <field name="item_photo_ids" nolabel='1'>
+                    <kanban delete='1'>
+                      <templates>
+                        <t t-name="kanban-box">
+                          <div style="display: inline-block; width: 250px; height: 200px; margin: 10px; border: 1px solid #ddd; padding: 10px; box-sizing: border-box;">
+                              <div style="height: 100%; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden;">
+                                <field name="photo" widget="image" style="width: auto; height: 100%; object-fit: contain; max-width: 100%; max-height: 100%;"
+                                t-attf-onclick="return false;" />
+                                  <field name="auction_state" invisible="1"/>
+                      
+                                  <!-- Download Button -->
+                                  <button type="object" class="btn btn-primary" name="action_download_image" 
+                                          style="position: absolute; top: 10px; right: 60px; background-color: rgba(0, 123, 255, 0.8); 
+                                                 border: none; color: white; font-size: 14px; cursor: pointer; 
+                                                 padding: 5px 10px; display: flex; align-items: center; justify-content: center;">
+                                      <i class="fa fa-download"></i>
+                                  </button>
+                                  <!-- Delete Button -->
+                                  <button type="object" class="btn btn-danger auction-photo-remove-btn" name="remove_upload_images" 
+                                          style="position: absolute; top: 10px; right: 10px; background-color: rgba(255, 0, 0, 0.8); 
+                                                 border: none; color: white; font-size: 14px; cursor: pointer; 
+                                                 padding: 5px 10px; display: flex; align-items: center; justify-content: center;" 
+                                          attrs="{'invisible': [('auction_state', 'not in', ['draft', 'requested'])]}">
+                                      <i class="fa fa-trash"></i>
+                                  </button>
+                              </div>
+                          </div>
+                      </t>
+                      
+                      </templates>
+                    </kanban>
+                  </field>
+                </page>
+                <page string="Bids">
+                  <group col='2'>
+                    <group>
+                      <field name="bid_ids" readonly="1" nolabel='1'>
+                        <tree class="budget_allocation_tree">
+                          <field name="bidder_id"/>
+                          <field name="bid_amount"/>
+                          <field name="date"/>
+                          <field name="status"/>
+                          <field name="rebid_withdraw_interest_button_show_hide_boolean" invisible="1"/>
+                          <button name="button_auction_rebid" string="Rebid" type="object" class="btn btn-success"  attrs="{'invisible':[('rebid_withdraw_interest_button_show_hide_boolean', '=', False)]}" icon="fa-hand-paper-o"/>
+                          <button name="button_auction_withdraw_interest" string="Withdraw Interest" type="object" class="btn btn-danger"  attrs="{'invisible':[('rebid_withdraw_interest_button_show_hide_boolean', '=', False)]}" icon="fa-stop-circle"/>
+                        </tree>
+                        <form>
+                          <group>
+                            <field name="bidder_id" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}"/>
+                            <field name="bid_amount"/>
+                            <field name="date"/>
+                            <field name="status"/>
+                          </group>
+                        </form>
+                      </field>
+                    </group>
+                  </group>
+                </page>
+                <page string="Action Log Details" groups='kw_auction.kw_auction_IT_head_group,kw_auction.kw_auction_store_manager_group'>
+                  <group col='2'>
+                    <group>
+                      <field name="action_log_ids" readonly="1" nolabel='1'>
+                        <tree>
+                          <field name="date"/>
+                          <field name="action_by"/>
+                          <field name="action_taken"/>
+                          <field name="remark"/>
+                        </tree>
+                        <form>
+                          <group>
+                            <field name="date"/>
+                            <field name="action_by"/>
+                            <field name="action_taken"/>
+                            <field name="remark"/>
+                          </group>
+                        </form>
+                      </field>
+                    </group>
+                  </group>
+                </page>
+            </notebook>
+          </sheet>
+          <div class="oe_chatter" >
+            <field name="message_follower_ids" widget="mail_followers" />
+            <field name="activity_ids" widget="mail_activity" />
+            <field name="message_ids" widget="mail_thread" />
+          </div>
+        </form>
+      </field>
+    </record>
+
+
+    <record model="ir.ui.view" id="kw_auction_search">
+      <field name="name">kw_auction_search</field>
+      <field name="model">kw_auction</field>
+      <field name="arch" type="xml">
+        <search>
+          <field name="item_name"/>
+          <field name="item_model"/>
+          <field name="booked_on"/>
+          <field name="fa_code"/>
+          <field name="serial_no"/>
+          <field name="item_configuration"/>
+          <filter string="My Bookings" name="filter_my_bookings" domain="[('booked_by_id.user_id', '=', uid)]" groups='kw_auction.kw_auction_store_manager_group'/>
+          <filter string="To Take Action" name="filter_to_take_action" domain="[('state', 'in', ['requested', 'pending_for_complete'])]" groups='kw_auction.kw_auction_IT_head_group'/>
+          <filter string="Current Month" name="filter_current_month" domain="[('booked_on', '&gt;=', (datetime.datetime.now().strftime('%%Y-%%m-01 00:00:00'))), ('booked_on', '&lt;=', (datetime.datetime.now() + relativedelta(day=31)).strftime('%%Y-%%m-%%d 23:59:59'))]" help="Filter records booked in the current month"/>
+          <group expand='0' string="Group By">
+            <filter string="Item" name="Item" domain="[]" context="{'group_by':'item_name'}"/>
+            <filter string="Model" name="Model" domain="[]" context="{'group_by':'item_model'}"/>
+            <filter string="State" name="State" domain="[]" context="{'group_by':'state'}"/>
+          </group>
+        </search>
+      </field>
+    </record>
+
+
+    <record model="ir.ui.view" id="kw_auction_remark_wizard_form">
+      <field name="name">kw_auction_remark_wizard_form</field>
+      <field name="model">kw_auction_remark_wizard</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group>
+              <field name="reserve_for_id" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}" groups='kw_auction.kw_auction_IT_head_group' attrs="{'invisible':[('reserve_for_id_show_hide_bool','=',False)], 'required':[('reserve_for_id_show_hide_bool','=',True)]}"/>
+              <field name="ref_id" invisible='1'/>
+              <field name="ref_ids" attrs="{'invisible':[('ref_ids_show_hide_bool','=',True)]}"/>
+              <field name="remarks"/>
+              <field name="ref_ids_show_hide_bool" invisible='1'/>
+              <field name="reserve_for_id_show_hide_bool" invisible='1'/>
+            </group>
+            <footer>
+              <center>
+                <button string="Confirm" name="proceed_with_remark" type="object" class="oe_highlight"/>
+                <button string="Cancel" class="btn btn-default" special="cancel"/>
+              </center>
+            </footer>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <act_window
+            id="kw_auction_act_window"
+            name="Request For Auction"
+            res_model="kw_auction_remark_wizard"
+            view_id = "kw_auction_remark_wizard_form"
+            view_mode = "form"
+            view_type = "form"
+            key2 = "client_action_multi"
+            target = "new"
+            src_model="kw_auction"
+            groups='kw_auction.kw_auction_store_manager_group'
+            />
+
+
+    <record model="ir.ui.view" id="kw_auction_rebid_wizard_form">
+      <field name="name">kw_auction_rebid_wizard_form</field>
+      <field name="model">kw_auction_rebid_wizard</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group>
+              <field name="ref_id" invisible='1'/>
+              <field name="rebid_amount" required="1"/>
+            </group>
+            <footer>
+              <center>
+                <button string="Confirm" name="proceed_rebid" type="object" class="oe_highlight"/>
+                <button string="Cancel" class="btn btn-default" special="cancel"/>
+              </center>
+            </footer>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+
+    <record id="kw_auction_item_photo_upload_wizard_form" model="ir.ui.view">
+      <field name="name">kw_auction_item_photo_upload_wizard_form</field>
+      <field name="model">kw_auction_item_photo_upload_wizard</field>
+      <field name="type">form</field>
+      <field name="arch" type="xml">
+        <form string="Upload Photos">
+          <sheet>
+            <group>
+              <p style='color: red;'> # image size should not be greater than 1MB. </p>
+              <field name="photos_ids" widget="many2many_binary"/>
+              <field name="auction_id" invisible="1"/>
+            </group>
+          </sheet>
+          <footer>
+            <button string='Submit' name="upload_image" type="object" class="btn-primary"/>
+            <button string="Cancel" class="btn-danger" special="cancel"/>
+          </footer>
+        </form>
+      </field>
+    </record>
+
+    
+
+
+    <record model="ir.actions.act_window" id="kw_auction_add_action_window">
+      <field name="name">Auctions</field>
+      <field name="res_model">kw_auction</field>
+      <field name="view_mode">tree,form,search</field>
+      <field name="view_type">form</field>
+      <field name="domain">[]</field>
+      <field name="context">{'add':1}</field>
+      <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+              Create a new auction item...
+          </p>
+      </field>
+    </record>
+
+    <record id="kw_auction_view_server_action" model="ir.actions.server">
+        <field name="name">View Auctions</field>
+        <field name="model_id" ref="model_kw_auction"/>
+        <field name="state">code</field>
+        <field name="code">action=model.get_auction_records()</field>
+    </record>
+
+    <record id="kw_auction_my_bids_server_action" model="ir.actions.server">
+        <field name="name">My Bids</field>
+        <field name="model_id" ref="model_kw_auction"/>
+        <field name="state">code</field>
+        <field name="code">action=model.view_my_bids()</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="kw_auction_my_bookings_action_window">
+      <field name="name">My Bookings</field>
+      <field name="res_model">kw_auction</field>
+      <field name="view_mode">tree,form,search</field>
+      <field name="view_type">form</field>
+      <field name="domain">[('state', 'in', ['booked', 'reserved', 'pending_for_complete', 'completed']), ('booked_by_id.user_id', '=', uid)]</field>
+      <field name="context">{'create': False, 'delete': False, 'copy': False, 'my_bookings':1}</field>
+      <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+              No auction items won or booked yet....
+          </p>
+      </field>
+    </record>
+    
+    <record id="kw_auction_take_action_server_action" model="ir.actions.server">
+        <field name="name">Take Action</field>
+        <field name="model_id" ref="model_kw_auction"/>
+        <field name="state">code</field>
+        <field name="code">action=model.take_action()</field>
+    </record>
+
+
+  </data>
+</odoo>

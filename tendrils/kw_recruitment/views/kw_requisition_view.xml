@@ -1,0 +1,830 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+
+
+		<!-- Tree view for "model" -->
+		<record id="view_kw_recruitment_requisition_tree" model="ir.ui.view">
+			<field name="name">view.kw_recruitment_requisition.tree</field>
+			<field name="model">kw_recruitment_requisition</field>
+			<field name="type">tree</field>
+			<field name="mode">primary</field>
+			<field name="arch" type="xml">
+				<tree import="false" decoration-success="state=='approve'"
+				      decoration-danger="state=='reject'" default_order='id desc'>
+					<field name="order_sequence" invisible="1"/>
+					<field name="code"/>
+					<field name="requisition_type"/>
+					<field name="type_employment"/>
+					<field name="resource"/>
+					<field name="employee_id" widget="many2many_tags" string="Replacement For" invisible="1"/>
+					<field name="role_id"/>
+					<field name="categ_id"/>
+					<field name="req_raised_by_id" string="Raised By"/>
+					<field name="state"/>
+					<field name="pending_at"/>
+					<field name="active" widget="boolean_toggle" invisible="1"/>
+					<field name="approved_user_id"/>
+				</tree>
+			</field>
+		</record>
+
+
+		<record id="view_kw_recruitment_requisition_kanban" model="ir.ui.view">
+			<field name="name">kw_recruitment_requisition.kanban</field>
+			<field name="model">kw_recruitment_requisition</field>
+			<field name="priority">16</field>
+			<field name="arch" type="xml">
+				<kanban import="false" class="oe_background_grey o_kanban_dashboard o_hr_recruitment_kanban">
+					<field name="code"/>
+					<field name="requisition_type"/>
+					<field name="type_employment"/>
+					<field name="resource"/>
+					<field name="employee_id"/>
+					<field name="role_id"/>
+					<field name="categ_id"/>
+					<field name="req_raised_by_id"/>
+					<field name="state"/>
+					<field name="pending_at"/>
+					<field name="active"/>
+					<field name="approved_user_id"/>
+					<templates>
+						<t t-name="kanban-box">
+							<div class="oe_kanban_global_click">
+								<div class="o_kanban_card_content">
+									<p class="badge badge-warning h2 mt-0 p-2 mb-2 font-weight-bold"
+									   style="font-size:16px">
+										<field name="code"/>
+									</p>
+									<br/>
+									<table class="table table-borderless">
+										<tr>
+											<td style="width:50%">Employment Type</td>
+											<td style="width:5%">:</td>
+											<td>
+												<field name="type_employment"/>
+											</td>
+										</tr>
+										<tr>
+											<td>Raised By</td>
+											<td>:</td>
+											<td>
+												<field name="req_raised_by_id"/>
+											</td>
+										</tr>
+										<tr>
+											<td>Raised On</td>
+											<td>:</td>
+											<td>
+												<field name="create_date"/>
+											</td>
+										</tr>
+									</table>
+
+								</div>
+							</div>
+						</t>
+					</templates>
+				</kanban>
+			</field>
+		</record>
+
+		<!-- Form view for "model" -->
+		<record id="view_kw_recruitment_requisition_form" model="ir.ui.view">
+			<field name="name">view.model.form</field>
+			<field name="model">kw_recruitment_requisition</field>
+			<field name="type">form</field>
+			<field name="mode">primary</field>
+			<field name="priority">99</field>
+			<field name="arch" type="xml">
+				<form string="Manpower Requisition" import="false">
+					<header>
+						<button name="send_for_approval" type="object"
+						        string="Send for Approval" class="btn btn-success"
+						        attrs="{'invisible':['|',('state','!=','draft'),('user_in_second_label','=',True)]}"
+						/>
+						<button name="action_reject" type="object" string="Reject"
+						        attrs="{'invisible':['|',('is_final_approver','=', False),('state','in',['reject'])]}"
+						        class="btn-danger"/>
+						<field name="state" widget="statusbar" statusbar_visible="draft,sent,approve,reject"/>
+						<field name="user_inv" invisible="1"/>
+						<field name="is_final_approver" invisible="1"/>
+						<field name="forwarded" invisible="1"/>
+					</header>
+					<sheet>
+						<group>
+							<group string="General Requirement">
+								<field name="user_in_second_label" invisible="1"/>
+								<field name="last_approver_ids" invisible="1"/>
+								<field name="current_user" invisible="1"/>
+								<field name="hide_sal" invisible="1"/>
+								<field name="code" string="Reference No."/>
+								<field name="req_raised_by" readonly="1"/>
+								<field name="req_raised_by_id" invisible="1"/>
+								<field name="dept_name" options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       attrs="{'readonly':['|', ('state','in',['reject','forward']),('field_edit_post_approval','=', True)],'required': True}"/>
+								<field name="approver_id"
+								       attrs="{'invisible': [('approver_field','=', True)],'required': [('approver_field','=', False)],'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)]}"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+								<field name="forwarder_id"
+								       attrs="{'invisible':['|',('is_final_approver','=', False),('state','in',['approve','reject','forward'])]}"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+								<field name="approver_field" invisible="1"/>
+								<field name="field_edit_post_approval" invisible="1"/>
+								<field name="branch_id" options="{'no_open': True,'no_edit':True,'no_create':True}"
+								       widget="many2many_tags"
+								       attrs="{'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],'required': True}"/>
+								<field name="resource" string="Resource Type"
+								       attrs="{'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],'required': True}"/>
+
+								<field name="employee_id"
+								       attrs="{'invisible':['|','&amp;',('resource','=',False),('employee_id','=',False),('resource','=','new')],'required':[('resource','!=','new')],'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],}"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       widget="many2many_tags" string="Replacement for"/>
+
+								<!-- <field name="current_ctc"
+								       attrs="{'invisible':['|','&amp;',('resource','=',False),('employee_id','=',False),('resource','=','new')],'required':[('resource','!=','new')],'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],}"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       string="Current CTC"/> -->
+								       <!--  attrs="{'invisible':['|', ('resource','=','new'),('hide_sal', '=', True)],'required':[('resource','!=','new')]}" -->
+								<field name="current_ctc"
+								       force_save="1"
+								       readonly="1"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       string="Current CTC" invisible="1"/>
+
+								<field name="type_employment"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       attrs="{'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],'required': True}"/>
+							</group>
+							<group string="Budget Settings">
+								<field name="requisition_type" string="Budget Type"
+								       attrs="{'readonly':['|', ('state','in',['reject','forward']),('field_edit_post_approval','=', True)],'required': True}"/>
+
+								<!-- <field name="category_id"
+									   options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+								<field name="skill_id" domain="[('category_id', '=', category_id)]"
+									   options="{'no_open': True,'no_create':True,'no_edit':True}"/> -->
+								<field name="role_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       domain="[('budget_type','=',requisition_type)]"
+									   attrs="{'readonly':['|', ('state','in',['reject','forward']),('field_edit_post_approval','=', True)],'required': True}"/>
+								<field name="categ_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+								attrs="{'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],'required': True}" 
+									   domain="[('role_ids', '=', role_id)]"/>
+								<field name="type_project"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('type_project','=',False),('requisition_type','=','treasury')],'required': [('requisition_type','=', 'project')],'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],}"/>
+								<field name="project"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('project','=',False),('requisition_type','=','treasury')],'required': [('requisition_type','=', 'project')],'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],}"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+
+								<!--								<field name="project_id" -->
+								<!--									   attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('project_id','=',False),('requisition_type','=','treasury')],'required': [('requisition_type','=', 'project')],'readonly':[('state','in',['approve','reject'])],}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>-->
+								<field name="duration"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('duration','=',False),('requisition_type','=','treasury')],'required': [('requisition_type','=', 'project')],'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],}"/>
+								<field name="name_of_business"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('name_of_business','=',False),('requisition_type','=','treasury')],'required': [('requisition_type','=', 'project')],'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],}"
+								       options="{'no_open': True,'no_edit':True}"/>
+								<field name="employment_is" attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('type_project','=',False),('requisition_type','=','project')],'required': [('requisition_type','=', 'treasury')],'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],}"
+								       widget="radio" options="{'horizontal':True}"/>
+								<field name="employment_duration" attrs="{'invisible':['|','|','&amp;',('requisition_type','=',False),('type_project','=',False),('requisition_type','=','project'),('employment_is','!=','temporary')],'required': [('requisition_type','=', 'treasury'),('employment_is','=','temporary')],'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],}"/>
+							</group>
+						</group>
+						<group>
+							<group string="Requisition Details">
+								<field name="job_position" string='Position'
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       attrs="{'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],'required': True}"/>
+								<field name="date_requisition"
+								       attrs="{'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],'required': True}"/>
+								<field name="no_of_resource"
+								       attrs="{'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],'required': True}"/>
+								<field name="skill_set"
+								       attrs="{'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],'required': True}"/>
+								<field name="qualification"
+								       attrs="{'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],'required': True}"/>
+							</group>
+							<group string="Experience">
+								<!-- <field name="branch_id"
+									   options="{'no_open': True,'no_create':True,'no_edit':True}"
+									   attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('branch_id','=',False),('requisition_type','=','project')]}"/> -->
+
+								<label for="experience" class="oe_inline"/>
+								<div>
+									<group>
+										<field name="min_exp_year"
+										       attrs="{'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],'required': True}"/>
+										<field name="max_exp_year"
+										       attrs="{'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],'required': True}"/>
+									</group>
+								</div>
+<!--								<label for="salary_month" class="oe_inline" attrs="{'invisible':[('hide_sal','=',True)]}"/>-->
+<!--								<div attrs="{'invisible':[('hide_sal','=',True)]}">-->
+<!--									<group>-->
+<!--										<field name="min_sal"-->
+<!--										       attrs="{'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],'required': [('hide_sal','=',False)]}"/>-->
+<!--										<field name="max_sal"-->
+<!--										       attrs="{'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],'required': [('hide_sal','=',False)]}"/>-->
+
+<!--									</group>-->
+<!--								</div>-->
+								<field name="max_sal" string="Salary per Month"
+									   attrs="{'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)], 'required': [('hide_sal','=',False)], 'invisible':[('hide_sal','=',True)]}"/>
+									  <!--  attrs="{'required': [('hide_sal','=',False)], 'invisible':['|', ('hide_sal','=',True), ('resource', '=', 'new')]}" -->
+								<field name="extra_load_on_budget" string="Extra Load on Budget"
+									   readonly="1" force_save="1" invisible="1"/>
+
+								<field name="description" attrs="{'readonly':[('state','not in',['draft','sent'])]}"/>
+								<field name="forwared_note" readonly="1" invisible="1"/>
+								<field name="approved_note" readonly="1" invisible="1"/>
+							</group>
+						</group>
+
+
+						<!-- <page string="Project for Deployment" attrs="{'invisible':['|',('requisition_type','=',False),('requisition_type','=','treasury')]}" > -->
+						<group string="Project for Deployment"
+						       attrs="{'invisible':['|',('requisition_type','=',False),('requisition_type','=','treasury')]}">
+							<group>
+								<!-- <field name="name_of_workorder"
+								   attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('name_of_workorder','=',False),('requisition_type','=','treasury')]}"/> -->
+								<field name="billing_date"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('billing_date','=',False),('requisition_type','=','treasury')],'readonly':[('state','in',['approve','reject','forward'])]}"/>
+								<field name="end_date_contract"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('end_date_contract','=',False),('requisition_type','=','treasury')],'readonly':[('state','in',['approve','reject','forward'])]}"/>
+
+							</group>
+
+						</group>
+						<!-- </page>  -->
+
+						<!-- <page string="HR Use Only">
+							<group string="Employee Details">
+								<group>
+									<field name="type_employment"
+										options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+									<field name="actual_joining"/>
+								</group>
+								<group>
+									<field name="end_service"  attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('end_service','=',False),('requisition_type','=','treasury')]}"/>
+									<field name="actual_sal"/>
+								</group>
+							</group>
+						</page> -->
+						<!-- </notebook> -->
+					</sheet>
+					<group name="hide_chatter_mrf" attrs="{'invisible':[('hide_sal','=',True)]}">
+						<div class="oe_chatter">
+							<field name="message_follower_ids" widget="mail_followers"/>
+							<field name="activity_ids" widget="mail_activity"/>
+							<field name="message_ids" widget="mail_thread"/>
+						</div>
+					</group>
+				</form>
+			</field>
+		</record>
+
+		<record id="view_kw_recruitment_requisition_search" model="ir.ui.view">
+			<field name="name">view.kw_recruitment_requisition.search</field>
+			<field name="model">kw_recruitment_requisition</field>
+			<field name="type">search</field>
+			<field name="arch" type="xml">
+				<search>
+					<field name="code"/>
+					<field name="req_raised_by_id" string="Raised By"/>
+					<field name="create_date" string="Applied On"/>
+					<field name="requisition_type"/>
+					<field name="type_employment"/>
+					<field name="resource"/>
+					<field name="role_id"/>
+					<field name="categ_id"/>
+					<field name="state"/>
+					<field name="employee_id" string="Replacement For"/>
+					<separator/>
+					<group expand="0" string="Group By">
+						<filter name="group_state" string="State" context="{'group_by':'state'}"/>
+					</group>
+				</search>
+			</field>
+		</record>
+
+
+		<!-- Main window action for "model" -->
+		<record id="kw_recruitment_requisition_act_window" model="ir.actions.act_window">
+			<field name="type">ir.actions.act_window</field>
+			<field name="name">Manpower Requisitions</field>
+			<field name="res_model">kw_recruitment_requisition</field>
+			<field name="view_mode">tree,form</field>
+			<field name="view_type">form</field>
+			<field name="search_view_id" ref="view_kw_recruitment_requisition_search"/>
+			<field name="domain">['|',('state','!=','draft'),('state','=','draft')]</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+		(0, 0, {'view_mode': 'tree', 'view_id': ref('view_kw_recruitment_requisition_tree')}),
+		(0, 0, {'view_mode': 'form', 'view_id': ref('view_kw_recruitment_requisition_form')}),
+		(0, 0, {'view_mode': 'kanban', 'view_id': ref('view_kw_recruitment_requisition_kanban')})]"/>
+
+			<!-- <field name="view_id" ref="view_kw_recruitment_requisition_tree"/> -->
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					No record found..
+				</p>
+			</field>
+
+		</record>
+		<!-- Tree view for pending actions. -->
+		<record id="view_kw_recruitment_requisition_pending_action_tree" model="ir.ui.view">
+			<field name="name">view.kw_recruitment_requisition.tree</field>
+			<field name="model">kw_recruitment_requisition</field>
+			<field name="type">tree</field>
+			<field name="mode">primary</field>
+			<field name="arch" type="xml">
+				<tree create="false" import="false">
+					<field name="code"/>
+					<field name="req_raised_by_id" string="Raised By"/>
+					<field name="create_date" string="Applied On"/>
+					<field name="requisition_type"/>
+					<field name="type_employment"/>
+					<field name="resource"/>
+					<field name="employee_id" widget="many2many_tags" string="Replacement For" invisible="1"/>
+					<field name="role_id"/>
+					<field name="categ_id"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+
+		<record id="view_kw_recruitment_requisition_approve_action_tree" model="ir.ui.view">
+			<field name="name">view.kw_recruitment_requisition.tree</field>
+			<field name="model">kw_recruitment_requisition</field>
+			<field name="type">tree</field>
+			<field name="mode">primary</field>
+			<field name="arch" type="xml">
+				<tree create="false" import="false">
+					<field name="code"/>
+					<field name="req_raised_by_id" string="Raised By"/>
+					<field name="create_date" string="Applied On"/>
+					<field name="requisition_type"/>
+					<field name="type_employment"/>
+					<field name="resource"/>
+					<field name="employee_id" widget="many2many_tags" string="Replacement For" invisible="1"/>
+					<field name="role_id"/>
+					<field name="categ_id"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+		<!-- Form view for pending actions -->
+		<record id="view_kw_recruitment_requisition_pending_actions_form" model="ir.ui.view">
+			<field name="name">view.model.form</field>
+			<field name="model">kw_recruitment_requisition</field>
+			<field name="type">form</field>
+			<field name="mode">primary</field>
+			<field name="priority">110</field>
+			<field name="arch" type="xml">
+				<form string="Manpower Requisition" create="false" import="false">
+					<header>
+						<!-- <button name="send_for_approval" type="object" string="Send for Approval" class="oe_highlight" states="draft" /> -->
+						<button name="action_approved_forward" type="object" string="Approve &amp; Forward"
+						        class="btn btn-success"
+						        attrs="{'invisible':['|','|',('user_inv','=',True),('state','not in',['sent','hold',]),('is_final_approver','=', True)]}"/>
+
+						<button name="action_approved" type="object" string="Approve" class="btn-success"
+						        attrs="{'invisible':['|',('is_final_approver','=', False),('state','in',['approve','reject'])]}"/>
+
+						<button name="action_revise" type="object" string="Revise"
+						        attrs="{'invisible':['|','|',('user_inv','=',True),('state','not in',['sent','hold']),('is_final_approver','=', True)]}"
+						        class="btn-warning"/>
+
+						<button name="action_revise" type="object" string="Revise"
+						        attrs="{'invisible':['|',('is_final_approver','=', False),('state','in',['approve','reject'])]}"
+						        class="btn-warning"/>
+
+						<button name="action_hold" type="object" string="Hold"
+						        attrs="{'invisible':['|','|',('user_inv','=',True),('state','not in',['sent']),('is_final_approver','=', True)]}"
+						        class="btn-warning"/>
+
+						<button name="action_hold" type="object" string="Hold"
+						        attrs="{'invisible':['|',('is_final_approver','=', False),('state','in',['approve','hold','reject'])]}"
+						        class="btn-warning"/>
+
+						<button name="action_reject" type="object" string="Reject"
+						        attrs="{'invisible':['|','|',('user_inv','=',True),('state','not in',['sent','hold']),('is_final_approver','=', True)]}"
+						        class="btn-danger"/>
+						<button name="action_reject" type="object" string="Reject"
+						        attrs="{'invisible':['|',('is_final_approver','=', False),('state','in',['approve','reject'])]}"
+						        class="btn-danger"/>
+
+						<button name="action_create_job" type="object" string="Create Job" class="btn-success"
+						        states="approve" groups="hr_recruitment.group_hr_recruitment_manager"/>
+						<field name="state" widget="statusbar" statusbar_visible="draft,sent,approve,reject"/>
+						<field name="user_inv" invisible="1"/>
+						<field name="is_final_approver" invisible="1"/>
+						<field name="forwarded" invisible="1"/>
+					</header>
+					<sheet>
+						<group>
+							<group string="General Requirement">
+								<field name="last_approver_ids" invisible="1"/>
+								<field name="current_user" invisible="1"/>
+								<field name="hide_sal" invisible="1"/>
+								<field name="code" string="Reference No."/>
+								<field name="req_raised_by" readonly="1"/>
+								<field name="req_raised_by_id" invisible="1"/>
+								<field name="field_edit_post_approval" invisible="1"/>
+								<field name="dept_name" options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       readonly="1"/>
+								<field name="approver_id"
+								       attrs="{'invisible': ['|',('is_final_approver','=', True),('approver_field','=', True)],'required': [('approver_field','=', False)],'readonly':[('state','in',['approve','reject'])]}"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1"/>
+
+								<field name="branch_id" options="{'no_open': True,'no_edit':True}"
+								       widget="many2many_tags"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+								<field name="resource" string="Resource Type"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+
+								<field name="employee_id"
+								       attrs="{'invisible':['|','&amp;',('resource','=',False),('employee_id','=',False),('resource','=','new')],'required':[('resource','!=','new')],'readonly':[('state','in',['approve','reject'])],}"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       widget="many2many_tags" string="Replacement for"/>
+								        <!-- attrs="{'invisible':['|', ('resource','=','new'),('hide_sal', '=', True)],'required':[('resource','!=','new')]}" -->
+								<field name="current_ctc"
+								       force_save="1"
+								       readonly="1"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       string="Current CTC" invisible="1"/>
+								<field name="type_employment"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+								<field name="forwarder_id"
+								       attrs="{'invisible':['|',('is_final_approver','=', False),('state','in',['approve','reject'])]}"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1"/>
+
+								<field name="approver_field" invisible="1"/>
+							</group>
+							<group string="Budget Settings">
+								<field name="requisition_type" string="Budget Type"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+								<!-- <field name="category_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+										<field name="skill_id" domain="[('category_id', '=', category_id)]" options="{'no_open': True,'no_create':True,'no_edit':True}"/> -->
+								<field name="role_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+								<field name="categ_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+								<field name="employment_is" attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('type_project','=',False),('requisition_type','=','project')],'required': [('requisition_type','=', 'treasury')],'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],}"
+								       widget="radio" options="{'horizontal':True}"/>
+								<field name="employment_duration" attrs="{'invisible':['|','|','&amp;',('requisition_type','=',False),('type_project','=',False),('requisition_type','=','project'),('employment_is','!=','temporary')],'required': [('requisition_type','=', 'treasury'),('employment_is','=','temporary')],'readonly':['|',('state','in',['reject','forward']),('field_edit_post_approval','=', True)],}"/>
+								<field name="type_project"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('type_project','=',False),('requisition_type','=','treasury')],'required': [('requisition_type','=', 'project')],'readonly':[('state','in',['approve','reject'])],}"/>
+								<field name="project"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('project','=',False),('requisition_type','=','treasury')],'required': [('requisition_type','=', 'project')],'readonly':[('state','in',['approve','reject'])],}"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+
+								<!--						<field name="project_id" attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('project_id','=',False),('requisition_type','=','treasury')],'required': [('requisition_type','=', 'project')],'readonly':[('state','in',['approve','reject'])],}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>-->
+								<field name="duration"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('duration','=',False),('requisition_type','=','treasury')],'required': [('requisition_type','=', 'project')],'readonly':[('state','in',['approve','reject'])],}"/>
+								<field name="name_of_business"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('name_of_business','=',False),('requisition_type','=','treasury')],'required': [('requisition_type','=', 'project')],'readonly':[('state','in',['approve','reject'])],}"
+								       options="{'no_open': True,'no_edit':True}"/>
+							</group>
+						</group>
+						<group>
+							<group string="Requisition Details">
+								<field name="job_position" string='Position'
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+								<field name="date_requisition"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+								<field name="no_of_resource"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+								<field name="skill_set"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+								<field name="qualification"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+							</group>
+							<group string="Experience">
+								<!-- <field name="branch_id" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('branch_id','=',False),('requisition_type','=','project')]}"/> -->
+
+								<label for="experience" class="oe_inline"/>
+								<div>
+									<group>
+										<field name="min_exp_year"
+										       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+										<field name="max_exp_year"
+										       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+									</group>
+								</div>
+<!--								<label for="salary_month" class="oe_inline" attrs="{'invisible':[('hide_sal','=',True)]}"/>-->
+<!--								<div attrs="{'invisible':[('hide_sal','=',True)]}">-->
+<!--									<group>-->
+<!--										<field name="min_sal"-->
+<!--										       attrs="{'readonly':[('state','in',['approve','reject'])],'required': [('hide_sal','=',False)]}"/>-->
+<!--										<field name="max_sal"-->
+<!--										       attrs="{'readonly':[('state','in',['approve','reject'])],'required': [('hide_sal','=',False)]}"/>-->
+<!--									</group>-->
+<!--								</div>-->
+								<field name="max_sal" string="Salary Budget per Month"
+									   attrs="{'readonly':[('state','in',['approve','reject'])], 'required': [('hide_sal','=',False)], 'invisible':[('hide_sal','=',True)]}"/>
+									   <!-- attrs="{'required': [('hide_sal','=',False)], 'invisible':['|', ('hide_sal','=',True), ('resource', '=', 'new')]}" -->
+								<field name="extra_load_on_budget" string="Extra Load on Budget"
+									   readonly="1" force_save="1" invisible="1"/>
+								<field name="description" attrs="{'readonly':[('state','not in',['draft','sent'])]}"/>
+
+							</group>
+						</group>
+
+
+						<!-- <page string="Project for Deployment" attrs="{'invisible':['|',('requisition_type','=',False),('requisition_type','=','treasury')]}"> -->
+						<group string="Project for Deployment"
+						       attrs="{'invisible':['|',('requisition_type','=',False),('requisition_type','=','treasury')]}">
+							<group>
+								<!-- <field name="name_of_workorder" attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('name_of_workorder','=',False),('requisition_type','=','treasury')]}"/> -->
+								<field name="billing_date"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('billing_date','=',False),('requisition_type','=','treasury')],'readonly':[('state','in',['approve','reject'])]}"/>
+								<field name="end_date_contract"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('end_date_contract','=',False),('requisition_type','=','treasury')],'readonly':[('state','in',['approve','reject'])]}"/>
+
+							</group>
+
+						</group>
+						<!-- </page>  -->
+
+						<!-- <page string="HR Use Only">
+										<group string="Employee Details">
+											<group>
+												<field name="type_employment" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+												<field name="actual_joining"/>
+											</group>
+											<group>
+												<field name="end_service" attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('end_service','=',False),('requisition_type','=','treasury')]}"/>
+												<field name="actual_sal"/>
+											</group>
+										</group>
+									</page> -->
+						<!-- </notebook> -->
+					</sheet>
+					<group name="hide_chatter_mrf" attrs="{'invisible':[('hide_sal','=',True)]}">
+						<div class="oe_chatter">
+							<field name="message_follower_ids" widget="mail_followers"/>
+							<field name="activity_ids" widget="mail_activity"/>
+							<field name="message_ids" widget="mail_thread"/>
+						</div>
+					</group>
+				</form>
+			</field>
+		</record>
+
+		<!-- Form view for pending actions -->
+		<record id="view_kw_recruitment_requisition_approve_actions_form" model="ir.ui.view">
+			<field name="name">view.model.form</field>
+			<field name="model">kw_recruitment_requisition</field>
+			<field name="type">form</field>
+			<field name="mode">primary</field>
+			<field name="priority">120</field>
+			<field name="arch" type="xml">
+				<form string="Manpower Requisition" create="false" import="false" edit="false">
+					<header>
+						<!-- <button name="send_for_approval" type="object" string="Send for Approval" class="oe_highlight" states="draft" /> -->
+						<button name="action_approved_forward" type="object" string="Approve &amp; Forward"
+						        class="btn btn-success"
+						        attrs="{'invisible':['|','|',('user_inv','=',True),('state','not in',['sent','hold',]),('is_final_approver','=', True)]}"/>
+
+						<button name="action_approved" type="object" string="Approve" class="oe_highlight"
+						        attrs="{'invisible':['|',('is_final_approver','=', False),('state','in',['approve','reject'])]}"/>
+
+						<button name="action_revise" type="object" string="Revise"
+						        attrs="{'invisible':['|','|',('user_inv','=',True),('state','not in',['sent','hold']),('is_final_approver','=', True)]}"
+						        class="btn-warning"/>
+
+						<button name="action_revise" type="object" string="Revise"
+						        attrs="{'invisible':['|',('is_final_approver','=', False),('state','in',['approve','reject'])]}"
+						        class="btn-warning"/>
+
+						<button name="action_hold" type="object" string="Hold"
+						        attrs="{'invisible':['|','|',('user_inv','=',True),('state','not in',['sent']),('is_final_approver','=', True)]}"
+						        class="btn-warning"/>
+
+						<button name="action_hold" type="object" string="Hold"
+						        attrs="{'invisible':['|',('is_final_approver','=', False),('state','in',['approve','hold','reject'])]}"
+						        class="btn-warning"/>
+
+						<button name="action_reject" type="object" string="Reject"
+						        attrs="{'invisible':['|','|',('user_inv','=',True),('state','not in',['sent','hold']),('is_final_approver','=', True)]}"
+						        class="btn-danger"/>
+						<button name="action_reject" type="object" string="Reject"
+						        attrs="{'invisible':['|',('is_final_approver','=', False),('state','in',['approve','reject'])]}"
+						        class="btn-danger"/>
+
+						<button name="action_create_job" type="object" string="Create Job" class="oe_highlight"
+						        states="approve" groups="hr_recruitment.group_hr_recruitment_manager"/>
+						<field name="state" widget="statusbar" statusbar_visible="draft,sent,approve,reject"/>
+						<field name="user_inv" invisible="1"/>
+						<field name="is_final_approver" invisible="1"/>
+						<field name="forwarded" invisible="1"/>
+					</header>
+					<sheet>
+						<group>
+							<group string="General Requirement">
+								<field name="last_approver_ids" invisible="1"/>
+								<field name="current_user" invisible="1"/>
+								<field name="hide_sal" invisible="1"/>
+								<field name="code" string="Reference No."/>
+								<field name="req_raised_by" readonly="1"/>
+								<field name="req_raised_by_id" invisible="1"/>
+								<field name="dept_name" options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       readonly="1"/>
+								<field name="approver_id"
+								       attrs="{'invisible': [('approver_field','=', True)],'required': [('approver_field','=', False)],'readonly':[('state','in',['approve','reject'])]}"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1"/>
+
+								<field name="approver_field" invisible="1"/>
+								<field name="requisition_type" string="Budget Type"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+								<field name="type_project"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('type_project','=',False),('requisition_type','=','treasury')],'required': [('requisition_type','=', 'project')],'readonly':[('state','in',['approve','reject'])],}"/>
+								<field name="project"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('project','=',False),('requisition_type','=','treasury')],'required': [('requisition_type','=', 'project')],'readonly':[('state','in',['approve','reject'])],}"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+
+								<!--						<field name="project_id" attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('project_id','=',False),('requisition_type','=','treasury')],'required': [('requisition_type','=', 'project')],'readonly':[('state','in',['approve','reject'])],}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>-->
+								<field name="duration"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('duration','=',False),('requisition_type','=','treasury')],'required': [('requisition_type','=', 'project')],'readonly':[('state','in',['approve','reject'])],}"/>
+								<field name="name_of_business"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('name_of_business','=',False),('requisition_type','=','treasury')],'required': [('requisition_type','=', 'project')],'readonly':[('state','in',['approve','reject'])],}"
+								       options="{'no_open': True,'no_edit':True}"/>
+							</group>
+							<group string="Details">
+								<field name="branch_id" options="{'no_open': True,'no_edit':True}"
+								       widget="many2many_tags"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+								<field name="resource" string="Resource Type"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+
+								<field name="employee_id"
+								       attrs="{'invisible':['|','&amp;',('resource','=',False),('employee_id','=',False),('resource','=','new')],'required':[('resource','!=','new')],'readonly':[('state','in',['approve','reject'])],}"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       widget="many2many_tags" string="Replacement for"/>
+								<field name="type_employment"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+								<!-- <field name="category_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+										<field name="skill_id" domain="[('category_id', '=', category_id)]" options="{'no_open': True,'no_create':True,'no_edit':True}"/> -->
+								<field name="role_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+								<field name="categ_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+							</group>
+						</group>
+						<group>
+							<group string="Requisition Details">
+								<field name="job_position" string='Position'
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+								<field name="date_requisition"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+								<field name="no_of_resource"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+								<field name="skill_set"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+								<field name="qualification"
+								       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+							</group>
+							<group string="Experience">
+								<!-- <field name="branch_id" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('branch_id','=',False),('requisition_type','=','project')]}"/> -->
+
+								<label for="experience" class="oe_inline"/>
+								<div>
+									<group>
+										<field name="min_exp_year"
+										       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+										<field name="max_exp_year"
+										       attrs="{'readonly':[('state','in',['approve','reject'])],'required': True}"/>
+									</group>
+								</div>
+<!--								<label for="salary_month" class="oe_inline" attrs="{'invisible':[('hide_sal','=',True)]}"/>-->
+<!--								<div attrs="{'invisible':[('hide_sal','=',True)]}">-->
+<!--									<group>-->
+<!--										<field name="min_sal"-->
+<!--										       attrs="{'readonly':[('state','in',['approve','reject'])],'required': [('hide_sal','=',False)]}"/>-->
+<!--										<field name="max_sal"-->
+<!--										       attrs="{'readonly':[('state','in',['approve','reject'])],'required': [('hide_sal','=',False)]}"/>-->
+<!--									</group>-->
+<!--								</div>-->
+								<field name="max_sal" string="Salary per Month"
+										       attrs="{'readonly':[('state','in',['approve','reject'])], 'required': [('hide_sal','=',False)], 'invisible':[('hide_sal','=',True)]}"/>
+
+								<field name="description" attrs="{'readonly':[('state','not in',['draft','sent'])]}"/>
+							</group>
+						</group>
+
+
+						<!-- <page string="Project for Deployment" attrs="{'invisible':['|',('requisition_type','=',False),('requisition_type','=','treasury')]}"> -->
+						<group string="Project for Deployment"
+						       attrs="{'invisible':['|',('requisition_type','=',False),('requisition_type','=','treasury')]}">
+							<group>
+								<!-- <field name="name_of_workorder" attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('name_of_workorder','=',False),('requisition_type','=','treasury')]}"/> -->
+								<field name="billing_date"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('billing_date','=',False),('requisition_type','=','treasury')],'readonly':[('state','in',['approve','reject'])]}"/>
+								<field name="end_date_contract"
+								       attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('end_date_contract','=',False),('requisition_type','=','treasury')],'readonly':[('state','in',['approve','reject'])]}"/>
+
+							</group>
+
+						</group>
+					</sheet>
+					<group name="hide_chatter_mrf" attrs="{'invisible':[('hide_sal','=',True)]}">
+						<div class="oe_chatter">
+							<field name="message_follower_ids" widget="mail_followers"/>
+							<field name="activity_ids" widget="mail_activity"/>
+							<field name="message_ids" widget="mail_thread"/>
+						</div>
+					</group>
+				</form>
+			</field>
+		</record>
+
+
+		<!-- Act window for pending actions view -->
+
+		<record id="kw_recruitment_requisition_pending_act_window" model="ir.actions.act_window">
+			<field name="type">ir.actions.act_window</field>
+			<field name="name">Take Action</field>
+			<field name="res_model">kw_recruitment_requisition</field>
+			<field name="view_mode">tree,form</field>
+			<field name="domain">[('state','not in',['draft','approve'])]</field>
+			<field name="context">{'approval_label_check':1}</field>
+			<field name="view_type">form</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+		(0, 0, {'view_mode': 'tree', 'view_id': ref('view_kw_recruitment_requisition_pending_action_tree')}),
+		(0, 0, {'view_mode': 'form', 'view_id': ref('view_kw_recruitment_requisition_pending_actions_form')})]"/>
+
+			<!-- <field name="view_id" ref="view_kw_recruitment_requisition_tree"/> -->
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					No pending request found..
+				</p>
+			</field>
+		</record>
+
+		<record id="kw_recruitment_requisition_approved_act_window" model="ir.actions.act_window">
+			<field name="type">ir.actions.act_window</field>
+			<field name="name">Approved MRF</field>
+			<field name="res_model">kw_recruitment_requisition</field>
+			<field name="view_mode">tree,form</field>
+			<field name="domain">[('state','in',['approve'])]</field>
+			<field name="context">{'create': False,'edit':False,'delete':False, 'import': False}</field>
+			<field name="view_type">form</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+		(0, 0, {'view_mode': 'tree', 'view_id': ref('view_kw_recruitment_requisition_approve_action_tree')}),
+		(0, 0, {'view_mode': 'form', 'view_id': ref('view_kw_recruitment_requisition_approve_actions_form')})]"/>
+
+			<!-- <field name="view_id" ref="view_kw_recruitment_requisition_tree"/> -->
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					No pending request found..
+				</p>
+			</field>
+		</record>
+		<!-- MRFs parent menu -->
+		<menuitem parent="hr_recruitment.menu_hr_recruitment_root"
+		          id="menu_kw_recruitment_requisition_form_view"
+		          name="Manpower Requisitions"
+		          sequence="5"
+		          groups="group_kw_mrf_user,base.group_user"
+		/>
+		<!-- MRF All Requests -->
+		<menuitem id="kw_recruitment_mrf_all_request_menu"
+		          name="All Requests"
+		          sequence="2"
+		          parent="menu_kw_recruitment_requisition_form_view"
+		          action="kw_recruitment_requisition_act_window"
+		          groups="group_kw_mrf_user,hr_recruitment.group_hr_recruitment_manager"/>
+		<!--  MRF take action-->
+		<menuitem id="kw_recruitment_mrf_pending_request_menu"
+		          name="Take Action"
+		          sequence="1"
+		          parent="menu_kw_recruitment_requisition_form_view"
+		          action="kw_recruitment_requisition_pending_act_window"
+		          groups="group_kw_mrf_user,hr_recruitment.group_hr_recruitment_manager"/>
+
+
+		<menuitem id="kw_recruitment_mrf_approve_request_menu"
+		          name="Approved MRF"
+		          sequence="3"
+		          parent="menu_kw_recruitment_requisition_form_view"
+		          action="kw_recruitment_requisition_approved_act_window"
+		          groups="kw_recruitment.group_hr_recruitment_accounts,hr_recruitment.group_hr_recruitment_manager"/>
+
+
+		<!--Menu only for MRF
+		<menuitem parent="hr_recruitment.menu_hr_recruitment_root" name="Manpower Requisition Form" id="hr_recruitment.menu_mrf_user"
+		          action="kw_recruitment_requisition_act_window" groups="group_kw_mrf_user" sequence="1"/>-->
+
+		<record id="hr_recruitment.menu_hr_recruitment_root" model="ir.ui.menu">
+			<field name="groups_id" eval="[(4,ref('group_kw_mrf_user')),(4,ref('group_hr_recruitment_accounts'))]"/>
+		</record>
+		<menuitem name="Employee Roles"
+		          id="kw_recruitment_emp_role"
+		          parent="hr_recruitment.menu_hr_recruitment_configuration"
+		          action="kw_employee.kwemp_work_role_action"
+		          sequence="10"/>
+	</data>
+</odoo>

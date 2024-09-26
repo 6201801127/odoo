@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="view_kw_tour_city_tree" model="ir.ui.view">
+            <field name="name">view.kw_tour_city.tree</field>
+            <field name="model">kw_tour_city</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <tree  string="Cities">
+                    <field name="name"/>
+                    <field name="company_id"/>
+                    <field name="country_id"/>
+                    <field name="classification_type_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_kw_tour_city_form" model="ir.ui.view">
+            <field name="name">view.kw_tour_city.form</field>
+            <field name="model">kw_tour_city</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <form string="City">
+                <script>
+                    $(document).ready(function(){
+                        $(".modal-title").show();
+                    });
+                </script>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="expense_domain_ids" invisible="1"/>
+                                <field name="country_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="name"/>
+                                <field name="classification_type_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="company_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="expense_ids">
+                                    <tree editable="bottom">
+                                        <field name="expense_type_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                        <!-- <field name="employee_level_id"  widget="many2many_tags" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/> -->
+                                        <field name="employee_grade_id"  widget="many2many_tags" options="{'no_edit': True,'no_open':True,'no_create':True}"/>
+                                        <field name="currency_type_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                        <field name="amount" options="{'currency_field': 'currency_type_id'}" widget="monetary"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            <group>
+                                <field name="ha_eligible"/>
+                                <field name="expense_type_id" domain="[('id','in',expense_domain_ids)]"
+                                options="{'no_create_edit': True,'no_open':True,'no_create':True}"
+                                attrs="{'invisible':[('ha_eligible','=',False)],'required':[('ha_eligible','=',True)]}"/>
+
+                                <field name="eligibility_percent" attrs="{'invisible':[('ha_eligible','=',False)],'required':[('ha_eligible','=',True)]}"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_kw_tour_city_search" model="ir.ui.view">
+            <field name="name">view.kw_tour_city.search</field>
+            <field name="model">kw_tour_city</field>
+            <field name="arch" type="xml">
+                <search string="Search City">
+                    <field name="name" string="City" />
+                    <field name="country_id"/>
+                    <field name="classification_type_id" />
+                    <field name="company_id" />
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_classification_type" string="Classification Type" context="{'group_by':'classification_type_id'}"/>
+                        <filter name="group_by_company" string="Company" context="{'group_by':'company_id'}" />
+                        <filter name="group_by_country" string="Country" context="{'group_by':'country_id'}" />
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_kw_tour_city_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">City Configuration</field>
+            <field name="res_model">kw_tour_city</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>
+            <field name="domain">[]</field>
+            <field name="context">{'search_default_group_by_classification_type':1,'search_default_group_by_country':1,'search_default_group_by_company':1}</field>
+            <field name="search_view_id" ref="view_kw_tour_city_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No city found..
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="kw_tour_city_menu" name="City Configuration" action="action_kw_tour_city_act_window" 
+        parent="kw_tour_config_menu" sequence="4" groups="kw_tour.group_kw_tour_admin"/>
+
+    </data>
+</odoo>

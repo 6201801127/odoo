@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="hr_salary_rule_saladv" model="hr.salary.rule">
+            <field name="code">SALADV</field>
+            <field name="name">Salary Advance</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <field name="condition_select">none</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_salary_advance(payslip.id,payslip.employee_id,payslip.date_to,payslip.date_from,payslip.date_to.year,payslip.date_to.month)</field>
+            <field name="sequence" eval="220"/>
+        </record>
+        <record id="hr_salary_rule_lwop" model="hr.salary.rule">
+            <field name="code">LWOP</field>
+            <field name="name">LWOP</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_lwop(categories.BASIC,categories.ALW,categories.FBONUS,payslip.employee_id,payslip.date_to.year,payslip.date_to.month)</field>
+            <field name="sequence" eval="210"/>
+        </record>
+        <record id="hr_payroll.hr_rule_basic" model="hr.salary.rule">
+            <field name="name">Basic Salary</field>
+            <field name="sequence" eval="1"/>
+            <field name="code">BASIC</field>
+            <field name="category_id" ref="hr_payroll.BASIC"/>
+            <field name="condition_select">none</field>
+            <field name="amount_select">code</field>
+            <field name="parent_id" ref="hr_payroll.structure_base"/>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_basic(contract.current_basic,payslip.employee_id,payslip.date_to.year,payslip.date_to.month,payslip.date_from,payslip.date_to,payslip.date_to.day,'BASIC')</field>
+        </record>
+
+        <record id="kenya_hr_rule_basic" model="hr.salary.rule">
+            <field name="name">Basic Salary</field>
+            <field name="sequence" eval="1"/>
+            <field name="code">BASICK</field>
+            <field name="category_id" ref="hr_payroll.BASIC"/>
+            <field name="condition_select">none</field>
+            <field name="amount_select">code</field>
+            <!-- <field name="parent_id" ref="hr_payroll.structure_base"/> -->
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_basic(contract.current_basic,payslip.employee_id,payslip.date_to.year,payslip.date_to.month,payslip.date_from,payslip.date_to,payslip.date_to.day,'BASICK')</field>
+        </record>
+
+        <record id="l10n_in_hr_payroll.hr_salary_rule_bonus" model="hr.salary.rule">
+            <field name="code">PBONUS</field>
+            <field name="name">Productivity Bonus</field>
+            <field name="category_id" ref="payroll_inherit.FIXBONUS"/>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_cbonus(contract.productivity,payslip.date_to.year,payslip.date_to.month,payslip.employee_id,contract.employee_id.gender,'PB',payslip.date_to)</field>
+            <field name="sequence" eval="4"/>
+            <field name="condition_select">none</field>
+        </record>
+        
+        <record id="payroll_inherit.hr_salary_rule_cbonus" model="hr.salary.rule">
+            <field name="code">CBONUS</field>
+            <field name="name">Committment Bonus</field>
+            <field name="category_id" ref="payroll_inherit.FIXBONUS"/>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_cbonus(contract.commitment,payslip.date_to.year,payslip.date_to.month,payslip.employee_id,contract.employee_id.gender,'CB',payslip.date_to)</field>
+            <field name="sequence" eval="5"/>
+            <field name="condition_select">none</field>
+        </record>
+        <record id="l10n_in_hr_payroll.hr_payslip_rule_tds" model="hr.salary.rule">
+            <field name="code">TDS</field>
+            <field name="name">Tax Deducted at Source</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <field name="condition_select">none</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_tds(payslip.id,categories.BASIC,categories.ALW,categories.FBONUS,categories.GROSS, payslip.env['hr.payslip'].calculate_cbonus(contract.productivity,payslip.date_to.year,payslip.date_to.month,payslip.employee_id,contract.employee_id.gender,'PB',payslip.date_to),payslip.env['hr.payslip'].calculate_cbonus(contract.commitment,payslip.date_to.year,payslip.date_to.month,payslip.employee_id,contract.employee_id.gender,'CB',payslip.date_to), payslip.env['hr.payslip'].calculate_fixed_allowance(payslip.id,contract.ltc,contract.employee_id.gender,payslip.employee_id,payslip.date_to.year,payslip.date_to.month,'LTC',payslip.date_to),payslip.env['hr.payslip'].calculate_fixed_allowance(payslip.id,contract.prof_persuit,contract.employee_id.gender,payslip.employee_id,payslip.date_to.year,payslip.date_to.month,'PP',payslip.date_to),payslip.env['hr.payslip'].calculate_allowance('ARRE',payslip.employee_id,payslip.date_to.year,payslip.date_to.month),payslip.env['hr.payslip'].calculate_allowance('INC',payslip.employee_id,payslip.date_to.year,payslip.date_to.month),payslip.env['hr.payslip'].calculate_allowance('VAR',payslip.employee_id,payslip.date_to.year,payslip.date_to.month),payslip.env['hr.payslip'].calculate_allowance('SALW',payslip.employee_id,payslip.date_to.year,payslip.date_to.month),payslip.env['hr.payslip'].calculate_allowance('EALW',payslip.employee_id,payslip.date_to.year,payslip.date_to.month),payslip.env['hr.payslip'].calculate_allowance('LE',payslip.employee_id,payslip.date_to.year,payslip.date_to.month),payslip.env['hr.payslip'].calculate_allowance('CBDA',payslip.employee_id,payslip.date_to.year,payslip.date_to.month),payslip.env['hr.payslip'].calculate_allowance('TINC',payslip.employee_id,payslip.date_to.year,payslip.date_to.month),payslip.env['hr.payslip'].calculate_allowance('ERBONUS',payslip.employee_id,payslip.date_to.year,payslip.date_to.month),payslip.env['hr.payslip'].calculate_lwop(categories.BASIC,categories.ALW,categories.FBONUS,payslip.employee_id,payslip.date_to.year,payslip.date_to.month),payslip.employee_id,payslip.date_to.year,payslip.date_to.month,payslip.date_to,payslip.date_from,contract.employee_id.date_of_joining,contract.employee_id.last_working_day,contract.employee_id.active,payslip.actual_nps)</field>
+            <field name="register_id" ref="l10n_in_hr_payroll.hr_tds_register"/>
+            <field name="sequence" eval="16"/>
+            <field name="note">As per income tax rules, all payment which are taxable in nature should be done after deduction of taxes at the source itself. Hence employer compute income tax on salary payment and deduct it every month. This TDS is based on employee’s saving/investment declaration at the start of year. If investments for tax saving is not done, large amount may be deducted in last few months.</field>
+        </record>
+        <!-- <record id="l10n_in_hr_payroll.hr_payslip_rule_tds" model="hr.salary.rule">
+            <field name="code">TDS</field>
+            <field name="name">Tax Deducted at Source</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <field name="condition_select">none</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = payslip.env['hr.payslip'].calculate_tds(payslip.id,categories.BASIC,categories.ALW,categories.FBONUS,categories.GROSS)</field>
+            <field name="register_id" ref="l10n_in_hr_payroll.hr_tds_register"/>
+            <field name="sequence" eval="16"/>
+            <field name="note">As per income tax rules, all payment which are taxable in nature should be done after deduction of taxes at the source itself. Hence employer compute income tax on salary payment and deduct it every month. This TDS is based on employee’s saving/investment declaration at the start of year. If investments for tax saving is not done, large amount may be deducted in last few months.</field>
+        </record> -->
+
+    </data>
+</odoo>

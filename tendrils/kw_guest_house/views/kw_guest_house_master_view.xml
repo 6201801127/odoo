@@ -1,0 +1,160 @@
+<odoo>
+  <data>
+
+    <!-- Tree view for guest house master -->
+    <record model="ir.ui.view" id="kw_guest_house_master_list">
+      <field name="name">kw_guest_house_master_list</field>
+      <field name="model">kw_guest_house_master</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="guest_house_name"/>
+          <field name="address"/>
+          <field name="country_id"/>
+          <field name="state_id"/>
+          <!-- <field name="city_id"/> -->
+          <field name="contact_person_1_id"/>
+          <field name="contact_no_1"/>
+          <field name="contact_person_2_id"/>
+          <field name="contact_no_2"/>
+          <field name="room_ids" widget='many2many_tags'/>
+          <field name="no_of_single_room"/>
+          <field name="no_of_double_room"/>
+          <field name="care_taker"/>
+          <field name="care_taker_no"/>
+          <field name="facilities_ids" widget = 'many2many_tags'/>
+        </tree>
+      </field>
+    </record>
+
+    <!-- Form view for guest house master -->
+    <record model="ir.ui.view" id="kw_guest_house_master_form">
+      <field name="name">kw_guest_house_master_form</field>
+      <field name="model">kw_guest_house_master</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group string='Guest House Details'>
+              <group>
+                <field name="guest_house_name" required='1'/>
+                <field name="address" required='1'/>
+                <field name="country_id" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}" required='1'/>
+                <field name="state_id" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}" required='1'/>
+                <field name="city_id" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}" required='0' invisible="1"/>
+                <field name="available_single_room" invisible="1"/>
+                <field name="available_double_room" invisible="1"/>
+              </group>
+              <group>
+                <field name="facilities_ids" widget="many2many_tags"  options="{'no_open': True,'no_create':True,'no_edit':True}" required='1'/>
+                <field name="contact_person_1_id" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}" domain = "[('id','!=',contact_person_2_id)]" required='0' position="attributes">
+                    <attribute name="context">{'tree_view_ref': 'kw_guest_house.kw_hr_employee_custom_list'}</attribute>
+                </field>
+                <field name="contact_no_1"/>
+                <field name="contact_person_2_id" options="{'no_create': True, 'no_edit': True, 'no_open': True, 'no_delete': True}" domain = "[('id','!=',contact_person_1_id)]" required='0' position="attributes">
+                    <attribute name="context">{'tree_view_ref': 'kw_guest_house.kw_hr_employee_custom_list'}</attribute>
+                </field>
+                <field name="contact_no_2"/>
+                <field name="care_taker"/>
+                <field name="care_taker_no"/>
+              </group>
+              <group>
+                <field name="auto_boolean" widget='boolean_toggle'/>
+              </group>
+            </group>
+            <group string='Add Rooms'>
+              <group>
+                <field name="room_ids" nolabel='1'>
+                  <tree>
+                    <field name="room_name"/>
+                    <field name="room_type"/>
+                  </tree>
+                  <form>
+                    <sheet>
+                      <group>
+                        <field name="room_name"/>
+                        <field name="room_type"/>
+                      </group>
+                    </sheet>
+                  </form>
+                </field>
+              </group>
+            </group>
+            <p style='text-align:left; color:red; font-weight:bold; margin-bottom:0'>**Please fill the mandatory fields before adding photos.</p>
+            <group string='Add Photos'>
+              <button name="get_upload_images"  string="Upload Photos"  type="object"  class="oe_highlight"/>
+            </group>
+            <field name="photo_ids" nolabel='1'>
+              <kanban delete='1'>
+                <templates>
+                  <t t-name="kanban-box">
+                    <div class="oe_kanban_global_click custom-kanban-div">
+                      <field name='photo' widget='image' height="280px" width="300px"/>
+                      <button type='object' class='btn btn-danger custom-remove-btn' name='remove_upload_images' style="position:absolute;">
+                        <i class="fa fa-trash"/>
+                      </button>
+                    </div>
+                  </t>
+                </templates>
+              </kanban>
+            </field>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="kw_guesthouse_image_preview" model="ir.ui.view">
+      <field name="name">Guest House Image</field>
+      <field name="model">kw_guest_house_photo_master</field>
+      <field name="type">kanban</field>
+      <field name="arch" type="xml">
+          <kanban>
+              <templates>
+                  <t t-name="kanban-box">
+                      <div class="o_kanban_image_preview">
+                        <field name='photo' widget='image' options='{"preview_image": "image"}'/>
+                      </div>
+                  </t>
+              </templates>
+          </kanban>
+      </field>
+  </record>
+  
+
+
+    <!--	Wizard view for Upload Many Guest House Photos-->
+    <record id="kw_upload_many_guesthouse_photos_form" model="ir.ui.view">
+      <field name="name">Upload Image</field>
+      <field name="model">kw_upload_guest_house_image_wizard</field>
+      <field name="type">form</field>
+      <field name="arch" type="xml">
+        <form string="Upload Photos">
+          <sheet>
+            <group>
+              <p style='color: red;'> # image size should not be greater than 1MB. </p>
+              <field name="photos_ids" widget="many2many_binary"/>
+              <field name="guest_house_id" invisible="1"/>
+            </group>
+          </sheet>
+          <footer>
+            <button string='Submit' name="upload_image" type="object" class="btn-primary"/>
+            <button string="Cancel" class="btn-danger" special="cancel"/>
+          </footer>
+        </form>
+      </field>
+    </record>
+
+    <!-- actions opening views on models -->
+    <record model="ir.actions.act_window" id="kw_guest_house_master_action_window">
+      <field name="name">Add Guest House</field>
+      <field name="res_model">kw_guest_house_master</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_type">form</field>
+    </record>
+
+    <template id="assets_backend" name="kw_assets" inherit_id="web.assets_backend">
+      <xpath expr="." position="inside">
+        <link rel="stylesheet" type="text/css" href="/kw_guest_house/static/src/css/kw_guest_house_master_view_css.css"/>
+      </xpath>
+    </template>
+
+  </data>
+</odoo>

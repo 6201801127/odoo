@@ -1,0 +1,672 @@
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="pip_counselling_config">
+            <field name="name">Configuration list</field>
+            <field name="model">kw_pip_counselling_details</field>
+            <field name="arch" type="xml">
+                <tree create="false" import="false" class="customer_tree" >
+                    <field name="reference" readonly="1"/>
+                    <field name="assessee_id"/>
+                    <field name="assign_assessors_ids" widget='many2many_tags'/>
+                    <field name="assessment_date"/>
+                    <field name="reason_for_counselling"/>
+                    <field name="feedback_status"/>
+                    <!-- <button class="btn btn-sm btn-info" string='Manage Meeting' type="object" name="manage_meeting_counselling" /> -->
+                </tree>
+            </field>
+        </record>
+        <record id="pip_counselling_config_form" model="ir.ui.view">
+            <field name="name">Configuration Form</field>
+            <field name="model">kw_pip_counselling_details</field>
+            <field name="arch" type="xml">
+                <form string="Counselling Feedback" create='false' delete='false'>
+                    <script>
+                       $(document).ready(function(){ 
+                            feedback_status =  $("[aria-pressed=true]").text().trim();
+                            if ( (feedback_status === 'PIP Closed')){
+                                $('.o_form_button_edit').hide();
+                               
+                            }
+                        });
+                    </script>
+                    <header>
+                        <field name="feedback_status" widget="statusbar" statusbar_visible="0,1,2,3,4,5,7,6"/>
+
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name ="meeting_id" invisible="1"/>
+                                <field name="reference" readonly="1"/>
+                                <!-- <field name="pip_ref_id"/> -->
+                                <field name="assessee_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}"  readonly="1"/>
+                                <field name="assign_assessors_ids" widget='many2many_tags' options="{'no_create': True, 'no_open': True, 'no_edit': True}"  required="1"/>
+                                <field name="assessment_date" autocomplete='off'  required="1"/>
+                                <field name="reason_for_counselling" required="1"/>
+                                <field name="raised_by" invisible="1"/>
+                            </group>
+                            
+                        </group>
+
+                        <div class="text-left">
+                            <button class="btn btn-sm btn-info" string='Manage Meeting' type="object" name="manage_meeting_counselling" />
+                        </div>
+                        <group>
+                            <field name="meeting_log_id">
+                                <tree create='false' edit='false' delete='false'>
+                                    <field name="meeting_id"/>
+                                    <field name="meeting_date"/>
+                                    <field name="meeting_time"/>
+                                    <field name="meeting_duration"/>
+                                    <field name="meeting_room" options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="counselling_pip_config_details_take_action" model="ir.actions.act_window">
+            <field name="name">Schedule Meeting</field>
+            <field name="res_model">kw_pip_counselling_details</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                     (0, 0, {'view_mode': 'tree', 'view_id': ref('performance_improvement_plan.pip_counselling_config')}),
+                     (0, 0, {'view_mode': 'form', 'view_id': ref('performance_improvement_plan.pip_counselling_config_form')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No Records found.
+                </p>
+            </field>
+        </record>
+        <record id="kw_pip_feedback_publish_feedback_form_view" model="ir.ui.view">
+            <field name="name">assessors_feedback_form_view</field>
+            <field name="model">kw_pip_counselling_details</field>
+            <field name="arch" type="xml">
+                <form string="Assessors Feedback" create='false' duplicate='false' delete='false'>
+                    <header>
+                        <button class="btn-success" context="{'default_active_rec': active_id, 'button': 'improve_Assessors'}" attrs="{'invisible':['|',('feedback_status','not in',['4']),('assessor_improvement_feedback_bool','=',True)]}" 
+                        name="assessor_improvement_give_feedback" type="object" string="Final Feedback"/>
+                        <field name="feedback_status" widget="statusbar" statusbar_visible="0,1,2,3,4,5,7,6"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="training_create_bool" invisible='1'/>
+                                <field name="assessor_improvement_feedback_bool" invisible="1"/>
+                                <field name="improve_btn_hide" invisible="1"/>
+                                <field name="assessee_id" readonly='1' options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="assign_assessors_ids"  widget="many2many_tags" options="{'no_create': True, 'no_open': True, 'no_edit': True}" readonly="1" invisible="0"/>
+                                
+                            </group>
+                            <group>
+                                <field name="assessment_date" autocomplete='off' readonly='1'/>
+                            </group>
+                        </group>
+                        <group string='Meeting Details'>
+                            <field name="meeting_log_id">
+                                <tree create='false' edit='false' delete='false'>
+                                    <field name="meeting_id"  invisible="1"/>
+                                    <field name="meeting_date"/>
+                                    <field name="meeting_time"/>
+                                    <field name="meeting_duration"/>
+                                    <field name="meeting_room" options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                </tree>
+                            </field>
+                           
+                            <group string="Assessors Feedback">
+                                <field name="hr_assessor_details_ids" nolabel="1" attrs="{'readonly': [('feedback_status','in',['2','3','4','5','7','6'])],'invisible': [('training_create_bool', '=', True)]}">
+                                    <tree editable="bottom" delete="false" create="false">
+                                        <field name="assessor_id" readonly="1"/>
+                                        <field name="assessee_id" readonly="1" string="Employee"  invisible="1"/>
+                                        <field name="keep_observation" readonly="1"/>
+                                        <field name="observation_duration" readonly="1"/>
+                                        <field name="pip_assessor_counselling_id" readonly="1" invisible="1"/>
+                                        <field name="improve_remark" readonly="1"/>
+                                        <field name="assessor_status"  invisible="1"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            <group></group>
+                            <group string="Deliverables Details" attrs ="{'invisible':['|',('feedback_status','not in',['3','4','5','6']),('training_create_bool','=',True)]}">
+                                <field name="hr_feedback_details_ids" nolabel="1" readonly="1" >
+                                    <tree editable="bottom" delete="false" create="false">
+                                        <field name="deliverable_rec" readonly="1"/>
+                                        <field name="excepted_achivement_rec" readonly="1"/>
+                                        <field name="deliver_status_user" readonly="1"/>
+                                        <field name="deliverables_uplod_doc" widget="binary" filename="file_name" readonly="1"
+                                              string="Document"/>
+                                        <field name="file_name" invisible="1"/>
+                                    </tree>
+                                    <form>
+                                        <group>
+                                            <field name="deliverable_rec" readonly="1"/>
+                                            <field name="excepted_achivement_rec" readonly="1"/>
+                                            <field name="deliver_status_user" readonly="1"/>
+                                            <field name="deliverables_uplod_doc" widget="binary" filename="file_name" readonly="1"
+                                                string="Document"/>
+                                            <field name="file_name" invisible="1"/>
+                                        </group>
+                                    </form>
+
+                                </field>
+                            </group>
+                            <group></group>
+                            <group string="Assessors Improvement Feedback"  attrs ="{'invisible':[('feedback_status','not in',['5','6','7'])]}">
+                                <field name="hr_improvement_details_ids" nolabel="1" attrs="{'readonly': [('feedback_status','in',['3','4','5','6','7'])]}">
+                                    <tree editable="bottom" delete="false" create="false">
+                                        <field name="assessor_id" readonly="1"/>
+                                        <field name="deliverable_rec" readonly="1"/>
+                                        <field name="excepted_achivement_rec" readonly="1"/>
+                                        <field name="areas_improvement_data" readonly="1" />
+                                    </tree>
+                                </field>
+                            </group>
+                            
+                        </group>
+                        
+                    </sheet>
+                    <group>
+                        <div class="oe_chatter">
+                            <field name="message_follower_ids" widget="mail_followers" />
+                            <field name="activity_ids" widget="mail_activity" />
+                            <field name="message_ids" widget="mail_thread" />
+                        </div>
+                    </group>
+                </form>
+            </field>
+        </record>
+        <!-- <record id="kw_assessor_feedback_counselling_kanban_view" model="ir.ui.view">
+            <field name="name">assessors_feedback_kanban_view</field>
+            <field name="model">kw_pip_counselling_details</field>
+            <field name="arch" type="xml">
+                <kanban class="o_event_kanban_view" import='false' create="false" delete="false" edit="false" modifiers="{}">
+                    <field name="assign_assessors_ids" widget="many2many_tags"/>
+                    <field name="assessee_id"/>
+                    <field name="assessment_date" autocomplete='off'/>
+                    <field name="feedback_status"/>
+                    <field name="meeting_id" invisible="1"/>
+                    <field name="meeting_time"/>
+                    <field name="meeting_duration"/>
+                    <field name="feedback_given_hide_btn" invisible="1"/>
+
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_global_click" style="width:330px">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <h4>
+                                            <img t-att-src="kanban_image('hr.employee', 'image_small', record.assessee_id.raw_value)" t-att-title="record.assessee_id.value" t-att-alt="record.assessee_id.value" width="40" height="40" class="rounded-circle"/>
+                                            <b t-esc="record.assessee_id.value">
+                                            </b>
+                                        </h4>
+                                    </div>
+                                </div>
+                                <div class="row mt-3 mb-2">
+                                    <div class="col-sm-8">
+                                        <div class="mb-4">
+                                            <h1 class="text-uppercase badge text-wrap font-weight-bold p-2" style="background-color:#ade4ef; font-size: 1rem;" modifiers="{}">
+                                                <span t-esc="record.counselling_id.value"/>
+                                            </h1>
+                                        </div>
+                                        <table class="table table-borderless">
+                                            <tr>
+                                                <td class="p-0" width="50%">
+                                                    <i class="fa fa-clock-o" role="img" aria-label="At" title="At"/>
+                                                    <span t-att-title="'Counselling Time : '+record.meeting_time.value">
+                                                        <t t-esc="record.meeting_time.value"/>
+                                                    </span>
+                                                    <span t-att-title="'Counselling Duration : '+record.meeting_duration.value">
+                                                       <strong>Duration: </strong><t t-esc="record.meeting_duration.value"/>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="p-0" width="30%">
+                                                    <i class="fa fa-calendar  mr-2" />
+                                                    From :
+                                                    <span t-att-title="'Counselling Date : '+record.assessment_date.value">
+                                                        <t t-esc="record.assessment_date.value"/>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-sm-4 text-center">
+                                        <h3 t-att-title="'Current Status is : '+record.feedback_status.value">
+                                            <field name="feedback_status" widget="label_selection" options="{'classes': {'1': 'notstarted', '2': 'warning', '3': 'completed','4':'publish'}}"/>
+                                        </h3>
+                                        <button class="btn btn-success float-right btn-sm mt-1" type="object" context="{'default_active_rec': active_id, 'button': 'Assessors'}" attrs="{'invisible':[('feedback_given_hide_btn','=',True)]}" name="assessor_give_feedback">Give Feedback <i class="fa fa-eye fa-inverse" role="img"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record> -->
+        <record id="kw_counselling_details_feedback_tree_view" model="ir.ui.view">
+            <field name="name">assessors_feedback_tree_view</field>
+            <field name="model">kw_pip_counselling_details</field>
+            <field name="arch" type="xml">
+                <tree string="Assessors Feedback" class="customer_tree" create='false' edit='false' import='false' delete="false" default_order='id desc'>
+                    <field name="reference"/>
+                    <field name="assessee_id"/>
+                    <field name="assign_assessors_ids" widget="many2many_tags"/>
+                    <field name="assessee_job_id" />
+                    <field name="department" />
+                    <field name="ra_id" />
+                    <field name="feedback_status" class='font-weight-bold'/>
+                    <field name="feedback_given_hide_btn" invisible="1"/>
+                    <field name="improve_btn_hide" invisible="1"/>
+                    <field name="assessor_feedback_bool" invisible="1"/>
+                    <field name="assessor_improvement_feedback_bool" invisible="1"/>
+
+                    <button class="btn-success"
+                    context="{'default_active_rec': active_id, 'button': 'Assessors'}" attrs="{'invisible':['|',('feedback_status','not in',['1']),('feedback_given_hide_btn',
+                    '=', True)]}" name="assessor_give_feedback" type="object" string="Give Feedback"/>
+                    
+                    <button class="btn-success" context="{'default_active_rec': active_id, 'button': 'improve_Assessors'}" attrs="{'invisible':['|',('feedback_status','not in',['4']),('assessor_improvement_feedback_bool','=',True)]}" name="assessor_improvement_give_feedback" type="object" string="Final Feedback"/>
+<!-- ('improve_btn_hide','=',True) -->
+
+                </tree>
+            </field>
+        </record>
+
+
+        <!-- ########### hr counselling feedback#################### -->
+        <record id="kw_counselling_details_hr_feedback_tree_view" model="ir.ui.view">
+            <field name="name">HR_Feedback_tree_view</field>
+            <field name="model">kw_pip_counselling_details</field>
+            <field name="arch" type="xml">
+                <tree string="HR Feedback" class="customer_tree" default_order='id desc' create='false' edit='false' import='false' delete="false">
+                    <field name="reference" readonly="1"/>
+                    <!-- <field name="pip_ref_id" readonly="1"/> -->
+                    <field name="assessee_id"/>
+                    <field name="assessee_job_id" />
+                    <field name="department" />
+                    <field name="ra_id" />
+                    <field name="assessor_id"  invisible="1"/>
+                    <field name="assign_assessors_ids" widget="many2many_tags"/>
+                    <field name="feedback_status" class='font-weight-bold'/>
+                    <!-- <button class="btn btn-sm oe_highlight" aria-label="Click To View Feedback" context="{'default_active_rec': active_id, 'button':'Assessors'}" name="assessor_give_feedback" string='View Feedback' type="object"/> -->
+                </tree>
+            </field>
+        </record>
+        <record id="kw_pip_feedback_hr_feedback_form_view" model="ir.ui.view">
+            <field name="name">HR_Feedback_form_view</field>
+            <field name="model">kw_pip_counselling_details</field>
+            <field name="arch" type="xml">
+                <form string="HR Feedback" create='false' duplicate='false' delete='false'>
+                    <script>
+                       $(document).ready(function(){ 
+                            feedback_status =  $("[aria-pressed=true]").text().trim();
+                            if ( (feedback_status === 'Second Counselling')){
+                                $('.o_form_button_edit').hide();
+                            }
+                        });
+
+                    </script>
+                    <style>
+                        .o_form_view .o_group .o_form_label {width: 305px;}
+                    </style>
+                    <header>
+                        <button name="btn_hr_confirm" string="Confirm" type="object" class="btn-primary" 
+                            attrs="{'invisible': [('feedback_status', 'not in', [('2')])]}"
+                            confirm="Are you sure, you want to Confirm?"/>
+                        <button name="closed_pip_hr_action" string="PIP Close" type="object" class="btn-success" context="{'default_active_rec': active_id,'button':'closed_pip'}"
+                         attrs="{'invisible': [('feedback_status', 'not in', ['7']),('feedback_status', 'not in', ['5'])]}"/>
+                        
+                        <button name="assessor_add_extra_deliverables" type="object" class="btn-warning" string="Add Deliverables" context="{'default_active_rec': active_id, 'button': 'add_deliverables'}"
+                            attrs="{'invisible': [('feedback_status', 'not in', ['3','4'])]}"/>
+
+                       
+                        <field name="feedback_status" widget="statusbar" statusbar_visible="0,1,2,3,4,5,7,6"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="btn_hr_closed_stage" type="object"  icon="fa-times-circle-o" class="oe_stat_button" style="color: #108fbb !important;float:right;height=90px;background-color: #bf0a28;"
+                                context="{'default_active_rec': active_id,}" attrs="{'invisible': [('feedback_status', 'in', ['5','6'])]}">
+                            <!-- <button 
+                                name="button_emp_pip_details" type="object"   groups="performance_improvement_plan.group_pip_manager,performance_improvement_plan.group_pip_hr_user"> -->
+                            <span class="o_stat_text font-weight-bold">
+                                Close
+                            </span>
+                            </button>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="training_create_bool" invisible='1'/>
+                                <field name="in_observe" invisible="1"/>
+                                <field name="hide_hr_feedback" invisible="1"/>
+                                <field name="reference" readonly="1"/>
+                                <!-- <field name="pip_ref_id" readonly="1"/> -->
+                                <field name="assessee_id" readonly='1' options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="raised_by" invisible="1"/>
+                                <field name="assessor_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}" invisible="1" readonly="1"/>
+                                <field name="assign_assessors_ids" attrs="{'invisible': [('training_create_bool', '=', True)]}" widget="many2many_tags" options="{'no_create': True, 'no_open': True, 'no_edit': True}" readonly="1"/>
+                            </group>
+                            <group>
+                                <!-- <field name="counselling_id" readonly='1' invisible="1" options="{'no_create': True, 'no_open': True, 'no_edit': True}"/> -->
+                                <field name="assessment_date" autocomplete='off' readonly="1"/>
+                            </group>
+                           
+                        </group>
+                       
+                        <group>
+                            <group string="Meeting Details" attrs="{'invisible': [('training_create_bool', '=',True)]}">
+                                <field name="meeting_log_id">
+                                    <tree create='false' edit='false' delete='false'>
+                                        <field name="meeting_id" invisible="1"/>
+                                        <field name="meeting_date"/>
+                                        <field name="meeting_time"/>
+                                        <field name="meeting_duration"/>
+                                        <field name="meeting_room" options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            
+                        </group>
+                        <group string="Assessors Feedback" attrs="{'invisible': ['|',('training_create_bool', '=',True),('feedback_status','in',['1'])]}">
+                            <field name="hr_assessor_details_ids" nolabel="1" attrs="{'readonly': [('feedback_status','in',['3','4','5','6'])],}">
+                                <tree editable="bottom" delete="false" create="false">
+                                    <field name="assessor_id" readonly="1"/>
+                                    <field name="assessee_id" readonly="1" string="Employee"  invisible="1"/>
+                                    <field name="keep_observation" readonly="1"/>
+                                    <field name="observation_duration" readonly="1"/>
+                                    <field name="pip_assessor_counselling_id" readonly="1" invisible="1"/>
+                                    <field name="improve_remark" readonly="1"/>
+                                    <field name="assessor_status"  invisible="1"/>
+                                </tree>
+                                <form>
+                                    <group>
+                                        <field name="assessor_id" readonly="1" options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                        <field name="keep_observation" readonly="1"/>
+                                        <field name="observation_duration" readonly="1"/>
+                                        <field name="pip_assessor_counselling_id" readonly="1" invisible="1"/>
+                                        <field name="improve_remark" readonly="1"/>
+                                        <field name="assessor_status"  invisible="1"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </group>
+                        <group>
+                            <group string="Set Deliverables" attrs ="{'invisible':['|','|',('feedback_status','not in',['3','4','5','6']),('hide_hr_feedback','=',True),('training_create_bool','=',True)]}">
+                                <field name="hr_feedback_details_ids" nolabel="1" readonly="1" >
+                                    <tree editable="bottom" delete="false" create="false">
+                                        <field name="deliverable_rec" readonly="1"/>
+                                        <field name="excepted_achivement_rec" readonly="1"/>
+                                        <field name="deliver_status_user" readonly="1"/>
+                                        <field name="deliverables_uplod_doc" widget="binary" filename="file_name" readonly="1"
+                                              string="Document"/>
+                                        <field name="file_name" invisible="1"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                        <group string="Final Feedback" attrs ="{'invisible':['|','|',('feedback_status','not in',['4','5','6','7']),('hide_hr_feedback','=',True),('training_create_bool','=',True)]}" >
+                            <field name="hr_improvement_details_ids" nolabel="1" attrs="{'readonly': [('feedback_status','in',['4','5','6'])]}">
+                                <tree editable="bottom" delete="false">
+                                    <field name="deliverable_rec" readonly="1"/>
+                                    <field name="excepted_achivement_rec" readonly="1"/>
+                                    <field name="assessor_id" readonly="1"/>
+                                    <field name="accessor_final_feedback" readonly="1"/>
+                                    <field name="areas_improvement_data" readonly="1" />
+                                </tree>
+                            </field>
+                        </group>
+                        <group string="Final Outcomes" attrs ="{'invisible':['|','|',('feedback_status','not in',['4','5','6','7']),('hide_hr_feedback','=',True),('training_create_bool','=',True)]}">
+                            <group>
+                                <field name="final_assessor_feedback" nolabel="1" attrs="{'readonly': [('feedback_status','in',['4','5','6'])]}">
+                                    <tree editable="bottom" delete="false">
+                                        <field name="pip_final_assessor_feedback_id" invisible="1" readonly="1"/>
+                                        <field name="final_assessor_id" readonly="1"/>
+                                        <field name="assessor_final_outcome" readonly="1"/>
+                                        <field name="assessor_final_remark" readonly="1"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <!-- <field name="training_create_bool" invisible='1'/> -->
+                                <!-- <field name="timeline_improvement"
+                                       attrs="{'readonly': [('feedback_status','in',['3','4','5','6'])],'required':[('feedback_status','not in',['1','0']),('hide_hr_feedback','=',False),('training_create_bool','=',False)],'invisible':['|',('hide_hr_feedback','=',True),('training_create_bool','=',True)]}"/>
+                                <field name="next_counselling"
+                                       attrs="{'readonly': [('feedback_status','in',['3','4','5','6'])],'required':[('feedback_status','not in',['1','0']),('hide_hr_feedback','=',False),('training_create_bool','=',False)],'invisible':['|',('hide_hr_feedback','=',True),('training_create_bool','=',True)]}"/>
+                                <field name="remarks_hr" 
+                                       attrs="{'readonly': [('feedback_status','in',['3','4','5','6'])],'required':[('feedback_status','not in',['1','0'])]}"/> -->
+                                <!-- <field name="user_agree_observation" string="Agreed/Not Agreed" widget="radio"
+                                       options="{'horizontal': true}"
+                                       attrs="{'readonly': [('feedback_status','in',['3','4','5','6'])],'invisible':['|','|',('feedback_status','in',['1','2']),('hide_hr_feedback','=',True),('user_agree_observation','=',False)]}"/> -->
+                                <!-- <field name="final_decision"  attrs="{'invisible': ['|',('feedback_status','in',['1','2','4']),('user_agree_observation','=','Agree')],'required':['|',('user_agree_observation','=','Disagree'),('feedback_status','in',['5'])],'readonly':[('feedback_status','in',['4','6'])]}"/> -->
+
+                                <field name="training_final_feedback" readonly='True' attrs="{'invisible': [('training_final_feedback', '=', False)]}"/>
+                                <field name="final_decision"
+                                       attrs="{'readonly': [('feedback_status','in',['1','3','4','6'])],'required': [
+                                                '|', '|',
+                                                '&amp;', ('feedback_status', 'in', ['2']), ('hide_hr_feedback', '=', False),
+                                                '&amp;', ('feedback_status', 'in', ['5','7']), ('hide_hr_feedback', '=', False),
+                                                ('training_create_bool', '=', True)],'invisible':[('feedback_status','in',['1'])]}"/>
+                               
+                                <field name="training_create_bool" invisible="1"/>
+                                <field name="closed_remarks_hr" attrs="{'invisible': ['|','|',('training_create_bool', '=', True),('feedback_status','in',['1','2']),('closed_remarks_hr','=',False)]}" readonly="1"/>
+                                <field name="documents" attrs="{'invisible': ['|',('training_create_bool', '=', True),('feedback_status','not in',['6'])]}" filename="file_name" widget="FieldBinary" readonly="1"/>
+                                <field name="training_completion_expected_date" attrs="{'invisible': [('training_create_bool', '=', False)],'required':[('training_create_bool','=',True)]}" readonly="1"/>
+                                <field name="training_completion_actual_date" attrs="{'invisible': [('training_create_bool', '=', False)] ,'required':[('training_create_bool','=',True)]}" readonly="1"/>
+                                <field name="file_name" invisible="1"/>
+                            </group>
+                            <group></group>
+                            <!-- <group style="background-color: #2c9099;">
+                                <field name="hr_final_decision" attrs="{'invisible': [('feedback_status', 'not in', ['6'])],
+                                    'required':[('feedback_status', 'in', ['6'])]}"/>
+                            </group> -->
+                        </group>
+                    </sheet>
+                    <group>
+                        <div class="oe_chatter">
+                            <field name="message_follower_ids" widget="mail_followers" />
+                            <field name="activity_ids" widget="mail_activity" />
+                            <field name="message_ids" widget="mail_thread" />
+                        </div>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_pip_feedback_hr_view_feedback_form_view" model="ir.ui.view">
+            <field name="name">HR_Feedback_form_view</field>
+            <field name="model">kw_pip_counselling_details</field>
+            <field name="arch" type="xml">
+                <form string="HR Feedback" create='false' duplicate='false' delete='false' edit='false'>
+                    <style>
+                        .o_form_view .o_group .o_form_label {width: 305px;}
+                    </style>
+                    <header>
+                        <field name="feedback_status" widget="statusbar" statusbar_visible="0,1,2,3,4,5,6"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="in_observe" invisible="1"/>
+                                <field name="training_create_bool" invisible="1"/>
+                                <field name="hide_hr_feedback" invisible="1"/>
+                                <field name="reference" readonly="1"/>
+                                <!-- <field name="pip_ref_id" readonly="1"/> -->
+                                <field name="assessee_id" readonly='1' options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="raised_by" invisible="1"/>
+                                <field name="assessor_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}" invisible="1" readonly="1"/>
+                                <field name="assign_assessors_ids" widget="many2many_tags" options="{'no_create': True, 'no_open': True, 'no_edit': True}" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="assessment_date" autocomplete='off' readonly="1"/>
+                            </group>
+                           
+                        </group>
+                       
+                        <group>
+                            <group string="Meeting Details" >
+                                <field name="meeting_log_id">
+                                    <tree create='false' edit='false' delete='false' readonly="1">
+                                        <field name="meeting_id" invisible="1"/>
+                                        <field name="meeting_date"/>
+                                        <field name="meeting_time"/>
+                                        <field name="meeting_duration"/>
+                                        <field name="meeting_room" options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            
+                        </group>
+                        <group string="Assessors Feedback" >
+                            <field name="hr_assessor_details_ids" nolabel="1" readonly="1" attrs="{'invisible': [('training_create_bool', '=', True)]}">
+                                <tree editable="bottom" delete="false" create="false">
+                                    <field name="assessor_id" readonly="1"/>
+                                    <field name="assessee_id" readonly="1" string="Employee"  invisible="1"/>
+                                    <field name="keep_observation" readonly="1"/>
+                                    <field name="observation_duration" readonly="1"/>
+                                    <field name="pip_assessor_counselling_id" readonly="1" invisible="1"/>
+                                    <field name="improve_remark" readonly="1"/>
+                                    <field name="assessor_status"  invisible="1"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <group>
+                            <group string="Set Deliverables" >
+                                <field name="hr_feedback_details_ids" nolabel="1" readonly="1" attrs="{'invisible': [('training_create_bool', '=', True)]}">
+                                    <tree editable="bottom" delete="false" create="false">
+                                        <field name="deliverable_rec" required="1"/>
+                                        <field name="excepted_achivement_rec" required="1"/>
+                                        <field name="deliver_status_user" readonly="1"/>
+                                        <field name="deliverables_uplod_doc" widget="binary" filename="file_name" readonly="1"
+                                              string="Document"/>
+                                        <field name="file_name" invisible="1"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                        <group string="Final Feedback"  >
+                            <field name="hr_improvement_details_ids" nolabel="1" readonly="1" attrs="{'invisible': [('training_create_bool', '=', True)]}">
+                                <tree editable="bottom" delete="false">
+                                    <field name="deliverable_rec" readonly="1"/>
+                                    <field name="excepted_achivement_rec" readonly="1"/>
+                                    <field name="assessor_id" readonly="1"/>
+                                    <field name="accessor_final_feedback" readonly="1"/>
+                                    <field name="areas_improvement_data" readonly="1" />
+                                </tree>
+                            </field>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="timeline_improvement" readonly="1"
+                                       />
+                                <field name="next_counselling" readonly="1"
+                                       />
+                                <field name="remarks_hr" readonly="1"
+                                       />
+                                <field name="user_agree_observation" string="Agreed/Not Agreed" widget="radio"
+                                       options="{'horizontal': true}"
+                                       readonly="1"/>
+                                <!-- <field name="final_decision"  attrs="{'invisible': ['|',('feedback_status','in',['1','2','4']),('user_agree_observation','=','Agree')],'required':['|',('user_agree_observation','=','Disagree'),('feedback_status','in',['5'])],'readonly':[('feedback_status','in',['4','6'])]}"/> -->
+                                <field name="final_decision" readonly="1"/>
+                                <!-- <field name="hr_final_decision" readonly="1"/> -->
+                                <field name="closed_remarks_hr" readonly="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                    <group>
+                        <div class="oe_chatter">
+                            <field name="message_follower_ids" widget="mail_followers" />
+                            <field name="activity_ids" widget="mail_activity" />
+                            <field name="message_ids" widget="mail_thread" />
+                        </div>
+                    </group>
+                </form>
+            </field>
+        </record>
+       
+        <record id="kw_pip_counselling_feedback_action" model="ir.actions.act_window">
+            <field name="name">Assessors Feedback</field>
+            <field name="res_model">kw_pip_counselling_details</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="domain">[]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+					No  Assessor Feedback Here...
+                </p>
+            </field>
+        </record>
+        <record id="kw_pip_hr_counselling_feedback_action" model="ir.actions.act_window">
+            <field name="name">Counselling HR Feedback</field>
+            <field name="res_model">kw_pip_counselling_details</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="domain">[('feedback_status','not in',['0'])]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+					No  Feedback Here...
+                </p>
+            </field>
+        </record>
+        <record id="kw_pip_counselling_feedback_user_action" model="ir.actions.act_window">
+            <field name="name">Counselling Details Screen</field>
+            <field name="res_model">kw_pip_counselling_details</field>
+            <field name="view_mode">form</field>
+            <field name="view_type">form</field>
+            <field name="domain">[('feedback_status','not in',['0'])]</field>
+            <field name="view_id" ref="kw_pip_feedback_hr_feedback_form_view"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+					No  Feedback Here...
+                </p>
+            </field>
+        </record>
+      
+        <record id="kw_counselling_feedback_actions_view_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kw_counselling_details_feedback_tree_view"/>
+            <field name="act_window_id" ref="kw_pip_counselling_feedback_action"/>
+        </record>
+        <record id="kw_counselling_feedback_actions_view_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="kw_pip_feedback_publish_feedback_form_view"/>
+            <field name="act_window_id" ref="kw_pip_counselling_feedback_action"/>
+        </record>
+
+        <!-- hr view counselling feedback -->
+        <record id="kw_counselling_feedback_hr_actions_view_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kw_counselling_details_hr_feedback_tree_view"/>
+            <field name="act_window_id" ref="kw_pip_hr_counselling_feedback_action"/>
+        </record>
+        <record id="kw_counselling_feedback_hr_actions_view_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="kw_pip_feedback_hr_feedback_form_view"/>
+            <field name="act_window_id" ref="kw_pip_hr_counselling_feedback_action"/>
+        </record>
+
+
+        <menuitem name="Schedule Meeting"
+                  id="pip_counselling_config_hr_menu"
+                  parent='performance_improvement_plan_hr_menu'
+                  action='counselling_pip_config_details_take_action'
+                  sequence="2"/>
+
+        <menuitem name="Take Action" id="kw_pip_feedback_assessors_menu1"
+                  action="kw_pip_counselling_feedback_action"
+                  parent="kw_pip_feedback_assessors_menu"
+                  sequence="1" groups="performance_improvement_plan.group_pip_assessor_user"/>
+
+        <menuitem name="HR Feedback" id="kw_pip_feedback_hr_menu"
+                  action="kw_pip_hr_counselling_feedback_action"
+                  parent="performance_improvement_plan_hr_menu"
+                  sequence="3" groups="performance_improvement_plan.group_pip_hr_user,performance_improvement_plan.group_pip_manager"/>
+    </data>
+</odoo>

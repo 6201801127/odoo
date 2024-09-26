@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="view_kw_late_entry_approval_wizard_form" model="ir.ui.view">
+            <field name="name">view.kw_late_entry_approval_wizard.form</field>
+            <field name="model">kw_late_entry_approval_wizard</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Late Entry Approval" style="padding-bottom:0;">
+                  
+                    <sheet >
+                      
+                        <group  attrs="{'invisible': [('daily_attendance_id','=',False)]}" class="mb-0">
+                            <group  >
+                                <field name="daily_attendance_id"  options="{'no_open': True,'no_create':True,'no_create_edit': True}" string="Name"/>
+                                <field name="attendance_recorded_date" />
+                                <field name="shift_in_time" string="Office Time" />
+                                <field name="check_in" string="In Time" />
+                                <field name="check_out" string="Out Time" />
+                                <field name="late_entry_reason" attrs="{'invisible': [('action_type','=','update_le_reason')]}" string="Late Reason" />
+
+                                <field name="action_type" invisible="1"/>
+                                <field name="le_reason" attrs="{'invisible': [('action_type','!=','update_le_reason')],'required': [('action_type','=','update_le_reason')]}"  />
+                            </group>
+                           
+                            <group attrs="{'invisible': [('action_type','=','update_le_reason')]}" class="m-0" string="Last 7 late entry details ">
+                                <field name="last_le_ids" nolabel="1" class="custom_late_entry_records">
+                                    <tree style="width:100%">
+                                        <field name="attendance_recorded_date" string="Date"/>
+                                        <field name="check_in_time" string="In Time"/>
+                                         <field name="late_entry_reason" string="Reason" /> 
+                                        
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                        <group attrs="{'invisible': [('daily_attendance_id','!=',False)]}">
+                             <field name="daily_attendance_ids" string="Late Entry Requests" readonly="1">
+                                <tree >
+                                    
+                                    <field name="employee_id" string="Name" />
+                                    <field name="attendance_recorded_date" string="Date"/>                                    
+                                    <field name="shift_in" string="Office Time" />
+                                    <field name="check_in_time" string="In Time"/>
+                                    <field name="late_entry_reason" string="Late Reason" />
+                                </tree>
+                            </field>
+                        </group>
+                        <!-- <separator /> -->
+                        <group attrs="{'invisible': [('action_type','=','update_le_reason')]}">
+                            
+                            <field name="forward_late_entry" />
+                          
+                            <field name="forward_to" string="Employee" attrs="{'invisible': [('forward_late_entry','=',False)],'required': [('forward_late_entry','=',True)]}" options="{'no_open': True,'no_create':True,'no_create_edit': True}"/>
+                            <field name="remark" string="Remark" attrs="{'required': [('action_type','!=','update_le_reason')]}"  />
+
+                        </group>
+                    </sheet>
+                    <footer>
+
+                        <button string='Without Pay Cut'  name="late_entry_wdout_paycut" type="object" class="btn font-weight-bold text-white" style="background-color: #108fbb;" attrs="{'invisible': ['|',('forward_late_entry','=',True),('action_type','=','update_le_reason')]}" confirm="Are you sure you want to approve request as Without Pay Cut ?" />
+                        
+                        <button string='With Pay Cut'  name="late_entry_wd_paycut" type="object" class="btn font-weight-bold text-white" style="background-color: #d83d2b;" attrs="{'invisible': ['|',('forward_late_entry','=',True),('action_type','=','update_le_reason')]}"  confirm="Are you sure you want to approve request as With Pay Cut ?"/>
+
+                        <button string='Forward'  name="late_entry_forward" type="object" class="btn font-weight-bold text-white" style="background-color: #f7941d;" attrs="{'invisible': [('forward_late_entry','=',False)]}" confirm="Are you sure you want to forward the request ?"/>
+
+                        <button string='Submit'  name="late_entry_update_reason" type="object" class="btn font-weight-bold text-white" style="background-color: #108fbb;" attrs="{'invisible': [('action_type','!=','update_le_reason')]}" />
+
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                       
+                    </footer>
+                </form>
+            </field>
+        </record>
+        
+        <act_window id="action_late_entry_approval_wizard"
+		            name="Take Action"
+		            src_model="kw_late_entry_take_action"
+		            res_model="kw_late_entry_approval_wizard"
+		            view_type="form" view_mode="form"
+		            key2="client_action_multi" target="new"
+		/>
+
+        <record id="late_entry_approval_wizard_window_action" model="ir.actions.act_window">
+            <field name="name">Take Action</field>
+            <field name="res_model">kw_late_entry_approval_wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_kw_late_entry_approval_wizard_form"/>
+            <field name="target">new</field>
+            <field name="context">{'default_daily_attendance_id': active_id}</field>
+           
+        </record>
+        
+    </data>
+</odoo>

@@ -1,0 +1,520 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+     <record id="kw_add_product_items_view_tree" model="ir.ui.view">
+        <field name="name">kw_add_product_items_view.tree</field>
+        <field name="model">kw_add_product_items</field>
+        <field name="arch" type="xml">
+            <tree colors="red:status == 'Rejected'" create='0' delete='0' import='0' >
+                <field name="product_type" string="Product Category" />
+                <field name="product_template_id" string=" Product Type" />
+                <field name="item_code" string="Item Code" />
+                <field name="item_description" string="Item Description"  />
+                <field name="uom" string="Uom"  />
+                <field name="quantity_required" string="Qty Required" />
+
+                <field name="expected_days" string="Required Date" options="{'datepicker':{'maxDate': 'now'}}"/>
+                <field name="check_availability" />
+                <field name="alternate_name" />
+                <field name="stock_master_id"  string='Items' force_save='1'/>
+                <field name="item_in_stock"  force_save='1'/>
+                <field name="remark" string="Approver Remark"  placeholder="Remark"/>
+                <field name="status" string="Status"  />
+                <field name="stock_master_id" string="Alternate Material"/>
+                <field name="employee_id" force_save='1' string="Issued to"/>
+                <field name="action_taken_on" force_save='1' string="Released On"/>
+            </tree>
+        </field>
+    </record>
+    
+    <record id="kw_add_product_items_view_form" model="ir.ui.view">
+        <field name="name">kw_add_product_items.form</field>
+        <field name="model">kw_add_product_items</field>
+        <field name="arch" type="xml">
+            <form string="" create="false" edit="false">
+                <sheet>
+                    <group>
+                        <field name="item_code" string="Item Code" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                        <field name="item_description" string="Item Description" />
+                        <field name="uom" string="Uom" />
+                        <field name="quantity_required" string="Qty Required"/>
+                        <field name="expected_days" string="Required Date" />
+                        <field name="status" string="Status"/>
+                        <field name="product_type" string="Product Type"/>
+                        <field name="item_in_stock" string="Items in Stock" force_save='1' invisible='1'/>
+                        <field name="alternate_name" string="Alternate Product" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                        <field name="stock_master_id" string="Alternate Material" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                        <field name="employee_id" force_save='1' string="Issued to" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                        <field name="product_template_id" string="Product" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+        <record id="kw_add_product_items_report_search_view" model="ir.ui.view">
+            <field name="name">kw_add_product_items.search</field>
+            <field name="model">kw_add_product_items</field>
+            <field name="arch" type="xml">
+                <search>
+                        <field name="sequence"/>
+                        <field name="material_rel_id"/>
+                        <field name="product_type" string="Product Category" />
+                        <field name="product_template_id" string="Product Template" />
+                        <field name="item_code" string="Product" />
+                        <field name="item_description" string="Item Description"  />
+                        <field name="quant_required"/>
+                        <field name="quant_available"/>
+                        <field name="order_qty" string='Order Qty'/>
+                        <field name="uom" string="Uom"  />
+                        <field name="expected_days" string="Required Date" options="{'datepicker':{'maxDate': 'now'}}"/>
+                        <field name="check_availability" />
+                        <field name="alternate_name" />
+                        <field name="stock_master_id"  string='Item Serial No' force_save='1'/>
+                        <field name="employee_id" force_save='1' string="Issued to"/>
+                        <field name="requisition_remark" string='Remark'/>
+                        <field name="is_requisition_applied" invisible='1'/>
+                        <field name="action_on" string='Date'/>
+                        <field name="requisition_action_by" string='Approved by'/>
+                        <separator/>
+					    <filter string="This Year" domain="[('create_date', 'like',context_today().strftime('%Y'))]" 
+                                name="current_year_create_date"/>
+                        <separator/>
+                        <filter string="Applied Date" name="create_date" date="create_date" />
+                        <filter string="Expected Date" name="expected_days" date="expected_days"/>
+                        <filter string="Action on" name="action_on" date="action_on" />
+                        <separator/>
+                        <filter string="Pending" name="Pending" domain="[('status', '=','Pending')]"/>
+                        <filter string="Hold" name="Hold" domain="[('status', '=','Hold')]"/>
+                        <filter string="Approved" name="Approved" domain="[('status', '=','Approved')]"/>
+                        <filter string="Cancelled" name="Cancelled" domain="[('status', '=','Cancelled')]"/>
+                        <filter string="Rejected" name="Rejected" domain="[('status', '=','Rejected')]"/>
+                        <filter string="Issued" name="Issued" domain="[('status', '=','Issued')]"/>
+                        <filter string="Released" name="Released" domain="[('status', '=','Released')]"/>
+                        <filter string="Requisition_Approved" name="Requisition_Approved" domain="[('status', '=','Requisition_Approved')]"/>
+                        <filter string="Quotation_Created" name="Quotation_Created" domain="[('status', '=','Quotation_Created')]"/>
+                        <filter string="Negotiation" name="Negotiation" domain="[('status', '=','Negotiation')]"/>
+                        <filter string="PO Created" name="Created" domain="[('state', '=','PO_Created')]"/>
+                    <group expand="1" string="Group By">
+                        <filter string="Status" name="group_by_status" domain="[]" context="{'group_by':'status'}"/>
+                    </group> 
+                </search>
+            </field>
+        </record>       
+
+
+
+    <record id="kw_add_product_items_action_window" model="ir.actions.act_window">
+        <field name="name">Release Items</field>
+        <field name="res_model">kw_add_product_items</field>
+        <field name="view_mode">tree</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_add_product_items_view_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('kw_add_product_items_view_form')})]"/>
+        <field name="context">{'hide_quotation':True}</field>
+        <field name="domain">[('status', '=', ('Issued'))]</field> 
+    </record>
+
+    <record id="kw_approved_requisition_view_tree" model="ir.ui.view">
+        <field name="name">kw_approved_requisition.tree</field>
+        <field name="model">kw_requisition_requested</field>
+        <field name="arch" type="xml">
+            <tree colors="red:status == 'Rejected'" create='0' delete='0' import='0' >
+                <field name="sequence" string='Requisition No'/>
+                <field name="requisition_applied_by"/>
+                <field name="product_type" string="Product Type" />
+                <field name="product_template_id" string=" Product" />
+                <field name="item_code" string="Item" />
+                <field name="alternate_requisition_item" string="Alternate Item" />
+                <field name="item_description" string="Item Description" invisible='1'/>
+                <field name="uom" string="UoM"  />
+                <field name="quantity_required" string="Order Quantity" />
+                <field name="expected_days" string="Expected Date" />
+                <field name="check_availability" invisible='1'/>
+                <field name="status" invisible='0'/>
+                <button type="object" name="edit_approved_requisition" string="Edit" class="btn-success" invisible='0'/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="kw_hod_requisition_view_tree" model="ir.ui.view">
+        <field name="name">kw_approved_requisition.hod.tree</field>
+        <field name="model">kw_requisition_requested</field>
+        <field name="arch" type="xml">
+            <tree colors="red:status == 'Rejected'" create='0' delete='0' import='0' >
+                <field name="sequence"/>
+                <field name="product_type" string="Product Type" />
+                <field name="product_template_id" string=" Product" />
+                <field name="item_code" string="Item" />
+                <field name="alternate_requisition_item" string="Alternate Requisition Item" />
+                <field name="item_description" string="Item Description"  />
+                <field name="uom" string="Uom"  />
+                <field name="order_qty" string="Order Qty" />
+                <field name="expected_days" string="Required Date" />
+                <field name="check_availability" invisible='1'/>
+                <field name="pending_at"/>
+                <field name="status"/>
+                <button type="object" name="edit_approved_requisition" context="{'hod_action':True}" string="Edit" class="btn-info"/>
+                <button name="requisition_hod_action" context='{"submit_hod_approve":True}' attrs="{'invisible': [('status', '!=', 'Pending')]}" string="Approve" type="object" class="btn btn-success" />
+                <button name="requisition_hod_action" context='{"submit_hod_reject":True}' attrs="{'invisible': [('status', '!=', 'Pending')]}" string="Reject" type="object" class="btn btn-danger" />
+            </tree>
+        </field>
+    </record>
+    
+    <record id="kw_approved_requisition_view_form" model="ir.ui.view">
+        <field name="name">kw_approved_requisition.form</field>
+        <field name="model">kw_requisition_requested</field>
+        <field name="arch" type="xml">
+            <form string="" create="false" edit="true" delete='false'>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="sequence" string='Requisition No' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="requisition_rel_id" attrs="{'invisible': [('requisition_rel_id', '=', False)]}" readonly='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="material_id" string='Material Ref.' attrs="{'invisible': [('material_id', '=', False)]}" readonly='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="product_type" string="Product Type" readonly='1'/>
+                            <field name="product_template_id" string="Product" readonly='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="item_code" string="Name" readonly='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="alternate_requisition_item" string="Alternate Item" force_save='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" />
+                            <field name="item_description" string="Item Description" readonly='1' invisible='1'/>
+                        </group>
+                        <group>
+                            <field name="item_in_stock" string="Items in Stock" force_save='1' readonly='1'/>
+                            <field name="quantity_required" string="Order Quantity" required='1'/>
+                            <field name="uom" string="UoM" readonly='1'/>
+                            <field name="expected_days" string="Expected Date"  readonly='1'/>
+                            <field name="create_date" readonly='1'/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="kw_hod_requisition_view_form" model="ir.ui.view">
+        <field name="name">kw_approved_requisition.hod.form</field>
+        <field name="model">kw_requisition_requested</field>
+        <field name="arch" type="xml">
+            <form string="" create="false" edit="true">
+                <header>
+                    <button name="requisition_hod_action" context='{"submit_hod_approve":True}' attrs="{'invisible': [('status', '!=', 'Pending')]}" string="Approve" type="object" class="btn btn-success" />
+                    <button name="requisition_hod_action" context='{"submit_hod_reject":True}' attrs="{'invisible': [('status', '!=', 'Pending')]}" string="Reject" type="object" class="btn btn-danger" />
+                    <field name="status" widget="statusbar" statusbar_visible="Draft,Pending,Approved,Cancelled,Rejected" readonly="1"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="sequence"  options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="requisition_rel_id" attrs="{'invisible': [('requisition_rel_id', '=', False)]}" readonly='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="requisition_rel_line_id" attrs="{'invisible': [('requisition_rel_line_id', '=', False)]}" readonly='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="material_id" attrs="{'invisible': [('material_id', '=', False)]}" readonly='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="material_line_id" attrs="{'invisible': [('material_line_id', '=', False)]}" readonly='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="product_type" string="Product Type" readonly='1'/>
+                            <field name="product_template_id" string="Product" readonly='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="item_code" string="Name" readonly='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="alternate_requisition_item" string="Alternate Requisition Item" force_save='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" />
+                            <field name="item_description" string="Item Description" readonly='1'/>
+                        </group>
+                        <group>
+                            <field name="item_in_stock" string="Items in Stock" force_save='1' readonly='1'/>
+                            <field name="order_qty" string="Order Qty" required='1'/>
+                            <field name="uom" string="Uom" readonly='1'/>
+                            <field name="expected_days" string="Required Date"  readonly='1'/>
+                            <field name="create_date" readonly='1'/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="kw_approved_requisition_action_window" model="ir.actions.act_window">
+        <field name="name">Approved Requisition Items</field>
+        <field name="res_model">kw_requisition_requested</field>
+        <field name="view_mode">tree</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_approved_requisition_view_tree')})]"/>
+        <field name="context">{}</field>
+        <field name="domain">[('status','=','Approved')]</field> 
+    </record>
+
+    <record id="kw_requisition_pending_action_window" model="ir.actions.act_window">
+        <field name="name">Pending Actions</field>
+        <field name="res_model">kw_requisition_requested</field>
+        <field name="view_mode">tree</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_hod_requisition_view_tree')})]"/>
+        <field name="context">{}</field>
+        <field name="domain">[('pending_at.user_id','=', uid),('status','=','Pending')]</field> 
+    </record>
+
+ <!-- apply request -->
+    <record id="kw_add_product_items_remark_approve_form_view" model="ir.ui.view">
+        <field name="name">Approve Remark</field>
+        <field name="model">kw_add_product_items</field>
+        <field name="priority">10000</field>
+        <field name="arch" type="xml">
+            <form>
+                <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                </script>
+                <div class="row">
+                    <div class="text-center col-sm-12 mx-auto">
+                        <h4>Are you sure, you want to assign?</h4>
+                        <p class="h6 font-weight-light text-left text-justify">
+                            <field name="remark" required='1'/>
+                        </p>
+                        <button type="object" name="give_approve_remark" class="btn-success mr-2" style="float:left;">Submit</button>
+                        <button string="Cancel" class="btn-danger" special="cancel" style="float:left;"/>
+                    </div>
+                </div>
+            </form>
+        </field>
+    </record>
+
+
+
+    <!-- Hold -->
+    <record id="kw_add_product_items_remark_hold_form_view" model="ir.ui.view">
+            <field name="name">Hold Remark</field>
+            <field name="model">kw_add_product_items</field>
+            <field name="priority">10000</field>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                        $(document).ready(function(){
+                            $(".modal-footer").hide();
+                            $(".modal-title").show();
+                            $(".o_form_statusbar").hide();
+                        });
+                    </script>
+                    <div class="row">
+                        <div class="text-center col-sm-12 mx-auto">
+                            <h4>Are you sure, you want to hold?</h4>
+                            <p class="h6 font-weight-light text-left text-justify">
+                                <field name="remark"  required='1'/>
+                            </p>
+                            <button type="object" name="give_hold_remark" class="btn-success mr-2" style="float:left;">Submit</button>
+                            <button string="Cancel" class="btn-danger" special="cancel" style="float:left;"/>
+                        </div>
+                    </div>
+                </form>
+            </field>
+        </record>
+    <!-- reject -->
+    <record id="kw_add_product_items_remark_reject_form_view" model="ir.ui.view">
+            <field name="name">Reject Remark</field>
+            <field name="model">kw_add_product_items</field>
+            <field name="priority">10000</field>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                        $(document).ready(function(){
+                            $(".modal-footer").hide();
+                            $(".modal-title").show();
+                            $(".o_form_statusbar").hide();
+                        });
+                    </script>
+                    <div class="row">
+                        <div class="text-center col-sm-12 mx-auto">
+                            <h4>Are you sure, you want to reject?</h4>
+                            <p class="h6 font-weight-light text-left text-justify">
+                                <field name="remark"  required='1'/>
+                            </p>
+                            <button type="object" name="give_reject_remark" class="btn-success mr-2" style="float:left;">Submit</button>
+                            <button string="Cancel" class="btn-danger" special="cancel" style="float:left;"/>
+                        </div>
+                    </div>
+                </form>
+            </field>
+        </record>
+    
+    <record id="kw_stock_quant_remark_release_form_view" model="ir.ui.view">
+            <field name="name">Release Remark</field>
+            <field name="model">stock.quant</field>
+            <field name="priority">10000</field>
+            <field name="arch" type="xml">
+            <form>
+                <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                </script>
+                <div class="row">
+                    <div class="text-center col-sm-12 mx-auto">
+                        <h4> Are you sure,you want to return this item to store?</h4>
+                        <button type="object" name="release_items" class="btn-success mr-2" style="float:left;">Return</button>
+                        <button string="Cancel" class="btn-danger" special="cancel" style="float:left;"/>
+                    </div>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="kw_add_product_items_create_requisition_form_view"  model="ir.ui.view">
+            <field name="name">Requisition Remark</field>
+            <field name="model">kw_add_product_items</field>
+            <field name="priority">10000</field>
+            <field name="arch" type="xml">
+            <form>
+                <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                </script>
+                <div class="row">
+                    <div class="text-center col-sm-12 mx-auto">
+                        <h4> Are you sure,you want to create purchase requisition?</h4>
+                        <h3>Order Quantity : <field name="order_qty" readonly='0' style="width:100px;"/></h3>
+                        <h3>Expected Date : <field name="delivery_date" required='1' style="width:200px;"/></h3>
+                        <button type="object" name="create_approve_requistion" class="btn-success mr-2" style="float:left;">Submit</button>
+                        <button string="Cancel" class="btn-danger" special="cancel" style="float:left;"/>
+                    </div>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- requisition report -->
+    <record id="requisition_report_view_tree" model="ir.ui.view">
+        <field name="name">requisition.report.tree</field>
+        <field name="model">kw_add_product_items</field>
+        <field name="arch" type="xml">
+            <tree create="false" import="false" delete="false" edit="false" duplicate="false" >
+                <field name="sequence" class='serial_no'/>
+                <field name="material_rel_id" class='serial_no'/>
+                <field name="product_type" string="Product Type" class='product'/>
+                <field name="product_template_id" string=" Product" class='product'/>
+                <field name="item_code" string="Name" class='product'/>
+                <field name="item_description" string="Item Description" class='product'/>
+                <field name="quant_required" class='product'/>
+                <field name="quant_available" class='qty_available'/>
+                <field name="order_qty" string='Order Qty' class='qty_available'/>
+                <field name="uom" string="Uom"  class='qty_available'/>
+                <field name="expected_days" string="Required Date" class='qty_available'/>
+                <field name="check_availability" class='qty_available'/>
+                <field name="alternate_requisition_item" class='qty_available'/>
+                <field name="employee_id" force_save='1' string="Issued to" class='action_date'/>
+                <field name="requisition_remark" string='Remark' class='action_date'/>
+                <field name="is_requisition_applied" invisible='1'/>
+                <field name="action_on" string='Applied on' class='action_date'/>
+                <field name="requisition_action_by" string='Action by' class='action_date'/>
+                <field name="order_status" string="Status" class='action_date'/>
+                <field name="is_report_view" invisible='1'/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="requisition_report_view_form" model="ir.ui.view">
+        <field name="name">requisition.report.form</field>
+        <field name="model">kw_add_product_items</field>
+        <field name="arch" type="xml">
+            <form string="" create="false" edit="false">
+            <header>
+                <field name="status" statusbar='Pending,Hold,Approved,Cancelled,Rejected,Issued,Released'/>
+            </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="material_rel_id" string="Request No"/>
+                            <field name="item_code" string="Name" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="item_description" string="Item Description" />
+                            <field name="uom" string="Uom" />
+                            <field name="quant_required"  invisible='1'/>
+                            <field name="quant_available"/>
+                            <field name="order_qty" string='Order Qty'/>
+                            <field name="expected_days" string="Required Date" />
+                            <field name="product_type" string="Product Type"/>
+                            <field name="alternate_requisition_item" string="Alternate Requisition Product"/>
+                        </group>
+                        <group>
+                            <field name="stock_master_id" string="Alternate Material"/>
+                            <field name="employee_id" force_save='1' string="Issued to"/>
+                            <field name="product_template_id" string="Product" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="requisition_remark"/>
+                            <field name="is_requisition_applied" invisible='1'/>
+                            <field name="order_status" string="order Status"/>
+                            <field name="action_on"/>
+                            <field name="requisition_action_by"/>
+                            <field name="is_report_view" invisible='1'/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <record id="requisition_report_action_window" model="ir.actions.act_window">
+        <field name="name">Requisition Reports</field>
+        <field name="res_model">kw_add_product_items</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('requisition_report_view_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('requisition_report_view_form')})]"/>
+        <field name="domain">[('is_requisition_applied', '=', True)]</field> 
+        <field name="context">{'hide_quotation':True}</field>
+        <field name="search_view_id" ref="kw_add_product_items_report_search_view"/>
+        
+    </record>
+	<menuitem id="requisition_report_menu" name='Requisition Report' parent="purchase.purchase_report" action="requisition_report_action_window"/>
+    
+    <!-- advance view render -->
+    <record id="product_items_list_panel" model="ir.ui.view">
+            <field name="name">kw_add_product_items.list.panel</field>
+            <field name="model">kw_add_product_items</field>
+            <field name="inherit_id" ref="kw_inventory.requisition_report_view_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="attributes">
+                    <attribute name="banner_route">
+                        /inventory/product_items_list_panel
+                    </attribute>
+                </xpath>
+            </field>
+        </record>
+        
+    <template id="product_items_template" name="employee.panel.template">
+        <div class="row" style="margin: 10px 0px 10px 250px;">
+            <table class="table table-bordered" style="width:80%;">
+                <thead>
+                    <tr class="text-center">
+                        <td class="text-center" style="width:20%;font-weight: bold;">
+                            <div>Requisition</div>
+                        </td>
+                        <td class="text-center" style="background-color:#108fbb;width:20%;color:#FFFFFF;font-weight: bold;" >
+                           <t t-esc="values['requisitions_count']"/>
+                        </td>
+                        <td class="text-center" style="width:20%;font-weight: bold;">
+                            <div>Quotation</div>
+                        </td>
+                        <td class="text-center" style="width:20%;background-color:#108fbb;color:#FFFFFF;font-weight: bold;">
+                            <t t-esc="values['quotations_count']"/>
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="text-center">
+                        <td class="text-center" style="width:20%;font-weight: bold;">
+                            <div>Negtiation</div>
+                        </td>
+                        <td class="text-center" style="width:20%;background-color:#108fbb;color:#FFFFFF;font-weight: bold;">
+                            <t t-esc="values['negotiation_count']"/>
+                        </td>
+                        <td class="text-center" style="width:20%;font-weight: bold;">
+                            <div>Purchase Order</div>
+                        </td>
+                        <td class="text-center" style="width:20%;background-color:#108fbb;color:#FFFFFF;font-weight: bold;">
+                            <t t-esc="values['po_count']"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </template>
+</odoo>

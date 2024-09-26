@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--Loan Tree view-->
+    <record id="hr_loan_tree_view" model="ir.ui.view">
+        <field name="name">hr.loan.tree</field>
+        <field name="model">hr.loan</field>
+        <field name="priority" eval="1" />
+        <field name="arch" type="xml">
+            <tree string="Loan Requests" default_order="loan_end_date desc" delete="0" decoration-danger="loan_end_date &lt; current_date">
+                <field name="loan_no" />
+                <field name="loan_name" string="Loan Name" />
+                <field name="bank" string="Bank" />
+                <field name="date" string="Loan Date" />
+                <field name="loan_amount" sum="Total" />
+                <field name="installment" string="Loan Tenure" />
+                <field name="interest_rate" />
+                <field name="principal_repayment" sum="Total" />
+                <field name="interest_repayment" sum="Total" />
+                <field name="loan_end_date" />
+                <field name="loan_expenses" />
+                <field name="lock" widget="boolean_toggle" />
+            </tree>
+        </field>
+    </record>
+
+    <!--Loan
+    Form view-->
+    <record id="hr_loan_form_view" model="ir.ui.view">
+        <field name="name">hr.loan.form</field>
+        <field name="model">hr.loan</field>
+        <field name="arch" type="xml">
+            <form string="Loan Request" delete="0">
+                <header>
+                    <button string="Download Template for XLSX Format"
+                        name="generate_xls_format_loan" type="object" class="btn btn-success" />
+                </header>
+                <sheet>
+                    <h1>
+                        <div class="o_row">
+                            <div class="col p-0">
+                                <label string="Name of Loan" for="loan_name" />
+                                <field name="loan_name" placeholder="Name of Loan" required="1" attrs="{'readonly':[('lock','=',True)]}"/>
+                            </div>
+                        </div>
+                    </h1>
+                    <group col="12">
+                        <group colspan="5">
+                            <field name="lock" invisible="1" />
+                            <field name="loan_no" placeholder="Loan A/C No" required="1" attrs="{'readonly':[('lock','=',True)]}"/>
+                            <field name="date" string="Loan Date" required="1" attrs="{'readonly':[('lock','=',True)]}"/>
+                            <field name="loan_amount" required="1" attrs="{'readonly':[('lock','=',True)]}"/>
+                            <field name="installment" string="Loan Tenure" required="1" attrs="{'readonly':[('lock','=',True)]}"/>
+                            <field name="interest_rate" attrs="{'readonly':[('lock','=',True)]}"/>
+                            <field name="loan_end_date" attrs="{'readonly':[('lock','=',True)]}"/>
+                        </group>
+                        <group colspan="3">
+                            <field name="bank"  attrs="{'readonly':[('lock','=',True)]}"/>
+                            <field name="loan_expenses"  attrs="{'readonly':[('lock','=',True)]}"/>
+                            <field name="loan_account_id" string="GL Code - Principal"  attrs="{'readonly':[('lock','=',True)]}"/>
+                            <field name="ints_account_id" string="GL Code - Interest"  attrs="{'readonly':[('lock','=',True)]}"/>
+                            <field name="sanction_letter_file" filename="sanction_letter_file_name" attrs="{'readonly':[('lock','=',True)]}"/>
+                            <field name="sanction_letter_file_name" invisible="1"  attrs="{'readonly':[('lock','=',True)]}"/>
+                            <field name="original_schedule_file" filename="original_schedule_file_name" attrs="{'readonly':[('lock','=',True)]}"/>
+                            <field name="original_schedule_file_name" invisible="1"  attrs="{'readonly':[('lock','=',True)]}"/>
+                        </group>
+                        <group colspan="4">
+                            <field name="interest_log_lines" string="Interest Logs" attrs="{'readonly':[('lock','=',True)]}">
+                                <tree editable="top">
+                                    <field name="loan_id" invisible="1" />
+                                    <field name="from_date" />
+                                    <field name="to_date" />
+                                    <field name="interest_per" string="Interest (%) P.A." />
+                                </tree>
+                            </field>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="remarks" />
+                    </group>
+                    <notebook>
+
+                        <page string="Actual Installments">
+                            <group>
+                                <field name="file" filename='file_name' />
+                            </group>
+                            <group>
+                                <button string="Click to Submit" name="generate_loan_line"
+                                    type="object" class="oe_inline btn-primary" />
+                            </group>
+                            <button string="Update Loan Lines" name="update_loan_line" type="object"
+                                class="oe_inline btn-info" />
+                            <field name="lock" invisible="1" />
+                            <group>
+                                <field name="loan_lines" readonly="0" default_order="date asc"
+                                    string="Loan Lines" context="{'default_loan_id':id}">
+                                    <tree string="Original Installments" class="loan_class" decoration-danger="date &lt; current_date"
+                                        default_order="date asc" editable="bottom">
+                                        <field name="lock_date_check" invisible="1"/>
+                                        <field name="sl_no" />
+                                        <field name="date" string="Instl. Dt." attrs="{'readonly':[('lock_date_check','=',True)]}"/>
+                                        <field class="opening_principle"
+                                            name="opening_blance_principle"
+                                            string="Op. Principal" readonly="1" />
+                                        <field class="" name="new_amount" sum="Total"
+                                            string="Principal Recd." attrs="{'readonly':[('lock_date_check','=',True)]}"/>
+                                        <field class="" name="interest_per" string="Int. "
+                                            invisible="1" />
+                                        <field class="" name="principle" sum="Total Principle"
+                                            string="Principal Pd." attrs="{'readonly':[('lock_date_check','=',True)]}"/>
+                                        <field class="" name="interest_amt" sum="Total Amount"
+                                            string="Interest Pd." attrs="{'readonly':[('lock_date_check','=',True)]}"/>
+                                        <field class="" name="amount" sum="Total EMI"
+                                            string="EMI" readonly="1" attrs="{'readonly':[('lock_date_check','=',True)]}"/>
+                                        <field class="opening_principle"
+                                            name="closing_blance_principle"
+                                            string="Cl. Principal" readonly="1" />
+                                        <field name="date" string="Instl. Dt." attrs="{'readonly':[('lock_date_check','=',True)]}"/>
+                                        <field name="loan_id" invisible="1" />
+                                    </tree>
+                                </field>
+                            </group>
+                            <div class="oe_clear" />
+                        </page>
+                    </notebook>
+
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" />
+                    <field name="activity_ids" widget="mail_activity" />
+                    <field name="message_ids" widget="mail_thread" />
+                </div>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="action_hr_loan_request" model="ir.actions.act_window">
+        <field name="name">Loan Requests</field>
+        <field name="res_model">hr.loan</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to create a new Loan request.
+            </p>
+            <p>
+                Use this menu to create loan requests.
+            </p>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="hr_loan_pivot_view">
+        <field name="name">Loan Pivot</field>
+        <field name="model">hr.loan.line</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="loan_bank" type="col" />
+                <field name="loan_id" type="col" />
+                <field name="date" type="row" />
+                <field name="opening_blance_principle" type="measure" />
+                <field name="new_amount" type="measure" />
+                <field name="interest_per" type="measure" />
+                <field name="interest_amt" type="measure" />
+                <field name="amount" type="measure" />
+                <field name="principle" type="measure" />
+                <field name="closing_blance_principle" type="measure" />
+            </pivot>
+        </field>
+    </record>
+
+    <record id="hr_loan_pivot_view" model="ir.ui.view">
+        <field name="name">Loan Pivot</field>
+        <field name="model">hr.loan.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="loan_id" />
+            </search>
+        </field>
+    </record>
+
+    <record id="action_hr_loan_request_report" model="ir.actions.act_window">
+        <field name="name">Loan Report</field>
+        <field name="res_model">hr.loan.line</field>
+        <field name="view_mode">pivot</field>
+        <field name="search_view_id" ref="hr_loan_pivot_view" />
+    </record>
+
+    <!--loan
+    menu-->
+   
+</odoo>

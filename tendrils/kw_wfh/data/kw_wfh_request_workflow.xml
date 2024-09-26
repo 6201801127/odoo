@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="kw_wfh_request_workflow_main" model="odoo.workflow">
+            <field name="name">Work From Home</field>
+            <field name="activities_add" eval="True"/>
+            <field name="followers_add" eval="False"/>
+            <field name="mail_thread_add" eval="True"/>
+            <field name="remove_default_attrs_mod" eval="False"/>
+            <field name="model_id" ref="kw_wfh.model_kw_wfh"/>
+        </record>
+
+        <record id="kw_wfh_request_workflow_node_1" model="odoo.workflow.node">
+            <field name="name">Draft</field>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="node_name">draft</field>
+            <field name="sequence" eval="1"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_start" eval="True"/>
+        </record>
+
+        <record id="kw_wfh_request_workflow_node_2" model="odoo.workflow.node">
+            <field name="name">Applied</field>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="node_name">applied</field>
+            <field name="sequence" eval="2"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="False"/>
+        </record>
+
+        <!-- <record id="kw_wfh_request_workflow_node_3" model="odoo.workflow.node">
+            <field name="name">Hold</field>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="node_name">hold</field>
+            <field name="sequence" eval="3"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="False"/>
+        </record> -->
+        <record id="kw_wfh_request_workflow_node_4" model="odoo.workflow.node">
+            <field name="name">Granted</field>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="node_name">grant</field>
+            <field name="sequence" eval="4"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="False"/>
+        </record>
+        <record id="kw_wfh_request_workflow_node_5" model="odoo.workflow.node">
+            <field name="name">Expired</field>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="node_name">expired</field>
+            <field name="sequence" eval="5"/>
+            <field name="is_visible" eval="False"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+
+        <record id="kw_wfh_request_workflow_node_6" model="odoo.workflow.node">
+            <field name="name">Cancelled</field>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="node_name">cancel</field>
+            <field name="sequence" eval="6"/>
+            <field name="is_visible" eval="False"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+        <record id="kw_wfh_request_workflow_node_7" model="odoo.workflow.node">
+            <field name="name">Rejected</field>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="node_name">reject</field>
+            <field name="sequence" eval="7"/>
+            <field name="is_visible" eval="False"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+
+
+
+        <record id="kw_wfh_request_workflow_button_1" model="odoo.workflow.node.button">
+            <field name="sequence" eval="1"/>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="name">Apply</field>
+            <field name="node_id" ref="kw_wfh_request_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_apply_btn','=',False),('state', 'not in', 'draft')]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+obj.apply_wfh_request()       
+            </field>
+        </record>
+
+        <record id="kw_wfh_request_workflow_button_2" model="odoo.workflow.node.button">
+            <field name="sequence" eval="2"/>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="name">Apply Extension</field>
+            <field name="node_id" ref="kw_wfh_request_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_apply_extension_btn','=',False),('state', 'not in', 'draft')]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+obj.apply_wfh_extension()       
+            </field>
+        </record>
+
+
+
+        <record id="kw_wfh_request_workflow_button_3" model="odoo.workflow.node.button">
+            <field name="sequence" eval="3"/>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="name">Cancel</field>
+            <field name="node_id" ref="kw_wfh_request_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|','|',('show_btn_cancel','=',False),('hide_btn_cancel','=',True),('state', 'in', ['draft','grant','cancel','reject'])]"/>
+
+            <field name="btn_class">btn-danger</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_wfh.kw_wfh_cancel_remark_wizard_form_view").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_wfh_cancel_remark_wizard',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'view_id': form_view_id,
+    'target': 'new',
+    'context': {'default_request_record_id': obj.id},
+    }
+            </field>
+        </record>
+
+
+        <record id="kw_wfh_request_workflow_button_4" model="odoo.workflow.node.button">
+            <field name="sequence" eval="4"/>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="name">Grant</field>
+            <field name="node_id" ref="kw_wfh_request_workflow_node_2"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_grant_button','=',False),('state', 'in', ['draft','cancel','reject','grant'])]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_wfh.kw_wfh_grant_remark_wizard_form_view").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_wfh_grant_remark_wizard',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'view_id': form_view_id,
+    'target': 'new',
+    'context': {'default_request_record_id': obj.id},
+    }
+            </field>
+        </record>
+
+    <record id="kw_wfh_request_workflow_button_5" model="odoo.workflow.node.button">
+            <field name="sequence" eval="5"/>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="name">Grant extension</field>
+            <field name="node_id" ref="kw_wfh_request_workflow_node_2"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('hide_extension_grant_btn','=',False),('state', 'in', ['draft','cancel','reject','grant'])]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_wfh.kw_wfh_emp_extension_remark_wizard_form_view").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_wfh_emp_extension_remark_wizard',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'view_id': form_view_id,
+    'target': 'new',
+    'context': {'default_extension_record_id': obj.id},
+    }
+            </field>
+        </record>
+
+
+        <!-- <record id="kw_wfh_request_workflow_button_6" model="odoo.workflow.node.button">
+            <field name="sequence" eval="6"/>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="name">Hold</field>
+            <field name="node_id" ref="kw_wfh_request_workflow_node_2"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_grant_button','=',False),('state', 'in', ['hold','reject','grant','draft','cancel'])]"/>
+            <field name="btn_class">btn-info</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_wfh.kw_wfh_hold_remark_wizard_form_view").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_wfh_hold_remark_wizard',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'view_id': form_view_id,
+    'target': 'new',
+    'context': {'default_request_record_id': obj.id},
+    }
+            </field>
+        </record> -->
+
+        <!-- <record id="kw_wfh_request_workflow_button_7" model="odoo.workflow.node.button">
+            <field name="sequence" eval="7"/>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="name">Unhold</field>
+            <field name="node_id" ref="kw_wfh_request_workflow_node_2"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_grant_button','=',False),('state', 'not in', ['hold'])]"/>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+obj.write({'state':'applied','form_status':'applied'})
+            </field>
+        </record> -->
+
+        <record id="kw_wfh_request_workflow_button_8" model="odoo.workflow.node.button">
+            <field name="sequence" eval="8"/>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="name">Reject</field>
+            <field name="node_id" ref="kw_wfh_request_workflow_node_2"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_grant_button','=',False),('state', 'not in', ['applied'])]"/>
+            <field name="btn_class">btn-danger</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_wfh.kw_wfh_reject_remark_wizard_form_view").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_wfh_reject_remark_wizard',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'view_id': form_view_id,
+    'target': 'new',
+    'context': {'default_request_record_id': obj.id},
+    }
+     
+            </field>
+        </record>
+
+        <record id="kw_wfh_request_workflow_button_9" model="odoo.workflow.node.button">
+            <field name="sequence" eval="9"/>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="name">Grant</field>
+            <field name="node_id" ref="kw_wfh_request_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_hr_grant_button','=',False),('state', 'in', ['reject','cancel','grant'])]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_wfh.kw_wfh_hr_grant_remark_wizard_form_view").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_wfh_hr_grant_remark_wizard',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'view_id': form_view_id,
+    'target': 'new',
+    'context': {'default_record_id': obj.id},
+    }
+     
+            </field>
+        </record>
+
+        <record id="kw_wfh_request_workflow_button_10" model="odoo.workflow.node.button">
+            <field name="sequence" eval="10"/>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="name">Extend WFH Link</field>
+            <field name="node_id" ref="kw_wfh_request_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_hr_extension_button','=',False),('state', 'in', ['reject','cancel','grant'])]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_wfh.kw_wfh_hr_extension_remark_wizard_form_view").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_wfh_hr_extension_remark_wizard',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'view_id': form_view_id,
+    'target': 'new',
+    'context': {'default_extension_record_id': obj.id},
+    }
+     
+            </field>
+        </record>
+<!-- 
+         <record id="kw_wfh_request_workflow_button_11" model="odoo.workflow.node.button">
+            <field name="sequence" eval="11"/>
+            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>
+            <field name="name">Assign Task</field>
+            <field name="node_id" ref="kw_wfh_request_workflow_node_4"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_grant_button','=',False),('state', 'not in', ['grant'])]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+emp_id = obj.employee_id.id
+wfh_id = obj.id
+kanban_view_id = env.ref('kw_wfh.kw_wfh_deliverables_kanban_dashboard').id
+tree_view_id = env.ref('kw_wfh.kw_wfh_deliverables_tree').id
+form_view_id = env.ref('kw_wfh.kw_wfh_deliverables_form').id
+action = {
+    'type': 'ir.actions.act_window',
+    'name': 'Assign Task',
+    'view_mode': 'kanban,form,tree',
+    'res_model': 'kw_wfh_deliverables',
+    'target': 'obj',
+    'views': [(kanban_view_id, 'kanban'),(tree_view_id, 'tree'),(form_view_id, 'form')],
+    'context': {'group_by':'state','default_employee_id': emp_id,'default_mail_sent':True,'default_wfh_record_id': wfh_id},
+    }
+action['search_view_id'] = (env.ref('kw_wfh.ra_search_view_kw_wfh_deliverables').id, )
+            </field>
+        </record> -->
+
+<!--         <record id="kw_wfh_request_workflow_button_12" model="odoo.workflow.node.button">-->
+<!--            <field name="sequence" eval="12"/>-->
+<!--            <field name="workflow_id" ref="kw_wfh_request_workflow_main"/>-->
+<!--            <field name="name">View Task</field>-->
+<!--            <field name="node_id" ref="kw_wfh_request_workflow_node_4"/>-->
+<!--            <field name="is_highlight" eval="True"/>-->
+<!--            <field name="custom_domain" eval="True"/>-->
+<!--            <field name="btn_hide_domain" eval="['|','|',('hide_btn_cancel','=',False),('state', 'not in', ['grant']),('emp_record_report','=',False)]"/>-->
+<!--            <field name="btn_class">btn-success</field>-->
+<!--            <field name="condition_code">-->
+<!--result = True-->
+<!--            </field>-->
+<!--            <field name="action_type">code</field>-->
+<!--            <field name="code">-->
+<!--kanban_view_id = env.ref('kw_wfh.kw_wfh_emp_deliverables_kanban_dashboard').id-->
+<!--tree_view_id = env.ref('kw_wfh.kw_wfh_deliverables_tree').id-->
+<!--form_view_id = env.ref('kw_wfh.kw_wfh_emp_deliverables_form').id-->
+<!--action = {-->
+<!--    'type': 'ir.actions.act_window',-->
+<!--    'name': 'Daily Task',-->
+<!--    'view_mode': 'kanban,form,tree',-->
+<!--    'res_model': 'kw_wfh_deliverables',-->
+<!--    'target': 'obj',-->
+<!--    'views': [(kanban_view_id, 'kanban'),(tree_view_id, 'tree'),(form_view_id, 'form')],-->
+<!--    'domain': [('employee_id.id','=',env.user.employee_ids.id),('state', 'in', ['assigned','inprogress'])],-->
+<!--    'context': {'group_by':'state'},-->
+<!--    'flags': {'create': False,'edit': False},-->
+<!--}-->
+<!--action['search_view_id'] = (env.ref('kw_wfh.search_view_kw_wfh_emp_deliverables_report').id, )-->
+<!--            </field>-->
+<!--        </record>-->
+
+    </data>
+</odoo>

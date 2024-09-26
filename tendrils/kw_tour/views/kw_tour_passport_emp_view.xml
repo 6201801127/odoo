@@ -1,0 +1,86 @@
+<odoo>
+	<data>
+		<record id="kw_tour_passport_employee_list_tree" model="ir.ui.view">
+			<field name="name">Employee Tour List</field>
+			<field name="model">kw_tour_passport</field>
+			<field name="priority" eval="60"/>
+			<field name="arch" type="xml">
+				<tree create="false" import="false" delete="false">
+					<field name="name" class="font-weight-bold"/>
+					<field name="emp_code"/>
+					<field name="job_id"/>
+					
+					<field name="department_id"/>
+					<field name="division"/>
+					<field name="section"/>
+					<field name="practise"/>
+                    <field name="job_branch_id"/>
+
+					<field name="work_email"/>
+					<field name="mobile_phone"/>
+<!--					<field name="identy_type" invisible="1"/>-->
+					<field name="doc_number" string="Passport Number"/>
+					<field name="date_of_expiry" string="Passport Expiry date"/>
+					<field name="fever_doc_number" string="Yellow Fever Doc. Number"/>
+					<field name="fever_date_of_issue" string="Yellow Fever Doc. Date"/>
+<!--					<field name="uploaded_doc" invisible="1"/>-->
+<!--					<field name="date_of_issue" invisible="1"/>-->
+<!--					<field name="doc_file_name" invisible="1"/>-->
+
+
+					<button name="%(kw_tour_passport_action_window)d" string="Update" context="{'current_record':id}"
+							type="action" class="oe_highlight"/>
+					<button name="call_download_doc" string="Download" type="object"
+							attrs="{'invisible': [('doc_number','=',False),('fever_doc_number','=',False)]}"
+							class="oe_highlight p-2" icon="fa-download"/>
+				</tree>
+            </field>
+        </record>
+
+        <record id="kw_tour_employee_search_view" model="ir.ui.view">
+			<field name="model">kw_tour_passport</field>
+			<field name="priority">200</field>
+			<field name="arch" type="xml">
+				<search>
+					<field name="name" string="Employees" filter_domain="['|',('work_email','ilike',self),('name','ilike',self)]"/>
+					<field name="job_id" string='Designation'/>
+					<field name="emp_code" string="Employee Code"/>
+					<field name="work_email" string="Email" />
+                    <field name="job_branch_id" string="Work Location"/>
+					<field name="department_id"/>
+					<field name="division" string="Division"/>
+					<field name="section" string="Section"/>
+					<field name="practise" string="Practise"/>
+                    <filter name="name" string="Passport Updated" domain="[('date_of_expiry','&gt;',time.strftime('%%Y-%%m-%%d'))]"/>
+					<filter name="name" string="Passport Expired" domain="[('date_of_expiry','&lt;=',time.strftime('%%Y-%%m-%%d'))]"/>
+					<filter name="name" string="No Passport" domain="[('doc_number','=', False)]"/>
+					<filter name="name" string="Yellow Fever Vaccine Taken" domain="[('fever_doc_number','!=',True)]"/>
+					<filter name="name" string="Yellow Fever Vaccine Not Taken" domain="[('fever_doc_number','=', False)]"/>
+				</search>
+			</field>
+		</record>
+
+       
+        <record id="kw_tour_passport_employees_actions" model="ir.actions.act_window">
+			<field name="name">Employee Record</field>
+			<field name="res_model">kw_tour_passport</field>
+			<field name="view_mode">tree</field>
+			<field name="search_view_id" ref="kw_tour_employee_search_view"/>
+			<field name="view_id" ref="kw_tour_passport_employee_list_tree"/>
+			<field name="view_type">form</field>
+			<!-- <field name="context">{'manager':True,'search_default_active_employees':1}</field> -->
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					No Records to take action...
+				</p>
+			</field>
+		</record>
+
+
+        <menuitem id="kw_tour_employees_data_menu"
+				  name="Employee Record"
+				  parent="kw_tour.kw_tour_emp_passport"
+				  action="kw_tour.kw_tour_passport_employees_actions"
+				  sequence="1"/>
+    </data>
+</odoo>

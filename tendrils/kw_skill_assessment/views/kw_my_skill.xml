@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+
+		
+
+		<record id="kw_my_skill_view_tree" model="ir.ui.view">
+            <field name="name">kw_my_skill.view.tree</field>
+            <field name="model">kw_skill_answer_master</field>
+            <field name="arch" type="xml">
+                <tree create="false" edit="false">
+                    <!-- Add your fields here -->
+                   <field name="user_id"/>
+					<field name="test_name"/>
+					<field name="skill_id"/>
+					<field name="skill_type_id"/>
+					<field name="total_mark_obtained"/>
+					<field name="percentage_scored"/>
+					<field name="create_date"/>
+                </tree>
+            </field>
+        </record>
+
+		<record model="ir.ui.view" id="kw_my_skill_view_kanban">
+			<field name="name">kw_my_skill.view.kanban</field>
+			<field name="model">kw_skill_answer_master</field>
+			<field name="arch" type="xml">
+				<kanban create="false">
+					<field name="user_id"/>
+					<field name="skill_id"/>
+					<field name="skill_type_id"/>
+					<field name="total_mark"/>
+					<field name="total_mark_obtained"/>
+					<field name="percentage_scored"/>
+					<field name="create_date"/>
+					<field name="time_taken"/>
+					<field name="duration"/>
+					<field name="test_name"/>
+					<field name="time_taken_duration"/>
+					<templates>
+						<t t-name="kanban-box">
+							<div t-attf-class="oe_kanban_global_click" t-attf-style="">
+								<div class="o_kanban_record_top ">
+									<div class="container p-0 m-0">
+										<div class="row">
+											<div class="col-sm-9">
+												<h1 class='text-uppercase text-info'>
+													<field name="test_name"/>
+												</h1>
+												<h6 class='text-uppercase badge badge-primary text-wrap font-weight-bold mb-2'
+												    style="font-size: 1.2rem; background-color:#108fbb;">
+													<field name="skill_id"/>
+												</h6>
+												<h6 class='text-uppercase badge badge-primary text-wrap font-weight-bold mb-2'
+												    style="font-size: 1.2rem; background-color:#108fbb">
+													<field name="skill_type_id"/>
+												</h6>
+												<p class="h6">Appeared on :
+													<field name="create_date"/>
+												</p>
+
+												<div class="clearfix"/>
+
+											</div>
+											<div class="col-sm-3 text-center">
+												<h6 class='text-danger'>Result</h6>
+												<p class="h1 text-danger">
+													<field name="percentage_scored" widget='percentpie' string=' '/>
+												</p>
+												<p class="h6 ml-0">
+													<field name="total_mark_obtained"/>
+													/
+													<field name="total_mark"/>
+												</p>
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-sm-8">
+												<p class="h6">Duration:
+													<field name="duration" />
+												</p>
+												<p class="h6">Completed In:
+													<field name="time_taken_duration" />
+												</p>
+											</div>
+											<div class="col-sm-4">
+												<button class="btn btn-primary" title="View Test Details"
+												        name='view_details' type="object">View Details
+												</button>
+
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</t>
+					</templates>
+				</kanban>
+			</field>
+		</record>
+
+		
+
+		<!-- model.name form view -->
+		<record id="kw_my_skill_view_form" model="ir.ui.view">
+			<field name="name">My skill form</field>
+			<field name="model">kw_skill_my_skill</field>
+			<field name="arch" type="xml">
+				<form string="">
+					<sheet>
+						<group>
+							<field name="res_skill" widget='selection'/>
+							<field name="user_id"/>
+							<field name="skill_duration"/>
+						</group>
+						<group string='Result'>
+							<group>
+								<field name="skill_completed_in"/>
+								<field name="skill_total_questions"/>
+								<field name="skill_correct_answer"/>
+							</group>
+							<group>
+								<field name="percentage" widget='percentpie' nolabel='1'/>
+							</group>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record id="kw_my_skill_view_search" model="ir.ui.view">
+            <field name="name">kw_my_skill.default.search</field>
+            <field name="model">kw_skill_answer_master</field>
+            <field name="arch" type="xml">
+                <search string="Search">
+                    <field name="user_id" string="User Name"/>
+					<field name="skill_id" string="Skill Name"/>
+                    <field name="skill_type_id" string="Skill Category"/>
+					<field name="test_name" string="Test Name"/>
+					<field name="create_date" string="Test Date"/>
+                    <field name="status" string="Test Status"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Test Date" name="create_date" date="create_date"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+		<record id="kw_my_skill_action_window" model="ir.actions.act_window">
+			<field name="name">My Skill</field>
+			<field name="res_model">kw_skill_answer_master</field>
+			<field name="view_mode">kanban,tree,form</field>
+			<field name="view_type">form</field>
+			<field name="domain">[('user_id', '=', uid),('set_config_id.assessment_type','=','skill')]</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'kanban', 'view_id': ref('kw_my_skill_view_kanban')}),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_my_skill_view_tree')})]"/>
+			<field name="search_view_id" ref="kw_my_skill_view_search"/>
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					Your skill appears here ...
+				</p>
+			</field>
+		</record>
+
+		<template id="available_test_style" inherit_id="web.assets_backend">
+			<xpath expr="." position="inside">
+				<link rel="stylesheet" type="text/css" href="/kw_skill_assessment/static/src/css/style.css"/>
+			</xpath>
+		</template>
+	</data>
+</odoo>

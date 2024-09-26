@@ -1,0 +1,120 @@
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="kw_lv_settlement_apply_list">
+            <field name="name">Apply Settlement</field>
+            <field name="model">kw_lv_settlement</field>
+            <field name="arch" type="xml">
+                <tree string="Local Visit Settlement" import='false' delete='false' duplicate='false'>
+                    <field name="applied_date"/>
+                    <field name="month"/>
+                    <field name="year"/>
+                    <field name="lv_id" string='No. of Visits'/>
+                    <field name="total_km"/>
+                    <field name="price"/>
+                    <field name="payment_mode" attrs="{'invisible':[('state','in',[False,'applied'])]}"/>
+                    <field name="state"/>
+                    <field name="to_be_taken_by"/>
+                    <field name="payment_state" attrs="{'invisible': [('state','in',[False,'applied','rejected'])]}"/>
+                    <field name="group_access" invisible='1'/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_lv_settlement_apply_form">
+            <field name="name">Apply Settlement</field>
+            <field name="model">kw_lv_settlement</field>
+            <field name="arch" type="xml">
+                <form string="Local Visit Settlement" import='false' edit='false' delete='false' duplicate='false'>
+                    <field name="group_access" invisible='1'/>
+                    <field name="stage_id" invisible="1"/>
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="emp_name" attrs="{'readonly': [('state','not in',[False])],'invisible':[('state','=',False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="applied_date" readonly='1' attrs="{'invisible': [('state','in',[False])]}"/>
+                                <field name="month" attrs="{'readonly': [('state','not in',[False])]}"/>
+                                <field name="year" attrs="{'readonly': [('state','not in',[False])]}"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="lv_id" options="{'no_open': True,'no_create':True,'no_edit':True}" context="{'form_view_ref': 'kw_local_visit.kw_lv_view_form'}" attrs="{'readonly': [('state','not in',[False])]}">
+                                <tree create='false' edit='false'>
+                                    <field name="emp_name"/>
+                                    <field name="visit_category"/>
+                                    <field name="visit_date" />
+                                    <field name="vehicle_type"/>
+                                    <field name="total_km" sum="Total KM"/>
+                                    <field name="attachment_id" readonly='1'/>
+                                    <field name="price" sum="Total Price"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <group>
+                            <group>
+                                <field name='total_km' readonly='1' attrs="{'invisible': [('state','in',[False])]}"/>
+                                <field name="price" readonly='1' attrs="{'invisible': [('state','in',[False])]}"/>
+                                <field name="payment_mode" required='1' attrs="{'invisible': [('state','in',[False,'applied'])]}"/>
+                            </group>
+                            <group>
+                                <field name="taken_by" attrs="{'invisible': [('state','in',[False,'applied'])]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="taken_on" attrs="{'invisible': [('state','in',[False,'applied'])]}"/>
+                                <field name="payment_state" attrs="{'invisible': [('state','in',[False,'applied','rejected'])]}"/>
+                                <field name="payment_date" attrs="{'invisible': [('state','in',[False,'applied','rejected'])]}"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_lv_settlement_apply_search" model="ir.ui.view">
+            <field name="name">Apply Settlement</field>
+            <field name="model">kw_lv_settlement</field>
+            <field name="arch" type="xml">
+                <search>
+                    <!-- SEARCH -->
+                    <field name="emp_name"/>
+                    <!-- GROUP BY -->
+                    <group expand="0" string="Group By">
+                        <filter string="Payment Mode" name="payment_mode" context="{'group_by':'payment_mode'}"/>
+                        <filter string="Settlement State" name="settlement_state" context="{'group_by':'state'}"/>
+                        <filter string="Payment State" name="payment_state" context="{'group_by':'payment_state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_lv_settlement_apply_action_window">
+            <field name="name">Apply Settlement</field>
+            <field name="res_model">kw_lv_settlement</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('emp_name.user_id','=',uid)]</field>
+            <field name="search_view_id" ref="kw_lv_settlement_apply_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No applied local visit settlement(s) here...
+                </p>
+            </field>
+        </record>
+
+        <record id="action_kw_lv_settlement_apply_act_window_view_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kw_lv_settlement_apply_list"/>
+            <field name="act_window_id" ref="kw_lv_settlement_apply_action_window"/>
+        </record>
+
+        <record id="action_kw_lv_settlement_apply_act_window_view_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="kw_lv_settlement_apply_form"/>
+            <field name="act_window_id" ref="kw_lv_settlement_apply_action_window"/>
+        </record>
+
+
+    </data>
+</odoo>

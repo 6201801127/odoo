@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="view_hr_employee_kw_survey_tree" model="ir.ui.view">
+            <field name="name">view.hr.employee.kw.survey.tree</field>
+            <field name="model">hr.employee</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="99" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="emp_code"/>
+                    <field name="job_id" string="Designation"/>
+                    <field name="department_id"/>
+                    <field name="division"/>
+                    <field name="section"/>
+                    <field name="practise"/>
+                    <field name="work_email"/>
+                    <field name="mobile_phone"/>
+                    <field name="epbx_no"/>
+                    <field name="location"/>
+                    
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kwantify_feedback_tree">
+            <field name="name">Survey</field>
+            <field name="model">kw_surveys</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree default_order="id desc" string="Survey Form">
+                    <field name="name" />
+                    <field name="survey_id" />
+                    <field name="start_date" />
+                    <field name="end_date" />
+                    <field name="total_employee"/>
+                    <field name="completed"/>
+                    <field name="pending"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_kw_surveys_config_form" model="ir.ui.view">
+            <field name="name">view.kw_surveys.form</field>
+            <field name="model">kw_surveys</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="kw_surveys_form" create="true" delete="false" edit="true" duplicate="false">
+                    <field name="feedback_status" invisible='1'/>
+                    <field name="total_employee" invisible='1'/>
+                    <field name="pending" invisible='1'/>
+                    <field name="completed" invisible='1'/>
+                    <header>
+                        <button class='btn btn-info' attrs="{'invisible': [('feedback_status','in',['published'])]}" string='Start Survey' name='create_survey_details' type='object' />
+                    </header>
+                    <sheet>
+                        <!-- <group> -->
+                            <group>
+                                <field name="name" attrs="{'readonly': [('feedback_status','in',['published'])]}" autocomplete="off"/>
+                                <field name="survey_id" attrs="{'readonly': [('feedback_status','in',['published'])]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="start_date" autocomplete="off" options="{'datepicker':{'minDate': 0}}" />
+                                <field name="end_date" autocomplete="off" />
+                            <!-- </group> -->
+                            <!-- <group> -->
+                                <field name="employee_ids" options="{'no_create': True,'no_open': False}" context="{'search_view_ref':'kw_surveys.view_hr_employee_survey_search_view','tree_view_ref':'kw_surveys.view_hr_employee_kw_survey_tree'}">
+                                    <tree editable="bottom" create="true" delete="true" edit="true" style="width:100%;">
+                                        <field name="image_small" widget="image" string="Photo"/>
+                                        <field name="name" />
+                                        <field name="emp_code" />
+                                        <field name="job_id" string="Designation" />
+                                        <field name="department_id" />
+                                        <field name="job_branch_id" string="Job Location"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            <group string="Email Content">
+                                <field name="email_subject_line"/>
+                                <field name="email_body"/>
+                            </group>
+
+                            <group string="Survey Mode">
+                                <field name="portal"/>
+                                <field name="log_in"/>
+                                <field name="email"/>
+                            </group>
+                        <group string="Survey Details">
+                            <field name="survey_details_id" readonly='1' nolabel='1'>
+                                <tree create='false' edit='false' delete='false'>
+                                    <field name="employee_ids"/>
+                                    <field name="survey_id"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                    <field name="completed_on"/>
+                                    <field name="state"/>
+                                    <button string='Edit Survey' groups='survey.group_survey_manager' attrs="{'invisible': [('state','in',['1','4'])]}" class="btn btn-info btn-sm" type="object" name="edit_survey_manager"/>
+                                    <button string='Publish'  groups='survey.group_survey_manager' attrs="{'invisible': [('state','in',['1','2','4'])]}" class="btn btn-success btn-sm" type="object" name="publish_survey_manager"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="view_hr_employee_survey_search_view" model="ir.ui.view">
+            <field name="name">view.hr.employee_survey.search</field>
+            <field name="model">hr.employee</field>
+            <field name="type">search</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <field name="job_id" string="Designation"/>
+                    <field name="department_id"/>
+                    <field name="division"/>
+                    <field name="section"/>
+                    <field name="practise"/>
+                    <field name="job_branch_id" string="Job Location"/>
+                    <field name="employement_type"/>
+                    <field name="gender"/>
+                    <field name="location"/>
+                    <filter string="Male" name="gender"  domain="[('gender','=','male')]"/>
+                    <filter string="Female" name="gender"  domain="[('gender','=','female')]"/>
+                    <filter string="Onsite" name="location"  domain="[('location','=','onsite')]"/>
+                    <filter string="Offsite" name="location"  domain="[('location','=','offsite')]"/>
+                    <filter string="WFA" name="location"  domain="[('location','=','wfa')]"/>
+                    <separator/>
+                    <filter name="hq_workstation" string="CSM HQ" domain="[('hq_workstation','=',True)]"/>
+					<separator/>
+                    <filter name="camp_workstation" string="CAMP Office" domain="[('camp_workstation','=',True)]"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="kwantify_surveys_search" model="ir.ui.view">
+            <field name="name">Survey Search</field>
+            <field name="model">kw_surveys</field>
+            <field name="arch" type="xml">
+                <search string="Search Description">
+                <field name="survey_id" string='Survey name'/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_portal" string="Portal" domain="[]" context="{'group_by':'portal'}" />
+                        <filter name="group_login" string="Log In" domain="[]" context="{'group_by':'log_in'}" />
+                        <filter name="group_email" string="Email" domain="[]" context="{'group_by':'email'}" />
+                    </group>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="kwantify_survey_schedule_action" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Employee Surveys</field>
+            <field name="res_model">kw_surveys</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+    </data>
+</odoo>

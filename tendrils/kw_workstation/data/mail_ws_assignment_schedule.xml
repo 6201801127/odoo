@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="ws_assignment_schedule_mail" model="mail.template">
+            <field name="name">WS Assignment Schedule</field>
+            <field name="email_from">tendrils@csm.tech</field>
+            <field name="subject">WS Assignment Schedule | ${ctx['month_name']}</field>
+            <field name="email_to">${ctx['mail_to']}</field>
+            <field name="email_cc">${ctx['cc_mail']}</field>
+            <field name="model_id" ref="kw_workstation.model_kw_workstation_assign" />
+            <field name="auto_delete" eval="False" />
+            <field name="body_html">
+                <![CDATA[
+                    <table border="0" style="width:100%;border-collapse: collapse;">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">Dear</span>
+                                         All,
+                                    </h5>
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                        Please find the below Workstation Assignment Schedule for ${ctx['month_name']}.
+                                    </p>
+                                    <table border="1" cellpadding="5" cellspacing="0" style="width:100%;border-collapse: collapse;font-size: 16px; margin-top:1rem;">
+                                        <tr>
+                                            <th style="height: 30px;width:16%;padding-left:5px; font-weight:700;color:#676767;text-align:left;">Name</th>
+                                            <th style="height: 30px;width:14%;padding-left:5px; font-weight:700;color:#676767;text-align:left;">Code</th>
+                                            <th style="height: 30px;width:20%;padding-left:5px; font-weight:700;color:#676767;text-align:left;">WS No</th>
+                                            <th style="height: 30px;width:25%;padding-left:5px; font-weight:700;color:#676767;text-align:left;">Date (WFO)</th>
+                                            <th style="height: 30px;width:25%;padding-left:5px; font-weight:700;color:#676767;text-align:left;">Date (WFH)</th>
+                                        </tr>
+                                        % for rec in ctx['records']:
+                                        <tr>
+                                            <td style="padding-left:5px;color:#676767;">
+                                                ${rec.name}
+                                            </td>
+                                            <td style="padding-left:5px;color:#676767;">
+                                                ${rec.emp_code}
+                                            </td>
+                                            <td style="padding-left:5px;color:#676767;">
+                                                ${', '.join(ctx['employee_workstations'].get(rec.id, []))}
+                                            </td>
+                                            <td style="padding-left:5px;color:#676767;">
+                                                % for assign in ctx.date.get(rec.id, []):
+                                                    ${assign}
+                                                    % if not assign_last
+                                                        <br/>
+                                                    % endif
+                                                % endfor
+                                            </td>
+                                            <td style="padding-left:5px;color:#676767;">
+                                                % if rec.id in ctx.wfh_dates:
+                                                    % for date_range in ctx.wfh_dates[rec.id]:
+                                                        ${date_range}<br/>
+                                                    % endfor
+
+                                                % else:
+                                                    N/A
+                                                % endif
+                                            </td>
+                                        </tr>
+                                        % endfor
+                                    </table>
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                        Please note: It is necessary to adhere to the Workstation Assignment religiously.
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    ]]>
+            </field>
+        </record>
+    </data>
+</odoo>

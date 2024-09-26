@@ -1,0 +1,379 @@
+<odoo>
+  <data>
+     <!-- ===========================Internship Apply View================================================= -->
+    <record id="tendrils_internship_form" model="ir.ui.view">
+      <field name="name">tendrils_internship form</field>
+      <field name="model">tendrils_internship</field>
+      <field name="priority" eval="27" />
+
+      <field name="arch" type="xml">
+          <form delete='false' duplicate="false">
+            <header>
+              <button name="btn_internship_apply" string="Apply" type="object" class="btn-primary" stage='Draft'
+                  attrs="{'invisible': [('stage', 'not in', ('Draft'))]}"
+                      confirm="Are you sure, you want to Apply?"/>
+              <field name="stage" widget="statusbar"
+                     statusbar_visible="Draft,Applied"/>
+            </header>
+              <sheet>
+                  <group>
+                      <group>
+                        <!-- <div style="color: blue;">
+                          <h2>
+                              <field name="refered_by"  readonly='1'
+                                  attrs="{'readonly': [('stage', '!=', 'Draft')]}"
+                                  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                          </h2>
+                        </div> -->
+                        <field name="refered_by"  readonly='1'
+                                  attrs="{'readonly': [('stage', '!=', 'Draft')]}"
+                                  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                        <!-- <field name="applied_by"/> -->
+                      
+                        <field name="intern_name" required="1" 
+                          attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                        <field name="contact_no" required="1"    
+                          attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                        <field name="email_id" required="1" 
+                          attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+
+                        </group>
+                        <group>
+                          
+                          <field name="highest_qualification" required="1" 
+                            attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                          <field name="college_name" required="1"
+                            attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                          <!-- <field name="latest_resume" required="1" 
+                            attrs="{'readonly': [('stage', '!=', 'Draft')]}"/> -->
+                          <field name="resume_filename" invisible="1"/>
+                          <field name="latest_resume" filename="resume_filename" widget="FieldBinary" string = 'Resume' 
+                          required="1"
+                          attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                          
+                          <field name="internship_topic" required="1"
+                            attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                          <field name="employee_id" invisible="1"/>
+                      <field name="is_level" invisible = "1"/>
+                        </group>
+                  </group>
+                  <group>
+                    <group string="Action Log">
+                      <field name="internship_ids" nolabel="1" style="pointer-events:none;">
+                          <tree editable="bottom" delete='true' create='false' readonly="1"
+                                style="pointer-events:none;">
+                              <field name="date"/>
+                              <field name="stage"/>
+                              <field name="remark"/>
+                              <field name="action_taken_by"/>
+                          </tree>
+                      </field>
+                  </group>
+                    <!-- <group>
+                        <group string='Action Log' attrs="{'invisible': [('stage', 'in', ('Draft','Applied'))]}">
+                            <field name="store_remark" readonly="1"/>            
+                        </group>
+                    </group> -->
+                </group>
+                 
+              </sheet>
+          </form>
+      </field>
+    </record>
+    
+    <record model="ir.ui.view" id="tendrils_internship_list">
+      <field name="name">tendrils_internship list</field>
+      <field name="model">tendrils_internship</field>
+      <field name="arch" type="xml">
+          <tree delete='0' import='0' decoration-danger="stage=='Reject'"
+          decoration-success="stage == 'Approve'"
+          decoration-warning="stage == 'Grant'">
+            <field name="intern_name"/>
+            <field name="contact_no"/>
+            <field name="email_id"/>
+            <field name="highest_qualification"/>
+            <field name="college_name"/>
+            <field name="refered_by"/>
+            <!-- <field name="latest_resume"/> -->
+            <field name="internship_topic"/>
+            <field name="stage"/>
+            <field name="pending_at" widget="many2many_tags"/>
+            <field name="is_grant_view" invisible='1'/>
+
+
+          </tree>
+      </field>
+    </record>
+     <!-- ===========================End Internship Apply View================================================= -->
+
+
+     <!-- ===========================Take Aaction VIEW================================================= -->
+     <record id="internship_takeaction_form" model="ir.ui.view">
+      <field name="name">Internship take action form</field>
+      <field name="model">tendrils_internship</field>
+      <field name="priority" eval="18" />
+
+      <field name="arch" type="xml">
+          <form duplicate='false' create='false' edit='false' delete='false'>
+            <header>
+              <button name="btn_internship_approve" string="Approve" type="object" class="btn-primary"
+                attrs="{'invisible': [('approve_reject_dept_head_bool', '=', True)]}"/>
+              <button name="btn_internship_reject" string="Reject" type="object" class="btn-danger"
+                attrs="{'invisible': [('approve_reject_dept_head_bool', '=', True)]}"/>
+              <button name="btn_internship_grant" string="Grant" type="object" class="btn-warning"
+                attrs="{'invisible': ['|',('stage', '=', 'Applied'),('btn_grant_bool', '=', True)]} "/>
+              <button name="btn_chro_reject" string="Reject" type="object" class="btn-danger"
+                attrs="{'invisible': ['|',('stage', '=', 'Applied'),('btn_reject_bool', '=', True)]} "/>
+              <field name="stage" widget="statusbar"
+                     statusbar_visible="Applied,Approve"/>
+            </header>
+              <sheet>
+                  <group>
+                    <field name="intern_name"/>
+                    <field name="contact_no"/>
+                    <field name="email_id"/>
+                  </group>
+                  <group>
+                    <field name="highest_qualification"/>
+                    <field name="college_name"/>
+                    <field name="refered_by" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <!-- <field name="latest_resume"/> -->
+                    <field name="resume_filename" invisible="1"/>
+                    <field name="latest_resume" filename="resume_filename" widget="FieldBinary" string = 'Resume' 
+                    required="1"
+                    attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                    <field name="internship_topic"/>
+                    <field name="employee_id" invisible="1"/>
+                    <field name="approve_reject_dept_head_bool" invisible="1"/>
+                    <field name="btn_grant_bool" invisible="1"/>
+                    <field name="btn_reject_bool" invisible="1"/>
+
+                  </group>
+
+              </sheet>
+          </form>
+      </field>
+    </record>
+
+    <record id="internship_takeaction_list" model="ir.ui.view">
+        <field name="name">Internship Takeaction List</field>
+        <field name="model">tendrils_internship</field>
+        <field name="arch" type="xml">
+            <tree default_order='id desc' import='0' create='0' delete='0'>
+              <field name="intern_name"/>
+              <field name="contact_no"/>
+              <field name="email_id"/>
+              <field name="highest_qualification"/>
+              <field name="college_name"/>
+              <field name="refered_by"/>
+              <!-- <field name="latest_resume"/> -->
+              <field name="internship_topic"/>
+              <field name="stage"/>
+              <!-- <field name="pending_at" widget="many2many_tags"/> -->
+            </tree>
+        </field>
+    </record>
+    <!-- ===========================End Take Aaction VIEW================================================= -->
+
+
+
+    <!-- ===========================L & K  VIEW================================================= -->
+    
+      <record id="l_and_k_list_view" model="ir.ui.view">
+        <field name="name">L&amp;k List</field>
+        <field name="model">tendrils_internship</field>
+        <!-- <field name="groups_id" eval="[(6, 0, [ref('tendrils_internship.group_tendrils_internship_training_manager')])]"/> -->
+        <field name="groups_id" eval="[(4, ref('tendrils_internship.group_tendrils_internship_training_manager'))]"/>
+
+        <field name="arch" type="xml">
+            <tree default_order='id desc' import='0' create='0'>
+                <field name="intern_name"/>
+                <field name="contact_no"/>
+                <field name="email_id"/>
+                <field name="highest_qualification"/>
+                <field name="college_name"/>
+                <field name="refered_by"/>
+                <field name="internship_topic"/>
+                <field name="stage"/>
+                <field name="is_lk" invisible="1"/>
+                <field name="latest_resume" filename="resume_filename" widget="FieldBinary" string = 'Resume'/>
+
+                <field name="resume_filename" invisible="1"/>
+                <!-- <button name="resume_download" type="object" string="Download Resume" icon="fa-download" class="btn btn-success o_list_button"/> -->
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="l_k_batch_wizform_view">
+      <field name="name">l_k_batch_wiz form</field>
+      <field name="model">l_k_batch_wiz</field>
+      <field name="arch" type="xml">
+          <form>
+              <sheet>
+                  <group>
+                      <field name="employee_ids" style="pointer-events:none;"/>
+                    </group>
+                    <group>
+                        <group>
+                          <field name="batch_name" required = '1'/>
+                          <field name="financial_year_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                        </group>
+                        <group>
+                          <field name="start_date" required = '1'/>
+                          <field name="close_date" required = '1'/>
+                        </group>
+                    </group>
+                  <footer>
+                      <center>
+                          <button name="create_batches" type="object" string="Create" class="btn-success" context="{'button':'chro_Reject'}"/>
+                          <button string="Cancel" class="btn-default" special="cancel" style="margin-left: 5px;"/>
+                      </center>
+                  </footer>
+              </sheet>
+          </form>
+      </field>
+    </record>
+    <act_window id="l_and_k_batch_create_id"
+      name="Batch Create"
+      src_model="tendrils_internship"
+      res_model="l_k_batch_wiz"
+      view_type="form" view_mode="form" view_id="l_k_batch_wizform_view"
+      key2="client_action_multi" target="new" 
+      groups="tendrils_internship.group_tendrils_internship_training_manager"
+
+      
+    />
+
+    <!-- ===========================End L & K  VIEW================================================= -->
+
+    <!-- actions opening views on models -->
+    
+    <record model="ir.actions.act_window" id="tendrils_internship_server_action_id">
+      <field name="name">Apply Internship</field>
+      <field name="res_model">tendrils_internship</field>
+      <field name="view_mode">tree,form</field>
+      <field name="domain">[('create_uid','=',uid),('is_level','=',True)]</field>
+      <field name="context">{'edit':False}</field>
+      <field name="view_ids" eval="[(5, 0, 0),
+                       (0, 0, {'view_mode': 'tree', 'view_id': ref('tendrils_internship_list')}),
+                       (0, 0, {'view_mode': 'form', 'view_id': ref('tendrils_internship_form')})]"/>
+      <field name="context">{'hide_quotation':True}</field>
+    </record>
+
+    <!-- <record id="tendrils_internship_server_action_id" model="ir.actions.server">
+      <field name="name">Apply Internship</field>
+      <field name="model_id" ref="tendrils_internship.model_tendrils_internship"/>
+      <field name="state">code</field>
+      <field name="code">
+action=model.get_level_user_check_details()
+      </field>
+    </record>
+   -->
+
+
+    <!-- <record model="ir.actions.act_window" id="take_action_server_id">
+      <field name="name">Take Action</field>
+      <field name="res_model">tendrils_internship</field>
+      <field name="view_mode">tree,form</field>
+      <field name="domain">[
+          '|',
+          '&amp;',
+          ('stage','=','Approve'),
+          ('is_chro','=',True),
+          '&amp;',
+          ('stage','in',['Applied']),
+          ('employee_id.department_id.manager_id.user_id','=',uid)
+      ]</field>
+      <field name="view_ids" eval="[(5, 0, 0),
+          (0, 0, {'view_mode': 'tree', 'view_id': ref('internship_takeaction_list')}),
+          (0, 0, {'view_mode': 'form', 'view_id': ref('internship_takeaction_form')})]"/>
+  </record> -->
+
+
+  <record id="take_action_server_id" model="ir.actions.server">
+    <field name="name">Take Action</field>
+    <field name="model_id" ref="model_tendrils_internship"/>
+    <!-- <field name="groups_id" eval="[(4, ref('tendrils_internship.group_tendrils_internship_chro'))]"/> -->
+    <field name="state">code</field>
+    <field name="code">
+if env.user.has_group('tendrils_internship.group_tendrils_internship_chro'):
+  tree_view_id = env.ref('tendrils_internship.internship_takeaction_list').id
+  form_view_id = env.ref('tendrils_internship.internship_takeaction_form').id
+  action = {
+    'name': 'Take Action',
+    'type': 'ir.actions.act_window',
+    'view_mode': 'form,tree',
+    'res_model': 'tendrils_internship',
+    'views': [(tree_view_id, 'tree'), (form_view_id, 'form')],
+    'domain': [
+        '|',
+        '&amp;',
+        ('stage', '=', 'Approve'), ('approve_reject_dept_head_bool', '=', True),
+        '&amp;',
+        ('stage', '=', 'Reject'), ('btn_reject_bool', '=', True),
+        
+    ],
+}
+
+else:
+  tree_view_id = env.ref('tendrils_internship.internship_takeaction_list').id
+  form_view_id = env.ref('tendrils_internship.internship_takeaction_form').id
+  action = {
+      'name': 'Take Action',
+      'type': 'ir.actions.act_window',
+      'view_mode': 'form,tree',
+      'res_model': 'tendrils_internship',
+      'views': [(tree_view_id, 'tree'), (form_view_id, 'form')],
+      'domain': [('stage', 'in', ['Applied']),
+                  ('employee_id.department_id.manager_id.user_id', '=', uid)],
+     
+  }
+
+    </field>
+  </record>
+
+  <!-- <record id="take_action_server_id" model="ir.actions.server">
+    <field name="name">Take Action</field>
+    <field name="model_id" ref="model_tendrils_internship"/>
+    <field name="state">code</field>
+    <field name="code">
+action=model.internship_take_action()
+    </field>
+  </record> -->
+
+
+    
+  <record model="ir.actions.act_window" id="l_and_k_action_id">
+      <field name="name">L &amp;K Grant</field>
+      <field name="res_model">tendrils_internship</field>
+      <field name="view_mode">tree</field>
+      <field name="domain">[('stage','=','Grant'),('is_lk','=',False)]</field>
+      <field name="view_ids" eval="[(5, 0, 0),
+                       (0, 0, {'view_mode': 'tree', 'view_id': ref('l_and_k_list_view')})]"/>
+  </record>
+
+  
+   
+    <menuitem name="Apply Internship"
+      id="internship_apply_menu"
+      parent='internship_parent_menu'
+      action="tendrils_internship_server_action_id"
+      sequence="1"/>
+
+    <menuitem name="Take Action"
+      id="dept_head_take_action_menu"
+      parent='internship_parent_menu'
+      action="take_action_server_id"
+      sequence="2"/>
+
+<!-- =======================L & K Menu============================ -->
+
+    <menuitem name="l&amp;K Grant"
+      id="l_and_k_action_menu"
+      parent='l_and_K_parent_menu'
+      action="l_and_k_action_id"
+      groups='tendrils_internship.group_tendrils_internship_training_manager'
+      sequence="1"/>
+   
+  </data>
+</odoo>

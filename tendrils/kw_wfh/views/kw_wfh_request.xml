@@ -1,0 +1,118 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="kw_wfh_requset_tree">
+            <field name="name">kw_wfh.tree</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <tree import='false' default_order='create_date desc' delete='false'>
+                    <field name="ref_no"/>
+                    <field name="employee_id"/>
+                    <field name="job_id"/>
+                    <field name="req_department_id"/>
+                    <field name="req_division_id"/>
+                    <field name="req_section_id"/>
+                    <field name="req_practise_id"/>
+                    <field name="wfh_type" invisible="1"/>
+                    <field name="reason_id"/>
+                    <field name="request_from_date"/>
+                    <field name="request_to_date"/>
+                    <field name="action_taken_by"/>
+                    <field name="state" invisible="1"/>
+                    <field name="form_status"/>
+                    <button name="request_extension" string="Apply Extension" type="object" attrs="{'invisible': [('hide_extension_record','=',True)]}" help="message" class="btn-success"/>
+                    <button name="submit_task_redirect" string="Submit Task" type="object" attrs="{'invisible': [('state','not in',['grant'])]}" help="message" class="btn-primary"/>
+                    <field name="hide_extension_record" invisible="1"/>
+                    <field name="hide_csm_wfh_extended_record" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_wfh_requset_form">
+            <field name="name">kw_wfh.form</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <form create='false' delete='false'>
+                    <script>
+                        $(document).ready(function(){ state=  $("[aria-pressed=true]").text().trim();
+                           console.log(state);
+                            if (state != 'Draft'){
+                                $('.o_form_button_edit').hide();
+                            }
+                        });
+                    </script>
+                    <header>
+                         <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="old_reff_no" attrs="{'invisible': [('parent_ref_id','=', False)],'readonly': ['|',('state','in', ['applied','cancel','reject','expired']),('revised_to_date','!=',False)]}"/>
+                                <feld name="emp_id" attrs="{'invisible': [('parent_ref_id','=', False)],'readonly': ['|',('state','in', ['applied','cancel','reject','expired']),('revised_to_date','!=',False)]}"/>
+                                <feld name="job_id" attrs="{'invisible': [('parent_ref_id','=', False)],'readonly': ['|',('state','in', ['applied','cancel','reject','expired']),('revised_to_date','!=',False)]}"/>
+                                <field name="req_department_id" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'invisible': [('parent_ref_id','=', False)],'readonly': ['|',('state','in', ['applied','cancel','reject','expired']),('revised_to_date','!=',False)]}"/>
+                                <field name="req_division_id" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'invisible': [('parent_ref_id','=', False)],'readonly': ['|',('state','in', ['applied','cancel','reject','expired']),('revised_to_date','!=',False)]}"/>
+                                <field name="req_section_id" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'invisible': [('parent_ref_id','=', False)],'readonly': ['|',('state','in', ['applied','cancel','reject','expired']),('revised_to_date','!=',False)]}"/>
+                                <field name="req_practise_id" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'invisible': [('parent_ref_id','=', False)],'readonly': ['|',('state','in', ['applied','cancel','reject','expired']),('revised_to_date','!=',False)]}"/>
+                                <field name="reason_id" domain="[('type.type', 'in', ['By Employee'])]" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'readonly': ['|',('state','in', ['applied','cancel','reject','expired']),('revised_to_date','!=',False)]}"/>
+                                <field name="remark" string="Reason Description" required="1" attrs="{'readonly': ['|',('state','in', ['applied','cancel','reject','expired'])]}"/>
+                                <field name="request_from_date" required="1" attrs="{'readonly': [('state','in', ['applied','cancel','reject','expired'])]}"/>
+                                <field name="request_to_date" required="1" attrs="{'readonly': [('state','in', ['applied','cancel','reject','expired'])]}"/>
+                                <field name="days_count" required="1" readonly="1"/>
+                                <p>
+                                    (Maximum days: <field name="allowed_days" readonly='1'/>)
+                                </p>
+                                <field name="computer_info" required="1" attrs="{'readonly': ['|',('state','in', ['applied','cancel','reject','expired']),('revised_to_date','!=',False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="inter_connectivity" required="1" options="{'horizontal': true}" widget="radio" attrs="{'readonly': ['|',('state','in', ['applied','cancel','reject','expired']),('revised_to_date','!=',False)]}"/>
+                                <!-- <field name="vpn_access" required="1" options="{'horizontal': true}" widget="radio" attrs="{'readonly': ['|',('state','in', ['applied','cancel','reject','expired']),('revised_to_date','!=',False)]}"/> -->
+                                <field name="citrix_access" required="1" options="{'horizontal': true}" widget="radio" attrs="{'readonly': ['|',('state','in', ['applied','cancel','reject','expired']),('revised_to_date','!=',False)]}"/>
+                                
+                                <field name="show_btn_cancel" invisible="1"/>
+                                <field name="hide_btn_cancel" invisible="1"/>
+                                <field name="show_apply_btn" invisible="1"/>
+                                <field name="show_apply_extension_btn" invisible="1"/>
+                                <field name="show_grant_button" invisible="1"/>
+                                <field name="hide_extension_grant_btn" invisible="1"/>
+                                <field name="show_hr_grant_button" invisible="1"/>
+                                <field name="show_hr_extension_button" invisible="1"/>
+                                <field name="hide_csm_wfh_extended_record" invisible="1"/>
+                                <field name="show_apply_extension_btn" invisible="1"/>
+                                <field name="hide_extension_record" invisible="1"/>
+                                <field name="hr_created_wfh_active_link" invisible='1'/>
+                                <field name="parent_ref_id" invisible='1'/>
+                                <field name="form_status" invisible='1'/>
+                                <field name="emp_record_report" invisible="1"/>
+                                <field name="filter_hr_record" invisible="1"/>
+                                <field name="act_from_date" invisible="1"/>
+                                <field name="act_to_date" invisible="1"/>
+                                <field name="is_extended" invisible="1"/>
+                            </group>
+                            <group attrs="{'invisible': [('parent_ref_id','=', False)]}">
+                                <field name="revised_to_date" attrs="{'invisible': [('parent_ref_id','=', False)]}" readonly="1"/>
+                                <field name="extension_remark" attrs="{'invisible': [('parent_ref_id','=', False)]}" readonly="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_wfh_requset_action">
+            <field name="name">Apply</field>
+            <field name="res_model">kw_wfh</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">['&amp;','&amp;',('hide_csm_initiated_record','=',False),('employee_id.user_id','=',uid),('hide_expired_record','=',False)]</field>
+            <field name="context">{'default_show_apply_btn':True,'default_hide_emp_request_record':True,'default_hide_extension_grant_btn': False,'self_view_loaded':True,'is_validated':True}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_wfh_requset_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_wfh_requset_form')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+						No records to show...
+                </p>
+            </field>
+        </record>
+
+    </data>
+</odoo>

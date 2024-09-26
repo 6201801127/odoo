@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_kw_hr_job_positions_kanban" model="ir.ui.view">
+            <field name="name">kw_hr_job_positions.kanban</field>
+            <field name="model">kw_hr_job_positions</field>
+            <field name="arch" type="xml">
+                <kanban class="oe_background_grey o_kanban_dashboard o_hr_recruitment_kanban">
+                    <field name="title"/>
+                    <field name="is_published"/>
+                    <field name="job_id"/>
+                    <field name="user_id"/>
+                    <field name="address_id"/>
+                    <field name="website_id"/>
+                    <field name="expiration"/>
+                    <field name="state"/>
+                    <field name="no_of_recruitment"/>
+                    <templates>
+                        <t t-name="kanban-box">
+
+                            <div>
+                                <!-- <div class="ribbon ribbon-top-right"
+                                     attrs="{'invisible': [('is_published', '=', False)]}">
+                                    <span class="o_recruitment_purple">Published</span>
+                                </div> -->
+
+                                <div class="container o_kanban_card_content">
+                                    <div class="row">
+                                        <div class="col-10 pl-0">
+                                            <p class="h2 mt-0">
+                                                <field name="title"/>
+                                                <t t-if="record.job_code.raw_value">
+                                                    <small>(<field name="job_code"/>)
+                                                    </small>
+                                                </t>
+                                            </p>
+                                            <!--<p class="h6 mt-2 hidden">
+                                                <field name="job_id"/>
+                                                (<field name="job_code"/>)
+                                            </p>-->
+                                            <p class="h5 mt-2">
+                                                <field name="department_id"/>
+                                            </p>
+                                            <field name="address_id"/>
+
+                                            <!-- <p class="h5 mt-2">
+                                                <span class="h6"><i class="fa fa-map-marker fa-2x"/></span> <field name="address_id"/>
+                                            </p> -->
+                                            <!-- <p class="h6 mt-2"> Website: <field name="website_id"/></p> -->
+                                        </div>
+                                        <div class="col-2 pull-right"
+                                             attrs="{'invisible': [('is_published', '=', False)]}">
+                                            <span class="fa fa-check-circle fa-3x text-success" data-toggle="tooltip"
+                                                  data-placement="right" title="Published"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- <t t-if="record.state.raw_value == 'recruit'"> -->
+                                <div class="row">
+                                    <div class="col-1">
+                                        <a name="edit_job" class="text-left" type="edit">
+                                            <span title='Edit'>
+                                                <i class='fa fa-edit' style="font-size:20px;" role="img"
+                                                   aria-label="Edit"/>
+                                            </span>
+                                        </a>
+                                    </div>
+                                    <div class="col-5">
+                                        <p class="h6 mt-2">
+                                            <i class="fa fa-calendar" title="Expire On"/>
+                                            <field name="expiration"/>
+                                        </p>
+                                    </div>
+                                    <div class="col-2">
+                                        <p class="h6 mt-2">
+                                            <i class="fa fa-group" title="No. Of Openings"/>
+                                            <field name="no_of_recruitment"/>
+                                        </p>
+                                    </div>
+                                    <div class="col-4 text-right">
+                                        <button class="btn btn-primary " name="view_job_applications" type="object"  t-attf-data-context="{'recruitment_job_id':active_id}">
+                                            <span>
+                                                <field name="application_count"/>
+                                            </span>
+                                            Application(s)
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- </t> -->
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+        <record id="view_kw_hr_job_positions_tree" model="ir.ui.view">
+            <field name="name">kw_hr_job_positions_tree</field>
+            <field name="model">kw_hr_job_positions</field>
+            <field name="arch" type="xml">
+                <tree string="Job Positions">
+                    <!-- <field name="is_published"/> -->
+                    <!-- <field name="job_id"/> -->
+                    <!-- <field name="user_id"/> -->
+                    <!-- <field name="website_id"/> -->
+                    <!-- <field name="state"/> -->
+                    <field name="title"/>
+                    <field name="job_code"/>
+                    <field name="qualification" widget="many2many_tags"/>
+                    <field name="min_exp_year" string="Min. Years (Exp.)"/>
+                    <field name="max_exp_year" string="Max. Years (Exp.)"/>
+                    <field name="no_of_recruitment" invisible="1"/>
+                    <field name="address_id" widget="many2many_tags"/>
+                    <field name="expiration" invisible="1"/>
+
+                </tree>
+            </field>
+        </record>
+        <record id="kw_hr_job_positions_model_search" model="ir.ui.view">
+            <field name="name">kw_hr_job_positions.model.search</field>
+            <field name="model">kw_hr_job_positions</field>
+            <field name="arch" type="xml">
+                <search string="Search Job">
+                    <field name="title"/>
+                    <field name="job_id" string="Designation"/>
+                    <field name="address_id"/>
+                    <field name="department_id"/>
+                    <filter string="Published Jobs" domain="[('is_published','=',True)]" name="published"/>
+                    <filter string="Expired jobs" domain="[('is_published','=',False)]" name="expired"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="view_kw_hr_job_positions_form" model="ir.ui.view">
+            <field name="name">kw_hr_job_positions.form</field>
+            <field name="model">kw_hr_job_positions</field>
+            <field name="priority">100</field>
+            <field name="arch" type="xml">
+                <form string="Job Positions" duplicate="false">
+                    <header>
+                        <button name="set_recruit" string="Open Position" states="open" type="object"
+                                class="oe_highlight" groups="base.group_user"/>
+                        <button name="set_open" string="Close Position" states="recruit" type="object"
+                                groups="base.group_user"/>
+                        <button class="btn btn-success" name="send_job_opening_notification" string="Send IJP Notification Mail to CSM" states="recruit" type="object"
+                                groups="base.group_user" attrs="{'invisible': [('internal_job_posting', '=', False)]}"
+                                confirm="The mail will be sent to CSM Family. Are you sure to send notification?"/>
+                        <field name="state" widget="statusbar" statusbar_visible="recruit,open"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <!-- <button class="oe_stat_button" name="website_publish_button" type="object" icon="fa-globe">
+                                <field name="website_published" widget="website_button"/>
+                                <field name="is_published" invisible="1"/>
+                            </button> -->
+                            <button class="oe_stat_button" icon="fa-file-o" name="view_job_applications"
+                                    context="{'default_user_id': user_id}" type="object">
+                                <field name="application_count" widget="statinfo" string="Applications"/>
+                            </button>
+                            <button class="oe_stat_button ml-2" icon="fa-eye" name="view_job_details" type="object"
+                                    string="Preview">
+                            </button>
+                            <!-- <button class="oe_stat_button" icon="fa-group" name="view_employees"
+                                    context="{'default_user_id': user_id}" type="object">
+                                <field name="no_of_employee" widget="statinfo" string="Employees"/>
+                            </button> -->
+                            <!-- <div class=" d-flex justify-content-center">
+                                <span>
+                                    <field name="no_of_hired_employee"/> Employees Hired
+                                </span>
+                            </div> -->
+                        </div>
+                        <group>
+                            <group>
+                                <field name="title"/>
+                                <field name="job_id"
+                                       options="{'no_edit': True, 'no_create':True, 'no_open':True}"/>
+                                <field name="job_code"/>
+                                <!-- <field name="website_id" options="{'no_create_edit': True, 'no_create':True, 'no_open':True}"/> -->
+                                <!-- <field name="survey_id" string="Interview feedback Form" options="{'no_create_edit': True, 'no_create':True, 'no_open':True}"/> -->
+                                <field name="company_id" invisible="1"/>
+                                <field name="address_id"
+                                       options="{'no_edit': True, 'no_create':True, 'no_open':True}"
+                                       widget="many2many_tags"/>
+                                <field name="qualification" widget='many2many_tags'
+                                       options="{'no_create': True, 'no_edit':True}"/>
+                                <!-- <field name="experience_id" options="{'no_create_edit': True, 'no_create':True, 'no_open':True}"/> -->
+                                <field name="jd_skills_ids" string="JD Skills"
+                                       options="{'no_create': True, 'no_edit':True}" widget="many2many_tags" required="1"/>
+                                <field name="min_exp_year" string="Min. Year"
+                                       attrs="{'invisible':[('min_exp_year','&gt;',1)]}"/>
+                                <field name="min_exp_year" string="Min. Years"
+                                       attrs="{'invisible':['|',('min_exp_year','=',False),('min_exp_year','&lt;',2)]}"/>
+                                <field name="max_exp_year" string="Max. Year"
+                                       attrs="{'invisible':[('max_exp_year','&gt;',1)]}"/>
+                                <field name="max_exp_year" string="Max. Years"
+                                       attrs="{'invisible':['|',('max_exp_year','=',False),('max_exp_year','&lt;',2)]}"/>
+                                <field name="no_of_recruitment"/>
+                                <field name="consultancy_id" widget='many2many_tags'
+                                       options="{'no_create': True, 'no_edit':True}"/>
+                                <field name="panel_members_grp" string="Interview Panel Members Group"
+                                       options="{'no_create': True, 'no_edit':True}"/>
+                                <field name="opening_for" required="1"/>
+                            </group>
+                            <group>
+                                <field name="department_id"
+                                       options="{'no_edit': True, 'no_create':True, 'no_open':True}"
+                                       required="True"/>
+                                <field name="emp_category_id"
+                                       options="{'no_create': True, 'no_edit':True,'no_open':True}"
+                                       required="True"/>
+                                <field name="industry_type"
+                                       options="{'no_create': True, 'no_edit':True,'no_open':True}"
+                                       required="True"/>
+                                <!-- <field name="applicant_survey_id" options="{'no_create_edit': True, 'no_create':True, 'no_open':True}"/> -->
+                                <!-- <field name="emp_status_id" options="{'no_create_edit': True, 'no_create':True, 'no_open':True}"/>
+                                <field name="shift"/> -->
+                                <field name="expiration"/>
+                                <field name="hr_responsible_id"
+                                       options="{'no_edit': True, 'no_create':True, 'no_open':True}"
+                                       required="True"/>
+                                <field name="user_id"
+                                       options="{'no_edit': True, 'no_create':True, 'no_open':True}"
+                                       required="True"/>
+                                <!-- <field name="mrf_id" options="{'no_create_edit': True, 'no_create':True, 'no_open':True}"/> -->
+
+                                <field name="on_homepage"/>
+                                <field name="walk_in"/>
+                                <field name="campus_drive"/>
+                                <field name="hide_in_website"/>
+                                <field name="file_name" invisible="1"/>
+                                <field name="internal_job_posting"/>
+                                <field name="referred_amount" widget='monetary'
+                                       attrs="{'invisible': [('internal_job_posting', '=', False)]}"/>
+                                <field name="enable_applicant_screening"/>
+                                <field name="panel_member" widget="many2many_tags"
+                                       options="{'no_create': True, 'no_edit':True}"
+                                       attrs="{'invisible': [('enable_applicant_screening', '=', False)], 'required': [('enable_applicant_screening', '=', True)]}"/>
+                                <field name="attachment" widget="binary"
+                                       attrs="{'invisible': [('on_homepage', '=', False)]}" filename="file_name"/>
+                                <templates attrs="{'invisible': [('on_homepage', '=', False)]}">
+                                    <!--<div class="o_kanban_image">-->
+                                    <a class="lightbox-box" t-attf-href="/web/image/#{attachment.attachment_id}"/>
+                                    <!--</div>-->
+                                </templates>
+                                <field name="attachment_url" invisible="1"
+                                       attrs="{'invisible': [('on_homepage', '=', False)]}"/>
+                                <!-- <field name="travel"/> -->
+                            </group>
+                            <label for="summary" class="font-weight-bold"/>
+                            <field name="summary" required="True"/>
+
+                            <label for="description" class="font-weight-bold"/>
+                            <field name="description" widget='html'/>
+
+                            <label for="candidate_profile" class="font-weight-bold"/>
+                            <field name="candidate_profile" widget='html'/>
+
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_kw_hr_job_positions" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Job Openings</field>
+            <field name="res_model">kw_hr_job_positions</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>
+            <field name="domain">[]</field>
+            <field name="context">{"search_default_published":1}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'kanban', 'view_id': ref('kw_recruitment.view_kw_hr_job_positions_kanban')}),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_recruitment.view_kw_hr_job_positions_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_recruitment.view_kw_hr_job_positions_form')})]"/>
+        </record>
+
+        <menuitem parent="hr_recruitment.menu_hr_recruitment_root" name="Jobs" id="hr_recruitment.menu_hr_job_position"
+                  action="action_kw_hr_job_positions" sequence="1"/>
+        <!-- <menuitem parent="hr_recruitment.menu_hr_job_position" id="menu_kw_job_position" name="Job Positions" action="hr_recruitment.action_hr_job"/> -->
+        <!-- <menuitem parent="hr_recruitment.menu_hr_job_position" id="menu_kw_job_openings" name="Job Openings"
+                  action="action_kw_hr_job_positions"/> -->
+
+                  
+
+    </data>
+</odoo>

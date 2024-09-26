@@ -1,0 +1,1378 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <report id="kw_recruitment_interview_feedback_report"
+            string="Print Feedback"
+            model="survey.user_input"
+            report_type="qweb-pdf"
+            name="kw_recruitment.kw_print_feedback_report" 
+            file="kw_recruitment.kw_print_feedback_report" 
+            print_report_name="'Applicant Feedback'" />
+
+    <template id="kw_print_feedback_report">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <style>
+                    table {
+                        font-family: arial, sans-serif;
+                        border-collapse: collapse;
+                        width: 100%;
+                        border: 2px solid black;
+                        font-size:12px;
+                    }
+                    td, th {
+                        border: 0.5px solid black;
+                        padding: 2px;
+                    }
+                </style>
+                <t t-set="technical" t-value="['Interview Feedback_T_Tel','Interview Feedback_T_Tel - Development','Interview Feedback_T_F2F','Interview Feedback_T_F2F - Development','Interview Feedback_NT_Tel','Interview Feedback_NT_F2F','Interview Feedback_HR','New Interview Feedback_HR']"/>
+                <t t-set="sqst" t-value="['Scoresheet Practical Test - Testing','Scoresheet Practical test-DBA','Scoresheet Practical test-DBA-V2']"/>
+                <t t-set="dqst" t-value="['Scoresheet_Practical test_NSA']"/>
+                <t t-set="paging" t-value="['Scoresheet_Practical_Graphic Designer','Scoresheet_Practical test_BSS','Scoresheet_Practical_Web Designer']"/>
+                <t t-set="web_design" t-value="'Scoresheet_Practical_Web Designer'"/>
+                <t t-set="graphic_design" t-value="'Scoresheet_Practical_Graphic Designer'"/>
+                <t t-set="bss" t-value="'Scoresheet_Practical test_BSS'"/>
+                <t t-set="dba_new" t-value="'Scoresheet Practical Test-DBA(New)'"/>
+                <t t-set="presentation" t-value="'Presentation Skill- Score sheet'"/>
+                <t t-set="new_interview_form" t-value="['New Interview Feedback_HR']" />
+
+                <t t-foreach="docs" t-as="doc">
+                    <div class="page">
+
+                        <p align="center" class="h3 font-weight-bold">
+                            <t t-esc="doc.survey_id.page_ids[0].title"/>
+                        </p>
+
+                        <table>
+                            <t t-set="usersorting" t-value="doc.user_input_line_ids.sorted(key=lambda r: r.question_id.sequence)"/>
+                            <tbody t-if="doc.survey_id.title.strip() in technical or doc.survey_id.title.strip() in new_interview_form">
+                                <t t-set="row_count" t-value="0"/>
+                                <tr t-foreach="usersorting[0:7]" t-as="ques">
+                                    <t t-set="row_count" t-value="row_count+1"/>
+                                    <td width="25%" class="font-weight-bold">
+                                        <t t-esc="ques.question_id.question"/>
+                                    </td>
+                                    <td>
+                                        <t t-if="row_count in [1,5]">
+                                            <i class="font-weight-bold">
+                                            <t t-if="ques.answer_type == 'text'">
+                                                <t t-esc="ques.value_text"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'free_text'">
+                                                    <t t-esc="ques.value_free_text"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'number'">
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'date'">
+                                                <t t-esc="ques.value_date.strftime('%d-%b-%Y')"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'simple_choice'">
+                                                <t t-esc="ques.value_simple_choice"/>
+                                            </t>
+                                        </i>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-if="ques.answer_type == 'text'">
+                                                <t t-esc="ques.value_text"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'free_text'">
+                                                <t t-esc="ques.value_free_text"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'number'">
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'date'">
+                                                <t t-esc="ques.value_date.strftime('%d-%b-%Y')"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'simple_choice'">
+                                                <t t-esc="ques.value_simple_choice"/>
+                                            </t>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                            <tbody t-if="doc.survey_id.title.strip()== presentation">
+                                <tr t-foreach="usersorting[0:4]" t-as="ques">
+                                    <t t-if="ques.answer_type == 'text'">
+                                        <td class="font-weight-bold" width="50%">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_text"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'free_text'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_free_text"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'number'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="int(ques.value_number)"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'date'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_date.strftime('%d-%b-%Y')"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'simple_choice'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_simple_choice"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                            </tbody>  
+                            <tbody t-if="doc.survey_id.title.strip()== dba_new">
+                                <tr t-foreach="usersorting[0:2]" t-as="ques">
+                                    <t t-if="ques.answer_type == 'text'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_text"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'free_text'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_free_text"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'number'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="int(ques.value_number)"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'date'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_date.strftime('%d-%b-%Y')"/>
+                                        </td>
+                                    <t t-if="ques.answer_type == 'simple_choice'">
+                                            <td class="font-weight-bold">
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="ques.value_simple_choice"/>
+                                            </td>
+                                        </t>
+                                    </t>
+
+                                </tr>
+                            </tbody>    
+                            <tbody t-if="doc.survey_id.title.strip() in sqst">
+                                <tr t-foreach="usersorting[0:2]" t-as="ques">
+                                    <t t-if="ques.answer_type == 'text'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_text"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'free_text'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_free_text"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'number'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="int(ques.value_number)"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'date'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_date.strftime('%d-%b-%Y')"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'simple_choice'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_simple_choice"/>
+                                        </td>
+                                    </t>
+                                
+                                </tr>
+                            </tbody>    
+                            <tbody t-if="doc.survey_id.title.strip() in dqst">
+                                <tr t-foreach="usersorting[0:2]" t-as="ques">
+                                    <t t-if="ques.answer_type == 'text'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_text"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'free_text'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_free_text"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'number'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="int(ques.value_number)"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'date'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_date.strftime('%d-%b-%Y')"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'suggestion'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_suggested.value"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                            </tbody>
+                            <tbody t-if="doc.survey_id.title.strip()== web_design or doc.survey_id.title.strip() == graphic_design or doc.survey_id.title.strip()==bss">
+                                <tr t-foreach="usersorting[0:2]" t-as="ques">
+                                    <t t-if="ques.answer_type == 'text'">
+                                        <td class="font-weight-bold" width="20%">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_text"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'free_text'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_free_text"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'number'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="int(ques.value_number)"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'date'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_date.strftime('%d-%b-%Y')"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="ques.answer_type == 'simple_choice'">
+                                        <td class="font-weight-bold">
+                                            <t t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="ques.value_simple_choice"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="mt-2" t-if="doc.survey_id.title.strip() not in new_interview_form">
+                                <thead>
+                                    <tr t-if="doc.survey_id.title.strip() in technical">
+                                        <th class="font-weight-bold" width="5%">Sl#</th>
+                                        <th class="font-weight-bold" width="20%">Parameters</th>
+                                        <th class="font-weight-bold" width="65%">Description</th>
+                                        <th class="font-weight-bold text-center" width="10%">Score</th>
+                                    </tr>
+                                    <tr t-if="doc.survey_id.title.strip() == dba_new">
+                                        <td class="font-weight-bold" width="5%">Sl#</td>
+                                        <td class="font-weight-bold">Parameters</td>
+                                        <td class="font-weight-bold">Marks</td>
+                                        <td class="font-weight-bold" width="10%">Score</td>
+                                    </tr>
+                                    <tr t-if="doc.survey_id.title.strip() == presentation">
+                                        <td class="font-weight-bold" width="20%">Parameters</td>
+                                        <td class="font-weight-bold" width="15%">Score (10)</td>
+                                        <td class="font-weight-bold">Remarks</td>
+                                    </tr>
+                                    <tr t-if="doc.survey_id.title.strip() in sqst or doc.survey_id.title.strip() in dqst  or doc.survey_id.title.strip() in [web_design,graphic_design,bss]">
+                                        <td class="font-weight-bold" width="10%">Sl#</td>
+                                        <td class="font-weight-bold">Parameters</td>
+                                        <td class="font-weight-bold text-center" width="10%">Score</td>
+                                    </tr>
+                                    <tr t-if="doc.survey_id.title.strip() == dqst">
+                                        <td class="font-weight-bold" width="5%">Sl#</td>
+                                        <td class="font-weight-bold">Parameters</td>
+                                        <td class="font-weight-bold" width="10%">Score</td>
+                                    </tr>
+                                </thead>
+                                <tbody t-if="doc.survey_id.title.strip() in technical">
+                                    <t t-set="serial_no" t-value="0"/>
+                                    <tr t-foreach="usersorting[7:-4]" t-as="ques">
+                                        <t t-set="serial_no" t-value="serial_no+1"/>
+                                        <td style="text-align:center">
+                                            <t t-esc="serial_no"/>
+                                        </td>
+
+                                        <td>
+                                            <span class="font-weight-bold" t-esc="ques.question_id.question"/>
+                                        </td>
+
+                                        <td>
+                                            <t t-raw="ques.question_id.description"/>
+                                        </td>
+
+                                        <td style="text-align:center">
+                                            <t t-if="ques.answer_type == 'text'">
+                                                <t t-esc="ques.value_text"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'free_text'">
+                                                <t t-esc="ques.value_free_text"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'number'">
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'date'">
+                                                <t t-esc="ques.value_date"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'suggestion'">
+                                                <t t-esc="ques.value_suggested.value"/>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                    <tr t-foreach="usersorting[-4:-3]" t-as="ques">
+                                        <td colspan="3" align="right">
+                                            <span class="font-weight-bold" t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td class="font-weight-bold text-center">
+                                            <t t-if="ques.answer_type == 'text'">
+                                                <t t-esc="ques.value_text"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'free_text'">
+                                                <t t-esc="ques.value_free_text"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'number'">
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'date'">
+                                                <t t-esc="ques.value_date"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'suggestion'">
+                                                <t t-esc="ques.value_suggested.value"/>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </tbody>
+
+                                <tbody t-if="doc.survey_id.title.strip() in dba_new">
+                                    <t t-set="serial_no" t-value="0"/>
+                                    <tr t-foreach="usersorting[2:-4]" t-as="ques">
+                                        <t t-set="serial_no" t-value="serial_no+1"/>
+                                        <td>
+                                            <t t-esc="serial_no"/>
+                                        </td>
+                                        <t t-if="ques.answer_type == 'text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td>
+                                                <t t-raw="ques.question_id.description"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="ques.value_text"/>
+
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'free_text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td>
+                                                <t t-raw="ques.question_id.description"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="ques.value_free_text"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'number'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td>
+                                                <t t-raw="ques.question_id.description"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'date'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td>
+                                                <t t-raw="ques.question_id.description"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="ques.value_date"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'suggestion'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td>
+                                            <t t-raw="ques.question_id.description"/>
+                                            </td>
+                                            <td>
+                                            <t t-esc="ques.value_suggested.value"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr t-foreach="usersorting[-4:-3]" t-as="ques">
+                                        <td colspan="2" align="right">
+                                            <span class="font-weight-bold" t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td>
+                                            <t t-raw="ques.question_id.description"/>
+                                        </td>
+                                        <td class="font-weight-bold">
+                                            <t t-if="ques.answer_type == 'text'">
+                                                <t t-esc="ques.value_text"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'free_text'">
+                                                <t t-esc="ques.value_free_text"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'number'">
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'date'">
+                                                <t t-esc="ques.value_date"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'suggestion'">
+                                                <t t-esc="ques.value_suggested.value"/>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                    
+                                </tbody>
+
+                                <tbody t-if="doc.survey_id.title.strip() in dqst">
+                                    <t t-set="serial_no" t-value="0"/>
+                                    <tr t-foreach="usersorting[2:-4]" t-as="ques">
+                                        <t t-set="serial_no" t-value="serial_no+1"/>
+                                        <td>
+                                            <t t-esc="serial_no"/>
+                                        </td>
+                                        <t t-if="ques.answer_type == 'text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_text"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'free_text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                           
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_free_text"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'number'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            
+                                            <td class="text-center">
+                                                <t t-esc="int(ques.value_number)"/>
+
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'date'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_date"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'suggestion'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_suggested.value"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr t-foreach="usersorting[-4:-3]" t-as="ques">
+                                        <td colspan="2" align="right">
+                                            <span class="font-weight-bold" t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td class="font-weight-bold text-center">
+                                            <t t-if="ques.answer_type == 'text'">
+                                                <t t-esc="ques.value_text"/>
+                                            </t>
+                                            <t t-if="ques.answer_type == 'free_text'">
+                                                <t t-esc="ques.value_free_text"/>
+                                            </t>
+                                            <t t-if="ques.answer_type == 'number'">
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </t>
+                                            <t t-if="ques.answer_type == 'date'">
+                                                <t t-esc="ques.value_date"/>
+                                            </t>
+                                            <t t-if="ques.answer_type == 'suggestion'">
+                                                <t t-esc="ques.value_suggested.value"/>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tbody t-if="doc.survey_id.title.strip() in sqst">
+                                    <t t-set="serial_no" t-value="0"/>
+                                    <tr t-foreach="usersorting[2:-4]" t-as="ques">
+                                        <t t-set="serial_no" t-value="serial_no+1"/>
+                                        <td>
+                                            <t t-esc="serial_no"/>
+                                        </td>
+                                        <t t-if="ques.answer_type == 'text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_text"/>
+
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'free_text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_free_text"/>
+
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'number'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'date'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_date"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'suggestion'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_suggested.value"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+
+                                    <tr t-foreach="usersorting[-4:-3]" t-as="ques">
+                                        <td colspan="2" align="right">
+                                            <span class="font-weight-bold" t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td class="font-weight-bold text-center">
+                                            <t t-if="ques.answer_type == 'text'">
+                                                <t t-esc="ques.value_text"/>
+                                            </t>
+                                            <t t-if="ques.answer_type == 'free_text'">
+                                                <t t-esc="ques.value_free_text"/>
+                                            </t>
+                                            <t t-if="ques.answer_type == 'number'">
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </t>
+                                            <t t-if="ques.answer_type == 'date'">
+                                                <t t-esc="ques.value_date"/>
+                                            </t>
+                                            <t t-if="ques.answer_type == 'suggestion'">
+                                                <t t-esc="ques.value_suggested.value"/>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </tbody>
+
+                                <tbody t-if="doc.survey_id.title.strip() == graphic_design">
+                                    <tr>
+                                        <th></th>
+                                        <th>Designing Standard</th>
+                                        <th class="text-center">0-5</th>
+                                    </tr>
+                                    <t t-set="serial_no" t-value="0"/>
+                                    <tr t-foreach="usersorting[2:7]" t-as="ques">
+                                        <t t-set="serial_no" t-value="serial_no+1"/>
+                                        <td>
+                                            <t t-esc="serial_no"/>
+                                        </td>
+                                        <t t-if="ques.answer_type == 'text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_text"/>
+
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'free_text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_free_text"/>
+
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'number'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="int(ques.value_number)"/>
+
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'date'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_date"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'suggestion'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td>
+                                            <t t-raw="ques.question_id.description"/>
+                                            </td>
+                                            <td>
+                                            <t t-esc="ques.value_suggested.value"/>
+
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr>
+                                        <th></th>
+                                        <th>Technical Skill</th>
+                                        <th class="text-center">0-5</th>
+                                    </tr>
+                                    <tr t-foreach="usersorting[7:-4]" t-as="ques">
+                                        <t t-set="serial_no" t-value="serial_no+1"/>
+                                        <td>
+                                            <t t-esc="serial_no"/>
+                                        </td>
+                                        <t t-if="ques.answer_type == 'text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_text"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'free_text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_free_text"/>
+
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'number'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'date'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_date"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'suggestion'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_suggested.value"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr t-foreach="usersorting[-4:-3]" t-as="ques">
+                                        <td colspan="2" align="right">
+                                            <span class="font-weight-bold" t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td class="font-weight-bold text-center">
+                                            <t t-if="ques.answer_type == 'text'">
+                                                <t t-esc="ques.value_text"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'free_text'">
+                                                <t t-esc="ques.value_free_text"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'number'">
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'date'">
+                                                <t t-esc="ques.value_date"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'suggestion'">
+                                                <t t-esc="ques.value_suggested.value"/>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </tbody>
+
+                                <tbody t-if="doc.survey_id.title.strip() == web_design">
+                                    <tr>
+                                        <th></th>
+                                        <th scope="col">Coding Standard</th>
+                                        <th scope="col" class="text-center">0-5</th>
+                                    </tr>
+                                    <t t-set="serial_no" t-value="0"/>
+                                    <tr t-foreach="usersorting[2:9]" t-as="ques">
+                                        <t t-set="serial_no" t-value="serial_no+1"/>
+                                        <td>
+                                            <t t-esc="serial_no"/>
+                                        </td>
+                                        <t t-if="ques.answer_type == 'text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_text"/>
+
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'free_text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_free_text"/>
+
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'number'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="int(ques.value_number)"/>
+
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'date'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_date"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'suggestion'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td>
+                                            <t t-raw="ques.question_id.description"/>
+                                            </td>
+                                            <td class="text-center">
+                                            <t t-esc="ques.value_suggested.value"/>
+
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr>
+                                        <th></th>
+                                        <th scope="col">Accessibility</th>
+                                        <th scope="col" class="text-center">0-5</th>
+                                    </tr>
+                                    <tr t-foreach="usersorting[9:-4]" t-as="ques">
+                                        <t t-set="serial_no" t-value="serial_no+1"/>
+                                        <td>
+                                            <t t-esc="serial_no"/>
+                                        </td>
+                                        <t t-if="ques.answer_type == 'text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_text"/>
+
+                                            </td >
+                                        </t>
+                                        <t t-if="ques.answer_type == 'free_text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_free_text"/>
+
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'number'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="int(ques.value_number)"/>
+
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'date'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_date"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'suggestion'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            
+                                            <td class="text-center">
+                                            <t t-esc="ques.value_suggested.value"/>
+
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr t-foreach="usersorting[-4:-3]" t-as="ques">
+                                        <td colspan="2" align="right">
+                                            <span class="font-weight-bold" t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td class="font-weight-bold text-center">
+                                            <t t-if="ques.answer_type == 'text'">
+                                                <t t-esc="ques.value_text"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'free_text'">
+                                                <t t-esc="ques.value_free_text"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'number'">
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'date'">
+                                                <t t-esc="ques.value_date"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'suggestion'">
+                                                <t t-esc="ques.value_suggested.value"/>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tbody t-if="doc.survey_id.title.strip() == bss">
+                                    <tr>
+                                        <th></th>
+                                        <th>Coding Standard</th>
+                                        <th class="text-center">0-5</th>
+                                    </tr>
+                                    <t t-set="serial_no" t-value="0"/>
+                                    <tr t-foreach="usersorting[2:8]" t-as="ques">
+                                        <t t-set="serial_no" t-value="serial_no+1"/>
+                                        <td>
+                                            <t t-esc="serial_no"/>
+                                        </td>
+                                        <t t-if="ques.answer_type == 'text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_text"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'free_text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_free_text"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'number'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'date'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_date"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'suggestion'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td>
+                                                <t t-raw="ques.question_id.description"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="ques.value_suggested.value"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr>
+                                        <th></th>
+                                        <th>System Architecture</th>
+                                        <th class="text-center">0-5</th>
+                                    </tr>
+                                    <tr t-foreach="usersorting[8:10]" t-as="ques">
+                                        <t t-set="serial_no" t-value="serial_no+1"/>
+                                        <td>
+                                            <t t-esc="serial_no"/>
+                                        </td>
+                                        <t t-if="ques.answer_type == 'text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_text"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'free_text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_free_text"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'number'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'date'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_date"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'suggestion'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td>
+                                                <t t-raw="ques.question_id.description"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="ques.value_suggested.value"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr>
+                                        <th></th>
+                                        <th>Database Design</th>
+                                        <th class="text-center">0-5</th>
+                                    </tr>
+                                    <tr t-foreach="usersorting[10:15]" t-as="ques">
+                                        <t t-set="serial_no" t-value="serial_no+1"/>
+                                        <td>
+                                            <t t-esc="serial_no"/>
+                                        </td>
+                                        <t t-if="ques.answer_type == 'text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_text"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'free_text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_free_text"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'number'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'date'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_date"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'suggestion'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td>
+                                            	<t t-raw="ques.question_id.description"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="ques.value_suggested.value"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr>
+                                        <th></th>
+                                        <th>Project Output</th> 
+                                        <th class="text-center">0-5</th>
+                                    </tr>
+                                    <tr t-foreach="usersorting[15:16]" t-as="ques">
+                                        <t t-set="serial_no" t-value="serial_no+1"/>
+                                        <td>
+                                            <t t-esc="serial_no"/>
+                                        </td>
+                                        <t t-if="ques.answer_type == 'text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_text"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'free_text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_free_text"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'number'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'date'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_date"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'suggestion'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td>
+                                            	<t t-raw="ques.question_id.description"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="ques.value_suggested.value"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr>
+                                        <th></th>
+                                        <th>Time Constraint</th>
+                                        <th class="text-center">0-5</th>
+                                    </tr>
+                                    <tr t-foreach="usersorting[16:-4]" t-as="ques">
+                                        <t t-set="serial_no" t-value="serial_no+1"/>
+                                        <td>
+                                            <t t-esc="serial_no"/>
+                                        </td>
+                                        <t t-if="ques.answer_type == 'text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_text"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'free_text'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_free_text"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'number'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'date'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="ques.value_date"/>
+                                            </td>
+                                        </t>
+                                        <t t-if="ques.answer_type == 'suggestion'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="ques.value_suggested.value"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr t-foreach="usersorting[-4:-3]" t-as="ques">
+                                        <td colspan="2" align="right">
+                                            <span class="font-weight-bold" t-esc="ques.question_id.question"/>
+                                        </td>
+                                        <td class="font-weight-bold text-center">
+                                            <t t-if="ques.answer_type == 'text'">
+                                                <t t-esc="ques.value_text"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'free_text'">
+                                                <t t-esc="ques.value_free_text"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'number'">
+                                                <t t-esc="int(ques.value_number)"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'date'">
+                                                <t t-esc="ques.value_date"/>
+                                            </t>
+
+                                            <t t-if="ques.answer_type == 'suggestion'">
+                                                <t t-esc="ques.value_suggested.value"/>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tbody t-if="doc.survey_id.title.strip() == presentation">
+                                    <t t-set="questn" t-value="0"/>
+                                    <tr t-foreach="usersorting[4:11]" t-as="ques">
+                                        <t t-set="questn" t-value="questn+1"/>
+                                        <t t-if="ques.answer_type == 'suggestion'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td style="text-align:center;">
+                                                <t t-raw="ques.value_suggested.value"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="usersorting[questn+10].value_free_text"/>
+                                            </td>
+                                        </t>
+                            
+                                        <t t-if="ques.answer_type == 'number'">
+                                            <td>
+                                                <t t-esc="ques.question_id.question"/>
+                                            </td>
+                                            <td style="text-align:center;">
+                                                <t t-raw="int(ques.value_number)"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="usersorting[questn+10].value_suggested.value"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                </tbody>
+                        </table>
+                        <t t-if="doc.survey_id.title.strip()== presentation">
+                            <table class="mt-2">
+                                <tr>
+                                    <td  class="p-1">
+                                        <span class="font-weight-bold" style="color:black">Relevant Experience:</span>
+                                        <br/>
+                                        <i><span style="color:blue" t-esc="usersorting[-1].value_text"/></i>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+                        <t t-if="doc.survey_id.title.strip() in technical or doc.survey_id.title.strip() in [graphic_design] or doc.survey_id.title.strip() == bss or doc.survey_id.title.strip() in sqst or doc.survey_id.title.strip() in dba_new or doc.survey_id.title.strip() in dqst or doc.survey_id.title.strip() in dqst or doc.survey_id.title.strip() == web_design">
+                            <table class="mt-2">
+                                <tr>
+                                    <td  class="p-1">
+                                        <span class="font-weight-bold" style="color:black">Relevant Experience:</span>
+                                        <br/>
+                                        <i><span style="color:blue" t-esc="usersorting[-2].value_text"/></i>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+
+                        <!-- Start : table for remark -->
+                        <t t-if="doc.survey_id.title.strip() != presentation">
+                            <table class="mt-2">
+                                <tr>
+                                    <td  class="p-1">
+                                        <span class="font-weight-bold" style="color:black">Remarks:</span>
+                                        <span class="font-weight-bold" style="color:blue" t-esc="usersorting[-3].value_suggested.value"/>
+                                        <br/>
+                                        <i><span style="color:blue" t-esc="usersorting[-1].value_free_text"/></i>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+                        <!-- End : table for remark -->
+
+                        <!-- Start : table for mark instructions -->
+                        <t t-if="doc.survey_id.title.strip() not in new_interview_form">
+                            <table  class="mt-2" t-if="doc.survey_id.title.strip() in technical">
+                                <tr>
+                                    <td align="center">
+                                        <span style="font-size: 15px;">
+                                            Reject = (0 - 10) Average = (11 - 30) Satisfactory = (31 - 60) Good = (61 - 80) Excellent = (81 - 100)
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center">
+                                        <span class="font-weight-bold" style="font-size: 18px;">
+                                            Total Score of each parameter is 100.
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+                        <!-- End : table for mark instructions -->
+                    </div>
+                </t>
+                <!-- </t> -->
+            </t> 
+        </t>
+    </template>
+    <record id="kw_recruitment_paperformat" model="report.paperformat">
+        <field name="name">Full Page</field>
+        <field name="default" eval="True" />
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">15</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">22</field>
+        <field name="margin_right">22</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">35</field>
+        <field name="dpi">90</field>
+        <field name="report_ids" eval="[(4, ref('kw_recruitment.kw_recruitment_interview_feedback_report'))]"></field>
+    </record>
+</odoo>

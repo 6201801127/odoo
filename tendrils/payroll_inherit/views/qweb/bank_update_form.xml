@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- &amp;&amp; -->
+        <template id="update_bank_details_web_template" name="BANK">
+            <t t-call="website.layout">
+                <style>
+                    .o_main_navbar, .o_affix_enabled{display:none;}
+                </style>
+                <script>
+                    $(document).ready(function () {
+                        $('.select2').select2({
+                            allowClear: true,
+                            width: '100%'
+                        });
+                    });
+                </script>
+
+                <div class="d-flex align-items-center flex-column justify-content-center py-5 container">
+                    <div class="card" style="width: 50%;">
+                        <div class="badge-dark card-header mb-4 py-4">
+                            <!-- <i class="fa fa-long-arrow-right fa-2x mx-3" /> -->
+                            <span class="h3 text-center">
+                                        Bank Details Update Form
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <label for="bank_name" class="col-sm-4 col-form-label font-weight-bold">Bank Name<span class="text-danger">*</span>:</label>
+                                <div class="col-sm-8">
+                                    <select class="form-control select2" id="bank_names" name="bank_name">
+                                        <option selected="selected">Select Your Bank</option>
+                                        <t t-foreach='banks' t-as='bank' >
+                                            <option t-att-value="bank.id" t-att-ifsc="bank.bic">
+                                                <t t-esc="bank.display_name" id="bank_id"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="bank_account_number" class="col-sm-4 col-form-label font-weight-bold">Account Number<span class="text-danger">*</span>:
+                                </label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" id="bank_account_number" name="bank_account_number" placeholder="Enter Account Number"/>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <button class="btn btn-primary" type="button" id="submitBankDetails">Submit</button>
+                                <a class="btn btn-warning btn-md"
+                                    t-attf-href="/skip-bank-details/">
+                                    <span style="font-size:15px;">Skip
+                                        <i class="fa fa-arrow-circle-right"/>
+                                    </span>
+                                </a>
+                                                       
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-primary" role="document">
+
+                        <form t-att-action="'/bank-update-form/'" method="post" autocomplete="off" style="width: 100%;">
+                            <div class="modal-content">
+                                <div class="modal-header text-center bg-dark">
+                                    <h4 class="modal-title w-100 font-weight-bold"> Confirm The Bank Account Details </h4>
+                                </div>
+                                <div class="modal-body mx-3" id="popup">
+                                    <div class="text-center">
+                                        <span class="text-danger" id="desc"/>
+                                    </div>
+                                    <div class="form-group row mb-0">
+                                        <label for="bank_dispaly_name" class="col-sm-4 col-form-label font-weight-bold">Bank Name:
+                                        </label>
+                                        <div class="col-sm-8">
+                                            <label for="bank_dispaly_name" id="bank_names_res" class="col-form-label"></label>
+                                           <input type="hidden" name="bank_names_res_hidden" id="bank_names_res_hidden" value=""/>
+                                            <!-- <select class="form-control" id="bank_names_res" name="bank_name_res" >
+                                                <option value='0' disabled="disabled"  selected="selected">Select Your Bank</option>
+                                                <t t-foreach='banks' t-as='bank'>
+                                                    <option t-attf-value="#{bank.id}">
+                                                        <t t-esc="bank.display_name" id="bank_id_res"/>
+                                                    </option>
+                                                </t>
+                                            </select> -->
+                                        </div>
+                                    </div>
+                                    <div class="form-group row  mb-0">
+                                        <label for="bank_ifsc" class="col-sm-4 col-form-label font-weight-bold">IFSC :
+                                        </label>
+                                        <div class="col-sm-8">
+                                            <label  id="bank_bic" class="col-form-label font-weight-bold"></label>
+                                            <!-- <input type="text" class="form-control" id="bank_bic" name="bank_bic" value="" placeholder="Enter Account Number" readonly="True"/> -->
+											<input type="hidden" name="bank_bic_hidden" id="bank_bic_hidden" value =""/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row  mb-0">
+                                        <label for="bank_account_number" class="col-sm-4 col-form-label font-weight-bold">Account Number :
+                                        </label>
+                                        <div class="col-sm-8">
+                                            <label  id="account_number" class="col-form-label font-weight-bold"></label>
+                                            <!-- <input type="text" class="form-control" id="account_number" name="account_number" value="" placeholder="Enter Account Number" readonly="True"/> -->
+											<input type="hidden" name="account_number_hidden" id="account_number_hidden" value=""/>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer d-flex justify-content-between">
+                                    <a class="btn btn-danger btn-lg font-weight-bold" t-attf-href='/cancel-bank-details'>
+                                    Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-success btn-lg font-weight-bold">Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                        </div>
+                    </div>
+                </t>
+            </template>
+
+        <template id="bank_details_submission_template" name="bank_submission_template">
+            <t t-call="website.layout">
+                <style>
+                    .o_main_navbar, .o_affix_enabled{display:none;}
+                </style>
+                <div class="wrap">
+                    <div class="container">
+                        <section class="service-request mt32">
+                            <div class="container card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-12 mx-auto">
+                                            <div class="section__content text-center">
+                                                <div class="swal2-icon swal2-success swal2-animate-success-icon" style="display: flex;" data-oe-model="ir.ui.view" data-oe-id="1641" data-oe-field="arch" data-oe-xpath="/t[1]/t[1]/div[1]/div[1]/div[1]/div[1]">
+                                                    <span class="swal2-success-line-tip"/>
+                                                    <span class="swal2-success-line-long"/>
+                                                    <div class="swal2-success-ring"/>
+                                                </div>
+                                                <h2 class="display-6 text-center font-weight-bold mt-6 mb-4">
+                                                Thank you!
+                                                    <br/>
+                                                Your Bank details has been submitted successfully.
+                                                </h2>
+                                                <a class="btn btn-primary btn-lg" style="background-color: #f7941d !important;" t-attf-href="/web">
+                                                    <i class="fa fa-arrow-circle-left "/>
+                                                &amp;nbsp;
+                                                Go To Dashboard
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+            </t>
+        </template>
+
+        <template id="bank_form_style" inherit_id="payroll_inherit.update_bank_details_web_template">
+            <xpath expr="." position="inside">
+                <link href="/kwantify_theme/static/src/mdb/css/mdb.min.css" rel="stylesheet"/>
+                <script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js"></script>
+                <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js" />
+                <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+                <script type="text/javascript" src="/payroll_inherit/static/js/bank.js"/>
+                <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0/css/select2.min.css" rel="stylesheet" /> -->
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0/js/select2.min.js"></script>
+            </xpath>
+        </template>
+
+    </data>
+</odoo>

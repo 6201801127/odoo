@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_kw_training_plan_approve_tree" model="ir.ui.view">
+            <field name="name">view.kw_training_plan.approve.tree</field>
+            <field name="model">kw_training_plan</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree create="false" edit="false" delete="false" duplicate="false">
+                    <field name="ra_access" invisible="1"/>
+                    <field name="training_id"/>
+                    <field name="instructor_type"/>
+                    <field name="employee_id" string="Added By"/>
+                    <field name="create_date" string="Added On"/>
+                    <field name="state" invisible="1"/>
+                    <button class="btn btn-info" name="take_action" type="object" string="Take Action"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_kw_training_plan_approve_form" model="ir.ui.view">
+            <field name="name">view.model.form</field>
+            <field name="model">kw_training_plan</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form create="false" edit="true" delete="false" duplicate="false">
+                    <sheet>
+                        <group string="Course Details">
+                            <group>
+                                <field name="ra_access" invisible="1"/>
+                                <field name="financial_year" readonly="1" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="training_id" readonly="1" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="period_from"/>
+                                <field name="period_to"/>
+                            </group>
+                            <group>
+                                <field name="cost"/>
+                                <field name="details"/>
+                            </group>
+                        </group>
+                        <group string="Instructor Details">
+                            <group>
+                                <field name="instructor_type"/>
+                                <field name="instructor_partner" context="{'disable_cdefault':True}"
+                                attrs="{'invisible': ['|',('instructor_type', '=','internal'),('instructor_type', '=',False)]}"/>
+                            </group>
+                            <group>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="internal_user_ids" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                            attrs="{'invisible': ['|',('instructor_type', '=','external'),('instructor_type', '=',False)]}"
+                            context="{'search_view_ref':'kw_training.view_hr_employee_training_search','tree_view_ref':'kw_training.view_hr_employee_training_tree'}">
+                                <tree>
+                                    <field name="emp_code" style="pointer-events:none;"/>
+                                    <field name="name" style="pointer-events:none;"/>
+                                    <field name="job_id" string="Designation" style="pointer-events:none;"/>
+                                    <field name="department_id" style="pointer-events:none;"/>
+                                    <field name="work_email" string="Email" style="pointer-events:none;"/>
+                                    <field name="mobile_phone" string="Mobile Number" style="pointer-events:none;"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <group string="Participation Details">
+                            <field name="participant_ids" options="{'no_open': True,'no_create':True,'no_edit':True}">
+                                <tree>
+                                    <field name="emp_code" style="pointer-events:none;"/>
+                                    <field name="name" style="pointer-events:none;"/>
+                                    <field name="job_id" string="Designation" style="pointer-events:none;"/>
+                                    <field name="department_id" style="pointer-events:none;"/>
+                                    <field name="work_email" string="Email" style="pointer-events:none;"/>
+                                    <field name="mobile_phone" string="Mobile Number" style="pointer-events:none;"/>
+                                </tree>
+                            </field>
+                            <field name="plan_doc_name" invisible="1"/>
+                            <field name="plan_doc" widget="binary" filename="plan_doc_name"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="view_kw_training_plan_approve_search" model="ir.ui.view">
+            <field name="name">view.kw_training_my_training.search</field>
+            <field name="model">kw_training_plan</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="training_id"/>
+                    <filter string="Instructor (Internal)" name="internal_instructor" icon="terp-personal" domain="[('instructor_type','=','internal')]"/>
+                    <filter string="Instructor (External)" name="external_instructor" icon="terp-personal" domain="[('instructor_type','=','external')]"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="kw_training_plan_approve_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Take Action</field>
+            <field name="res_model">kw_training_plan</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>
+            <field name="domain">[]</field>
+            <field name="context">{"ra_access_check": 1,}</field>
+            <field name="search_view_id" ref="view_kw_training_plan_approve_search"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    No plan found..
+                </p>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="kw_training_approve_act_window_tree">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_kw_training_plan_approve_tree"/>
+            <field name="act_window_id" ref="kw_training_plan_approve_act_window"/>
+        </record>
+        
+        <record model="ir.actions.act_window.view" id="kw_training_approve_act_window_form">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_kw_training_plan_approve_form"/>
+            <field name="act_window_id" ref="kw_training_plan_approve_act_window"/>
+        </record>
+            
+
+        <menuitem name="Take Action" id="menu_training_plan_approve" 
+        action="kw_training_plan_approve_act_window" parent="menu_kw_training_plan" sequence="1" groups="group_kw_training_manager"/>
+    </data>
+</odoo>

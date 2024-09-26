@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Tree view for "model" -->
+        <record id="view_kw_assessment_progress_report_tree" model="ir.ui.view">
+            <field name="name">view.kw_assessment_progress_report.tree</field>
+            <field name="model">kw_assessment_progress_report</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <tree string="kw_assessment_progress_report_tree" create="false" delete="false" edit="false" import="false">
+                    <field name="assessee" />
+                    <field name="designation" />
+                    <field name="department" />
+                    <field name="assessors"/>
+                    <field name="period" />
+                    <field name="assessment" />
+                    <field name="from_date" />
+                    <field name="to_date" />
+                    <field name="feedback_status" />
+                    <field name="score" />
+                    <field name="weightage"/>
+                    <field name="previous_grade"/>
+                    <field name="last_grade"/>
+                    <button class="btn btn-sm oe_highlight" name="view_assessee_feedback_details" type="object" string="View Details" attrs="{'invisible':[('feedback_status','not in',['3','4','5','6'])]}" />
+                </tree>
+            </field>
+        </record>
+
+        <!-- Search view for "model" -->
+        <record id="view_kw_assessment_progress_report_search" model="ir.ui.view">
+            <field name="name">view.kw_assessment_progress_report.search</field>
+            <field name="model">kw_assessment_progress_report</field>
+            <field name="type">search</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <search string="kw_assessment_progress_report_search">
+                    <field name="assessee" />
+
+                    <filter string="Current Period" domain="[('period_date','&lt;',(context_today()+relativedelta(months=1)).strftime('%Y-%m-01')), ('period_date','&gt;=',time.strftime('%Y-%m-01'))]" name="by_current_month_year"/>
+
+                    <separator/>
+
+                    <filter string="Last Period" domain="[('period_date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('period_date','&lt;',time.strftime('%Y-%m-01'))]" name="by_last_month_year"/>
+
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_assessment" context="{'group_by': 'assessment'}" string="Assessment Type" help="Group Feedback by Assessment"/>
+                        <filter name="group_by_period" context="{'group_by': 'period'}" string="Period" help="Group Feedback by Period"/>
+                        <filter name="group_by_state" context="{'group_by': 'feedback_status'}" string="Status" help="Group Feedback by State"/>
+                        <filter name="group_by_grade" context="{'group_by': 'weightage'}" string="Performance Grade" help="Group Feedback by Weightage"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- model.name pivot view -->
+        <record id="view_kw_assessment_progress_report_pivot" model="ir.ui.view">
+            <field name="name">view.kw_assessment_progress_report.pivot</field>
+            <field name="model">kw_assessment_progress_report</field>
+            <field name="arch" type="xml">
+                <pivot string="Pivot Description">
+                    <!-- Add your fields here -->
+                    <field name="period" type="row"/>
+                </pivot>
+            </field>
+        </record>
+        <!-- Main window action for "model" -->
+        <record id="action_kw_assessment_progress_report_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Periodic Assessment Progress Report</field>
+            <field name="res_model">kw_assessment_progress_report</field>
+            <field name="view_mode">tree,pivot</field>
+            <field name="target">current</field>
+            <field name="domain">[]</field>
+            <field name="context">{'search_default_by_current_month_year':1,}</field>
+            <field name="search_view_id" ref="view_kw_assessment_progress_report_search" />
+        </record>
+    </data>
+</odoo>

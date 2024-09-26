@@ -1,0 +1,1145 @@
+<odoo>
+    <data>
+            <!-- APPLY MAIL TEMPLATE   user apply for self, team, guest mail to admin-->
+        <record id='guesthouse_apply_self_team_guest_mail' model='mail.template'>
+            <field name="name">Mail template for applying guesthouse</field>
+            <field name="email_from">${object.requested_by_id.work_email}</field>
+            <field name='subject'>Guest House Booking Request</field>
+            <field name='email_to'>${ctx['email_to']}</field> <!--admin-->
+            <field name='email_cc'>${ctx['email_cc']}</field> <!--to RA-->             
+            <field name='model_id' ref='kw_guest_house.model_kw_guest_house_booking'/>
+            <field name='auto_delete' eval='False'/>
+            <field name='body_html'>
+                <![CDATA[
+                <html>
+                <head>
+                    <style>
+                        th, td {
+                            border: 1px solid #dddddd;
+                            text-align: left;
+                            padding: 8px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <p>Dear Admin,</p>
+                    % if object.guest_type == 'guest':
+                        <p>Guest house booking request by ${object.requested_by_id.name} for guest.</p>
+                    % endif
+                    % if object.guest_type != 'guest':
+                        <p>Guest house booking request by ${object.requested_by_id.name}.</p>
+                    % endif
+                    
+                    <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+                        <tr>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guesthouse</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guest Type</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">From</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">To</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room Type</th>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_house_id.guest_house_name}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_type}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_in_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_out_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_type}</td>
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                </body>
+                </html>
+                ]]>
+            </field>
+        </record>
+
+                   <!-- APPLY MAIL TEMPLATE   user apply for new joinee or admin mail to admin-->
+        <record id='guesthouse_apply_newjoinee_admin_mail' model='mail.template'>
+            <field name="name">Mail template for applying guesthouse</field>
+            <field name="email_from">${object.requested_by_id.work_email}</field>
+            <field name='subject'>Guest House Booking Request</field>
+            <field name='email_to'>${ctx['email_to']}</field> <!--admin-->
+            <field name='email_cc'>${ctx['email_cc']}</field> <!--notify person-->
+            <field name='model_id' ref='kw_guest_house.model_kw_guest_house_booking'/>
+            <field name='auto_delete' eval='False'/>
+            <field name='body_html'>
+                <![CDATA[
+                <html>
+                <head>
+                    <style>
+                        th, td {
+                            border: 1px solid #dddddd;
+                            text-align: left;
+                            padding: 8px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <p>Dear Admin,</p>
+                    % if object.guest_type == 'new_joinee':
+                        <p>Guest house booking request by ${object.requested_by_id.name} for ${object.requesting_for}.</p>
+                    % elif object.guest_type == 'admin':
+                        <p>Guest house booking request by ${object.requested_by_id.name} for ${object.requesting_for_id.name}.</p>
+                    % endif
+
+                    <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+                        <tr>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guesthouse</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guest Type</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">From</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">To</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room Type</th>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_house_id.guest_house_name}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">
+                                % if object.guest_type == 'new_joinee':
+                                    new joinee
+                                % else:
+                                    ${object.guest_type}
+                                % endif
+                            </td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_in_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_out_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_type}</td>
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                </body>
+                </html>
+                ]]>
+            </field>
+        </record>
+
+
+        <!-- admin apply self record or user for self, team, guest applying in auto mode-->
+        <record id='guesthouse_admin_apply_or_auto_approval__self_team_guest_mail' model='mail.template'>
+            <field name="name">Mail template for applying guesthouse for Admin</field>
+            <field name="email_from">${object.requested_by_id.work_email}</field>
+            <field name='subject'>Guest House Booking Approved</field>
+            <field name='email_to'>${object.requested_by_id.work_email}</field>
+            <field name='email_cc'>${ctx['email_cc1']},${ctx['email_cc2']},${ctx['email_cc3']}</field> <!--admin and ra and contact person-->
+            <field name='model_id' ref='kw_guest_house.model_kw_guest_house_booking'/>
+            <field name='auto_delete' eval='False'/>
+            <field name='body_html'>
+                <![CDATA[
+                <html>
+                <head>
+                    <style>
+                        th, td {
+                            border: 1px solid #dddddd;
+                            text-align: left;
+                            padding: 8px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <p>Dear ${object.requested_by_id.name},</p>
+                    % if object.guest_type == 'guest':
+                        <p>Guest house booking request for guest has been approved.</p>
+                    % endif
+                    % if object.guest_type != 'guest':
+                        <p>Guest house booking request has been approved.</p>
+                    % endif
+
+                    <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+                        <tr>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guesthouse</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guest Type</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">From</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">To</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room Type</th>
+                            % if object.room_type != 'single':
+                                <th style="border: 1px solid #dddddd; text-align: center;">Booking Type</th>
+                            % endif
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room No</th>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_house_id.guest_house_name}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_type}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_in_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_out_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_type}</td>
+                            % if object.room_type != 'single':
+                                <td style="border: 1px solid #dddddd; text-align: center;">
+                                    % if object.booking_type == 'partially_book':
+                                        partially book
+                                    % elif object.booking_type == 'fully_book':
+                                        fully book
+                                    % else:
+                                        ${object.booking_type}
+                                    % endif
+                                </td>                          
+                            % endif
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_id.room_name}</td>
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                </body>
+                </html>
+                ]]>
+            </field>
+        </record>
+
+        <!-- admin apply self record or user for new joinee or admin applying in auto mode-->
+        <record id='guesthouse_admin_apply_or_auto_approval__newjoinee_admin_mail' model='mail.template'>
+            <field name="name">Mail template for applying guesthouse for Admin</field>
+            <field name="email_from">${object.requested_by_id.work_email}</field>
+            <field name='subject'>Guest House Booking Approved</field>
+            <field name='email_to'>${object.requested_by_id.work_email}</field> 
+            <field name='email_cc'>${ctx['email_cc2']},${ctx['email_cc3']},${ctx['email_cc1']}</field> <!--admin and contact person and notify user-->
+            <field name='model_id' ref='kw_guest_house.model_kw_guest_house_booking'/>
+            <field name='auto_delete' eval='False'/>
+            <field name='body_html'>
+                <![CDATA[
+                <html>
+                <head>
+                    <style>
+                        th, td {
+                            border: 1px solid #dddddd;
+                            text-align: left;
+                            padding: 8px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <p>Dear ${object.requested_by_id.name},
+                    % if object.guest_type == 'new_joinee':
+                        <p>Guest house booking request has been approved for ${object.requesting_for}.</p>
+                    % elif object.guest_type == 'admin':
+                        <p>Guest house booking request has been approved for ${object.requesting_for_id.name}.</p>
+                    % endif
+
+                    <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+                        <tr>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guesthouse</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guest Type</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">From</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">To</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room Type</th>
+                            % if object.room_type != 'single':
+                                <th style="border: 1px solid #dddddd; text-align: center;">Booking Type</th>
+                            % endif
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room No</th>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_house_id.guest_house_name}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">
+                                % if object.guest_type == 'new_joinee':
+                                    new joinee
+                                % else:
+                                    ${object.guest_type}
+                                % endif
+                            </td>                            
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_in_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_out_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_type}</td>
+                            % if object.room_type != 'single':
+                                <td style="border: 1px solid #dddddd; text-align: center;">
+                                    % if object.booking_type == 'partially_book':
+                                        partially book
+                                    % elif object.booking_type == 'fully_book':
+                                        fully book
+                                    % else:
+                                        ${object.booking_type}
+                                    % endif
+                                </td>                             
+                            % endif
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_id.room_name}</td>
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                </body>
+                </html>
+                ]]>
+            </field>
+        </record>
+
+
+        <!-- ADMIN APPROVE MAIL TEMPLATE  admin approved user for self, team, guest record-->
+        <record id='guesthouse_admin_approve_self_team_guest_mail' model='mail.template'>
+            <field name="name">Mail template for approving guesthouse</field>
+            <field name="email_from">${ctx['email_from']}</field> <!--admin-->
+            <field name='subject'>Guest House Booking Request Approved</field>
+            <field name='email_to'>${object.requested_by_id.work_email}</field>
+            <field name='email_cc'>${ctx['email_cc3']}</field><!--contact person-->
+            <field name='model_id' ref='model_kw_guest_house_booking'/>
+            <field name='auto_delete' eval='False'/>
+            <field name='body_html'>
+                <![CDATA[
+                <html>
+                <head>
+                    <style>
+                        th, td {
+                            border: 1px solid #dddddd;
+                            text-align: left;
+                            padding: 8px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <p>Dear ${object.requested_by_id.name},</p>
+                    <p>Your guest house booking request has been approved by Admin.</p>
+
+                    <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+                        <tr>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guesthouse</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guest Type</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">From</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">To</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room Type</th>
+                            % if object.room_type != 'single':
+                                <th style="border: 1px solid #dddddd; text-align: center;">Booking Type</th>
+                            % endif
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room No</th>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_house_id.guest_house_name}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_type}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_in_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_out_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_type}</td>
+                            % if object.room_type != 'single':
+                                <td style="border: 1px solid #dddddd; text-align: center;">
+                                    % if object.booking_type == 'partially_book':
+                                        partially book
+                                    % elif object.booking_type == 'fully_book':
+                                        fully book
+                                    % else:
+                                        ${object.booking_type}
+                                    % endif
+                                </td>                             
+                            % endif
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_id.room_name}</td>
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                </body>
+                </html>
+                ]]>
+            </field>
+        </record>
+
+        <!-- ADMIN APPROVE MAIL TEMPLATE  admin approved user for new joinee, admin record-->
+        <record id='guesthouse_admin_approve_newjoinee_admin_mail' model='mail.template'>
+            <field name="name">Mail template for approving guesthouse</field>
+            <field name="email_from">${ctx['email_from']}</field> <!--admin-->
+            <field name='subject'>Guest House Booking Request Approved</field>
+            <field name='email_to'>${object.requested_by_id.work_email}</field>
+            <field name='email_cc'>${ctx['email_cc3']},${ctx['email_cc']}</field> <!--contact person and notify person-->
+            <field name='model_id' ref='model_kw_guest_house_booking'/>
+            <field name='auto_delete' eval='False'/>
+            <field name='body_html'>
+                <![CDATA[
+                <html>
+                <head>
+                    <style>
+                        th, td {
+                            border: 1px solid #dddddd;
+                            text-align: left;
+                            padding: 8px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <p>Dear ${object.requested_by_id.name},</p>
+                    % if object.guest_type == 'new_joinee':
+                        <p>Guest house booking request has been approved by Admin for ${object.requesting_for}.</p>
+                    % elif object.guest_type == 'admin':
+                        <p>Guest house booking request has been approved by Admin for ${object.requesting_for_id.name}.</p>
+                    % endif
+
+                    <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+                        <tr>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guesthouse</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guest Type</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">From</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">To</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room Type</th>
+                            % if object.room_type != 'single':
+                                <th style="border: 1px solid #dddddd; text-align: center;">Booking Type</th>
+                            % endif
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room No</th>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_house_id.guest_house_name}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">
+                                % if object.guest_type == 'new_joinee':
+                                    new joinee
+                                % else:
+                                    ${object.guest_type}
+                                % endif
+                            </td>                            
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_in_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_out_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_type}</td>
+                            % if object.room_type != 'single':
+                                <td style="border: 1px solid #dddddd; text-align: center;">
+                                    % if object.booking_type == 'partially_book':
+                                        partially book
+                                    % elif object.booking_type == 'fully_book':
+                                        fully book
+                                    % else:
+                                        ${object.booking_type}
+                                    % endif
+                                </td>                             
+                            % endif
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_id.room_name}</td>
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                </body>
+                </html>
+                ]]>
+            </field>
+        </record>
+
+
+
+        
+        <!-- ADMIN REJECT MAIL TEMPLATE admin reject user for self, team, guest record--> 
+        <record id='guesthouse_admin_reject_self_team_guest_mail' model='mail.template'>
+            <field name="name">Mail template for rejecting guesthouse</field>
+            <field name="email_from">${ctx['email_from']}</field> <!--admin-->
+            <field name='subject'>Guest House Booking Request Rejected</field>
+            <field name='email_to'>${object.requested_by_id.work_email}</field>
+            <field name='model_id' ref='model_kw_guest_house_booking'/>
+            <field name='auto_delete' eval='False'/>
+            <field name='body_html'>
+                <![CDATA[
+                <html>
+                <head>
+                    <style>
+                        th, td {
+                            border: 1px solid #dddddd;
+                            text-align: left;
+                            padding: 8px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <p>Dear ${object.requested_by_id.name},</p>
+                    % if object.guest_type == 'guest':
+                        <p>Your guest house booking request has been rejected for guest.</p>
+                    % endif
+                    % if object.guest_type != 'guest':
+                        <p>Your guest house booking request has been rejected.</p>
+                    % endif
+                    
+                    <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+                        <tr>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guesthouse</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guest Type</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">From</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">To</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room Type</th>
+                            % if object.room_type != 'single':
+                                <th style="border: 1px solid #dddddd; text-align: center;">Booking Type</th>
+                            % endif
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_house_id.guest_house_name}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_type}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_in_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_out_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_type}</td>
+                            % if object.room_type != 'single':
+                                <td style="border: 1px solid #dddddd; text-align: center;">
+                                    % if object.booking_type == 'partially_book':
+                                        partially book
+                                    % elif object.booking_type == 'fully_book':
+                                        fully book
+                                    % else:
+                                        ${object.booking_type}
+                                    % endif
+                                </td>
+                             % endif
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                </body>
+                </html>
+                ]]>
+            </field>
+        </record>
+
+        <!-- ADMIN REJECT MAIL TEMPLATE admin reject user new joinee, famliy record--> 
+        <record id='guesthouse_admin_reject_newjoinee_admin_mail' model='mail.template'>
+            <field name="name">Mail template for rejecting guesthouse</field>
+            <field name="email_from">${ctx['email_from']}</field> <!--admin-->
+            <field name='subject'>Guest House Booking Request Rejected</field>
+            <field name='email_to'>${object.requested_by_id.work_email}</field>
+            <field name='email_cc'>${ctx['email_cc']}</field> <!--notify user-->
+            <field name='model_id' ref='model_kw_guest_house_booking'/>
+            <field name='auto_delete' eval='False'/>
+            <field name='body_html'>
+                <![CDATA[
+                <html>
+                <head>
+                    <style>
+                        th, td {
+                            border: 1px solid #dddddd;
+                            text-align: left;
+                            padding: 8px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <p>Dear ${object.requested_by_id.name},</p>
+                    % if object.guest_type == 'new_joinee':
+                        <p>Your guest house booking request has been rejected for ${object.requesting_for}.</p>
+                    % elif object.guest_type == 'admin':
+                        <p>Your guest house booking request has been rejected for ${object.requesting_for_id.name}.</p>
+                    % endif
+                    
+                    <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+                        <tr>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guesthouse</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guest Type</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">From</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">To</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room Type</th>
+                            % if object.room_type != 'single':
+                                <th style="border: 1px solid #dddddd; text-align: center;">Booking Type</th>
+                            % endif
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_house_id.guest_house_name}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_type}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_in_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_out_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_type}</td>
+                            % if object.room_type != 'single':
+                                <td style="border: 1px solid #dddddd; text-align: center;">
+                                    % if object.booking_type == 'partially_book':
+                                        partially book
+                                    % elif object.booking_type == 'fully_book':
+                                        fully book
+                                    % else:
+                                        ${object.booking_type}
+                                    % endif
+                                </td>
+                             % endif
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                </body>
+                </html>
+                ]]>
+            </field>
+        </record>
+
+  
+
+        <!-- CANCEL REQUEST MAIL TO ADMIN TEMPLATE user self, team, guest cancellation request to admin-->
+        <record id='guesthouse_cancel_request_self_team_guest_to_admin' model='mail.template'>
+            <field name="name">Mail template for cancel request of guesthouse</field>
+            <field name="email_from">${object.requested_by_id.work_email}</field>
+            <field name='subject'>Guest House Booking Cancellation Request</field>
+            <field name='email_to'>${ctx['email_to']}</field> <!--admin-->
+            <field name='model_id' ref='model_kw_guest_house_booking'/>
+            <field name='auto_delete' eval='False'/>
+            <field name='body_html'>
+                <![CDATA[
+                <html>
+                <head>
+                    <style>
+                        th, td {
+                            border: 1px solid #dddddd;
+                            text-align: left;
+                            padding: 8px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <p>Dear Admin,</p>
+                    % if object.guest_type == 'guest':
+                        <p>Request for guest house booking cancellation from ${object.requested_by_id.name} for guest.</p>
+                    % endif
+                    % if object.guest_type != 'guest':
+                        <p>Request for guest house booking cancellation from ${object.requested_by_id.name}.</p>
+                    % endif
+                    
+                    <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+                        <tr>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guesthouse</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guest Type</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">From</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">To</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room Type</th>
+                            % if object.room_type != 'single' and object.room_id:
+                                <th style="border: 1px solid #dddddd; text-align: center;">Booking Type</th>
+                            % endif
+                            % if object.room_id:
+                                <th style="border: 1px solid #dddddd; text-align: center;">Room No</th>
+                            % endif
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_house_id.guest_house_name}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_type}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_in_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_out_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_type}</td>
+                            % if object.room_type != 'single' and object.room_id:
+                                <td style="border: 1px solid #dddddd; text-align: center;">
+                                    % if object.booking_type == 'partially_book':
+                                        partially book
+                                    % elif object.booking_type == 'fully_book':
+                                        fully book
+                                    % else:
+                                        ${object.booking_type}
+                                    % endif
+                                </td>
+                             % endif
+                             % if object.room_id:
+                                <td style="border: 1px solid #dddddd; text-align: center;">${object.room_id.room_name}</td>
+                            % endif
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                </body>
+                </html>
+                ]]>
+            </field>
+        </record>
+
+        <!-- CANCEL REQUEST MAIL TO ADMIN TEMPLATE user new joinee, admin cancellation request to admin-->
+        <record id='guesthouse_cancel_request_newjoinee_admin_to_admin' model='mail.template'>
+            <field name="name">Mail template for cancel request of guesthouse</field>
+            <field name="email_from">${object.requested_by_id.work_email}</field>
+            <field name='subject'>Guest House Booking Cancellation Request</field>
+            <field name='email_to'>${ctx['email_to']}</field> <!--admin-->
+            <field name='email_cc'>${ctx['email_cc']}</field> <!--notify user-->
+            <field name='model_id' ref='model_kw_guest_house_booking'/>
+            <field name='auto_delete' eval='False'/>
+            <field name='body_html'>
+                <![CDATA[
+                <html>
+                <head>
+                    <style>
+                        th, td {
+                            border: 1px solid #dddddd;
+                            text-align: left;
+                            padding: 8px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <p>Dear Admin,</p>
+                    % if object.guest_type == 'new_joinee':
+                        <p>Request for guest house booking cancellation from ${object.requested_by_id.name} for ${object.requesting_for}.</p>
+                    % elif object.guest_type == 'admin':
+                        <p>Request for guest house booking cancellation from ${object.requested_by_id.name} for ${object.requesting_for_id.name}.</p>
+                    % endif
+                    
+                    <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+                        <tr>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guesthouse</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guest Type</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">From</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">To</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room Type</th>
+                            % if object.room_type != 'single' and object.room_id:
+                                <th style="border: 1px solid #dddddd; text-align: center;">Booking Type</th>
+                            % endif
+                            % if object.room_id:
+                                <th style="border: 1px solid #dddddd; text-align: center;">Room No</th>
+                            % endif
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_house_id.guest_house_name}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_type}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_in_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_out_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_type}</td>
+                            % if object.room_type != 'single' and object.room_id:
+                                <td style="border: 1px solid #dddddd; text-align: center;">
+                                    % if object.booking_type == 'partially_book':
+                                        partially book
+                                    % elif object.booking_type == 'fully_book':
+                                        fully book
+                                    % else:
+                                        ${object.booking_type}
+                                    % endif
+                                </td>
+                             % endif
+                             % if object.room_id:
+                                <td style="border: 1px solid #dddddd; text-align: center;">${object.room_id.room_name}</td>
+                            % endif
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                </body>
+                </html>
+                ]]>
+            </field>
+        </record>
+
+
+
+        <!-- CANCEL REQUEST APPROVED admin approve cancellation request of user self, team, guest-->
+        <record id='guesthouse_cancel_request_approved_self_team_guest_mail' model='mail.template'>
+            <field name="name">Mail template for cancel request of guesthouse</field>
+            <field name="email_from">${ctx['email_from']}</field> <!--admin-->
+            <field name='subject'>Guest House Booking Cancellation Approved</field>
+            <field name='email_to'>${object.requested_by_id.work_email}</field>
+            <field name='email_cc'>${ctx['email_cc3']}</field><!--contact person-->
+            <field name='model_id' ref='model_kw_guest_house_booking'/>
+            <field name='auto_delete' eval='False'/>
+            <field name='body_html'>
+                <![CDATA[
+                <html>
+                <head>
+                    <style>
+                        th, td {
+                            border: 1px solid #dddddd;
+                            text-align: left;
+                            padding: 8px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <p>Dear ${object.requested_by_id.name},</p>
+                    % if object.guest_type == 'guest':
+                        <p>Guest house booking cancellation request is approved for guest.</p>                    
+                    % endif
+                    % if object.guest_type != 'guest':
+                        <p>Guest house booking cancellation request is approved.</p>
+                    % endif
+                    
+                    <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+                        <tr>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guesthouse</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guest Type</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">From</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">To</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room Type</th>
+                            % if object.room_type != 'single' and object.room_id:
+                                <th style="border: 1px solid #dddddd; text-align: center;">Booking Type</th>
+                            % endif
+                            % if object.room_id:
+                                <th style="border: 1px solid #dddddd; text-align: center;">Room No</th>
+                            % endif
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_house_id.guest_house_name}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_type}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_in_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_out_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_type}</td>
+                            % if object.room_type != 'single' and object.room_id:
+                                <td style="border: 1px solid #dddddd; text-align: center;">
+                                    % if object.booking_type == 'partially_book':
+                                        partially book
+                                    % elif object.booking_type == 'fully_book':
+                                        fully book
+                                    % else:
+                                        ${object.booking_type}
+                                    % endif
+                                </td>
+                             % endif
+                             % if object.room_id:
+                                <td style="border: 1px solid #dddddd; text-align: center;">${object.room_id.room_name}</td>
+                            % endif
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                </body>
+                </html>
+                ]]>
+            </field>
+        </record>
+
+        <!-- CANCEL REQUEST APPROVED admin approve cancellation request of user new joinee, admin-->
+        <record id='guesthouse_cancel_request_approved_newjoinee_admin_mail' model='mail.template'>
+            <field name="name">Mail template for cancel request of guesthouse</field>
+            <field name="email_from">${ctx['email_from']}</field> <!--admin-->
+            <field name='subject'>Guest House Booking Cancellation Approved</field>
+            <field name='email_to'>${object.requested_by_id.work_email}</field>
+            <field name='email_cc'>${ctx['email_cc3']},${ctx['email_cc']}</field> <!--contact person and notify user-->
+            <field name='model_id' ref='model_kw_guest_house_booking'/>
+            <field name='auto_delete' eval='False'/>
+            <field name='body_html'>
+                <![CDATA[
+                <html>
+                <head>
+                    <style>
+                        th, td {
+                            border: 1px solid #dddddd;
+                            text-align: left;
+                            padding: 8px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <p>Dear ${object.requested_by_id.name},</p>
+                    % if object.guest_type == 'new_joinee':
+                        <p>Guest house booking cancellation request is approved for ${object.requesting_for}.</p>
+                    % elif object.guest_type == 'admin':
+                        <p>Guest house booking cancellation request is approved for ${object.requesting_for_id.name}.</p>
+                    % endif
+                    
+                    <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+                        <tr>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guesthouse</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guest Type</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">From</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">To</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room Type</th>
+                            % if object.room_type != 'single' and object.room_id:
+                                <th style="border: 1px solid #dddddd; text-align: center;">Booking Type</th>
+                            % endif
+                            % if object.room_id:
+                                <th style="border: 1px solid #dddddd; text-align: center;">Room No</th>
+                            % endif
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_house_id.guest_house_name}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_type}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_in_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_out_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_type}</td>
+                            % if object.room_type != 'single' and object.room_id:
+                                <td style="border: 1px solid #dddddd; text-align: center;">
+                                    % if object.booking_type == 'partially_book':
+                                        partially book
+                                    % elif object.booking_type == 'fully_book':
+                                        fully book
+                                    % else:
+                                        ${object.booking_type}
+                                    % endif
+                                </td>
+                             % endif
+                             % if object.room_id:
+                                <td style="border: 1px solid #dddddd; text-align: center;">${object.room_id.room_name}</td>
+                            % endif
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                </body>
+                </html>
+                ]]>
+            </field>
+        </record>
+
+
+        <!-- admin cancel self record self, team, guest-->
+        <record id='guesthouse_request_cancelled_self_team_guest_mail_admin' model='mail.template'>
+            <field name="name">Mail template for cancel request of guesthouse for admin</field>
+            <field name="email_from">${object.requested_by_id.work_email}</field>
+            <field name='subject'>Guest House Booking Cancel</field>
+            <field name='email_to'>${object.requested_by_id.work_email}</field>
+            <field name='email_cc'>${ctx['email_cc3']}</field><!--contact person-->
+            <field name='model_id' ref='model_kw_guest_house_booking'/>
+            <field name='auto_delete' eval='False'/>
+            <field name='body_html'>
+                <![CDATA[
+                <html>
+                <head>
+                    <style>
+                        th, td {
+                            border: 1px solid #dddddd;
+                            text-align: left;
+                            padding: 8px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <p>Dear ${object.requested_by_id.name},</p>
+                    % if object.guest_type == 'guest':
+                        <p>Request for guest house booking cancellation is approved for guest.</p>                    
+                    % endif
+                    % if object.guest_type != 'guest':
+                        <p>Request for guest house booking cancellation is approved.</p>
+                    % endif
+                    
+                    <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+                        <tr>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guesthouse</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guest Type</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">From</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">To</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room Type</th>
+                            % if object.room_type != 'single' and object.room_id:
+                                <th style="border: 1px solid #dddddd; text-align: center;">Booking Type</th>
+                            % endif
+                            % if object.room_id:
+                                <th style="border: 1px solid #dddddd; text-align: center;">Room No</th>
+                            % endif
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_house_id.guest_house_name}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_type}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_in_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_out_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_type}</td>
+                            % if object.room_type != 'single' and object.room_id:
+                                <td style="border: 1px solid #dddddd; text-align: center;">
+                                    % if object.booking_type == 'partially_book':
+                                        partially book
+                                    % elif object.booking_type == 'fully_book':
+                                        fully book
+                                    % else:
+                                        ${object.booking_type}
+                                    % endif
+                                </td>
+                             % endif
+                             % if object.room_id:
+                                <td style="border: 1px solid #dddddd; text-align: center;">${object.room_id.room_name}</td>
+                            % endif
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                </body>
+                </html>
+                ]]>
+            </field>
+        </record>
+
+        <!-- admin cancel self record new joinee, admin -->
+        <record id='guesthouse_request_cancelled_newjoinee_admin_mail_admin' model='mail.template'>
+            <field name="name">Mail template for cancel request of guesthouse for admin</field>
+            <field name="email_from">${object.requested_by_id.work_email}</field>
+            <field name='subject'>Guest House Booking Cancel</field>
+            <field name='email_to'>${object.requested_by_id.work_email}</field>
+            <field name='email_cc'>${ctx['email_cc3']},${ctx['email_cc']}</field> <!--contact person and notify user-->           
+            <field name='model_id' ref='model_kw_guest_house_booking'/>
+            <field name='auto_delete' eval='False'/>
+            <field name='body_html'>
+                <![CDATA[
+                <html>
+                <head>
+                    <style>
+                        th, td {
+                            border: 1px solid #dddddd;
+                            text-align: left;
+                            padding: 8px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <p>Dear ${object.requested_by_id.name},</p>
+                    % if object.guest_type == 'new_joinee':
+                        <p>Request for guest house booking cancellation is approved for ${object.requesting_for}.</p>
+                    % elif object.guest_type == 'admin':
+                        <p>Request for guest house booking cancellation is approved for ${object.requesting_for_id.name}.</p>
+                    %endif
+                    
+                    <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+                        <tr>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guesthouse</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guest Type</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">From</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">To</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room Type</th>
+                            % if object.room_type != 'single' and object.room_id:
+                                <th style="border: 1px solid #dddddd; text-align: center;">Booking Type</th>
+                            % endif
+                            % if object.room_id:
+                                <th style="border: 1px solid #dddddd; text-align: center;">Room No</th>
+                            % endif
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_house_id.guest_house_name}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_type}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_in_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_out_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_type}</td>
+                            % if object.room_type != 'single' and object.room_id:
+                                <td style="border: 1px solid #dddddd; text-align: center;">
+                                    % if object.booking_type == 'partially_book':
+                                        partially book
+                                    % elif object.booking_type == 'fully_book':
+                                        fully book
+                                    % else:
+                                        ${object.booking_type}
+                                    % endif
+                                </td>
+                             % endif
+                             % if object.room_id:
+                                <td style="border: 1px solid #dddddd; text-align: center;">${object.room_id.room_name}</td>
+                            % endif
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                </body>
+                </html>
+                ]]>
+            </field>
+        </record>
+
+
+        <record id='guesthouse_room_reallocation_self_team_guest_mail' model='mail.template'>
+            <field name="name">Mail template for guesthouse room Reallocation</field>
+            <field name="email_from">${ctx['email_from']}</field> <!--admin-->
+            <field name='subject'>Guest House Room Reallocation</field>
+            <field name='email_to'>${object.requested_by_id.work_email}</field>
+            <field name='email_cc'>${ctx['email_cc3']}</field> <!--contact person-->
+            <field name='model_id' ref='kw_guest_house.model_kw_guest_house_booking'/>
+            <field name='auto_delete' eval='False'/>
+            <field name='body_html'>
+                <![CDATA[
+                <html>
+                <head>
+                    <style>
+                        th, td {
+                            border: 1px solid #dddddd;
+                            text-align: left;
+                            padding: 8px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <p>Dear ${object.requested_by_id.name},</p>
+                    <p>Guest House room has been reallocated for you.</p>
+
+                    <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+                        <tr>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guesthouse</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guest Type</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">From</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">To</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room Type</th>
+                            % if object.room_type != 'single':
+                                <th style="border: 1px solid #dddddd; text-align: center;">Booking Type</th>
+                            % endif
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room No</th>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_house_id.guest_house_name}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_type}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_in_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_out_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_type}</td>
+                            % if object.room_type != 'single':
+                                <td style="border: 1px solid #dddddd; text-align: center;">
+                                    % if object.booking_type == 'partially_book':
+                                        partially book
+                                    % elif object.booking_type == 'fully_book':
+                                        fully book
+                                    % else:
+                                        ${object.booking_type}
+                                    % endif
+                                </td>                             
+                            % endif
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_id.room_name}</td>
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                </body>
+                </html>
+                ]]>
+            </field>
+        </record>
+
+        <record id='guesthouse_room_reallocation_newjoinee_admin_mail' model='mail.template'>
+            <field name="name">Mail template for guesthouse room Reallocation</field>
+            <field name="email_from">${ctx['email_from']}</field> <!--admin-->
+            <field name='subject'>Guest House Room Reallocation</field>
+            <field name='email_to'>${object.requested_by_id.work_email}</field>
+            <field name='email_cc'>${ctx['email_cc3']},${ctx['email_cc']}</field> <!--contact person and notify user-->  
+            <field name='model_id' ref='kw_guest_house.model_kw_guest_house_booking'/>
+            <field name='auto_delete' eval='False'/>
+            <field name='body_html'>
+                <![CDATA[
+                <html>
+                <head>
+                    <style>
+                        th, td {
+                            border: 1px solid #dddddd;
+                            text-align: left;
+                            padding: 8px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <p>Dear ${object.requested_by_id.name},</p>
+                    % if object.guest_type == 'new_joinee':
+                        <p>Guest House room has been reallocated for ${object.requesting_for}.</p>
+                    % elif object.guest_type == 'admin':
+                        <p>Guest House room has been reallocated for ${object.requesting_for_id.name}.</p>
+                    % endif
+
+                    <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+                        <tr>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guesthouse</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Guest Type</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">From</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">To</th>
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room Type</th>
+                            % if object.room_type != 'single':
+                                <th style="border: 1px solid #dddddd; text-align: center;">Booking Type</th>
+                            % endif
+                            <th style="border: 1px solid #dddddd; text-align: center;">Room No</th>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.guest_house_id.guest_house_name}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">
+                                % if object.guest_type == 'new_joinee':
+                                    new joinee
+                                % else:
+                                    ${object.guest_type}
+                                % endif
+                            </td>                            
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_in_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.check_out_date_time.strftime('%d %b %Y %H:%M:%S')}</td>
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_type}</td>
+                            % if object.room_type != 'single':
+                                <td style="border: 1px solid #dddddd; text-align: center;">
+                                    % if object.booking_type == 'partially_book':
+                                        partially book
+                                    % elif object.booking_type == 'fully_book':
+                                        fully book
+                                    % else:
+                                        ${object.booking_type}
+                                    % endif
+                                </td>                             
+                            % endif
+                            <td style="border: 1px solid #dddddd; text-align: center;">${object.room_id.room_name}</td>
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                </body>
+                </html> 
+                ]]>
+            </field>
+        </record>
+
+
+        <record id='guesthouse_room_check_out_newjoinee_mail' model='mail.template'>
+            <field name="name">Mail template for guesthouse room check out</field>
+            <field name="email_from">${ctx['email_from']}</field> <!--admin-->
+            <field name='subject'>Guest House Room Check Out Process</field>
+            <field name='email_to'>${object.requested_by_id.work_email}</field>
+            <field name='email_cc'>${ctx['email_cc3']},${ctx['email_cc']}</field> <!--contact person and notify user-->             
+            <field name='model_id' ref='kw_guest_house.model_kw_guest_house_booking'/>
+            <field name='auto_delete' eval='False'/>
+            <field name='body_html'>
+                <![CDATA[
+                    <p>Dear ${object.requested_by_id.name},</p>
+                    <p>kindly clear Room No ${object.room_id.room_name}, which is booked for ${object.requesting_for} (New Joinee), by ${object.check_out_date_time.strftime('%d %b %Y %H:%M:%S')}, coordinating with guest house management for a smooth check-out process.</p>
+                    <br>
+                    <br>
+                ]]>
+            </field>
+        </record>
+
+        
+    </data>
+</odoo>

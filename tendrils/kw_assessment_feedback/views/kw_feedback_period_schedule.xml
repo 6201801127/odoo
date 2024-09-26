@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="kw_feedback_period_schedule_feedback_tree_view" model="ir.ui.view">
+            <field name="name">Feedbacks period tree</field>
+            <field name="model">kw_feedback_assessment_period</field>
+            <field name="arch" type="xml">
+                <tree string="Assessment Feedback" create='false' edit='true' import='false' delete="false">
+                    <field name="active" invisible="1"/>
+                    <field name="name"/>
+                    <field name="assessees" widget='many2many_tags'/>
+                    <field name="assessors" widget='many2many_tags'/>
+                    <field name="from_date"/>
+                    <field name="to_date"/>
+                    <field name="survey_id"/>
+<!--                    <field name="deactive_records" invisible='1'/>-->
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_feedback_period_schedule_feedback_search_view" model="ir.ui.view">
+            <field name="name">Feedback period Search</field>
+            <field name="model">kw_feedback_assessment_period</field>
+            <field name="arch" type="xml">
+                <search string="Search Feedback">
+                    <field name="name" string='Period Name'/>
+
+                    <filter string="Active" domain="[('active', '=',True)]" name="enable_periodic_assessment"/>
+                    <filter string="Inactive" domain="[('active', '=',False)]" name="disable_periodic_assessment"/>
+                    <separator/>
+                    <filter string="Current Period &amp; Not Scheduled"
+                            domain="[('period_date','&lt;',(context_today()+relativedelta(months=1)).strftime('%Y-%m-01')), ('period_date','&gt;=',time.strftime('%Y-%m-01')),('state','=','1')]"
+                            name="by_current_period"/>
+
+                    <filter string="Previous Period &amp; Not Scheduled"
+                            domain="[('period_date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('period_date','&lt;',time.strftime('%Y-%m-01')),('state','=','1')]"
+                            name="by_previuos_period"/>
+
+                    <filter string="Assessment Feedback Submitted" domain="[('state','=','2')]"
+                            name="assement_submitted"/>
+
+                    <filter string="Assessment Feedback Not Submitted" domain="[('state','=','1')]"
+                            name="assement_notsubmitted"/>
+
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_name" context="{'group_by': 'name'}" string="Period Name"/>
+                        <filter name="group_by_survey_id" string="Template Type" domain="[]"
+                                context="{'group_by':'survey_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="kw_feedback_period_schedule_feedback_form_view" model="ir.ui.view">
+            <field name="name">Periodic Feedback Period Form</field>
+            <field name="model">kw_feedback_assessment_period</field>
+            <field name="arch" type="xml">
+                <form string="Assessment Feedback" create='false' delete='false'>
+                    <field name="state" invisible='1'/>
+                    <field name="rrule_type" invisible='1'/>
+                    <field name="meeting_id" invisible='1'/>
+                    <field name="assessment_type" invisible='1'/>
+<!--                    <field name="deactive_records" invisible='1'/>-->
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="toggle_active"
+                                    string="Restore"
+                                    type="object" class="oe_stat_button" icon="fa-archive"
+                                    attrs="{'invisible': [('active', '=', True)]}"/>
+                            <button name="toggle_active"
+                                    string="Archive"
+                                    type="object" class="oe_stat_button" icon="fa-archive"
+                                    attrs="{'invisible': [('active', '=', False)]}"/>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="name" force_save='1' readonly="1"/>
+                                <field name="assessees" domain="[('id','not in',assessors)]"
+                                       attrs="{'readonly': [('state','in',['2'])]}" widget='many2many_tags'
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="assessors" domain="[('id','not in',assessees)]"
+                                       attrs="{'readonly': [('state','in',['2'])]}" widget='many2many_tags'
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                            </group>
+                            <group>
+                                <field name="from_date" autocomplete='off' attrs="{'readonly': [('state','in',['2'])]}"
+                                       required="1"/>
+                                <field name="to_date" autocomplete='off' attrs="{'readonly': [('state','in',['2'])]}"
+                                       required="1"/>
+                                <field name="survey_id" attrs="{'readonly': [('state','in',['2'])]}"
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="active" invisible="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_feedback_period_schedule_feedback_action" model="ir.actions.act_window">
+            <field name="name">Schedule Periodic Assessment</field>
+            <field name="res_model">kw_feedback_assessment_period</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="search_view_id" ref='kw_assessment_feedback.kw_feedback_period_schedule_feedback_search_view'/>
+            <field name="domain">[("map_resource_id.assessment_tagging_id.assessment_type","in",["periodic"]), "&amp;",("state", "=", "1"), "&amp;", "&amp;", ("period_date", "&lt;", (context_today()+relativedelta(months=1)).strftime("%Y-%m-01")),("state", "=", "1"),"|","&amp;","&amp;",("period_date", "&lt;", (context_today()+relativedelta(months=1)).strftime("%Y-%m-01")),("period_date", "&gt;=", time.strftime("%Y-%m-01")),("state", "=", "1"),"&amp;","&amp;",("period_date", "&gt;=", (context_today()-relativedelta(months=1)).strftime("%Y-%m-01")),("period_date", "&lt;", time.strftime("%Y-%m-01")),("state", "=", "1")]</field>
+            <field name="context">{'search_default_by_current_period':1,'periodic':True}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+					No Assessment Feedback Here...
+                </p>
+            </field>
+        </record>
+
+        <record id="kw_feedback_period_schedule_feedback_actions_view_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kw_feedback_period_schedule_feedback_tree_view"/>
+            <field name="act_window_id" ref="kw_feedback_period_schedule_feedback_action"/>
+        </record>
+
+        <record id="kw_feedback_period_schedule_feedback_actions_view_form" model="ir.actions.act_window.view">
+            <field eval="3" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="kw_feedback_period_schedule_feedback_form_view"/>
+            <field name="act_window_id" ref="kw_feedback_period_schedule_feedback_action"/>
+        </record>
+
+        <!-- .............................Probationary.............................. -->
+
+        <record id="kw_feedback_probationary_period_schedule_feedback_action" model="ir.actions.act_window">
+            <field name="name">Schedule Final Assessment</field>
+            <field name="res_model">kw_feedback_assessment_period</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="search_view_id" ref='kw_assessment_feedback.kw_feedback_period_schedule_feedback_search_view'/>
+            <field name="domain">[("state", "=", "1"),("prob_assessment_tag_id.assessment_type", "in", ["probationary"])]</field>
+            <field name="context">{'probationary':True}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+					No Assessment Feedback Here...
+                </p>
+            </field>
+        </record>
+
+        <record id="kw_feedback_probationary_period_schedule_feedback_tree_view" model="ir.ui.view">
+            <field name="name">Feedbacks period tree</field>
+            <field name="model">kw_feedback_assessment_period</field>
+            <field name="arch" type="xml">
+                <tree string="Assessment Feedback" import='false' delete="false">
+                    <field name="active" invisible="1"/>
+                    <field name="prob_assessment_tag_id"/>
+                    <field name="assessees" widget='many2many_tags'/>
+                    <field name="assessors" widget='many2many_tags'/>
+                    <field name="assessment_date"/>
+                    <field name="survey_id"/>
+<!--                    <field name="deactive_records" invisible='1'/>-->
+                    <button class="btn btn-sm btn-info" string='Manage Meeting' type="object" name="manage_feedback_meeting" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_feedback_period_schedule_probationary_feedback_form_view" model="ir.ui.view">
+            <field name="name">Probationary Feedback Period Form</field>
+            <field name="model">kw_feedback_assessment_period</field>
+            <field name="arch" type="xml">
+                <form string="Assessment Feedback" create='false' delete='false'>
+                    <field name="active" invisible='1'/>
+                    <field name="state" invisible='1'/>
+                    <field name="rrule_type" invisible='1'/>
+                    <field name="meeting_id" invisible='1'/>
+                    <field name="assessment_type" invisible='1'/>
+<!--                    <field name="deactive_records" invisible='1'/>-->
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="toggle_active"
+                                    string="Restore"
+                                    type="object" class="oe_stat_button" icon="fa-archive"
+                                    attrs="{'invisible': [('active', '=', True)]}"/>
+                            <button name="toggle_active"
+                                    string="Archive"
+                                    type="object" class="oe_stat_button" icon="fa-archive"
+                                    attrs="{'invisible': [('active', '=', False)]}"/>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="prob_assessment_tag_id"
+                                       domain="[('assessment_type','in',['probationary'])]"
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}" required="1"/>
+                                <field name="assessees" domain="[('id','not in',assessors)]"
+                                       attrs="{'readonly': [('state','in',['2'])]}" widget='many2many_tags'
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="assessors" domain="[('id','not in',assessees)]"
+                                       attrs="{'readonly': [('state','in',['2'])]}" widget='many2many_tags'
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                            </group>
+                            <group>
+                                <field name="assessment_date" autocomplete='off'
+                                       attrs="{'readonly': [('state','in',['2'])]}" required="1"/>
+                                <field name="survey_id" attrs="{'readonly': [('state','in',['2'])]}"
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                            </group>
+                        </group>
+
+                        <div class="text-left">
+                            <button class="btn btn-sm btn-info" string='Manage Meeting' type="object"
+                                    name="manage_feedback_meeting"/>
+                        </div>
+
+                        <group attrs="{'invisible': ['|',('meeting_id','=',False)]}" string='Meeting Details'>
+                            <group>
+                                <field name="meeting_date"/>
+                                <field name="meeting_time"/>
+                                <field name="meeting_duration"/>
+                                <field name="meeting_room"
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_feedback_probationary_period_schedule_feedback_actions_view_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kw_feedback_probationary_period_schedule_feedback_tree_view"/>
+            <field name="act_window_id" ref="kw_feedback_probationary_period_schedule_feedback_action"/>
+        </record>
+
+        <record id="kw_feedback_probationary_period_schedule_feedback_actions_view_form" model="ir.actions.act_window.view">
+            <field eval="3" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="kw_feedback_period_schedule_probationary_feedback_form_view"/>
+            <field name="act_window_id" ref="kw_feedback_probationary_period_schedule_feedback_action"/>
+        </record>
+
+    </data>
+</odoo>

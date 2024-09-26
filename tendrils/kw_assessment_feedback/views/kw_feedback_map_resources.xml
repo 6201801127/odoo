@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="kw_feedback_map_resource_form" model="ir.ui.view">
+            <field name="name">Map Resources</field>
+            <field name="model">kw_feedback_map_resources</field>
+            <field name="arch" type="xml">
+                <form string="Feedback Questions" delete="false">
+<!--                    <field name="deactive_records" invisible='1'/>-->
+                    <header>
+                        <field name="hide_period_action_buttons" invisible="1"/>
+                        <button name="action_generate_periods" type="object" class="btn btn-primary mr-2" string="Schedule Periods" />
+                        <!-- <button name="action_clear_periods" type="object" class="btn btn-danger" string="Clear Periods" /> -->
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="assessment_tagging_id" domain="[('assessment_type','in',['periodic'])]" options="{'no_create': True, 'no_open': True, 'no_edit': True }" attrs="{'readonly': [('hide_period_action_buttons','=',True)]}" />
+                                <field name="survey_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}" />
+                            </group>
+                            <group>
+                                <field name="assessment_from_date" autocomplete='off' attrs="{'required':[('rrule_type','not in',['custom'])],'invisible': [('rrule_type','in',['custom'])],'readonly': [('hide_period_action_buttons','=',True)]}"/>
+                                <field name="assessment_to_date" autocomplete='off' attrs="{'required':[('rrule_type','not in',['custom'])],'invisible': [('rrule_type','in',['custom'])]}" options="{'datepicker':{'minDate': 'now'}}"/>
+                                <field name="assessment_date" autocomplete='off' attrs="{'required': [('rrule_type','in',['custom'])],'invisible': [('rrule_type','not in',['custom'])]}"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="rrule_type"/>
+                            <field name="rrule" invisible="1"/>
+                        </group>
+                        <group attrs="{'invisible': [('rrule_type', '!=', 'weekly')]}" options="{'horizontal':true}" name="weekdays">
+                            <group>
+                                <field name="mo" />
+                                <field name="tu" />
+                                <field name="we" />
+                            </group>
+                            <group>
+                                <field name="th" />
+                                <field name="fr" />
+                                <field name="sa" />
+                                <field name="su" />
+                            </group>
+                        </group>
+
+                        <group attrs="{'invisible': [('rrule_type', '!=', 'monthly')] }" name="weekdays" invisible='1'>
+                            <label string="Day of Month" for="month_by"/>
+                            <div class="o_row">
+                                <field name="month_by" />
+                                <field name="day" attrs="{'required': [('month_by', '=', 'date'), ('rrule_type', '=', 'monthly')],
+                                            'invisible': [('month_by', '!=', 'date')]}"/>
+                                <field name="byday" string="The" attrs="{'required': [('month_by', '=', 'day'), ('rrule_type', '=', 'monthly')],
+                                            'invisible': [('month_by', '!=', 'day')]}"/>
+                                <field name="week_list" nolabel="1" attrs="{'required': [('month_by', '=', 'day'), ('rrule_type', '=', 'monthly')],
+                                            'invisible': [('month_by', '!=', 'day')]}"/>
+                            </div>
+                        </group>
+
+                        <group string="Select Assessee">
+                            <field name="select_assessee" context="{'tree_view_ref': 'kw_assessment_feedback.hr_employee_assessment_feedback_tree_view'}" nolabel='1' domain="[('id','not in',select_assessor)]" options="{'no_create': True, 'no_open': True, 'no_edit': True}">
+                                <tree>
+                                    <field name="name" style="pointer-events:none;"/>
+                                    <field name="emp_code" style="pointer-events:none;"/>
+                                    <field name="job_id" style="pointer-events:none;" string="Designation"/>
+                                    <field name="department_id" style="pointer-events:none;"/>
+                                    <field name="division" />
+                                </tree>
+                            </field>
+                        </group>
+
+                        <group string="Select Assessor">
+                            <field name="select_assessor" context="{'tree_view_ref': 'kw_assessment_feedback.hr_employee_assessment_feedback_tree_view'}" domain="[('id','not in',select_assessee)]" nolabel='1' options="{'no_create': True, 'no_open': True, 'no_edit': True}">
+                                <tree>
+                                    <field name="name" style="pointer-events:none;"/>
+                                    <field name="emp_code" style="pointer-events:none;"/>
+                                    <field name="job_id" style="pointer-events:none;" string="Designation"/>
+                                    <field name="department_id" style="pointer-events:none;"/>
+                                    <field name="division" />
+                                </tree>
+                            </field>
+                        </group>
+
+                        <group string="Assessment Periods">
+                            <field name="period_ids" nolabel='1' context="{'form_view_ref':'kw_assessment_feedback.model_kw_feedback_assessment_period_view_form'}">
+                                <tree editable='bottom' create='false' delete="false" >
+                                    <field name="show_generate_feedback_action_buttons" invisible="1" />
+                                    <field name="hide_generate_button" invisible="1" />
+<!--                                    <field name="deactive_records" invisible='1'/>-->
+                                    <field name="name" readonly='1'/>
+                                    <field name="period_date" readonly='1'/>
+                                    <field name="assessees" options="{'no_create': True, 'no_open': True, 'no_edit': True}" domain="[('id','not in',assessors)]" widget='many2many_tags' attrs="{'readonly':[('hide_generate_button','=',True)]}"/>
+                                    <field name="assessors" options="{'no_create': True, 'no_open': True, 'no_edit': True}" domain="[('id','not in',assessees)]" widget='many2many_tags' attrs="{'readonly':[('hide_generate_button','=',True)]}"/>
+                                    <field name="from_date" attrs="{'readonly':[('hide_generate_button','=',True)]}"/>
+                                    <field name="to_date" attrs="{'readonly':[('hide_generate_button','=',True)]}"/>
+                                    <field name="survey_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}" attrs="{'readonly':[('hide_generate_button','=',True)]}"/>
+                                    <field name="state" readonly='1'/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_feedback_map_resource_tree" model="ir.ui.view">
+            <field name="name">Map Resources</field>
+            <field name="model">kw_feedback_map_resources</field>
+            <field name="arch" type="xml">
+                <tree string="Feedback Questions" delete="false" default_order='assessment_to_date desc'>
+<!--                    <field name="deactive_records" invisible='1'/>-->
+                    <field name="active" invisible="1"/>
+                    <field name="assessment_tagging_id"/>
+                    <field name="select_assessee" widget="many2many_tags" string="Assessee"/>
+                    <field name="select_assessor" widget="many2many_tags" string="Assessor"/>
+                    <field name="assessment_from_date"/>
+                    <field name="assessment_to_date"/>
+                    <field name="survey_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_feedback_map_resource_search" model="ir.ui.view">
+            <field name="name">kw_feedback_map_resources.view.search</field>
+            <field name="model">kw_feedback_map_resources</field>
+            <field name="arch" type="xml">
+                <search string="Search Description">
+                    <field name="select_assessee" string='Assessee Name'/>
+                    <field name="select_assessor" string='Assessor Name'/>
+                    <field name="assessment_tagging_id" string="Assessment Type"/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_assessment_tagging_id" string="Assessment Type" domain="[]" context="{'group_by':'assessment_tagging_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="kw_feedback_map_resource_action" model="ir.actions.act_window">
+            <field name="name">Periodic Map Resources</field>
+            <field name="res_model">kw_feedback_map_resources</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="kw_feedback_map_resource_search"/>
+            <field name="view_type">form</field>
+            <field name="domain">[('assessment_tagging_id.assessment_type','in',['periodic'])]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+					Map the resource(s) for assessment feedback...
+                </p>
+            </field>
+        </record>
+
+        <record id="kw_feedback_map_resource_actions_view_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kw_feedback_map_resource_tree"/>
+            <field name="act_window_id" ref="kw_feedback_map_resource_action"/>
+        </record>
+
+        <record id="kw_feedback_map_resource_actions_view_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="kw_feedback_map_resource_form"/>
+            <field name="act_window_id" ref="kw_feedback_map_resource_action"/>
+        </record>
+
+        <!-- .........................................Probationary............................................. -->
+
+        <record id="kw_feedback_probationary_map_resource_action" model="ir.actions.act_window">
+            <field name="name">Probationary Map Resources</field>
+            <field name="res_model">kw_feedback_map_resources</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="kw_feedback_map_resource_search"/>
+            <field name="view_type">form</field>
+            <field name="domain">[('assessment_tagging_id.assessment_type','=','probationary')]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+					Map the resource(s) for assessment feedback...
+                </p>
+            </field>
+        </record>
+
+        <record id="kw_feedback_probationary_map_resource_tree" model="ir.ui.view">
+            <field name="name">Probationary Map Resources</field>
+            <field name="model">kw_feedback_map_resources</field>
+            <field name="arch" type="xml">
+                <tree string="Feedback Questions" delete="false">
+                    <field name="assessment_tagging_id"/>
+                    <field name="select_assessee" widget="many2many_tags" string="Assessee"/>
+                    <field name="select_assessor" widget="many2many_tags" string="Assessor"/>
+                    <field name="assessment_date"/>
+                    <field name="survey_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_feedback_probationary_map_resource_form" model="ir.ui.view">
+            <field name="name">Map Resources</field>
+            <field name="model">kw_feedback_map_resources</field>
+            <field name="arch" type="xml">
+                <form string="Feedback Questions" delete="false">
+                    <field name="rrule_type" invisible="1"/>
+                    <field name="rrule" invisible="1"/>
+                    <header>
+                        <field name="hide_period_action_buttons" invisible="1"/>
+                        <button name="action_generate_periods" type="object" class="btn btn-primary mr-2" string="Schedule Periods" />
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="assessment_tagging_id" domain="[('assessment_type','in',['probationary'])]" options="{'no_create': True, 'no_open': True, 'no_edit': True}" attrs="{'readonly': [('hide_period_action_buttons','=',True)]}" />
+                                <field name="survey_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}" />
+                            </group>
+                            <group>
+                                <field name="assessment_from_date" autocomplete='off' attrs="{'required':[('rrule_type','not in',['custom'])],'invisible': [('rrule_type','in',['custom'])]}"/>
+                                <field name="assessment_to_date" autocomplete='off' attrs="{'required':[('rrule_type','not in',['custom'])],'invisible': [('rrule_type','in',['custom'])]}"/>
+                                <field name="assessment_date" autocomplete='off' attrs="{'required': [('rrule_type','in',['custom'])],'invisible': [('rrule_type','not in',['custom'])]}"/>
+                            </group>
+                        </group>
+
+                        <group attrs="{'invisible': [('rrule_type', '!=', 'weekly')]}" options="{'horizontal':true}" name="weekdays">
+                            <group>
+                                <field name="mo" />
+                                <field name="tu" />
+                                <field name="we" />
+                            </group>
+                            <group>
+                                <field name="th" />
+                                <field name="fr" />
+                                <field name="sa" />
+                                <field name="su" />
+                            </group>
+                        </group>
+
+                        <group attrs="{'invisible': [('rrule_type', '!=', 'monthly')] }" name="weekdays" invisible='1'>
+                            <label string="Day of Month" for="month_by"/>
+                            <div class="o_row">
+                                <field name="month_by" />
+                                <field name="day" attrs="{'required': [('month_by', '=', 'date'), ('rrule_type', '=', 'monthly')],
+                                            'invisible': [('month_by', '!=', 'date')]}"/>
+                                <field name="byday" string="The" attrs="{'required': [('month_by', '=', 'day'), ('rrule_type', '=', 'monthly')],
+                                            'invisible': [('month_by', '!=', 'day')]}"/>
+                                <field name="week_list" nolabel="1" attrs="{'required': [('month_by', '=', 'day'), ('rrule_type', '=', 'monthly')],
+                                            'invisible': [('month_by', '!=', 'day')]}"/>
+                            </div>
+                        </group>
+
+                        <group string="Select Assessee">
+                            <field name="select_assessee" context="{'tree_view_ref': 'kw_assessment_feedback.hr_employee_assessment_feedback_tree_view'}" nolabel='1' domain="[('id','not in',select_assessor)]" options="{'no_create': True, 'no_open': True, 'no_edit': True}">
+                                <tree>
+                                    <field name="name" style="pointer-events:none;"/>
+                                    <field name="emp_code" style="pointer-events:none;"/>
+                                    <field name="job_id" style="pointer-events:none;" string="Designation"/>
+                                    <field name="department_id" style="pointer-events:none;"/>
+                                    <field name="division" />
+                                </tree>
+                            </field>
+                        </group>
+
+                        <group string="Select Assessor">
+                            <field name="select_assessor" context="{'tree_view_ref': 'kw_assessment_feedback.hr_employee_assessment_feedback_tree_view'}" domain="[('id','not in',select_assessee)]" nolabel='1' options="{'no_create': True, 'no_open': True, 'no_edit': True}">
+                                <tree>
+                                    <field name="name" style="pointer-events:none;"/>
+                                    <field name="emp_code" style="pointer-events:none;"/>
+                                    <field name="job_id" style="pointer-events:none;" string="Designation"/>
+                                    <field name="department_id" style="pointer-events:none;"/>
+                                    <field name="division" />
+                                </tree>
+                            </field>
+                        </group>
+
+                        <group string="Assessment Periods">
+                            <field name="period_ids" nolabel='1' context="{'form_view_ref':'kw_assessment_feedback.model_kw_feedback_assessment_period_view_form'}">
+                                <tree editable='bottom' create='false' >
+                                    <field name="show_generate_feedback_action_buttons" invisible="1" />
+                                    <field name="hide_generate_button" invisible="1" />
+                                    <field name="name" readonly='1'/>
+                                    <field name="period_date" readonly='1'/>
+                                    <field name="assessees" options="{'no_create': True, 'no_open': True, 'no_edit': True}" domain="[('id','not in',assessors)]" widget='many2many_tags' attrs="{'readonly':[('hide_generate_button','=',True)]}"/>
+                                    <field name="assessors" options="{'no_create': True, 'no_open': True, 'no_edit': True}" domain="[('id','not in',assessees)]" widget='many2many_tags' attrs="{'readonly':[('hide_generate_button','=',True)]}"/>
+                                    <field name="assessment_date" attrs="{'readonly':[('hide_generate_button','=',True)]}"/>
+                                    <field name="survey_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}" attrs="{'readonly':[('hide_generate_button','=',True)]}"/>
+                                    <field name="state" readonly='1'/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="kw_feedback_probationary_map_resource_actions_view_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kw_feedback_probationary_map_resource_tree"/>
+            <field name="act_window_id" ref="kw_feedback_probationary_map_resource_action"/>
+        </record>
+
+        <record id="kw_feedback_probationary_map_resource_actions_view_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="kw_feedback_probationary_map_resource_form"/>
+            <field name="act_window_id" ref="kw_feedback_probationary_map_resource_action"/>
+        </record>
+
+    </data>
+</odoo>

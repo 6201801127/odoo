@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="view_kw_tour_settlement_payment_tree" model="ir.ui.view">
+            <field name="name">view.kw_tour_settlement.tree</field>
+            <field name="model">kw_tour_settlement</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <tree import="false" create="false" delete="false" default_order='create_date desc'>
+                    <field name="code"/>
+                    <field name="employee_id"/>
+                    <field name="job_id"/>
+                    <field name="dept_id"/>
+                    <field name="create_date" string="Applied On" widget="date"/>
+                    <field name="tour_type_id"/>
+                    <field name="date_travel"/>
+                    <field name="domestic_currency_id" invisible="1"/>
+                    <field name="usd_currency_id" invisible="1"/>
+                    <field name="date_return"/>
+                    <field name="paid_domestic" options="{'currency_field':'domestic_currency_id'}" widget="monetary" />
+                    <field name="paid_international" options="{'currency_field':'usd_currency_id'}" widget="monetary"/>
+                    <field name="receivable_inr" options="{'currency_field':'domestic_currency_id'}" widget="monetary"/>
+                    <field name="receivable_usd" options="{'currency_field':'usd_currency_id'}" widget="monetary"/>
+                    <field name="state" invisible="1"/>
+                    <button name="button_take_action" string="Take Action" class="oe_highlight " type="object"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_kw_tour_settlement_payment_form" model="ir.ui.view">
+            <field name="name">view.kw_tour_settlement.form</field>
+            <field name="model">kw_tour_settlement</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <form edit="false" create="false" delete="false" duplicate="false">
+                <script>
+                    $(document).ready(function(){
+                        $(".modal-title").show();
+                    });
+                </script>
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="create_uid" invisible="1"/>
+                                <field name="ra_access" invisible="1"/>
+                                <field name="own_record" invisible="1"/>
+                                <field name="final_approver_id" invisible="1"/>
+                                <field name="current_user" invisible="1"/>
+                                <field name="finance_access" invisible="1"/>
+                                <field name="employee_id" invisible="1"/>
+                                <field name="tour_id"  options="{'no_create_edit': True,'no_open':True,'no_create':True}" readonly="1"/>
+                                <field name="tour_type_id"  options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="purpose"/>
+                                <field name="date_travel"/>
+                                <field name="date_return"/>
+                                <field name="budget_head" attrs="{'invisible': [('budget_head', '=', False)]}"/>
+                                <field name="budget_head_id" attrs="{'invisible': [('budget_head', '!=', False)]}"/>
+                                <field name="city_id"  options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="travel_arrangement"/>
+                                <field name="domestic_currency_id" invisible="1"/>
+                                <field name="usd_currency_id" invisible="1"/>
+                            </group>
+                        </group>
+                        <group string="Tour Details">
+                            <field name="tour_detail_ids" nolabel="1"/>
+                        </group>
+                        <group string="Ticket Details" attrs="{'invisible': [('travel_arrangement', '!=', 'Self')]}">
+                            <field name="travel_ticket_ids" nolabel="1" readonly="1"/>
+                        </group>
+                        <group>
+                            <group string="Advance Disbursed Log">
+                                <field name="advance_ids" readonly="1" nolabel="1"/>
+                            </group>
+                        </group>
+                        <group string="Settlement Details">
+                            <field name="settlement_detail_ids" nolabel="1"
+                            context="{'default_tour_id':tour_id}"/>
+                        </group>
+                        <group>
+                            <group string="Travel Prerequisites">
+                                <field name="travel_prerequisite_ids" nolabel="1" force_save="1" readonly="1">
+                                    <tree>
+                                        <field name="travel_prerequisite_id" force_save="1" readonly="1"
+                                               options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                        <field name="amount" force_save="1" readonly="1"/>
+                                        <field name="currency_id" force_save="1" readonly="1"
+                                               options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                        <field name="document" filename="document_name" widget="binary" force_save="1"
+                                               readonly="1"/>
+                                        <field name="document_name" invisible="1" force_save="1" readonly="1"/>
+                                    </tree>
+                                    <form>
+                                        <group>
+                                            <field name="travel_prerequisite_id" force_save="1" readonly="1"
+                                                   options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                            <field name="amount" force_save="1" readonly="1"/>
+                                            <field name="currency_id" force_save="1" readonly="1"
+                                                   options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                            <field name="document" filename="document_name" widget="binary" force_save="1"
+                                                   readonly="1"/>
+                                            <field name="document_name" invisible="1" force_save="1" readonly="1"/>
+                                        </group>
+                                    </form>
+                                </field>
+                            </group>
+                        </group>
+                        <group>
+
+                            <group string="Expense with Head">
+                                <field name="total_expense_ids" nolabel="1">
+                                    <tree editable="bottom" delete="false" create="false">
+                                        <field name="expense_id" style="pointer-events:none;"/>
+                                        <field name="travel_prerequisite_id" style="pointer-events:none;"/>
+                                        <field name="amount_inr" style="pointer-events:none;" options="{'currency_field':'domestic_currency_id'}" widget="monetary"/>
+                                        <field name="amount_usd" style="pointer-events:none;" options="{'currency_field':'usd_currency_id'}" widget="monetary"/>
+                                        <field name="domestic_currency_id" invisible="1"/>
+                                        <field name="international_currency_id" invisible="1"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Expenditure Details">
+
+                                <table class="" style="width:100%;">
+                                    <tbody>
+                                        <tr>
+
+                                            <td style="width:100%;">
+                                                <div class="o_x2m_control_panel">
+                                                    <nav aria-label="Control panel toolbar" class="o_cp_buttons" role="toolbar"></nav>
+                                                    <nav aria-label="Pager" class="o_cp_pager" role="toolbar">
+                                                        <div class="o_hidden">
+                                                            <span class="o_pager_counter">
+                                                                <span class="o_pager_value"></span> /<span class="o_pager_limit"></span>
+                                                            </span>
+                                                            <span aria-atomic="true" class="btn-group">
+                                                                <button aria-label="Previous" class="fa fa-chevron-left btn btn-secondary o_pager_previous" tabindex="-1" title="Previous" type="button"></button>
+                                                                <button aria-label="Next" class="fa fa-chevron-right btn btn-secondary o_pager_next" tabindex="-1" title="Next" type="button"></button>
+                                                            </span>
+                                                        </div>
+                                                    </nav>
+                                                </div>
+                                                <div class=" table-responsive">
+
+                                                    <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="o_column_sortable"></th>
+                                                                <th class="o_column_sortable">Domestic</th>
+                                                                <th class="o_column_sortable">USD</th>
+                                                            </tr>
+                                                        </thead>
+
+                                                        <tbody class="ui-sortable">
+                                                            <tr>
+                                                                <td scope="row">Advance Amount</td>
+                                                                <td>
+                                                                    <field name="advance_inr" options="{'currency_field':'domestic_currency_id'}" widget="monetary" />
+                                                                </td>
+                                                                <td>
+                                                                    <field name="advance_usd" options="{'currency_field':'usd_currency_id'}" widget="monetary"/>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td scope="row">Total Expenditure</td>
+                                                                <td>
+                                                                    <field name="total_domestic" options="{'currency_field':'domestic_currency_id'}" widget="monetary" />
+                                                                </td>
+                                                                <td>
+                                                                    <field name="total_international" options="{'currency_field':'usd_currency_id'}" widget="monetary"/>
+                                                                </td>
+                                                            </tr>
+
+
+                                                            <tr>
+                                                                <td scope="row" class="text-danger">Amount Payable</td>
+                                                                <td class="text-danger">
+                                                                    <field name="paid_domestic" options="{'currency_field':'domestic_currency_id'}" widget="monetary" />
+                                                                </td>
+                                                                <td class="text-danger">
+                                                                    <field name="paid_international" options="{'currency_field':'usd_currency_id'}" widget="monetary"/>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td scope="row" class="text-success">Amount Receivable</td>
+                                                                <td class="text-success">
+                                                                    <field name="receivable_inr" options="{'currency_field':'domestic_currency_id'}" widget="monetary" />
+                                                                </td>
+                                                                <td class="text-success">
+                                                                    <field name="receivable_usd" options="{'currency_field':'usd_currency_id'}" widget="monetary"/>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    
+                                </table>
+
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="comment" attrs="{'readonly':[('state','!=','Draft')]}"/>
+                                <field name="upload_doc" attrs="{'readonly':[('state','!=','Draft')]}"/>
+                            </group>
+                        </group>
+                        <group>
+                          
+
+                            <group string="Action Logs">
+                                <field name="action_log_ids" readonly="1" nolabel="1">
+                                    <tree>
+                                        <field name="date"/>
+                                        <field name="employee_id"/>
+                                        <field name="state"/>
+                                        <field name="remark"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_kw_tour_settlement_payment_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Settlement Payment</field>
+            <field name="res_model">kw_tour_settlement</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>
+            <field name="domain">[('state','=','Granted')]</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('view_kw_tour_settlement_payment_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('view_kw_tour_settlement_payment_form')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                No settlement found...
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_kw_tour_settlement_payment" name="Settlement Payment" 
+        parent="kw_tour_settlement" sequence="3" action="action_kw_tour_settlement_payment_act_window"
+        groups="kw_tour.group_kw_tour_finance"/>
+
+    </data>
+</odoo>

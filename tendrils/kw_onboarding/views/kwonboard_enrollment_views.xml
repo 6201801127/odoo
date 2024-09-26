@@ -1,0 +1,1139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <!-- explicit tree view definition of kwonboard enrollment : Opening-->
+        <record id="kwonboard_enrollment_view_tree" model="ir.ui.view">
+            <field name="name">View Enrollment Details</field>
+            <field name="model">kwonboard_enrollment</field>
+            <field name="arch" type="xml">
+                <tree import="false" 
+                    decoration-primary="state == '1'"
+                    decoration-warning="state == '2'"
+                    decoration-info="state == '3'"
+                    decoration-success="state == '4'">
+                    <field name="reference_no" invisible="1"/>
+                    <field name="name"/>
+                    <field name="dept_name"/>
+                    <field name="division"/>
+                    <field name="section"/>
+                    <field name="practise"/>
+                    <field name="email"/>
+                    <field name="mobile"/>
+                    <field name="state" string="Status"/>
+                    <field name="check_finance" invisible="1"/>
+                    <field name="check_it" invisible="1"/>
+                    <field name="check_admin" invisible="1"/>
+                    <field name="check_rcm_onboard" invisible="1"/>
+                    
+                    <field name="admin_setting_status" string="Admin Configuration" attrs="{'invisible': [('check_admin', '=', False)]}"/>
+                    <field name="rcm_setting_status" string="RCM Configuration" attrs="{'invisible': [('check_rcm_onboard', '=', False)]}"/>
+                    <field name="finance_setting_status" string="Finance Configuration" attrs="{'invisible': [('check_finance', '=', False)]}"/>
+                    <field name="nsa_setting_status" string="IT Configuration" attrs="{'invisible': [('check_it', '=', False)]}"/>
+                    <field name="emp_id" string="Related Employee" invisible="1"/>
+                    <button name="button_update_applicant_data" string="Update Applicant" class="oe_highlight " type="object"
+                          groups="kw_onboarding.group_kw_onboarding_manager"/>   
+
+                    <button name="button_take_action" string="Take Action" class="oe_highlight " type="object"
+                            states="3"
+                            groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_finance,kw_onboarding.group_kw_onboarding_nsa ,kw_onboarding.group_kw_onboarding_admin,kw_onboarding.group_kw_onboarding_rcm"/>
+                    <button name="button_take_action" string="Validate" class="oe_highlight " type="object" states="4"
+                            groups="kw_onboarding.group_kw_onboarding_manager"/>
+                    <button name="button_enroll_document" class="oe_highlight" type="object" icon="fa-download fa-lg"
+                            groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_officer"
+                            attrs="{'invisible': [('state', 'in', ['1','6'])]}" aria-label="Download"/>
+                    <button name="button_send_invitation" class="oe_highlight" type="object" icon="fa-paper-plane fa-lg"
+                            groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_officer"
+                            attrs="{'invisible': [('state', 'not in', ['1'])]}" aria-label="Send"
+                            confirm="Are you sure to send invitation again?"/>
+                    <button name="button_move_to_enrolled" class="oe_highlight" type="object" icon="fa-refresh fa-lg"
+                            groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_officer"
+                            attrs="{'invisible': [('state', 'in', ['1'])]}" aria-label="Move"
+                            confirm="Are you sure to move to enrolled stage?"/>
+                </tree>
+            </field>
+        </record>
+        <!-- explicit tree view definition of kwonboard enrollment : Ending-->
+
+        <!-- explicit form view definition of kwonboard enrollment : Opening-->
+        <record id="kwonboard_enrollment_view_form" model="ir.ui.view">
+            <field name="name">Enrollment Details Form</field>
+            <field name="model">kwonboard_enrollment</field>
+            <field name="arch" type="xml">
+                <form string="Enrollment Form" create="false">
+                    <script>
+                        $(document).ready(function(){ 
+                            state =  $("[aria-pressed=true]").text().trim();
+                            if ( state === 'Approved' | state === 'Rejected'){
+                                $('.o_form_button_edit').hide();
+                            }
+                            <!-- enroll_state = $("[data-value=1]");
+                            prof_create_state = $("[data-value=2]");
+                            config_map_state = $("[data-value=3]");
+                            config_done = $("[data-value=4]");
+                            approve_state = $("[data-value=5]");
+                            reject_state = $("[data-value=6]");
+                            active_state = $("[aria-pressed=true]").text().trim();
+                            if (active_state === 'Enrolled'){
+                                $(enroll_state).css({"background-color": "#264653", "color": "#fff"})
+                            } else if (active_state === 'Profile Submitted'){
+                                $(prof_create_state).css({"background-color": "#2a9d8f", "color": "#fff"});
+                            } else if (active_state === 'Configuration'){
+                                $(config_map_state).css({"background-color": "#e9c46a", "color": "#fff"});
+                            } else if (active_state === 'Configuration Done'){
+                                $(config_done).css({"background-color": "#f4a261", "color": "#fff"});
+                            } else if (active_state === 'Approved'){
+                                $(approve_state).css({"background-color": "#e76f51", "color": "#fff"});
+                            } else {
+                                $(reject_state).css({"background-color": "#d62828", "color": "#fff"});
+                            } -->
+                        });
+                    </script>
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <!-- <div class="oe_button_box" name="button_box">
+                            <button class="oe_stat_button" name="button_enroll_document" type="object" icon="fa-download" groups="hr.group_hr_manager">
+                                <span class="o_stat_text font-weight-bold">
+                                        Documents
+                                </span>
+                            </button>
+                        </div> -->
+                        <field name="image" widget="image" filename="image_name" class="oe_avatar"
+                               options="{'preview_image':'image'}"
+                               attrs="{'required':[('create_full_profile', '=', True)]}"/>
+                        <div class="oe_title">
+                        	<label for="name" />
+                            <h1>
+                                <field name="name" placeholder="Candidate's Name" required="True" style="width: 80%"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group string="Employee Enrollment" name="employee_enrollment">
+                                <field name="applicant_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_officer"
+                                       invisible="1"/>
+                                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"
+                                       invisible="1"/>
+                                <field name="image_id" invisible="1"/>
+                                <field name="image_url" invisible="1"/>
+                                <field name="tmp_join_date" required='1'
+                                       attrs="{'readonly':[('check_officer', '=', False), ('check_manager', '=', False)]}"/>
+                                <field name="location_id" string="Base Location"
+                                       options='{"no_open": True, "no_create": True}' required="1" readonly="1"/>
+                                <field name="tmp_worklocation_id"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}" required='1'/>
+                                <!-- <field name="work_location_id" string="Work Location" options='{"no_open": True, "no_create": True}' invisible="1"/> -->
+                                <field name="emp_worklocation" options='{"no_open": True, "no_create": True}'
+                                       attrs="{'invisible': [('state', 'not in', '3')]}"
+                                       groups="kw_onboarding.group_kw_onboarding_admin,kw_onboarding.group_kw_onboarding_finance,kw_onboarding.group_kw_onboarding_nsa,kw_onboarding.group_kw_onboarding_rcm"
+                                       invisible="1"/>
+                                <field name="dept_name" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       required="1" readonly="1"/>
+                                <field name="division" required="0"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'invisible': [('dept_name', '=', False)]}"
+                                       domain="[('parent_id','=', dept_name)]"/>
+                                <field name="section" required="0"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'invisible': [('division', '=', False)]}"
+                                       domain="[('parent_id','=', division)]"/>
+                                <field name="practise" required="0"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'invisible': [('section', '=', False)]}"
+                                       domain="[('parent_id','=', section)]"/>
+                                <field name="check_finance" invisible="1"/>
+                                <field name="check_it" invisible="1"/>
+                                <field name="check_admin" invisible="1"/>
+                                <field name="check_rcm_onboard" invisible="1"/>
+                                <field name="user_grp_sbu" invisible="1"/>
+                                <field name="check_manager" invisible="1"/>
+                                <field name="check_officer" invisible="1"/>
+                                <field name="job_id" required="1"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_officer"/>
+                                <field name="email"
+                                       groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_officer"/>
+                                <field name="mobile"
+                                       groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_officer"/>
+                                <field name="create_full_profile"
+                                       groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_officer"/>
+                                <field name="need_uid" attrs="{'invisible': [('state', '!=', '4')]}" invisible="1"/>
+                            </group>
+                            <group string="Budget Setting"
+                                   groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_officer">
+                                <field name="mrf_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       required="0"/>
+                                <field name="budget_type" force_save="1"/>
+                                <field name="tmp_emp_role" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'readonly':['|',('finance_setting_status','=',True),'|',('check_officer', '=', True),('check_manager', '=', True)]}"
+                                       force_save="1"/>
+                                <field name="tmp_emp_category"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'readonly':['|',('finance_setting_status','=',True),'|',('check_officer', '=', True),('check_manager', '=', True)]}"
+                                       force_save="1"/>
+                                <field name="tmp_employement_type"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"  attrs="{'readonly':[('state', 'not in','4')]}"
+                                       force_save="1"/>
+                                <field name="tmp_employement_type_code" invisible='1'/>
+                                <field name="tmp_direct_indirect" widget='radio' options="{'horizontal': true}"
+                                       invisible="1"/>
+                                <field name="tmp_project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       invisible="1"/>
+                                <field name="type_of_project_id" force_save="1"/>
+                                <field name="engagement" force_save="1"/>
+                                <field name="project_name_id"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}" force_save="1"/>
+                                <field name="tmp_start_dt"
+                                       attrs="{'required':[('tmp_employement_type_code', 'in', ['C','O'])]}"
+                                       force_save="1"/>
+                                <label for="tmp_contract_period" string="Contract Period &amp; Year/Month"
+                                       invisible="1"/>
+<!--                                <div class="address_format">-->
+<!--                                    <field name="tmp_contract_period"-->
+<!--                                           class="mr-2" style="width: 40%;" force_save="1"/>-->
+                                    <!-- attrs="{'required':[('tmp_employement_type_code', 'in', ['S','C','O'])]}"
+                                    attrs="{'required':[('tmp_employement_type_code', 'in', ['S','C','O'])]}"-->
+<!--                                    <field name="tmp_contract_year_month"-->
+<!--                                           class="mr-2" style="width: 40%;" force_save="1"/>-->
+<!--                                </div>-->
+                                <field name="tmp_end_dt"
+                                       attrs="{'required':[('tmp_employement_type_code', 'in', ['C','O'])]}"
+                                       force_save="1"/>
+                            </group>
+                        </group>
+                        <group groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_officer">
+                            <group string='Account Information'>
+                                <field name="tmp_has_band" invisible="1"/>
+                                <field name="tmp_username"
+                                       attrs="{'required':['|',('tmp_employement_type_code','in',['P','S','C','R']),'|',('tmp_direct_indirect','=','1'),('need_user','=',True)]}"/>
+                                <field name="branch_unit_id"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       invisible="0"/>
+                                <field name="tmp_grade"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_officer"
+                                       attrs="{'required':['|',('tmp_employement_type_code','in',['P','S','C','R']),('tmp_direct_indirect','=','1')]}"/>
+                                <field name="tmp_band"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'required':[('tmp_has_band','=',True)]}"/>
+                                <field name="tmp_on_probation"/>
+                                <field name="no_of_months"
+                                       attrs="{'required':[('tmp_on_probation','=',True)], 'invisible':[('tmp_on_probation','=',False)]}"/>
+                                <field name="tmp_prob_compl_date"
+                                       attrs="{'required':[('tmp_on_probation','=',True)], 'invisible':[('tmp_on_probation','=',False)]}"/>
+                                <field name="tmp_location" widget="radio" options="{'horizontal': true}" required="1"/>
+                                <field name="tmp_client_location"
+                                       attrs="{'invisible':[('tmp_location','!=','onsite')], 'required': [('tmp_location','=','onsite'), ('state', '=', '4')]}"/>
+                                <field name="wfa_city"
+                                       attrs="{'invisible':[('tmp_location','!=','wfa')], 'required': [('tmp_location','=','wfa')]}"
+                                       groups="hr.group_hr_manager"
+                                       options="{'no_open': True}"/>
+                                <field name="tmp_shift" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       domain="[('branch_id','=',tmp_worklocation_id)]"
+                                       groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_officer"
+                                       attrs="{'required':['|',('tmp_employement_type_code','in',['P','S','C','R']),('tmp_direct_indirect','=','1')]}"/>
+                                <field name="bond_required" widget="radio" options="{'horizontal': true}"/>
+                                <field name="bond_years"
+                                       attrs="{'required': [('bond_required','=', '1')],'invisible': [('bond_required','=', '0')]}"/>
+                                <field name="bond_months"
+                                       attrs="{'required': [('bond_required','=', '1')],'invisible': [('bond_required','=', '0')]}"/>
+                               
+                                <field name="need_sync"/>
+                                <field name="need_user"/>
+                            </group>
+                            <group string='Personnel Information'>
+                                <field name="tmp_source_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       required='1'/>
+                                <field name="tmp_reference_walkindrive"
+                                       attrs="{'invisible':[('tmp_code_ref','!=','walkindrive')]}"/>
+                                <field name="tmp_reference_print_media"
+                                       attrs="{'invisible':[('tmp_code_ref','!=','printmedia')]}"/>
+                                <field name="tmp_reference_job_fair"
+                                       attrs="{'invisible':[('tmp_code_ref','!=','jobfair')]}"/>
+                                <field name="tmp_employee_referred"
+                                       attrs="{'invisible':[('tmp_code_ref','!=','employee')]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="tmp_media_id" attrs="{'invisible':[('tmp_code_ref','!=','social')]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="tmp_institute_id" attrs="{'invisible':[('tmp_code_ref','!=','institute')]}"
+                                       domain="[('institute','=',True)]"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="tmp_consultancy_id"
+                                       attrs="{'invisible':[('tmp_code_ref','!=','consultancy')]}"
+                                       domain="[('consultancy','=',True)]"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="tmp_jportal_id" attrs="{'invisible':[('tmp_code_ref','!=','job')]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="tmp_service_partner_id"
+                                       attrs="{'invisible':[('tmp_code_ref','!=','partners')]}"
+                                       domain="[('service_partner','=',True)]"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="tmp_reference"
+                                       attrs="{'invisible':['|', ('tmp_code_ref','in',['job','consultancy','social','employee','institute','partners','website','career','walkindrive','printmedia','jobfair']),('tmp_code_ref','=', False)]}"/>
+                                <field name="tmp_code_ref" invisible="1"/>
+                                <field name="personal_bank_name"/>
+                                <field name="personal_bank_account"/>
+                                <field name="personal_bank_ifsc"/>
+                            </group>
+                            <group string="Attendance Information">
+                                <field name="tmp_enable_attendance" widget="radio" options="{'horizontal': true}"/>
+                            </group>
+                            <group string="Reporting Authority">
+                                <field name="tmp_admin_auth" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       string="Reporting Authority"
+                                       groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_officer"
+                                       attrs="{'required':['|',('tmp_employement_type_code','in',['P','S','C','R']),('tmp_direct_indirect','=','1')]}"/>
+                                <field name="tmp_func_auth" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_officer"
+                                       attrs="{'required':['|',('tmp_employement_type_code','in',['P','S','C','R']),('tmp_direct_indirect','=','1')]}"/>
+                            </group>
+
+                            <group string="Payroll Information"
+                                   groups="kw_employee.group_payroll_manager,hr_recruitment.group_hr_recruitment_manager,kw_onboarding.group_kw_onboarding_manager"
+                                   attrs="{'invisible': [('state', 'not in', ('4', '5'))]}">
+                                <button name="action_update_payroll_information" type="object"
+                                        string="Update Payroll Information" class="btn-primary mb-4"/>
+                                <field name="enable_payroll" widget="radio" options="{'horizontal': true}"
+                                        attrs="{'readonly':[('state','!=','4')]}" />
+                                <field name="enable_epf" widget="radio" options="{'horizontal': true}"
+                                       attrs="{'invisible':[('enable_payroll','!=','yes')]}"/>
+                                <field name="epf_document" filename="file_name_epf" class="oe_avatar" widget="binary"
+                                                        options="{'preview_image':'image'}" attrs="{'invisible': [('enable_epf', 'in', ('yes',False))],'required': [('enable_epf','=','no'),('state', 'in', ('4', '5'))]}"/>
+                                <field name="file_name_epf" invisible="1"/>
+                                <field name="pf_deduction"
+                                       attrs="{'invisible': ['|','|',('enable_epf','=', False),('enable_epf','=', 'no'), ('enable_payroll', '=', 'no')]}"
+                                       widget='radio' options="{'horizontal': true}" readonly="1"/>
+                                <field name="is_consolidated"/>
+                                <field name="enable_gratuity" widget="radio" options="{'horizontal': true}"
+                                       attrs="{'invisible':[('enable_payroll','!=','yes')]}" readonly="1"/>
+                                <field name="struct_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       readonly="0"  attrs="{'required':[('state','=','4'),('enable_payroll','=','yes')],'invisible':[('enable_payroll','!=','yes')]}"/>
+                                <field name="uan_id"/>
+                                <field name="esi_id"/>
+                                <field name="odisha_domicile" widget="radio" options="{'horizontal': true}"
+                                        attrs="{'readonly':[('state','!=','4')],'required':[('state','=','4')],'invisible':[('state','!=','4')]}"/>
+                            </group>
+                            <group string="Bank Information"
+                                   attrs="{'invisible':['|',('enable_payroll','!=','yes'),('state', 'not in', ('4', '5'))]}"
+                                   groups="kw_employee.group_payroll_manager, hr_recruitment.group_hr_recruitment_manager,kw_onboarding.group_kw_onboarding_manager">
+                                   <group>
+                                          <field name="bank_account"/>
+                                          <field name="bank_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                   </group>
+                                   <group></group>
+                                   <group string="Insurance Information" attrs="{'invisible': [('state', 'not in', ('4', '5'))]}"
+                                          groups="kw_employee.group_payroll_manager, hr_recruitment.group_hr_recruitment_manager,kw_onboarding.group_kw_onboarding_manager">
+                                          <field name="personal_insurance" widget="radio" options="{'horizontal': true}"/>
+                                          <field name="uplod_insurance_doc" filename="file_name_insurance" class="oe_avatar" widget="binary"
+                                                        options="{'preview_image':'image'}" attrs="{'invisible': [('personal_insurance', 'in', ('Yes',False))]}"/>
+                                          <field name="file_name_insurance" invisible="1"/>
+                                          <field name="insurance_validate_date"  attrs="{'invisible': [('personal_insurance', 'in', ('Yes',False))],'required':[('personal_insurance','=','No'),('state', 'in', ('4', '5'))]}"/>
+                                          
+                                   </group>
+                            </group>
+                            <field name="intern_offer_type" invisible="1"/>
+                            <group string="Salary Information (CTC)"
+                                   attrs="{'invisible':['|','|',('enable_payroll','!=','yes'),('state', 'not in', ('4', '5')), ('intern_offer_type', '=', 'Intern')]}"
+                                   groups="kw_employee.group_payroll_manager,hr_recruitment.group_hr_recruitment_manager,kw_onboarding.group_kw_onboarding_manager">
+                                <field name="tmp_at_join_time" required="1" readonly="1"
+                                       groups="kw_employee.group_payroll_manager,kw_onboarding.group_kw_onboarding_officer"/>
+                                <field name="current" readonly="1"
+                                       groups="kw_employee.group_payroll_manager,hr_recruitment.group_hr_recruitment_manager"/>
+                            </group>
+
+                            <group string="Salary Information (Stipend Amount for First 3 months)"
+                                   attrs="{'invisible':['|','|',('enable_payroll','!=','yes'),('state', 'not in', ('4', '5')), ('intern_offer_type', '!=', 'Intern')]}"
+                                   groups="kw_employee.group_payroll_manager,hr_recruitment.group_hr_recruitment_manager,kw_onboarding.group_kw_onboarding_manager">
+                                <field name="tmp_at_join_time" required="1" readonly="1"
+                                       groups="kw_employee.group_payroll_manager,kw_onboarding.group_kw_onboarding_officer"/>
+                                <field name="current" readonly="1" string="Monthly Stipend"
+                                       groups="kw_employee.group_payroll_manager,hr_recruitment.group_hr_recruitment_manager"/>
+                            </group>
+                            <group string="Salary Information (wef 4th Month post approval from L&amp;D Head)"
+                                attrs="{'invisible':['|', '|', ('enable_payroll','=','no'),('state', 'not in', ('4', '5')), ('intern_offer_type', '!=', 'Intern')]}"
+                                   groups="kw_employee.group_payroll_manager,hr_recruitment.group_hr_recruitment_manager,kw_onboarding.group_kw_onboarding_manager">
+                                <field name="intern_offer_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="intern_offer_type"/>
+                                <field name="intern_ctc"/>
+                                <field name="intern_basic"/>
+                                <field name="intern_hra"/>
+                                <field name="intern_conveyance"/>
+                                <field name="intern_pb"/>
+                                <field name="intern_cb"/>
+                                <field name="intern_lta"/>
+                                <field name="intern_pp"/>
+                            </group>
+                            <group/>
+                            <group string="Basic Amount"
+                                   attrs="{'invisible':['|', '|', ('enable_payroll','=','no'),('state', 'not in', ('4', '5')), ('is_consolidated', '=', True)]}"
+                                   groups="kw_employee.group_payroll_manager,hr_recruitment.group_hr_recruitment_manager,kw_onboarding.group_kw_onboarding_manager">
+                                <field name="basic_at_join_time" force_save="1"
+                                       attrs="{'required':[('enable_payroll','=','yes')]}" readonly="1"/>
+                                <field name="current_basic" required="0" readonly="1"/>
+                                <field name="hra" attrs="{'required':[('enable_payroll','=','yes')]}" readonly="1"/>
+                                <field name="conveyance" attrs="{'required':[('enable_payroll','=','yes')]}"
+                                       readonly="1"/>
+                                <field name="medical_reimb" attrs="{'required':[('enable_payroll','=','yes')]}"
+                                       invisible="1"/>
+                            </group>
+
+                            <group string="Allowance Information at Joining Time"
+                                   attrs="{'invisible':['|', '|', ('enable_payroll','!=','yes'),('state', 'not in', ('4', '5')), ('is_consolidated', '=', True)]}"
+                                   groups="kw_employee.group_payroll_manager,hr_recruitment.group_hr_recruitment_manager,kw_onboarding.group_kw_onboarding_manager">
+                                <field name="transport" attrs="{'required':[('enable_payroll','=','yes')]}"
+                                       invisible="1"/>
+                                <field name="productivity" attrs="{'required':[('enable_payroll','=','yes')]}"
+                                       readonly="1"/>
+                                <field name="commitment" attrs="{'required':[('enable_payroll','=','yes')]}"
+                                       readonly="1"/>
+                                <field name="lta_amount" attrs="{'required':[('enable_payroll','=','yes')]}"
+                                       readonly="1"/>
+                                <field name="pp_amount" attrs="{'required':[('enable_payroll','=','yes')]}"
+                                       readonly="1"/>
+                            </group>
+
+                            <group string="Consolidate Amount"
+                                   attrs="{'invisible':['|',('enable_payroll','=','yes'),('state', 'not in', ('4', '5'))]}"
+                                   groups="kw_employee.group_payroll_manager,hr_recruitment.group_hr_recruitment_manager,kw_onboarding.group_kw_onboarding_manager">
+                                <field name="cosolid_amnt" attrs="{'required':[('enable_payroll','!=','yes')]}"/>
+                            </group>
+
+                        </group>
+
+                        <group string="Configuration Mapping"
+                               groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_officer">
+                            <field name="system_configuration" attrs="{'readonly':[('state','in',['3','4','5','6'])]}"/>
+                            <group invisible="1">
+                                <field name="admin_setting_status" string="admin_setting_status"/>
+                                <field name="rcm_setting_status" string="rcm_setting_status"/>
+                                <field name="nsa_setting_status" string="nsa_setting_status"/>
+                                <field name="finance_setting_status" string="finance_setting_status"/>
+                                <field name="display_nsa_btn" string="display_nsa_btn"/>
+                                <field name="other_user_status" string="other_user_status"/>
+                                <field name="user_grp_id_card" string="user_grp_id_card" />
+                                <field name="user_grp_budget" string="user_grp_budget"/>
+                                <field name="user_grp_outlook" string="user_grp_outlook"/>
+                                <field name="user_grp_biometric" string="user_grp_biometric"/>
+                                <field name="user_grp_domain_pwd" string="user_grp_domain_pwd"/>
+                                <field name="user_grp_epbx" string="user_grp_epbx"/>
+                                <field name="user_grp_sbu" string="user_grp_sbu"/>
+                            </group>
+                        </group>
+
+                        <group string="Environment Configuration" attrs="{'invisible':[('state','in',['1','2'])]}"
+                               groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_nsa,kw_onboarding.group_kw_onboarding_admin,kw_onboarding.group_kw_onboarding_finance,kw_onboarding.group_kw_onboarding_officer,kw_onboarding.group_kw_onboarding_rcm">
+                            <!--kw_onboarding.group_kw_onboarding_manager, kw_onboarding.group_kw_onboarding_nsa ,kw_onboarding.group_kw_onboarding_admin ,kw_onboarding.group_kw_onboarding_finance -->
+
+                            <group col="2"
+                                   groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_finance,kw_onboarding.group_kw_onboarding_officer"
+                                   name="budget_settings" string="Budget Setting"
+                                   attrs="{'invisible':[('user_grp_budget', '=', False)]}">
+                                <field name="finance_join_date" attrs="{'readonly':True}"
+                                       groups="kw_onboarding.group_kw_onboarding_finance" invisible='1'/>
+                                <field name="finance_mrf_id" attrs="{'readonly':True,'no_create':True,'no_edit':True}"
+                                       groups="kw_onboarding.group_kw_onboarding_finance"/>
+                                <!-- <field name="budget_type" options="{'no_open': True,'no_create':True,'no_edit':True}"/> -->
+                                <field name="fin_budget_type"
+                                       attrs="{'readonly':['|',('check_officer', '=', True),('check_manager', '=', True)]}"/>
+                                <field name="emp_role" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'readonly':['|',('check_officer', '=', True),('check_manager', '=', True)]}"
+                                       domain="[('budget_type','=',budget_type)]"/>
+
+                                <field name="emp_category" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'readonly':['|',('check_officer', '=', True),('check_manager', '=', True)]}"
+                                       domain="[('role_ids', '=', emp_role)]"/>
+
+                                <field name="employement_type"
+                                       attrs="{'readonly':['|',('check_officer', '=', True),('check_manager', '=', True)]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="employement_type_code" invisible="1"/>
+                                <field name="direct_indirect" widget='radio' options="{'horizontal': true}"
+                                       attrs="{'readonly':['|',('finance_setting_status','=',True),'|',('check_officer', '=', True),('check_manager', '=', True)]}"
+                                       invisible="1"/>
+                                <!-- 'invisible':[('employement_type_code','!=','O')],  -->
+                                <field name="fin_type_of_project_id"
+                                       attrs="{'readonly':['|',('check_officer', '=', True),('check_manager', '=', True)]}"/>
+                                <field name="fin_engagement"
+                                       attrs="{'readonly':['|',('check_officer', '=', True),('check_manager', '=', True)]}"/>
+                                <field name="fin_project_name_id"
+                                       attrs="{'readonly':['|',('check_officer', '=', True),('check_manager', '=', True)]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <!-- 'invisible':[('employement_type_code','in',['P', False])], -->
+                                <field name="start_dt"
+                                       attrs="{'required':[('employement_type_code', 'in', ['C','O'])], 'readonly':['&amp;',('finance_setting_status','=',True),'&amp;',('check_officer', '=', False),('check_manager', '=', False)]}"/>
+                                <!-- 'invisible':[('employement_type_code', 'not in', ['S','C','O'])], -->
+                                <!-- attrs="{'invisible':[('employement_type_code', 'not in', ['S','C','O'])]}" -->
+                                <!--                                <label for="contract_period" string="Contract Period &amp; Year/Month" invisible="1"/>-->
+                                <!--                                <div class="address_format">-->
+                                <!-- 'invisible':[('employement_type_code', 'not in', ['S','C','O'])], -->
+<!--                                <field name="contract_period"-->
+<!--                                       attrs="{'readonly':['&amp;',('finance_setting_status','=',True),'&amp;',('check_officer', '=', False),('check_manager', '=', False)]}"-->
+<!--                                       class="mr-2" style="width: 40%;" readonly="1" invisible="1"/>-->
+                                <!-- 'invisible':[('employement_type_code', 'not in', ['S','C','O'])], -->
+<!--                                <field name="contract_year_month"-->
+<!--                                       attrs="{'readonly':['&amp;',('finance_setting_status','=',True),'&amp;',('check_officer', '=', False),('check_manager', '=', False)]}"-->
+<!--                                       class="mr-2" style="width: 40%;" readonly="1" invisible="1"/>-->
+                                <!--                                </div>-->
+                                <!-- 'invisible':[('employement_type_code', 'not in', ['S','C','O'])], -->
+                                <field name="end_dt"
+                                       attrs="{'required':[('employement_type_code', 'in', ['C','O'])],'readonly':['&amp;',('finance_setting_status','=',True),'&amp;',('check_officer', '=', False),('check_manager', '=', False)]}"/>
+                            </group>
+
+                            <group name="nsa_settings"
+                                   groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_nsa,kw_onboarding.group_kw_onboarding_officer"
+                                   col="4" string="IT Setting" colspan="2"
+                                   attrs="{'invisible':[('user_grp_outlook', '=', False),('user_grp_biometric', '=', False),('user_grp_domain_pwd', '=', False),('user_grp_epbx', '=', False)]}">
+                                <group colspan="2"
+                                       attrs="{'invisible':['|',('check_officer','=',True),('check_manager','=',True),('state','=','3')]}">
+                                    <field name="nsa_employement_type"
+                                           options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1"/>
+                                    <field name="csm_email_id"
+                                           attrs="{'invisible':[('user_grp_outlook', '=', False)] , 'readonly':[('other_user_status','=',True),('nsa_setting_status', '=', True)] }"
+                                           string="Outlook ID"/>
+                                    <field name="outlook_pwd" password="True"
+                                           attrs="{'invisible':[('user_grp_outlook', '=', False)] , 'readonly':[('other_user_status','=',True),('nsa_setting_status', '=', True)]}"/>
+                                    <field name="confirm_outl_pwd" password="True"
+                                           attrs="{'invisible':[('user_grp_outlook', '=', False)], 'readonly':[('other_user_status','=',True),('nsa_setting_status', '=', True)], 'required':[('outlook_pwd', '!=', False)]}"/>
+                                </group>
+                                <group colspan="2"
+                                       attrs="{'invisible':['|',('check_officer','=',True),('check_manager','=',True),('state','=','3')]}">
+                                    <field name="domain_login_id"
+                                           attrs="{'invisible':[('user_grp_domain_pwd', '=', False)] , 'readonly':[('other_user_status','=',True),('nsa_setting_status', '=', True)]}"/>
+                                    <field name="domain_login_pwd" password="True"
+                                           attrs="{'invisible':[('user_grp_domain_pwd', '=', False)] , 'readonly':[('other_user_status','=',True),('nsa_setting_status', '=', True)]}"/>
+                                    <field name="confirm_domain_pwd" password="True"
+                                           attrs="{'invisible':[('user_grp_domain_pwd', '=', False)] , 'readonly':[('other_user_status','=',True),('nsa_setting_status', '=', True)], 'required':[('domain_login_pwd', '!=', False)]}"/>
+                                </group>
+                                <group colspan="2"
+                                       attrs="{'invisible':['|',('check_officer','=',True),('check_manager','=',True),('state','=','3')]}">
+                                    <field name="biometric_id"
+                                           attrs="{'invisible':[('user_grp_biometric', '=', False)]  , 'readonly':[('other_user_status','=',True),('nsa_setting_status', '=', True)]}"/>
+                                    <field name="epbx_no"
+                                           attrs="{'invisible':[('user_grp_epbx', '=', False)] , 'readonly':[('other_user_status','=',True),('nsa_setting_status', '=', True)]}"/>
+                                    <field name="it_join_date" readonly="1"
+                                           groups="kw_onboarding.group_kw_onboarding_nsa"/>
+                                </group>
+
+                            </group>
+                            <!-- ('display_id_card', '=',False),'|', -->
+                            <group col="2"
+                                   groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_admin,kw_onboarding.group_kw_onboarding_officer"
+                                   name="admin_settings" string="Admin Setting"
+                                   attrs="{'invisible':[('user_grp_id_card', '=', False)]}">
+                                <field name="admin_join_date" readonly="1"
+                                       groups="kw_onboarding.group_kw_onboarding_admin"/>
+                                <field name="card_type" widget="radio" options="{'horizontal': true}"
+                                       attrs="{'invisible':['|',('user_grp_id_card', '=', False),'&amp;','|',('check_officer','=',True),('check_manager','=',True),('state','=','3')], 'readonly':[('other_user_status','=',True),('admin_setting_status', '=', True)]}"/>
+                                <field name="id_card_no"
+                                       attrs="{'invisible':['|',('user_grp_id_card', '=', False),'&amp;','|',('check_officer','=',True),('check_manager','=',True),('state','=','3')], 'readonly':[('other_user_status','=',True),('admin_setting_status', '=', True)]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       domain="[('card_type', '=', card_type),('state','=','unassigned')]"/>
+                            </group>
+<!--                            <group col="2"-->
+<!--                                   groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_rcm,kw_onboarding.group_kw_onboarding_officer"-->
+<!--                                   name="rcm_settings" string="RCM Setting"-->
+<!--                                   attrs="{'invisible':[('user_grp_sbu', '=', False)]}">-->
+<!--                                <field name="division" required="0"-->
+<!--                                       options="{'no_open': True,'no_create':True,'no_edit':True}"-->
+<!--                                       attrs="{'invisible': [('dept_name', '=', False)]}"-->
+<!--                                       domain="[('parent_id','=', dept_name)]"/>-->
+<!--                                <field name="section" required="0"-->
+<!--                                       options="{'no_open': True,'no_create':True,'no_edit':True}"-->
+<!--                                       attrs="{'invisible': [('division', '=', False)]}"-->
+<!--                                       domain="[('parent_id','=', division)]"/>-->
+<!--                                <field name="practise" required="0"-->
+<!--                                       options="{'no_open': True,'no_create':True,'no_edit':True}"-->
+<!--                                       attrs="{'invisible': [('section', '=', False)]}"-->
+<!--                                       domain="[('parent_id','=', section)]"/>-->
+<!--                                <field name="sbu_type" widget='radio' options="{'horizontal': true}"-->
+<!--                                       attrs="{'invisible':['|',('user_grp_sbu', '=', False),'&amp;','|',('check_officer','=',True),('check_manager','=',True),('state','=','3')], 'readonly':[('other_user_status','=',True),('rcm_setting_status', '=', True)]}"/>-->
+<!--                                <field name="sbu_master_id" required="0"-->
+<!--                                       attrs="{'invisible': ['|',('sbu_type','=',False),'|',('user_grp_sbu', '=', False),'&amp;','|',('check_officer','=',True),('check_manager','=',True),('state','=','3')], 'readonly':[('other_user_status','=',True),('rcm_setting_status', '=', True)]}"-->
+<!--                                       domain="[('type','=',sbu_type)]"-->
+<!--                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>-->
+<!--                                <field name="tmp_admin_auth" options="{'no_open': True,'no_create':True,'no_edit':True}"-->
+<!--                                       string="Reporting Authority"-->
+<!--                                       attrs="{'invisible':['|',('user_grp_sbu', '=', False),'&amp;','|',('check_officer','=',True),('check_manager','=',True),('state','=','3')], 'readonly':[('other_user_status','=',True),('rcm_setting_status', '=', True)]}"/>-->
+<!--                                <field name="tmp_func_auth" options="{'no_open': True,'no_create':True,'no_edit':True}"-->
+<!--                                       attrs="{'invisible':['|',('user_grp_sbu', '=', False),'&amp;','|',('check_officer','=',True),('check_manager','=',True),('state','=','3')], 'readonly':[('other_user_status','=',True),('rcm_setting_status', '=', True)]}"/>-->
+<!--                            </group>-->
+                        </group>
+
+                        <!-- Notebook :start -->
+                        <notebook
+                                groups="kw_onboarding.group_kw_onboarding_manager,kw_onboarding.group_kw_onboarding_officer"
+                                attrs="{'invisible':[('create_full_profile', '=', False)]}">
+                            <!-- Personal details page : start-->
+                            <page name="personal_information" string="Personal Details">
+                                <group>
+                                    <group>
+                                        <field name="applicant_father_name"
+                                               attrs="{'required':[('create_full_profile', '=', True)]}"/>
+                                        <field name="applicant_father_dob" options="{'datepicker':{'maxDate': 'now'}}"
+                                               disabled="disabled"/>
+                                        <field name="applicant_mother_name"
+                                               attrs="{'required':[('create_full_profile', '=', True)]}"/>
+                                        <field name="applicant_mother_dob" options="{'datepicker':{'maxDate': 'now'}}"
+                                               disabled="disabled"/>
+                                        <field name="birthday" options="{'datepicker':{'maxDate': 'now'}}"
+                                               disabled="disabled"
+                                               attrs="{'required':[('create_full_profile', '=', True)]}"/>
+                                        <field name="gender" attrs="{'required':[('create_full_profile', '=', True)]}"/>
+                                        <field name="marital" attrs="{'required':[('create_full_profile', '=', True)]}"
+                                               options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="marital_code" invisible="1"/>
+                                        <field name="wedding_anniversary"
+                                               attrs="{'invisible': [('marital_code', 'not in', ['M', 'C'])],'required': [('marital_code', 'in', ['M', 'C'])]}"
+                                               options="{'datepicker':{'maxDate': 'now'}}"/>
+                                        <field name="blood_group"
+                                               attrs="{'required':[('create_full_profile', '=', True)]}"
+                                               options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="country_id"
+                                               attrs="{'required':[('create_full_profile', '=', True)]}"
+                                               options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="mother_tounge_ids"
+                                               attrs="{'required':[('create_full_profile', '=', True)]}"
+                                               options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="will_travel" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="travel_abroad" widget="radio" options="{'horizontal': true}"
+                                               attrs="{'invisible':[('will_travel','=','0')]}"/>
+                                        <field name="travel_domestic" widget="radio" options="{'horizontal': true}"
+                                               attrs="{'invisible':[('will_travel','=','0')]}"/>
+                                    </group>
+                                    <group>
+                                        <field name="emp_religion"
+                                               attrs="{'required':[('create_full_profile', '=', True)]}"
+                                               options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="whatsapp_no"
+                                               attrs="{'required':[('create_full_profile', '=', True)]}"/>
+                                        <field name="emgr_contact"
+                                               attrs="{'required':[('create_full_profile', '=', True)]}"/>
+                                        <field name="emgr_rel"
+                                               options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                               attrs="{'required':[('create_full_profile', '=', True)]}"/>
+                                        <field name="emgr_phone"
+                                               attrs="{'required':[('create_full_profile', '=', True)]}"/>
+                                        <field name="linkedin_url"
+                                               attrs="{'required':[('create_full_profile', '=', True)]}"/>
+                                        <field name="medical_certificate" widget="FieldBinary"
+                                               filename="certificate_name" class="oe_avatar"
+                                               options="{'preview_image':'image'}"/>
+                                        <field name="certificate_name" invisible="1"/>
+                                    </group>
+                                    <group>
+                                    </group>
+                                    <group>
+                                          <field name="appli_differently_abled"
+                                               attrs="{'required':[('create_full_profile', '=', True)]}"/>
+                                          <field name="appli_blind"
+                                                 attrs="{'required':[('create_full_profile', '=', True)],'invisible':[('appli_differently_abled', 'in', ['No',False])]}"/>
+                                          <field name="appli_deaf"
+                                               attrs="{'required':[('create_full_profile', '=', True)],'invisible':[('appli_differently_abled', 'in', ['No',False])]}"/>
+                                          <field name="appli_dumb"
+                                               attrs="{'required':[('create_full_profile', '=', True)],'invisible':[('appli_differently_abled', 'in', ['No',False])]}"/>
+                                          <field name="appli_orthopedically"
+                                               attrs="{'required':[('create_full_profile', '=', True)],'invisible':[('appli_differently_abled', 'in', ['No',False])]}"/>
+                                          <field name="appli_of_disability"
+                                               attrs="{'required':[('create_full_profile', '=', True)],'invisible':[('appli_differently_abled', 'in', ['No',False])]}"/>
+                                    </group>
+                                </group>
+                                <group string="Bank Information:">
+                                   <field name="personal_bank_name"/>
+                                   <field name="personal_bank_account"/>
+                                   <field name="personal_bank_ifsc"/>
+                                </group>
+                                <group string="Contact Information">
+                                    <!-- <field name="address_ids" /> -->
+                                    <group>
+                                        <label for="street" string="Present Address"/>
+                                        <div class="o_address_format">
+                                            <field name="present_addr_street" placeholder="Address Line 1..."
+                                                   class="o_address_street"/>
+                                            <field name="present_addr_street2" placeholder="Address Line 2..."
+                                                   class="o_address_street"/>
+                                            <field name="present_addr_country_id" placeholder="Country"
+                                                   class="o_address_country" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                            <field name="present_addr_city" placeholder="City" class="o_address_city"/>
+                                            <field name="present_addr_state_id" class="o_address_state"
+                                                   placeholder="State" options="{'no_open': True}"/>
+                                            <field name="present_addr_zip" placeholder="ZIP" class="o_address_zip"
+                                                   attrs="{'required':[('create_full_profile', '=', True)]}"/>
+                                        </div>
+                                    </group>
+                                    <group>
+                                        <field name="same_address"/>
+                                        <label for="street" string="Permanent Address"/>
+                                        <div class="o_address_format">
+                                            <field name="permanent_addr_street" placeholder="Address Line 1..."
+                                                   class="o_address_street"/>
+                                            <field name="permanent_addr_street2" placeholder="Address Line 2..."
+                                                   class="o_address_street"/>
+                                            <field name="permanent_addr_country_id" placeholder="Country"
+                                                   class="o_address_country" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                            <field name="permanent_addr_city" placeholder="City"
+                                                   class="o_address_city"/>
+                                            <field name="permanent_addr_state_id" class="o_address_state"
+                                                   placeholder="State" options="{'no_open': True}"/>
+                                            <field name="permanent_addr_zip" placeholder="ZIP" class="o_address_zip"
+                                                   attrs="{'required':[('create_full_profile', '=', True)]}"/>
+                                        </div>
+                                    </group>
+                                </group>
+                                <group string="Language Known:">
+                                    <field name="known_language_ids"/>
+                                </group>
+                                <group>
+                                   <group attrs="{'invisible':[('state', '=', '1')]}">
+                                          <field name="medical_doc_validate" widget="radio"  options="{'horizontal': true}"/>
+                                          <field name="medical_doc_not_valid_date" attrs="{'invisible':[('medical_doc_validate', 'in', ['Validated',False])]}"/>
+                                          <field name="medical_doc_remark" attrs="{'invisible':[('medical_doc_validate', 'in', ['Validated',False])]}"/>
+                                          <!-- <field name="personal_doc_valid_bool"/>
+                                          <field name="edu_doc_valid_bool"/>
+                                          <field name="work_doc_valid_bool"/>
+                                          <field name="identity_doc_valid_bool"/> -->
+                                   </group>
+                                </group>
+                            </page>
+                            <!-- Personal details page : End-->
+
+                            <!-- Work Experience Details page : Start-->
+                            <page string="Work Experience Details">
+                                <group>
+                                    <field name="experience_sts"/>
+                                    <field name="work_experience_ids"
+                                           attrs="{'invisible':[('experience_sts', 'in', ['1',False])]}"/>
+                                </group>
+                                <group attrs="{'invisible':[('experience_sts', 'in', ['1',False])]}">
+                                   <group>
+                                          <field name="previous_emp_code"/>
+                                          <field name="previous_date_of_relieving"/>
+                                          <field name="reason_for_leaving"/>
+
+                                          <field name="previous_ra"/>
+                                          <field name="previous_ra_mail"/>
+                                          <field name="previous_ra_phone"/>
+                                          <field name="previous_ra_designation"/>
+
+                                          <field name="previous_hr_name"/>
+                                          <field name="previous_hr_mail"/>
+                                          <field name="previous_hr_phone"/>
+                                          <field name="previous_salary_per_month"/>
+
+                                   </group> 
+                                   <group>
+                                        <field name="previous_exit_formalities_completion" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="reason_for_not_complete" attrs="{'invisible':[('previous_exit_formalities_completion', 'in', ['Yes',False])]}"/>
+
+                                        <field name="previous_payslip_available" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="reason_for_not_available" attrs="{'invisible':[('previous_payslip_available', 'in', ['Yes',False])]}"/>
+
+                                       <field name="uploaded_payslip_doc1" attrs="{'invisible':[('previous_payslip_available', 'in', ['No'])]}" widget="FieldBinary"
+                                               filename="payslip_filename1" class="oe_avatar"
+                                               options="{'preview_image':'image'}"/>
+                                        <field name="payslip_filename1" invisible="1"/>
+                                       <field name="uploaded_payslip_doc2" attrs="{'invisible':[('previous_payslip_available', 'in', ['No'])]}" widget="FieldBinary"
+                                               filename="payslip_filename2" class="oe_avatar"
+                                               options="{'preview_image':'image'}"/>
+                                        <field name="payslip_filename2" invisible="1"/>
+                                       <field name="uploaded_payslip_doc3" attrs="{'invisible':[('previous_payslip_available', 'in', ['No'])]}" widget="FieldBinary"
+                                               filename="payslip_filename3" class="oe_avatar"
+                                               options="{'preview_image':'image'}"/>
+                                        <field name="payslip_filename3" invisible="1"/>
+
+                                        <field name="previous_relieving_letter" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="reason_for_not_having_relieving_letter" attrs="{'invisible':[('previous_relieving_letter', 'in', ['Yes',False])]}"/>
+                                   </group>      
+                                </group>
+                                <group>
+                                   <group  attrs="{'invisible':[('state', '=', '1')]}">
+                                          <field name="work_ex_doc" widget="radio"  options="{'horizontal': true}"/>
+                                          <field name="work_ex_not_valid_date" attrs="{'invisible':[('work_ex_doc', 'in', ['Validated',False])]}"/>
+                                          <field name="work_ex_remark" attrs="{'invisible':[('work_ex_doc', 'in', ['Validated',False])]}"/>
+                                   </group>
+                                </group>
+                            </page>
+                            <!-- Work Experience Details page : End-->
+
+                            <!-- Educational Details page : Start-->
+                            <page string="Educational Details">
+                                <group >
+                                    <field name="educational_ids" />
+
+                                </group>
+                                <group>
+                                   <group  attrs="{'invisible':[('state', '=', '1')]}">
+                                          <field name="edu_doc_valid" widget="radio"  options="{'horizontal': true}"/>
+                                          <field name="edu_doc_not_valid_date" attrs="{'invisible':[('edu_doc_valid', 'in', ['Validated',False])]}"/>
+                                          <field name="edu_remark" attrs="{'invisible':[('edu_doc_valid', 'in', ['Validated',False])]}"/>
+                                   </group>
+                                </group>
+                            </page>
+                            <!-- Educational Details page : End-->
+
+                            <!-- Identification Details page : Start-->
+                            <page string="Identification Details">
+                                <group>
+                                    <field name="identification_ids" />
+                                </group>
+                                <group>
+                                   <group  attrs="{'invisible':[('state', '=', '1')]}">
+                                          <field name="identiy_doc_valid" widget="radio"  options="{'horizontal': true}"/>
+                                          <field name="identiy_valid_date" attrs="{'invisible':[('identiy_doc_valid', 'in', ['Validated',False])]}"/>
+                                          <field name="identity_remark" attrs="{'invisible':[('identiy_doc_valid', 'in', ['Validated',False])]}"/>
+                                   </group>
+                                </group>
+                            </page>
+                            <!-- Identification Details page : End-->
+                        </notebook>
+                        <!-- Notebook :End -->
+                    </sheet>
+                     <group>
+                        <div class="oe_chatter">
+                            <field name="message_follower_ids" widget="mail_followers" />
+                            <field name="activity_ids" widget="mail_activity" />
+                            <field name="message_ids" widget="mail_thread" />
+                        </div>
+                    </group>
+                </form>
+            </field>
+        </record>
+        <!-- explicit form view definition of kwonboard enrollment : Ending-->
+
+        <!-- explicit tree view definition of kwonboard_language_known : Opening-->
+        <record id="kwonboard_language_known_view_tree" model="ir.ui.view">
+            <field name="name">Languages Known Tree</field>
+            <field name="model">kwonboard_language_known</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="language_id"/>
+                    <field name="reading_status"/>
+                    <field name="writing_status"/>
+                    <field name="speaking_status"/>
+                    <field name="understanding_status"/>
+                </tree>
+            </field>
+        </record>
+        <!-- explicit tree view definition of kwonboard_language_known : Ending-->
+
+        <!-- explicit form view definition of kwonboard_language_known : Opening-->
+        <record id="kwonboard_language_known_view_form" model="ir.ui.view">
+            <field name="name">Languages Known Form</field>
+            <field name="model">kwonboard_language_known</field>
+            <field name="arch" type="xml">
+                <form string="Languages Known">
+                    <script>
+                        $(document).ready(function(){
+                            $(".modal-title").show();
+                        });
+                    </script>
+                    <group >
+                        <field name="language_id"/>
+                        <field name="reading_status" widget="radio" options="{'horizontal': true}" />
+                        <field name="writing_status" widget="radio" options="{'horizontal': true}" />
+                        <field name="speaking_status" widget="radio" options="{'horizontal': true}" />
+                        <field name="understanding_status" widget="radio" options="{'horizontal': true}" />
+                    </group>
+                </form>
+            </field>
+        </record>
+        <!-- explicit form view definition of kwonboard_language_known : Ending-->
+
+        <!-- explicit form view definition of kwonboard_identity_docs : Opening-->
+        <record id="kwonboard_identity_docs_view_form" model="ir.ui.view">
+            <field name="name">Indetification Details Form</field>
+            <field name="model">kwonboard_identity_docs</field>
+            <field name="arch" type="xml">
+                <form string="Indetification Details">
+                    <sheet>
+                        <group >
+                            <group >
+                                <field name="name"/>
+                                <field name="date_of_issue" options="{'datepicker':{'maxDate': 'now'}}"/>
+                                <field name="renewal_sts"/>
+                            </group>
+                            <group >
+                                <field name="doc_number"/>
+                                <field name="date_of_expiry"/>
+                                <field name="uploaded_doc" widget="binary" filename="filename" />
+                                <div class="file-format-note">(Only .jpeg,.png, .pdf format are allowed.Maximum file size is 4 MB) &#x2063;<span style="color:red;">*</span></div>
+                                <field name="filename" invisible="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <!-- explicit form view definition of kwonboard_identity_docs : Ending-->
+
+        <!-- explicit tree view definition of kwonboard_identity_docs : Opening-->
+        <record id="kwonboard_identity_docs_view_tree" model="ir.ui.view">
+            <field name="name">Indetification Details Tree</field>
+            <field name="model">kwonboard_identity_docs</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="doc_number"/>
+                    <field name="date_of_issue"/>
+                    <field name="date_of_expiry"/>
+                    <field name="renewal_sts"/>
+                    <field name="uploaded_doc" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+        <!-- explicit tree view definition of kwonboard_identity_docs : Ending-->
+
+        <!-- explicit form view definition of kwonboard_edu_qualification : Opening-->
+        <record id="kwonboard_edu_qualification_view_form" model="ir.ui.view">
+            <field name="name">Educational Details Form</field>
+            <field name="model">kwonboard_edu_qualification</field>
+            <field name="arch" type="xml">
+                <form string="Educational Details">
+                    <sheet>
+                        <group >
+                            <group >
+                                <field name="course_type"/>
+                                <field name="course_id"/>
+                                <field name="stream_id"/>
+                                <field name="university_name"/>
+                                <field name="passing_details"/>
+                            </group>
+                            <group >
+                                <field name="passing_year"/>
+                                <field name="division"/>
+                                <field name="marks_obtained" />
+                                <!-- <field name="uploaded_doc"/> -->
+                                <field name="filename" invisible="1"/>
+                                <field name="uploaded_doc" widget="binary" filename="filename" />
+                                <div class="file-format-note">(Only .jpeg,.png, .pdf format are allowed.Maximum file size is 4 MB) &#x2063;<span style="color:red;">*</span></div>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <!-- explicit form view definition of kwonboard_edu_qualification : Ending-->
+
+        <!-- explicit tree view definition of kwonboard_edu_qualification : Opening-->
+        <record id="kwonboard_edu_qualification_view_tree" model="ir.ui.view">
+            <field name="name">Educational Details Tree</field>
+            <field name="model">kwonboard_edu_qualification</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="course_type"/>
+                    <field name="course_id"/>
+                    <field name="stream_id"/>
+                    <field name="university_name"/>
+                    <field name="passing_year"/>
+                    <field name="uploaded_doc" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+        <!-- explicit tree view definition of kwonboard_edu_qualification : Ending-->
+
+        <!-- explicit form view definition of kwonboard_work_experience : Opening-->
+        <record id="kwonboard_work_experience_view_form" model="ir.ui.view">
+            <field name="name">Work Experience Form</field>
+            <field name="model">kwonboard_work_experience</field>
+            <field name="arch" type="xml">
+                <form string="Work Experience">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="country_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="designation_name"/>
+                                <field name="organization_type"/>
+                            </group>
+                            <group>
+                                <field name="name"/>
+                                <field name="industry_type"/>
+                                <field name="effective_from" options="{'datepicker':{'maxDate': 'now'}}"/>
+                                <field name="effective_to" options="{'datepicker':{'maxDate': 'now'}}"/>
+                                <field name="uploaded_doc" widget="binary" filename="filename"/>
+                                <div class="file-format-note">(Only .jpeg,.png, .pdf format are allowed.Maximum file size is 4 MB) &#x2063;<span style="color:red;">*</span></div>
+                                <field name="filename" invisible="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <!-- explicit form view definition of kwonboard_work_experience : Ending-->
+
+        <!-- explicit tree view definition of kwonboard_work_experience : Opening-->
+        <record id="kwonboard_work_experience_view_tree" model="ir.ui.view">
+            <field name="name">Work Experience Tree</field>
+            <field name="model">kwonboard_work_experience</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="country_id"/>
+                    <field name="name"/>
+                    <field name="designation_name"/>
+                    <field name="organization_type"/>
+                    <field name="industry_type"/>
+                    <field name="effective_from"/>
+                    <field name="effective_to"/>
+                </tree>
+            </field>
+        </record>
+        <!-- explicit tree view definition of kwonboard_work_experience : Ending-->
+
+        <record id="kwonboard_enrollment_view_search" model="ir.ui.view">
+            <field name="name">kwonboard_enrollment.search</field>
+            <field name="model">kwonboard_enrollment</field>
+            <field name="arch" type="xml">
+                <search string="Search">
+                    <field name="name" string="Candidate"/>
+                    <filter name="enroll" string="Enrolled" domain="[('state','=','1')]"/>
+                    <filter name="prof_submit" string="Profile Submitted" domain="[('state','=','2')]"/>
+                    <filter name="config_map" string="Configuration Mapping" domain="[('state','=','3')]"/>
+                    <filter name="config_done" string="Configuration Done" domain="[('state','=','4')]"/>
+                    <filter name="approv" string="Approved" domain="[('state','=','5')]"/>
+                    <filter name="reject" string="Rejected" domain="[('state','=','6')]"/>
+                    <group expand="0" string="Group By">
+                        <filter name="state" string="Status" context="{'group_by': 'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="kwonboard_enrollment_view_form_inherit" model="ir.ui.view">
+            <field name="name">kwonboard_enrollment_form_inherit</field>
+            <field name="model">kwonboard_enrollment</field>
+            <field name="inherit_id" ref="kw_onboarding.kwonboard_enrollment_view_form" />
+            <field name="groups_id" eval="[(6, 0, [ref('kw_onboarding.group_kw_onboarding_manager'),ref('kw_onboarding.group_kw_onboarding_officer')])]" />
+            <field name="arch" type="xml">
+                <field name="location_id" position="attributes">
+                   <attribute name="readonly">0</attribute>
+                </field>
+                <field name="dept_name" position="attributes">
+                   <attribute name="readonly">0</attribute>
+                </field>
+                <field name="division" position="attributes">
+                   <attribute name="readonly">0</attribute>
+                </field>
+                <field name="section" position="attributes">
+                   <attribute name="readonly">0</attribute>
+                </field>
+                <field name="practise" position="attributes">
+                   <attribute name="readonly">0</attribute>
+                </field>
+                <field name="job_id" position="attributes">
+                   <attribute name="readonly">0</attribute>
+                </field>
+            </field>
+        </record>
+
+         <!-- Kwonboard enrollment actions window : Opening -->
+        <record model="ir.actions.act_window" id="kwonboard_enrollment_action_window">
+            <field name="name">Enrollment</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kwonboard_enrollment</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','not in',['5','6'])]</field>
+            <field name="context">{'group_check':1}</field>
+            <!-- <field name="context">{'default_enroll_id':'active_id'}</field>    -->
+            <field name="groups" eval="[(4,0,0),(4, ref('kw_onboarding.group_kw_onboarding_manager'))]"/>
+            <field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('kwonboard_enrollment_view_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('kwonboard_enrollment_view_form')})]"/>
+        </record>
+        <!-- Kwonboard enrollment actions window : Ending -->
+
+         <record id="kwonboard_enrollment_report" model="ir.ui.view">
+            <field name="name">Enrollment Report Tree</field>
+            <field name="model">kwonboard_enrollment</field>
+            <field name="arch" type="xml">
+                <tree import="false">
+                    <field name="name"/>
+                    <field name="dept_name"/>
+                    <field name="division"/>
+                    <field name="section"/>
+                    <field name="practise"/>
+                    <field name="email"/>
+                    <field name="mobile"/>
+                    <field name="state" string="Status"/>
+                    <field name="admin_setting_status" string="Admin Configuration"/>
+                    <field name="finance_setting_status" string="Finance Configuration"/>
+                    <field name="nsa_setting_status" string="IT Configuration"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kwonboard_enrollment_report_action_window">
+            <field name="name">Pre-Onboarding Report</field>
+            <field name="res_model">kwonboard_enrollment</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kwonboard_enrollment_report')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kwonboard_enrollment_view_form')})]"/>
+            <field name="domain">[('state','in',['5','6'])]</field>
+            <field name="context">{"create": False,"edit": False}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Records not available.
+                </p>
+            </field>
+        </record>
+        <!-- model.name tree view -->
+        <record id="new_kwenrollment_view_tree" model="ir.ui.view">
+            <field name="name">kwonboard_enrollment.view.tree</field>
+            <field name="model">kwonboard_enrollment</field>
+            <field eval="8" name="priority"/>
+            <field name="arch" type="xml">
+                <tree create="false" import="false">
+                    <!-- Add your fields here -->
+                    <field name="name"/>
+                    <field name="location_id"/>
+                    <field name="job_id"/>
+                    <field name="dept_name"/>
+                    <field name="division"/>
+                    <field name="section"/>
+                    <field name="practise"/>
+                    <field name="tmp_join_date"/>
+                    <!-- <field name="mobile"/> -->
+                    <field name="state" string="Status" invisible="1"/>
+                    <button name="button_take_action" type="object" string="Validate" class="oe_highlight"/>
+                </tree>
+            </field>
+        </record>
+        <!-- kwonboard_enrollment action window -->
+        <record id="new1_kwonboard_enrollment_view_action" model="ir.actions.act_window">
+            <field name="name">New Joinee</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kwonboard_enrollment</field>
+            <field name="view_mode">tree</field>
+            <field name="view_type">form</field>
+            <field name="domain">[('state','=','4')]</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('new_kwenrollment_view_tree')})]"/>
+        </record>
+              <!--##################### document download error log ######################-->
+        <record id="document_error_log_view_tree" model="ir.ui.view">
+            <field name="name">document_error_log_view_tree</field>
+            <field name="model">onboading_document_download_log</field>
+            <field eval="8" name="priority"/>
+            <field name="arch" type="xml">
+                <tree create="false" import="false" edit="false">
+                    <!-- Add your fields here -->
+                    <field name="onboarding_id"/>
+                    <field name="applicant_id"/>
+                    <field name="error_msg"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="onboarding_document_error_log_view_action" model="ir.actions.act_window">
+            <field name="name">Onboarding document Error log</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">onboading_document_download_log</field>
+            <field name="view_mode">tree</field>
+            <field name="view_type">form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('document_error_log_view_tree')})]"/>
+        </record>
+    </data>
+</odoo>

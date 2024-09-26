@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+	<record id="my_interview_view_kanban" model="ir.ui.view">
+		<field name="name">kw_meeting_schedule_events.kanban view</field>
+	    <field name="model">kw_meeting_events</field>
+	    <field name="arch" type="xml">
+	        <kanban class="oe_background_grey o_kanban_dashboard o_project_kanban o_emphasize_colors" default_order="final_date,stop desc" import="false">
+	            <field name="user_id" />
+	            <field name="name"/>
+	            <field name="categ_ids"/>
+	            <field name="start"/>
+	            <field name="stop"/>
+	            <field name="meeting_room_id"/>
+	            <field name="meeting_category"/>
+	            <field name="recurrency"/>
+	            <field name="final_date"/>
+	            <field name="display_time"/>
+	            <field name="rrule_type"/>
+	            <field name="is_meeting_responsible"/>
+	            <field name="meeting_start_status"/>
+	            <field name="recurrent_id"/>
+				<field name="check_feedback_complete_count" invisible='1'/>
+				<field name="check_feedback_pending_count" invisible='1'/>
+	            <templates>
+	                <t t-name="kanban-box">
+	                    <div class="oe_kanban_global_click">
+	                        <div class="o_project_kanban_main">
+	                            <div class="o_kanban_card_content">
+	                                <div class="o_kanban_primary_left">
+	                                    <div class="o_primary">
+	                                        <span><t t-esc="record.name.value"/></span>
+	                                        <span t-if="record.user_id">
+	                                            <strong><field name="meeting_category" /></strong>
+	                                            <strong t-if="record.recurrency.raw_value"> , Recurring (<t t-esc="record.rrule_type.raw_value"/>) </strong>
+
+	                                            <strong t-else=""> , Once </strong>
+	                                        </span>
+	                                    </div>
+	                                    <div >
+	                                        <span t-if="record.recurrency.raw_value"><i class="fa fa-clock-o" role="img" aria-label="At" title="At"/> <t t-esc="record.display_time.value"/> -  <t t-esc="record.final_date.value"/></span>
+	                                        <span t-else=""><i class="fa fa-clock-o" role="img" aria-label="At" title="At"/> <t t-esc="record.display_time.value"/> </span>
+	                                    </div>
+
+	                                </div>
+	                            </div>
+
+	                            <div class="o_kanban_record_body">
+	                                <!-- <field name="categ_ids" widget="many2many_tags" options="{'color_field': 'color'}" /> -->
+									<div class="oe_kanban_bottom_left">
+										Room: <field name="meeting_room_id" />
+									</div>
+	                            </div>
+
+	                            <div class="o_kanban_card_manage_pane dropdown-menu" role="menu">
+
+	                                <div class="row">
+	                                    <div class="col-6 mk_directory_kanban_views">
+	                                        <h6 class="dropdown-header">Views</h6>
+	                                        <a t-if="record.recurrency.raw_value" type="action" name="%(kw_meeting_schedule.action_kw_meeting_schedule_all_recurring)d" role="menuitem" class="dropdown-item">
+	                                            <i class="fa fa-repeat" /> Meetings
+	                                        </a>
+
+	                                        <a type="object" name="action_meeting_partcipants" role="menuitem" class="dropdown-item">
+	                                            <i class="fa fa-users" /> Participants
+	                                        </a>
+	                                        <a type="object" name="action_meeting_agenda" role="menuitem" class="dropdown-item">
+	                                            <i class="fa fa-calendar-check-o" /> Agenda
+	                                        </a>
+
+	                                    </div>
+	                                    <div class="col-6 border-left mk_directory_kanban_actions">
+	                                        <h6 class="dropdown-header">Actions</h6>
+	                                        <a role="menuitem" type="open" class="dropdown-item">
+	                                            <i class="fa fa-external-link" /> Open
+	                                        </a>
+	                                        <a role="menuitem" type="object" class="dropdown-item" name="action_post_your_input">
+	                                            <i class="fa fa-comments" /> Post Your Input
+	                                        </a>
+	                                       <!--  <a t-if="record.is_meeting_responsible.raw_value" context="{'reschedule_option': True}" role="menuitem" type="edit" class="dropdown-item">
+	                                            <i class="fa fa-calendar" /> Reschedule
+	                                        </a> -->
+
+	                                        <a t-if="record.is_meeting_responsible.raw_value and !record.meeting_start_status.raw_value and !record.recurrency.raw_value" role="menuitem" type="object" name="action_open_meeting_form_edit_mode" class="dropdown-item">
+	                                            <i class="fa fa-calendar" /> Reschedule
+	                                        </a>
+	                                        <a t-if="record.is_meeting_responsible.raw_value and !record.meeting_start_status.raw_value" role="menuitem" type="object" name="action_open_cancel_meeting_form" class="dropdown-item">
+	                                            <i class="fa fa-times-circle" /> Cancel <!-- <t t-esc="record.meeting_start_status.raw_value"/> -->
+	                                        </a>
+
+	                                    </div>
+	                                </div>
+
+	                            </div>
+	                            <a class="o_kanban_manage_toggle_button o_left" href="#" ><i class="fa fa-ellipsis-v" role="img" aria-label="Manage" title="Manage"/></a>
+	                        </div>
+
+	                        <div class="o_kanban_record_bottom row">
+								<div class='col-8'>
+									<button style="margin-top:5px;margin-right: 150px;" class="oe_kanban_bottom_left btn btn-success"  name="redirect_interview_feedback" type="object" attrs="{'invisible':[('is_feedbacks_completed','=',True)]}">
+										Give Feedback
+									</button>
+									<button style="margin-top:5px;margin-right: 150px;" class="oe_kanban_bottom_left btn btn-success"  name="redirect_interview_view_feedback" type="object" attrs="{'invisible':[('is_feedbacks_completed','=',False)]}">
+										View Feedback
+									</button>
+									<field name="is_feedbacks_completed" invisible='1'/>
+								</div>
+								
+	                            <!-- <div class="oe_kanban_bottom_left">
+	                                Room: <field name="meeting_room_id" />
+	                            </div> -->
+	                            <div class="oe_kanban_bottom_right">
+									<t t-if="record.check_feedback_pending_count.raw_value ">
+											<i class="fa fa-circle warning mr-1" style="color:red" />
+									</t>
+									<t t-elif="record.check_feedback_complete_count.raw_value">
+											<i class="fa fa-circle mr-1" style="color:green"/>
+									</t>
+									<a type="object" name="action_meeting_feedback" role="menuitem" title="Applicants">
+	                                    <i class="fa fa-user-circle mr-1" /> <field name="total_feedback_count"/>
+	                                </a>
+	                                <a type="object" name="action_meeting_partcipants" role="menuitem" title="Panel Member" class="ml-2">
+	                                    <i class="fa fa-users mr-1" /> <field name="total_attendee_count"/>
+	                                </a>
+	                                <img t-att-src="kanban_image('res.users', 'image_small', record.user_id.raw_value)"
+	                                     t-att-title="record.user_id.value"
+	                                    t-att-alt="record.user_id.value"
+	                                     class="oe_kanban_avatar"/>
+	                            </div>
+
+	                        </div>
+	                    </div>
+	                </t>
+	            </templates>
+	        </kanban>
+	    </field>
+	</record>
+
+	<record id="view_kw_meeting_calendar_search_applicants" model="ir.ui.view">
+       <field name="name">kw calendar.event.search</field>
+        <field name="model">kw_meeting_events</field>
+        <field name="arch" type="xml">
+			<search string="Search Meetings">
+                <field name="name" string="Meeting" filter_domain="[('name','ilike',self)]"/>
+				<field name = "applicant_names" string ="Applicant"/>
+                <field name="user_id"/>
+                <field name="start"/>
+                <field name="stop"/>
+                <field name="meeting_room_id"/>
+
+                <filter string="My Meetings" help="My Meetings" name="mymeetings" context='{"mymeetings": 1}' />
+
+                <filter string="Today's Meetings" domain="['&amp;',('start', '&lt;=',context_today().strftime('%Y-%m-%d')),('stop', '&gt;=',context_today().strftime('%Y-%m-%d'))]" name="today_meetings"/>
+
+                <filter string="Meeting Date" name="filter_start_date" date="start"/>
+
+                <filter string="Old Meetings" domain="[('stop', '&lt;',context_today().strftime('%Y-%m-%d'))]" name="old_meetings"/>
+                <filter string="UpComing Meetings" domain="[('start', '&gt;',context_today().strftime('%Y-%m-%d'))]" name="upcoming_meetings"/>
+
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Responsible" name="responsible" domain="[]" context="{'group_by':'user_id'}"/>
+                    <filter string="Privacy" name="privacy" domain="[]" context="{'group_by':'privacy'}"/>
+                    <filter name="group_meeting_room" string="Meeting Room" context="{'group_by':'meeting_room_id'}"/>
+                    <filter name="group_meeting_category" string="Meeting Category" context="{'group_by':'meeting_category'}"/>
+                    <filter name="group_meeting_location" string="Location" context="{'group_by':'location_id'}"/>
+                    <filter name="group_meeting_start_day" string="Start Day" domain="[]" context="{'group_by':'start:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+	<record id="action_window_kw_meeting_schedule_my_interviews" model="ir.actions.act_window">
+	  <field name="name">My Interviews</field>
+	  <field name="res_model">kw_meeting_events</field>
+	  <field name="view_mode">kanban,form</field>
+	  <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'kanban', 'view_id': ref('my_interview_view_kanban')}),
+                ]"/>
+	  <field name="search_view_id" ref="view_kw_meeting_calendar_search_applicants"/>
+	  <field name="context">{'default_is_meeting_responsible': True,'my_all_meetings':True,}</field>
+	  <field name="domain">[('state', 'not in',['cancelled']),('meeting_type_id.code','=', 'interview')]</field>
+	  <field name="help" type="html">
+		  <p class="o_view_nocontent_smiling_face">
+			  Schedule a new meeting
+		  </p>
+		  <p>
+			  The calendar is shared between employees and fully integrated with
+			  other applications such as the employee leaves or the business
+			  opportunities.
+		  </p>
+	  </field>
+	</record>
+	    <menuitem name="My Interviews"
+	              action="action_window_kw_meeting_schedule_my_interviews"
+	              id="kw_meeting_schedule_my_interview_menu"
+	              sequence="3"
+	              parent="hr_recruitment.menu_hr_recruitment_root"/>
+	</data>
+</odoo>

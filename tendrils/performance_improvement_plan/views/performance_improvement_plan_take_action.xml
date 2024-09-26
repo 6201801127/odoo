@@ -1,0 +1,162 @@
+<odoo>
+    <data>
+        <!-- explicit list view definition -->
+        <record id="performance_improvement_plan_takeaction_form" model="ir.ui.view">
+            <field name="name">performance_improvement_plan form</field>
+            <field name="model">performance_improvement_plan</field>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                       $(document).ready(function(){ 
+                            status =  $("[aria-pressed=true]").text().trim();
+                            if ( (status === 'Closed' || status === 'Recommend PIP')){
+                                $('.o_form_button_edit').hide();
+                                $('.o_form_button_create').hide();
+                            }
+                        });
+
+                    </script>
+                    <style>
+                        .o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 333px;}
+                    </style>
+                <header>
+                    <button name="forward_to_HR" string="Submit" type="object" class="btn-primary"
+                            attrs="{'invisible': ['|',('status', 'in', ['Recommend PIP','Closed','Recommend Training']),('check_sbu','=',False)]}"
+                            context="{'current_record':id,'button':'approve'}" />
+
+                    <!-- <button name="forward_to_lk" type="object" string="Recommend Training" class="oe_highlight" attrs="{'invisible': [('suggestion_reviewer_sbu', '!=', 'RT')]}"/> -->
+
+                    <button name="send_to_hod" string="Submit" type="object" class="btn-primary"
+                            attrs="{'invisible': ['|','|',('status', 'in', ['Recommend PIP','Closed','Recommend Training']),('check_hod','=',False),('check_sbu','=',True)]}"
+                            context="{'current_record':id,'button':'hod_approve'}"/>
+                    <field name="status" widget="statusbar" statusbar_visible="Draft,Applied,Recommend PIP,Closed,Recommend Training"/>
+
+                    
+                </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button class="oe_stat_button" style="color: #108fbb !important;float:right;height=80px;"
+                                name="button_emp_pip_details" type="object" icon="fa-info"  groups="performance_improvement_plan.group_pip_manager,performance_improvement_plan.group_pip_hr_user">
+                            <span class="o_stat_text font-weight-bold">
+                                View Details
+                            </span>
+                            </button>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="reference" readonly="1"/>
+                                <field name="applied_date" string="Applied Date" readonly="1"/>
+                                 <field name="raised_by" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       readonly="1" invisible="1"/>
+                                <!-- <field name="request_for" widget="radio" options="{'horizontal': true}" readonly="1" attrs="{'invisible':[('request_for','=',False)]}"/> -->
+                                <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                        force_save="1"
+                                attrs="{'readonly':[('status','not in',['Draft'])],'invisible':[('project_id','=',False)]}"/>
+                                <field name="project_code" force_save="1" attrs="{'invisible':[('project_code','=',False)]}"/>
+                                <field name="employee_id"
+                                       attrs="{'readonly':[('status','not in',['Draft'])]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="designation_id" options="{'no_open': True,'no_create':True,'no_edit':True}" force_save = "1" readonly="1"/>
+                                 <field name="department_id" options="{'no_open': True,'no_create':True,'no_edit':True}" force_save = "1" readonly="1"/>
+                                <field name="division_id" options="{'no_open': True,'no_create':True,'no_edit':True}" force_save = "1" readonly="1"/>
+                                <field name="emp_sbu_master_id" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'invisible':[('emp_sbu_master_id','=',False)]}" readonly="1"/>
+                                
+                                <field name="performance_reason" widget='many2many_tags' options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1"/>
+                                <field name="remarks" string="Description of reason" readonly="1" attrs="{'invisible':['|',('check_sbu','=',True),('remarks','=',False),'&amp;',('status', 'in', ['Recommend PIP'])]}"/>
+                                <field name="remarks_pm" string="Description of reason" readonly="1"  attrs="{'invisible':[('check_sbu','=',False)]}"/>
+                                <field name="suggestion_pm" readonly="1"  attrs="{'invisible':[('check_sbu','=',False)]}"/>
+                                <field name="suggestion" readonly="1"  attrs="{'invisible':['|',('check_sbu','=',True),('check_hr','=',False),'&amp;',('suggestion','=',False)]}"/>
+                                <field name="documents_pm_doc" attrs="{'readonly':[('status','not in',['Draft'])]}">
+                                    <tree editable="bottom">
+                                        <field name='ref_id' options="{'no_open': True,'no_create':True,'no_edit':True}" invisible="1"/>
+                                        <field name='documents' widget="binary" filename="file_name"/>
+                                        <field name="file_name" invisible="1"/>
+                                    </tree>
+                                    <form>
+                                        <field name='documents' widget="binary"  filename="file_name"/>
+                                    </form>
+                                </field>
+                                <field name="file_name" invisible="1"/>
+                                <!-- <field name="documents_pm_doc" widget="binary" filename="file_name" attrs="{'invisible':[('check_hr','=',False)]}" readonly="1"/> -->
+
+
+                                <field name="suggestion_reviewer_sbu" widget="radio" options="{'horizontal': true}" attrs="{'required': ['|',('status', 'in', ['Applied']),('check_sbu','=',True)],'invisible':[('check_sbu','=',False)],
+                                    'readonly':[('status', 'in', ['Recommend PIP','Closed','Recommend Training'])]}"/>
+                                <field name="suggestion_reviewer" widget="radio" options="{'horizontal': true}" attrs="{'required': ['|',('status', 'in', ['Applied']),('check_hod','=',True)],'readonly':[('status', 'in', ['Recommend PIP','Closed','Recommend Training'])],'invisible':['|',('check_sbu','=',True),'&amp;',('suggestion_reviewer','=',False),('status', 'in', ['Recommend PIP'])]}" />
+                                <field name="suggestion_hod_sbu" readonly="1" invisible="1"/>
+                                <field name="show_add_skill" invisible="1"/>
+                                <field name="show_target_date" invisible="1"/>
+                                <field name="add_skill" string="Skill"  options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'invisible':['|',('show_add_skill','=',False),('show_target_date','=',False)],'readonly':[('status', 'in', ['Recommend PIP','Closed','Recommend Training'])]}"/>
+                                <field name="target_date" attrs="{'required': ['|',('suggestion_reviewer', '=', 'RT'),('suggestion_reviewer_sbu','=','RT')],'invisible':['|',('show_add_skill','=',False),('show_target_date','=',False)],'readonly':[('status', 'in', ['Recommend PIP','Closed','Recommend Training'])]}"/>
+                               
+                                <field name="date_of_action" string="Approved date" invisible="1" />
+                                <field name ='approve_remarks' attrs="{'required': ['|','|',('status', 'in', ['Applied']),('check_hod','=',True),('check_sbu','=',True)],'readonly':[('status', 'in', ['Recommend PIP','Closed','Recommend Training'])],'invisible':[('approve_remarks','=',False),('status', 'in', ['Recommend PIP'])]}"/>
+                                <field name="pending_at" invisible="1"/>
+                                <field name="check_sbu" invisible="1"/>
+                                <field name="check_pm" invisible="1"/>
+                                <field name="check_reviewer" invisible="1"/>
+                                <field name="rcm_group" invisible="1"/>
+                                <field name="check_hod" invisible="1"/>
+                                <field name="check_hr" invisible="1"/>
+
+                            </group>
+                        </group>
+                    </sheet>
+                    <group>
+                        <div class="oe_chatter">
+                            <field name="message_follower_ids" widget="mail_followers" />
+                            <field name="activity_ids" widget="mail_activity" />
+                            <field name="message_ids" widget="mail_thread" />
+                        </div>
+                    </group>
+
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="performance_improvement_plan_takeaction_list">
+            <field name="name">performance_improvement_plan list</field>
+            <field name="model">performance_improvement_plan</field>
+            <field name="arch" type="xml">
+                <tree create='false' import="false">
+                    <field name="reference" />
+                    <field name="employee_id" class="font-weight-bold"/>
+                    <field name="designation_id"/>
+                    <field name="project_id" invisible='1'/>
+                    <field name="project_code" invisible='1'/>
+                    <field name="performance_reason" widget='many2many_tags'/>
+                    <field name="raised_by"/>
+                    <field name="applied_date" string="Applied Date"/>
+                    <field name="status"/>
+                    <field name="pending_at" invisible="1"/>
+                    <field name="check_sbu" invisible="1"/>
+                    <field name="pending_at_txt" string="Pending At"/>
+                    <field name="approved_user_id" invisible="1"/>
+                    <!-- <field name="approved_by_txt"/> -->
+                    <button name="take_action_pip" string="Take Action" type="object" class="btn-primary"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- actions opening views on models -->
+        <record id="performance_improvement_plan_take_action" model="ir.actions.act_window">
+            <field name="name">Take Action</field>
+            <field name="res_model">performance_improvement_plan</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="domain">[('status','!=','Draft'),('pending_at.user_id','=',uid)]</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('performance_improvement_plan_takeaction_list')}),
+               ]"/>
+                <!-- (0, 0, {'view_mode': 'form', 'view_id': ref('performance_improvement_plan_takeaction_form')}) -->
+        </record>
+
+        <menuitem name="Take Action"
+                  id="performance_improvement_plan_take_action_menu"
+                  parent='pip_child_menu'
+                  action='performance_improvement_plan_take_action'
+                  groups="performance_improvement_plan.group_pip_user,performance_improvement_plan.group_pip_manager,performance_improvement_plan.group_pip_hr_user"
+                  sequence="1"/>
+
+    </data>
+</odoo>

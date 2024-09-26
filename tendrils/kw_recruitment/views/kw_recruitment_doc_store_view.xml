@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <!-- Attachment -->
+        <record id="view_recruitment_attachment_form" model="ir.ui.view">
+            <field name="model">recruitment_attachment</field>
+            <field name="arch" type="xml">
+                <form string="Attachments">
+                   <sheet>
+                    <label for="name" class="oe_edit_only"/>
+                    <h1>
+                        <field name="name"/>
+                    </h1>
+                    <group>
+                        <group>
+                            <field name="type"/>
+                            <field name="datas" filename="datas_fname" attrs="{'invisible':[('type','=','url')]}"/>
+                            <field name="datas_fname" invisible="1" attrs="{'invisible':[('type','=','url')]}" class="oe_inline oe_right"/>
+                            <field name="url" widget="url" attrs="{'invisible':[('type','=','binary')]}"/>
+                            <field name="mimetype" groups="base.group_no_one"/>
+                        </group>
+                        <group string="History" groups="base.group_no_one">
+                            <field name="res_model"/>
+                            <label for="create_uid" string="Creation"/>
+                            <div name="creation_div">
+                                <field name="create_uid" readonly="1" class="oe_inline"/> 
+                                <field name="create_date" readonly="1" class="oe_inline"/>
+                            </div>
+                        </group>
+                        <group name="description_group" string="Description" groups="base.group_no_one"  colspan="4">
+                            <field name="description" nolabel="1"/>
+                        </group>
+                    </group>
+                  </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_attachment_search" model="ir.ui.view">
+            <field name="model">recruitment_attachment</field>
+            <field name="arch" type="xml">
+                <search string="Attachments">
+                    <field name="name" filter_domain="['|', ('name','ilike',self), ('datas_fname','ilike',self)]" string="Attachment"/>
+                    <field name="create_date"/>
+                    <filter name="my_documents_filter"
+                        string="My Document(s)"
+                        domain="[('create_uid','=',uid)]"
+                        help="Filter on my documents"/>
+                    <filter name="url_filter" string="URL" domain="[('type', '=', 'url')]"/>
+                    <filter name="binary_filter" string="Stored" domain="[('type', '=', 'binary')]"/>
+                    <separator/>
+                    <field name="create_uid" string="Created by"/>
+                    <field name="type"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="view_recruitment_attachment_tree" model="ir.ui.view">
+            <field name="model">recruitment_attachment</field>
+            <field name="arch" type="xml">
+                <tree string="Attachments">
+                    <field name="name"/>
+                    <field name="datas_fname"/>
+                    <field name="type"/>
+                    <field name="create_uid"/>
+                    <field name="create_date"/>
+                </tree>
+            </field>
+        </record>
+        <record id="kw_recruitment_attachment_kanban_view" model="ir.ui.view">
+            <field name="name">Recruitment CV</field>
+            <field name="model">recruitment_attachment</field>
+            <field name="arch" type="xml">
+                        <kanban>
+                            <field name="id"/>
+                            <field name="mimetype"/>
+                            <field name="type"/>
+                            <field name="datas_fname"/>
+                            <field name="create_uid"/>
+                            <field name="url"/>
+                            <field name="type"/>
+                            <field name="create_date"/>
+                            <field name="name"/>
+                            <!-- <field name="res_model_name"/> -->
+                            <!-- <field name="res_name"/> -->
+                            <templates>
+                                <t t-name="kanban-box">
+                                    <div class="oe_kanban_global_area o_kanban_attachment oe_kanban_global_click">
+                                        <div class="o_kanban_image">
+                                            <div class="o_kanban_image_wrapper">
+                                                <t t-set="webimage" t-value="new RegExp('image.*(gif|jpeg|jpg|png)').test(record.mimetype.value)"/>
+                                                <div t-if="record.type.raw_value == 'url'" class="o_url_image fa fa-link fa-3x text-muted"/>
+                                                <img t-elif="webimage" t-attf-src="/web/image/#{record.id.raw_value}?field=thumbnail" width="100" height="100" alt="Document" class="o_attachment_image"/>
+                                                <div t-else="!webimage" class="o_image o_image_thumbnail" t-att-data-mimetype="record.mimetype.value"/>
+                                            </div>
+                                        </div>
+                                        <div class="o_kanban_details">
+                                            <div class="o_kanban_details_wrapper">
+                                                <div t-att-title="record.datas_fname.raw_value" class="o_kanban_record_title">
+                                                    <t t-if="record.type.raw_value == 'url'">
+                                                        <field name="name" class="o_text_overflow"/>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <field name="datas_fname" class="o_text_overflow"/>
+                                                    </t>
+                                                </div>
+                                                <!-- <div class="o_kanban_record_body">
+                                                    <t t-if="record.res_model_name.raw_value">
+                                                        <strong><field name="res_model_name"/></strong>
+                                                        <t t-if="record.res_name.raw_value">
+                                                            <span t-att-title="record.res_name.raw_value">: <field name="res_name"/></span>
+                                                        </t>
+                                                    </t>
+                                                    <t t-elif="record.type.raw_value == 'url'">
+                                                        <span class="o_document_url"><i class="fa fa-globe"/> <field name="url" widget="url"/></span>
+                                                    </t>
+                                                    <samp t-else="" class="text-muted"> </samp>
+                                                </div> -->
+                                                <div class="o_kanban_record_bottom">
+                                                    <time class="oe_kanban_bottom_left">
+                                                        <field name="create_date" widget="date"/>
+                                                    </time>
+                                                    <div class="oe_kanban_bottom_right">
+                                                        <img t-att-src="kanban_image('res.users', 'image_small', record.create_uid.raw_value)" t-att-data-member_id="record.create_uid.raw_value" t-att-alt="record.create_uid.raw_value" width="32" height="32" class="oe_kanban_avatar"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+                            </templates>
+                        </kanban>
+                    </field>
+                </record>
+                    
+        <record id="action_recruitement_attachment" model="ir.actions.act_window">
+            <field name="name">Attachments</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">recruitment_attachment</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="view_type">form</field>
+            <field name="search_view_id" ref="view_attachment_search"/>
+            <field name="view_id" eval="False"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create a new document
+                </p>
+                <p>
+                    Also you will find here all the related documents and download it by clicking on any individual document.
+                </p>
+            </field>
+        </record>
+</odoo>

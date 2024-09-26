@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Mailto IT and Admin Authorities -->
+         <record id="kw_meeting_calendar_template_meeting_invitation_to_authorities" model="mail.template">
+            <field name="name">Calendar: Meeting Invitation to Authorities</field>
+            <field name="model_id" ref="kw_meeting_schedule.model_kw_meeting_events"/>
+            <field name="subject">Meeting Scheduled for ${object.name} by ${object.user_id.name} | ${object.display_time}</field>
+            <field name="email_from">${object.create_uid.email}</field>
+            <field name="email_to" >${object.get_authority_group_users_email() or ''}</field>
+            <field name="body_html" type="html">
+                <div>
+                    <p>Dear All,</p>
+                    <p>
+                        ${object.user_id.partner_id.name} scheduled a meeting for the ${object.name}. You are requested to look after
+                        the facilities for the event to be successful.
+                    </p>
+                    <table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+                        <tr style="width:100%;">
+                            <td style="width:70%">
+                                <p><strong>Meeting Details: </strong></p>
+                                <table border="0" cellpadding="5" cellspacing="0">
+                                    % if object.meeting_room_id:
+                                      <tr>
+                                          <td>Meeting Room</td>
+                                          <td>:</td>
+                                          <td> <span style="margin-left:5px">${object.meeting_room_id.name}(${object.meeting_room_id.floor_name})</span></td>
+                                      </tr>
+                                    % endif
+                                   
+                                    % if object.agenda_ids:
+                                      <tr>
+                                          <td style="width: 30%;vertical-align:top;">Agenda</td>
+                                          <td style="width: 5%;vertical-align:top;">:</td>
+                                          <td style="width: 65%">
+                                            % for agenda in object.agenda_ids:
+                                                  <li>
+                                                    <span style="margin-left:5px">${agenda.name}</span>
+                                                </li>
+                                            % endfor
+                                          </td>
+                                      </tr>
+                                    % endif
+                                    
+                                    % if object.description:
+                                      <tr>
+                                          <td style="width: 30%">Required Information</td>
+                                          <td style="width: 5%">:</td>
+                                          <td style="width: 65%">
+                                               % if object.description:
+                                              <span style="margin-left:5px"> ${object.description}</span>
+                                                % endif
+                                          </td>
+                                      </tr>
+                                    % endif
+                                    
+                                    % if object.recurrency:
+                                      <tr>
+                                          <td style="width: 30%;vertical-align:top;">Meeting Type: </td>
+                                          <td style="width: 5%;vertical-align:top;">:</td>
+                                          <td style="width: 65%">
+                                                  % for recurring_event in object.child_ids:
+                                                        <div style="margin-left:5px;margin-bottom:5px;">${recurring_event.display_time}</div>
+                                                % endfor
+                                          </td>
+                                      </tr>
+                                    % endif
+                                    
+                                    % if not object.allday and object.duration:
+                                      <tr>
+                                          <td style="width: 30%">Duration</td>
+                                          <td style="width: 5%">:</td>
+                                          <td style="width: 65%">
+                                              <span style="margin-left:5px"> ${('%dH:%dM' % (object.duration,(object.duration*60)%60))}</span>
+                                          </td>
+                                      </tr>
+                                     % endif
+                                    
+                                     % if object.mom_required:
+                                      <tr>
+                                          <td style="width: 30%">MOM Controller</td>
+                                          <td style="width: 5%">:
+                                          </td>
+                                          <td style="width: 65%">
+                                              <span style="margin-left:5px">${object.mom_controller_id.name}</span>
+                                          </td>
+                                      </tr>
+                                    % endif
+                                      <tr t-if="object.attendee_ids">
+                                          <td style="width: 30%;vertical-align:top;">Attendees</td>
+                                          <td  style="width: 5%;vertical-align:top;">:</td>
+                                          <td  style="width: 65%">
+                                             % for attendee in object.attendee_ids:
+                                                    <div style="margin-left:5px;margin-bottom:5px">${loop.index}.${attendee.common_name}</div>
+                                            
+                                            % endfor
+                                          </td>
+                                      </tr>
+                                    % if object.external_attendee_ids:
+                                      <tr>
+                                          <td style="width: 30%;vertical-align:top;"> External Participants</td>
+                                          <td style="width: 5%;vertical-align:top;">:</td>
+                                          <td style="width: 65%">
+                                             % for ext_attendee in object.external_attendee_ids:
+                                                    <div style="margin-left:5px;margin-bottom:5px;">${loop.index}.${ext_attendee.partner_id.name} ${ext_attendee.partner_id.mobile_no}</div>
+                                            % endfor
+                                          </td>
+                                      </tr>
+                                     % endif
+                                </table>
+                            </td>
+                             <td style="width:30%">
+                                % if not object.recurrency:
+                                        <div style="border-top-left-radius: 3px; border-top-right-radius: 3px; font-size: 12px; border-collapse: separate; text-align: center; font-weight: bold; color: #ffffff; min-height: 18px; background-color: #875A7B; border: 1px solid #875A7B;">
+                                            ${object.get_interval('dayname', tz=object.partner_id.tz if not object.allday else None)}
+                                        </div>
+                                        <div style="font-size: 48px; min-height: auto; font-weight: bold; text-align: center; color: #5F5F5F; background-color: #F8F8F8; border: 1px solid #875A7B;">
+                                            ${object.get_interval('day', tz=object.partner_id.tz if not object.allday else None)}
+                                        </div>
+                                        <div style='font-size: 12px; text-align: center; font-weight: bold; color: #ffffff; background-color: #875A7B;'>
+                                            ${object.get_interval('month', tz=object.partner_id.tz if not object.allday else None)}
+                                        </div>
+                                        <div style="border-collapse: separate; color: #5F5F5F; text-align: center; font-size: 12px; border-bottom-right-radius: 3px; font-weight: bold; border: 1px solid #875A7B; border-bottom-left-radius: 3px;">
+                                            ${not object.allday and object.get_interval('time', tz=object.partner_id.tz) or ''}
+                                        </div>
+                                % endif
+                             </td>
+                        </tr>
+                    </table>
+
+                    <p>Thank You.</p>
+                    <p>
+                        % if object.user_id and object.user_id.signature:
+                            ${object.user_id.signature | safe}
+                        % endif
+                    </p>
+                </div>
+            </field>
+            <field name="auto_delete" eval="False"/>
+            <field name="user_signature" eval="False"/>
+        </record>
+    </data>
+</odoo>

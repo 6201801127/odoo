@@ -1,0 +1,248 @@
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="internship_program_list">
+            <field name="name">Foundation Program list</field>
+            <field name="model">lk_batch</field>
+            <field name="arch" type="xml">
+                <tree import="false">
+                    <field name="financial_year_id"/>
+                    <field name="name"/>
+                    <field name="mrf_id"/>
+                    <field name="training_completion_details_ids" string="No of Employees"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="internship_program_form" model="ir.ui.view">
+            <field name="name">learning_and_knowledge_details Form View</field>
+            <field name="model">lk_batch</field>
+            <field name="arch" type="xml">
+                <form delete='false' duplicate='false'>
+                    <header>
+                        <!-- <button string="Apply All" name="action_apply_all_manager"
+                                type="object"
+                                context="{'current_id':id,'button':'Complete_all_traineeship_manager'}"
+                                attrs="{'invisible':['|',('state','in',['confirm','approve']),('rh_check_bool','=',True)]}"
+                                class="btn-success"/> -->
+                        <button string="Notify to RH" name="action_notify_to_rh_traineeship_approve"
+                                type="object"
+                                attrs="{'invisible':[('rh_check_bool','=',True)]}"
+                                class="btn-success"/>
+                         <button string="Notify to Manager" name="action_notify_to_manager_traineeship_approve"
+                                type="object"
+                                attrs="{'invisible':[('rh_check_bool','!=',True)]}"
+                                class="btn-success"/>
+                        <!-- <button string="Approve All" name="action_approve_all" type="object"
+                                context="{'current_id': id,'button':'approve_all'}"
+                                groups="internship_program.group_rh_internship_program"
+                                attrs="{'invisible':[('state','in',['approve'])]}" class="btn-success"/> -->
+                        <button name="locked_for_no_edit"
+                                string="Lock" type="object" class="btn-primary"
+                                attrs="{'invisible':['|',('rh_check_bool','=',True),('locked_bool','=',True)]}"/>
+                        <button name="unlocked_for_edit"
+                                string="Unlock" type="object" class="btn-primary"
+                                attrs="{'invisible':['|',('rh_check_bool','=',True),('locked_bool','=',False)]}"/>
+                        <button name="action_apply_all_managers"
+                                string="Take Action" type="object" class="btn-primary"
+                                attrs="{'invisible':[('rh_check_bool','=',True)]}"
+                                context="{'current_record':id,'button':'foundation_approve_all'}"/>
+                        <button name="batches_take_action"
+                                string="Batch Take Action" type="object" class="btn-primary"
+                                attrs="{'invisible':[('rh_check_bool','=',False)]}"/>
+                        <button name="traineeship_department_change_btn"
+                                string="Change Department" type="object"
+                                class="btn-warning" attrs="{'invisible':[('rh_check_bool','=',True)]}"
+                                context="{'current_id':id}"/>
+<!--                        <button name="traineeship_complete_change_btn" string="Update Traineeship Date" type="object"
+                                class="btn-warning" attrs="{'invisible':[('rh_check_bool','=',True)]}"
+                                context="{'current_id':id}"/>-->
+
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="locked_bool" invisible="1"/>
+                                <field name="pay_revies_all_bool" invisible="1"/>
+                                
+                                <field name="financial_year_id" string='Financial Year'
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       context="{'order_display': 'name desc'}"
+                                       attrs="{'readonly':['|','|',('rh_check_bool','=',True),('state','in',['confirm','approve']),('locked_bool','=',True)]}"/>
+                                <field name="name" required="1" 
+                                       attrs="{'readonly':['|','|',('rh_check_bool','=',True),('state','in',['confirm','approve']),('locked_bool','=',True)]}"/>
+                                <field name="mrf_id" required="1"  
+                                       attrs="{'readonly':['|','|',('rh_check_bool','=',True),('state','in',['confirm','approve']),('locked_bool','=',True)]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="rh_check_bool" invisible="1"/>
+
+                            </group>
+                            <group>
+                            </group>
+                            <footer>
+
+                            </footer>
+                        </group>
+                        <group>
+                            <button name="update_employee_list" string="Update Employee List" type="object"
+                                    class="oe_highlight col-sm-2 mb-2"
+                                    attrs="{'invisible':['|',('rh_check_bool','=',True),('state','in',['approve'])]}"/>
+                            <!-- <button name="action_apply_all_managers" string="Take Action" type="object" class="oe_highlight col-sm-2 mx-2 mb-2"
+                                    attrs="{'invisible':[('rh_check_bool','=',True)]}"/>
+                            <button name="batches_take_action" string="Batch Take Action" type="object" class="oe_highlight col-sm-2 mx-2 mb-2"
+                                    attrs="{'invisible':[('rh_check_bool','=',False)]}" /> -->
+
+                            <field name="training_completion_details_ids"
+                                   attrs="{'readonly':['|',('rh_check_bool','=',True),('state','in',['approve'])]}">
+                                <tree editable="bottom" delete="false" create="false"
+                                      decoration-warning="traineeship_status=='Applied'"
+                                      decoration-danger="traineeship_status=='Rejected'"
+                                      decoration-success="traineeship_status in ['Approved','Pay Revised']">
+                                    <field name="batch_id" invisible="1"/>
+                                    <field name="hide_button_applied" invisible="1"/>
+                                    <field name="rh_check" invisible="1"/>
+                                    <field name="traineeship_complete_check" invisible="1"/>
+                                    <field name="employee_id" attrs="{'readonly':[('hide_button_applied','=',True)]}"
+                                           options="{'no_open': True,'no_create':True,'no_edit':True}" invisible="1"/>
+                                    <field name="traineeship_applied_date" invisible="1"/>
+                                    <field name="traineeship_completion_date" invisible="1"/>
+
+                                    <field name="employee_name"/>
+                                    <field name="employee_code"/>
+                                    <field name="deg_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                    <field name="department_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+
+                                    <field name="new_dept_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                        readonly="1" force_save="1"/>
+                                    <field name="new_division_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                        readonly="1" force_save="1"/>
+
+                                    <field name="doj"/>
+                                    <field name="increment_pattern"  required = '1'
+                                        attrs="{'readonly':[('traineeship_status','in',['Approved','Pay Revised'])]}"/>
+
+                                    <field name="traineeship_score"  required = '1'
+                                           attrs="{'readonly':[('traineeship_status','in',['Approved','Pay Revised'])]}"/>
+<!--                                    attrs="{'readonly':[('hide_button_applied','=',True)]}"-->
+                                    <field name="traineeship_comments_applied"
+                                           attrs="{'readonly':True}" force_save="true"/>
+                                    <field name="traineeship_comments_approved" force_save="true"
+                                           attrs="{'readonly':[('rh_check','=',False)]}"/>
+                                    <field name="traineeship_status" readonly="1"/>
+                                    <field name='change_dept_bool' invisible="1"/>
+                                    <button name="trainee_department_change_btn"
+                                            string="Change Department" type="object" class="btn-warning"
+                                            attrs="{'invisible':['|','|',('rh_check','=',True),('change_dept_bool','=',True),('traineeship_status','not in',['Approved', 'Pay Revised'])]}"
+                                            context="{'current_id':id}"/>
+
+
+                                    <button name="training_completion_check" class="oe_highlight btn btn-success" type="object"
+                                            string="Apply Completion"
+                                            attrs="{'invisible': ['|', '|', ('hide_button_applied','=',True), ('rh_check','=',True), ('traineeship_status','not in',['In Progress'])]}"/>
+                                    <button name="traineeship_approved_by_rh" class="oe_highlight" type="object"
+                                            string="Approve"
+                                            attrs="{'invisible':['|',('rh_check','=',False),('traineeship_status','in',['Approved','Rejected','Pay Revised'])]}"
+                                            groups="internship_program.group_rh_internship_program"
+                                            context="{'current_record':id,'button':'approve'}"/>
+                                     <button name="traineeship_approved_by_rh" class="btn-danger" type="object"
+                                            string="Reject"
+                                            attrs="{'invisible':['|',('rh_check','=',False),('traineeship_status','in',['Rejected','Approved','Pay Revised'])]}"
+                                            groups="internship_program.group_rh_internship_program"
+                                            context="{'current_record':id,'button':'reject'}"/>
+                                </tree>
+                                <form>
+                                    <group>
+                                        <field name="employee_name"/>
+                                        <field name="employee_code"/>
+                                        <field name="traineeship_status" invisible="1"/>
+                                        <field name="deg_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="department_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="new_dept_id" options="{'no_open': True,'no_create':True,'no_edit':True}" required = '1'  
+                                            attrs="{'readonly':[('traineeship_status','in',['Approved','Pay Revised'])]}"/>
+                                        <field name="new_division_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                            attrs="{'readonly':[('traineeship_status','in',['Approved','Pay Revised'])]}"/>
+                                        <field name="doj"/>
+                                        <field name="increment_pattern"
+                                            attrs="{'readonly':[('traineeship_status','in',['Approved','Pay Revised'])]}"/>
+
+                                        <field name="traineeship_score"
+                                            attrs="{'readonly':[('traineeship_status','in',['Approved','Pay Revised'])]}"/>
+                                    </group>
+                                </form>
+                            </field>
+                            <group>
+                            </group>
+                            <group>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- actions opening views on models -->
+
+        <record model="ir.actions.act_window" id="internship_program.action_window">
+            <field name="name">Foundation Program</field>
+            <field name="res_model">lk_batch</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+    (0, 0, {'view_mode': 'tree', 'view_id': ref('internship_program_list')}),
+    (0, 0, {'view_mode': 'form', 'view_id': ref('internship_program_form')})]"/>
+        </record>
+
+        <record model="ir.actions.act_window" id="traineeship_take_action_window">
+            <field name="name">Foundation Program</field>
+            <field name="res_model">lk_batch</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+            <field name="context">{'create': False,'edit':False,'delete':False}</field>
+            <!-- <field name="groups_id" eval="[(6,0,[ref('kw_advance_claim.group_kw_advance_claim_account')])]"/> -->
+            <field name="view_type">form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+    (0, 0, {'view_mode': 'tree', 'view_id': ref('internship_program_list')}),
+    (0, 0, {'view_mode': 'form', 'view_id': ref('internship_program_form')})]"/>
+        </record>
+
+
+        <menuitem name="Batches"
+                  id="l_k_batches_traineeship"
+                  action="internship_program.action_window"
+                  parent="l_k_traineeship_menu"
+                  groups="internship_program.group_manager_internship_program"
+                  sequence="1"/>
+        <menuitem name="Take action"
+                  id="l_k_batches_take_action"
+                  action="traineeship_take_action_window"
+                  groups="internship_program.group_rh_internship_program"
+                  parent="l_k_traineeship_menu"
+                  sequence="2"/>
+    <record model="ir.ui.view" id="internship_program_details_list">
+        <field name="name">Foundation Program list Detail</field>
+        <field name="model">lk_batch_details</field>
+        <field name="arch" type="xml">
+            <tree delete="false" create="false">
+                <field name="employee_name" readonly="1"/>
+                <field name="employee_code" readonly="1"/>
+                <field name="deg_id" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1"/>
+                <field name="department_id" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1"/>
+                <field name="new_dept_id" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1"/>
+                <field name="new_division_id" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1"/>
+                <field name="doj" readonly="1"/>
+                <field name="increment_pattern" readonly="1"/>
+                <field name="traineeship_score" readonly="1"/>
+               
+                <field name="traineeship_comments_applied" readonly="1"/>
+                <field name="traineeship_comments_approved" readonly="1"/>
+                <field name="traineeship_status" readonly="1" string ='Traineeship Status'/>
+                <field name="internship_score" readonly="1"/>
+                <field name="internship_status" readonly="1" string ="Internship Status"/>
+            </tree>
+        </field>
+    </record>
+        
+
+    </data>
+</odoo>

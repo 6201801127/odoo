@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="report_quotation_document">
+    <t t-call="web.external_layout" >
+        <!-- <div class="container" style="border:1px solid black">
+        
+            <div style="display:flex;">
+                <div>
+                    <div>
+                        <div>
+                            <img src='/web/binary/company_logo' class="float-left" alt="Logo"/>
+                        </div>
+                        <div>
+                        <span t-field="res_company.partner_id"
+                            t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/> 
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="float:left;margin-left:450px;">
+                    <div class="text-center" style="border:1px solid grey;height:100px;width:345px;background-color:#808080">
+                        <p class="text-light font-weight-bold mt-4"> REQUEST FOR QUOTATION </p>
+                    </div>
+                    <div>
+                        <span><strong>NUMBER:</strong>   CSMPL/<span t-field="res_company.partner_id.city"/>/RFQ/<span t-esc="o.qo_no[5:]"/>/<span t-esc="o.qo_no[1:3]"/>-<span t-esc="int(o.qo_no[1:3])+1"/></span>
+                        <strong>DATE:</strong><span t-field="o.date_order"/>
+                    </div>
+                </div>
+            </div> 
+           
+                        <table style="border:1px solid grey;">
+                                    <thead  style="background-color:#808080;">
+                                        <tr>
+                                            <th class="text-light col px-md-5" style="width:500px;height:30px"><strong>VENDOR/SUPPLIER:</strong></th>
+                                            <th class="text-light col px-md-5" style="width:500px;height:30px"><strong>SHIP TO:</strong></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr >
+                                            <td class="col px-md-5" style="width:500px;border:1px solid grey;">
+                                               <span t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}' name="purchase_shipping_address"/>
+                                                <p t-if="o.partner_id.vat">
+                                                    <t t-esc="o.company_id.country_id.vat_label or 'Tax ID'"/>: <span t-field="o.partner_id.vat"/>
+                                                </p>
+                                            </td>
+                                            <td class="col px-md-5" style="width:500px">
+                                                <span t-field="res_company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/>
+                                                <p t-if="res_company.partner_id.vat">
+                                                    <t t-esc="o.company_id.country_id.vat_label or 'Tax ID'"/>: <span t-field="res_company.partner_id.vat"/>
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                        </table>
+        
+            
+        
+        <div class="page">
+            <div class="oe_structure"/>
+            
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                       
+                        <div class="panel-body">
+                            <div class="table-responsive-sm" style="overflow-x: hidden;">
+                                <table style="border:1px solid grey;">
+                                    <thead style="background-color:#808080;">
+                                        <tr>
+                                            <th style="width:150px;height:30px" class="text-light text-left"><strong>Description</strong></th>
+                                            <th style="width:150px;height:30px" class="text-light text-center"><strong>HSN Code</strong></th>
+                                            <th style="width:150px;height:30px" class="text-light text-center"><strong>Date Req.</strong></th>
+                                            <th style="width:150px;height:30px" class="text-light text-center"><strong>Qty</strong></th>
+                                            <th style="width:150px;height:30px" class="text-light text-center"><strong>Unit Price</strong></th>
+                                            <th style="width:150px;height:30px" class="text-light text-center"><strong>Amount</strong></th>
+                                            <th style="width:150px;height:30px" class="text-light text-center"><strong>Taxes</strong></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="o.order_line" t-as="line">
+                                            <td style="border:1px solid grey;height:40px;">
+                                                <span t-field="line.name"/>
+                                            </td>
+                                            <td style="border:1px solid grey;height:40px;">
+                                                <span t-field="line.product_id.l10n_in_hsn_code"/>
+                                            </td>
+                                            <td style="border:1px solid grey;height:40px" class="text-center">
+                                                <span t-field="line.date_planned"/>
+                                            </td>
+                                            <td style="border:1px solid grey;height:40px" class="text-right">
+                                                <span t-field="line.product_qty"/>
+                                                <span t-field="line.product_uom.name" groups="uom.group_uom"/>
+                                            </td>
+                                            <td style="border:1px solid grey;height:40px" class="text-right">
+                                                <span t-field="line.price_unit"/>
+                                            </td>
+                                            <td style="border:1px solid grey;height:40px" class="text-right">
+                                                <span t-field="line.price_subtotal"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                            </td>
+                                            <td style="border:1px solid grey;height:40px">
+                                                <span t-esc="', '.join(map(lambda x: x.name, line.taxes_id))"/>
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr class="border-black">
+                                            <td colspan="5" style="border-right:1px solid grey;height:40px" class="thick-line"></td>
+                                            
+                                            <td style="border:1px solid grey;;height:40px" class="thick-line text-center"><strong>Subtotal</strong></td>
+                                            <td style="border:1px solid grey;;height:40px" class="thick-line text-right">
+                                                <span t-field="o.amount_untaxed"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="5" style="border-right:1px solid grey;height:40px" class="no-line"></td>
+                                            
+                                            <td style="border:1px solid grey;height:40px" class="no-line text-center">Taxes</td>
+                                            <td style="border:1px solid grey;height:40px" class="no-line text-right">
+                                                <span t-field="o.amount_tax"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                            </td>
+                                        </tr>
+                                        <tr class="">
+                                            <td colspan="5" style="border-right:1px solid grey;height:40px" class="no-line"><span t-esc="o.currency_id.amount_to_text(o.amount_total)" /></td>
+                                            
+                                            <td style="border:1px solid grey;;height:40px" class="no-line text-center"><strong>Total</strong></td>
+                                            <td style="border:1px solid grey;;height:40px" class="no-line text-right">
+                                                <span t-field="o.amount_total"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <div class="text-justify mt-4"><h6 class="panel-title"><strong>Comments or Special Instruction</strong></h6><span t-field="o.notes"/></div>
+                                <div id="informations" class="row mt12 mb15 p-0">
+                                    <div t-if="o.qo_no" class="col-3 bm-2"> 
+                                        <br/>
+                                        <strong>Our Order Reference:</strong>
+                                        <p t-field="o.qo_no" class="m-0"/>
+                                    </div>
+                                    <div t-if="o.partner_ref" class="col-3 bm-2">
+                                        <br/> 
+                                        <strong>Your Order Reference:</strong>
+                                        <p t-field="o.partner_ref" class="m-0"/>
+                                    </div>
+                                </div>
+                                
+                                    <p class="text-center font-italic mb-0 mt-2">If you have any Question Regarding this Request for Quotation.Please contact</p>
+
+                                <table style="border:1px solid grey;margin-bottom:10px;">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:1050px;height:0px;text-align:center;font-style:italic;"><span t-field="o.contact_prsn_name"/>,<span t-field="o.contact_prsn_number"/></th>
+                                        </tr>
+                                    </thead>
+                                            <td style="border:1px solid grey;height:100px;margin-bottom:0px;">
+                                                
+                                                <div class="float-right" style="margin-right:100px;margin-top:20px;">
+                                                    <p style="margin-bottom:0px;test-align:left;">Signature</p>
+                                                    <p style="margin-bottom:0px;">Name: Prafulla Kumar Parida</p>
+                                                    <p style="margin-bottom:0px;">Designation: Associate VP-IT</p>
+                                                </div>
+                                            </td>
+                                    <tbody>
+
+                                    </tbody>
+                                </table>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        </div>-->
+                        <table>
+                    <head>
+                        <title>CSM Technologies | IT Services, Consulting, Technology</title>
+
+
+                    </head>
+                    <body style="margin: 0; padding: 0;font-family: arial,sans-serif;color:#676767; font-size: .9rem;margin-bottom:1rem;">
+
+
+                        <table width="100%"  cellspacing="0" cellpadding="2" style="max-width:800px;overflow-y: hidden;margin:auto;border-collapse: collapse;color: #000;border: 1px solid #000;">
+                            <tr>
+                                <td height="73" colspan="4" rowspan="2" style="border-right: 1px solid transparent;">
+                                    <img src="kw_inventory/static/img/csmlogobtb.png" width="150px" alt="logoimage"/>
+                                    <p style="color: #000;font-size: .75rem;margin-bottom: -5px;margin-top: 3px;">
+                                        <i>Level-6,OCAC Tower, Acharya Vihar</i>
+                                    </p>
+                                    <p style="color: #000;font-size: .75rem;margin-bottom: -5px;">
+                                        <i>Bhubaneswar, Khurdha,Odisha,India,751013</i>
+                                    </p>
+                                    <p style="color: #000;font-size: .75rem;margin-bottom: 0px;">0674-6635900 | info@csm.tech | www.csm.tech</p>
+                                </td>
+                                <td colspan="2" rowspan="1" style=" color: #fff;background-color:#9699A7; text-align: center; border: 1px solid #000;">
+                                    <strong>REQUEST FOR QUOTATION</strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="height: 20px;">
+                                    <p style="font-size: .65rem;color: #000;">RFQ NO<![CDATA[&nbsp;]]>
+                                        <strong><span>CSMPL/<span t-field="res_company.partner_id.city"/>/RFQ/<span t-esc="o.qo_no[5:]"/>/<span t-esc="o.qo_no[1:3]"/>-<span t-esc="int(o.qo_no[1:3])+1"/></span></strong>
+                                    </p>
+                                    <p style="font-size: .65rem;color: #000;">DATE<![CDATA[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]]>
+                                        <strong style="text-align: right;">  <span t-field="o.date_order"/></strong>
+                                    </p>
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td colspan="2" style="background-color:#9699A7; color: #fff;border-top: 1px solid transparent;border-right: 1px solid transparent;" height="40">VENDOR / SUPPLIER</td>
+                                <td colspan="4" style="background-color:#9699A7; color: #fff;border-top: 1px solid transparent;" height="40">SHIP TO</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="border: 1px solid  #000;">
+                                    <span t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}' name="purchase_shipping_address"/>
+                                    <p t-if="o.partner_id.vat">
+                                        <t t-esc="o.company_id.country_id.vat_label or 'Tax ID'"/>: <span t-field="o.partner_id.vat"/>
+                                    </p>
+                                </td>
+                                <td colspan="4" style="border: 1px solid  #000;">
+                                    <span t-field="res_company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/>
+                                    <p t-if="res_company.partner_id.vat">
+                                        <t t-esc="o.company_id.country_id.vat_label or 'Tax ID'"/>: <span t-field="res_company.partner_id.vat"/>
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr >
+                                <td width="15%" style="text-align: center; color: #FFF;background-color:#9699A7;border: 1px solid  #000;">ITEM CODE </td>
+                                <td width="46%" style="text-align: center; color: #fff;background-color:#9699A7;border: 1px solid  #000;"> DESCRIPTION</td>
+                                <td width="8%" style="text-align: center;color: #fff;background-color:#9699A7;border: 1px solid  #000;">QUANTIY</td>
+                                <td width="6%" style="text-align: center; color: #fff;background-color:#9699A7;border: 1px solid #000;">UoM</td>
+                                <td width="12%" style="text-align: center;color: #fff;background-color:#9699A7;border: 1px solid  #000;">UNIT PRICE </td>
+                                <td width="25%" style="text-align: center;color: #fff;background-color:#9699A7;border: 1px solid  #000;">TOTAL</td>
+                            </tr>
+                            <!-- <t t-set="i" t-value="1" /> -->
+                            <tr t-foreach="o.order_line" t-as="line">
+                                <td style="border: 1px solid  #000; padding:10px"><span t-esc="line.product_id.default_code"/> </td>
+                                <td style="border: 1px solid  #000; padding:10px"><span t-field="line.name"/></td>
+                                <td style="border: 1px solid  #000;"><span t-field="line.product_qty"/></td>
+                                <td style="text-align: center;border: 1px solid  #000;"><span t-field="line.product_uom.name" /></td>
+                                <td style="text-align: right;border: 1px solid  #000;">
+                                    <span t-field="line.price_unit" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                </td>
+                                <td style="text-align: right;border: 1px solid  #000;">
+                                    <span t-field="line.price_subtotal" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                </td>
+                                <!-- <t t-set="i" t-value="i+1"/>  -->
+                            </tr>
+                           
+                           <!--  <tr>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;">VIP NO - E5900AE163FA95E5810A </td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                            </tr> -->
+                            <!-- <tr>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                            </tr>-->
+                            <tr>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;" height="40"><![CDATA[&nbsp;]]></td>
+                            </tr> 
+
+                            <tr>
+                                <td colspan="2" style="border: 1px solid  #000;">
+                                    <span t-field="o.num_word"/></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border: 1px solid  #000;">
+                                    <strong>SUBTOTAL</strong>
+                                </td>
+                                <td style="text-align: right;border: 1px solid  #000;">
+                                    <strong><span t-field="o.amount_untaxed"/></strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="background-color:#9699A7;">
+                                    <strong>Comments or Special Instruction</strong>
+                                </td>
+                                <td style="border: 1px solid  #000;">TAX</td>
+                                <td style="text-align: right;border: 1px solid  #000;">
+                                    <span t-field="o.amount_tax"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" rowspan="4" style="border-bottom: 1px solid transparent;">
+                                    <p style="margin-bottom: -8px;"><span t-field="o.notes"/></p>
+                                </td>
+                                <!-- <td style="border: 1px solid  #000;">TAX(28%)</td>
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td> -->
+                            <!-- </tr>
+                            
+                            <tr> -->
+                                <!-- <td colspan="4" style="border-bottom: 1px solid transparent; ">
+                                    <p style="margin-bottom: -2px;">3.Payment Terms: Within 30 Days from the date of Invoice</p>
+                                </td> -->
+                                <td style="border: 1px solid  #000;">
+                                    <strong>TOTAL</strong>
+                                </td>
+                                <td style="background-color:#9699A7;border: 1px solid  #000;">
+                                    <strong><![CDATA[&nbsp;&nbsp;&nbsp;]]><span t-field="o.amount_total"/> </strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <!-- <td colspan="4" rowspan="2" style="">
+                                    <p style="margin-top: 3px;">4.License Validity - 6 Months</p>
+                                </td> -->
+                                <td style="border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="background-color:#9699A7;border: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                            </tr>
+                            <tr>
+                                <td style="border-bottom: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                                <td style="border-bottom: 1px solid  #000;"><![CDATA[&nbsp;]]></td>
+                            </tr>
+                            <tr></tr>
+                            <tr>
+                                <td colspan="6" style="text-align: center;font-size: .9rem;border-top: 1px solid transparent;padding: 20px;">
+                                    <i>If you have any Question Regarding this Request for Quotation.Please contact </i>
+                                </td>
+                            </tr>
+                            <tr style="border: 1px solid  #000;">
+                                <td colspan="6" style="text-align: center;font-size: .9rem;color: #000;">
+                                    <i><span t-field="o.contact_prsn_name"/>, <span t-field="o.contact_prsn_number"/> </i>
+                                </td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid  #000;">
+                                <td colspan="3" style="border-right: 1px solid transparent;"><![CDATA[&nbsp;]]></td>
+                                <td colspan="3" style="">
+                                    <p style="margin-bottom: -8px;">Signature</p>
+                                    <p style="margin-bottom: -8px;">Name: Prafulla Kumar Parida</p>
+                                    <p style=""> Designation:Associate VP-IT </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </body>
+                </table>
+    </t>
+</template>
+
+<template id="remove_footer" inherit_id="web.external_layout_standard">
+    <xpath expr="//div[@class='footer o_standard_footer']" position="replace" />
+</template>
+<template id="remove_header" inherit_id="web.external_layout_standard">
+    <xpath expr="//div[@class='header']" position="replace" />
+    
+</template>
+
+<!-- <template id="remove_header" inherit_id="web.external_layout_standard">
+    <xpath expr="//div[@class='header']" position="replace">
+        <div class="header" style="font-family: 'Roboto', sans-serif;
+                                   font-weight: bold;">
+            <img t-if="company.logo"
+                 t-att-src="'data:image/png;base64,%s' % company.logo"
+                 style="height: 100px;
+                        width: 100px;"/>
+
+            <div style="margin-top: 15px;
+                        color: blue;
+                        font-size: 12px;"
+                 t-esc="company.name.encode('ascii', 'ignore').upper()"/>
+            </div>
+    </xpath>
+</template> -->
+
+<template id="report_quotation">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="kw_inventory.report_quotation_document" t-lang="o.partner_id.lang"/>
+        </t>
+    </t>
+</template>
+<!-- <report
+    id="quotation_report_qweb"
+    string="Quotation Report"
+    model="kw_quotation"
+    report_type="qweb-pdf"
+    name="kw_inventory.quotation_report"
+    file="kw_inventory.quotation_report"
+ />
+
+ <record id="paperformat_quotation_report" model="report.paperformat">
+    <field name="name">Quotation Report</field>
+    <field name="default" eval="True"/>
+    <field name="format">A4</field>
+    <field name="page_height">0</field>
+    <field name="page_width">0</field>
+    <field name="orientation">Portrait</field>
+    <field name="margin_top">10</field>
+    <field name="margin_bottom">15</field>
+    <field name="margin_left">7</field>
+    <field name="margin_right">7</field>
+    <field name="header_line" eval="False"/>
+    <field name="header_spacing">3</field>
+    <field name="dpi">90</field>
+</record>
+    <record id="kw_inventory.quotation_report_qweb" model="ir.actions.report.xml">
+      <field name="paperformat_id" ref="kw_inventory.paperformat_quotation_report" />
+    </record>   -->
+
+</odoo>

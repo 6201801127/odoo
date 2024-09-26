@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+		<!-- explicit form view of kw handbook Opening -->
+		<record model="ir.ui.view" id="kw_emp_grievance_form_view">
+			<field name="name">kw Employee Grievance</field>
+			<field name="model">kw.grievance</field>
+			<field name="priority" eval="1" />
+			<field name="arch" type="xml">
+				<form>
+					<header>
+						<button name="apply_grievance" string="Apply" type="object" class="oe_highlight" groups="kw_grievance.griev_user" attrs="{'invisible':['|',('state','!=','draft'),('check_user','=',False)]}" />
+
+						<button name="grievance_inprgress_button"  string="In Progress" type="object" class="oe_highlight"  attrs="{'invisible':[('check_spoc_user' ,'=',False)]}"/>
+
+						<button name="grievance_resolve_button" string="Resolve" type="object" class="oe_highlight" groups="kw_grievance.griev_spoc_committee_group" attrs="{'invisible':[('state','!=','in_progress')]}" />
+
+						<field name="state" widget="statusbar" statusbar_visible="draft,apply,in_progress,resolve" />
+
+					</header>
+					<sheet>
+						<style>
+							.o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 250px !important;}
+						</style>
+						<div class="oe-tittle">
+							<h1 style="color:#108fbb">
+							Applicant Information
+                         </h1>
+						</div>
+						<div class="oe-tittle">
+							<h3>
+								<!-- <field name="grievance_code" readonly='1' class="oe_inline" /> -->
+							</h3>
+						</div>
+						<group>
+							<group>
+								<field name="check_user" invisible="1" />
+								<field name="check_spoc_user" invisible='1' />
+								<field name="employee_id" readonly='1' options='{"no_open": True, "no_create": True, "no_edit": True}' />
+								<field name="department" />
+								<field name="designation" />
+								<!-- <field name="anonymous" /> -->
+
+								<!-- <field name="emp_branch" /> -->
+								<!-- <field name="unit" /> -->
+								<field name="show_grievance" invisible="1" />
+							</group>
+							<group>
+								<!-- <field name="case_type" groups="kw_grievance.griev_commandant" widget='radio' options="{'horizontal': true}" attrs="{'readonly':[('state','!=','receive')],'invisible':[('state','in',['draft','apply'])]}" /> -->
+								<field name="grievance_type_id" options='{"no_open": True, "no_create": True, "no_edit": True}' required="1" attrs="{'readonly':[('show_grievance','=',False)]}" />
+								<!-- <field name="grievance_sub_categories" required="1" attrs="{'readonly':[('show_grievance','=',False)]}" /> -->
+
+								<field name="subject" required='1' attrs="{'readonly':[('state','!=','draft')]}" />
+								<field name="description" required='1' attrs="{'readonly':[('state','!=','draft')]}" />
+								<field name="uploaded_doc" widget="binary" filename="file_name" attrs="{'readonly':[('state','!=','draft')]}" string="Upload File" />
+								<field name="file_name" invisible='1' />
+							</group>
+						</group>
+					
+
+						<group>
+							
+							<group  string="Action Logs"  attrs="{'invisible':[('state','in',['draft','apply'])]}">
+                                <field name="action_log_ids" nolabel="1" readonly="1">
+                                    <tree>
+                                        <field name="date"/>
+                                        <field name="employee_id" options='{"no_open": True, "no_create": True, "no_edit": True}' /> 
+                                        <field name="state"/>
+                                        <field name="remark"/>
+                                    </tree>
+									<form>
+										<group>
+											<field name="date"/>
+											<field name="employee_id" options='{"no_open": True, "no_create": True, "no_edit": True}' /> 
+											<field name="state"/>
+											<field name="remark"/>
+										</group>
+                                    </form>
+                                </field>
+                            </group>
+						
+                        </group>
+					</sheet>
+					<div class="oe_chatter">
+						<field name="message_follower_ids" widget="mail_followers" />
+						<field name="activity_ids" widget="mail_activity" />
+						<field name="message_ids" widget="mail_thread" />
+					</div>
+				</form>
+			</field>
+		</record>
+		<record model="ir.ui.view" id="kw_emp_grievance_tree_view">
+			<field name="name">kw Grievance tree view</field>
+			<field name="model">kw.grievance</field>
+			<field name="arch" type="xml">
+				<tree default_order='sort asc'>
+					<field name="sort" invisible='1' />
+					<field name="grievance_code" />
+					<field name="employee_id" />
+					<field name="designation" />
+					<field name="department" />
+					<field name="grievance_type_id" />
+					<field name="create_date" widget="date" string='Applied Date' />
+					<field name="state" widget="badge"/>
+					
+					<!-- <field name="pending_at" /> -->
+
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="kw_grievance_view_all_tree">
+			<field name="name">kw Employee Grievance tree view</field>
+			<field name="model">kw.grievance</field>
+			<field name="arch" type="xml">
+				<tree default_order='sort asc' create='false' import='false'>
+					<field name="sort" invisible='1' />
+					<field name="grievance_code" />
+					<field name="employee_id" />
+					<field name="designation" />
+					<field name="department" />
+					<field name="grievance_type_id" />
+					<field name="state" />
+					<field name="create_date" widget="date" string='Applied on'/>
+					<!-- <field name="pending_at" /> -->
+					<field name="check_user" invisible='1' />
+					<field name="spoc_user" invisible='1'/> 
+					<button name="btn_open_view" string="Take Action" type="object" class="oe_highlight" attrs="{'invisible':[('spoc_user','=',False)]}" />
+
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="kw_grievance_kanban">
+			<field name="name">kw Grievance Kanban view</field>
+			<field name="model">kw.grievance</field>
+			<field name="arch" type="xml">
+				<kanban create="0">
+					<templates>
+						<t t-name="kanban-box">
+							<div>
+								<div class="o_kanban_record_top">
+									<div class="o_kanban_record_headings">
+										<h2 class="text-primary font-weight-bold">
+											<field name="grievance_code" />
+										</h2>
+										<div class="mb-4" />
+										<h5 class="font-weight-bold">
+											<span class="fa fa-user-circle-o mr-3" title="Employee" />
+											<field name="employee_id" />
+										</h5>
+										<h5 class="font-weight-bold">
+											<span class="fa fa-map-marker mr-3" style="font-size:19px" title="Branch" />
+											<!-- <field name="emp_branch" /> -->
+										</h5>
+										<h5 class="font-weight-bold">
+											<span class="fa fa-file-text mr-3" title="Grievance" />
+											<field name="grievance_type_id" />
+										</h5>
+
+										<h5 class="font-weight-bold">
+											<span class="fa fa-calendar mr-3" title="Create Date" />
+											<field name="create_date" widget="date" />
+										</h5>
+										<field name="check_user" invisible='1' />
+										<button name="btn_open_view" type="object" class="btn btn-primary o_select_file_button  pull-right" attrs="{'invisible':[('check_user','=',True)]}">Take Action</button>
+									</div>
+								</div>
+							</div>
+						</t>
+					</templates>
+				</kanban>
+			</field>
+		</record>
+	
+		<record id="inprogress_remark_form_view" model="ir.ui.view">
+            <field name="name">inprogress_remark_form_view</field>
+            <field name="model">kw.grievance</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="99"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                        $(document).ready(function(){
+                            $(".modal-footer").hide();
+                            $(".modal-title").show();
+                            $(".o_form_statusbar").hide();
+                        });
+                    </script>
+                
+                    <div class="row">
+                        <div class="text-center col-sm-12 mx-auto">
+                            <p class="h6 font-weight-light text-left text-justify">
+                              
+                                <field name="remark" required="1"/>
+                            </p>
+                            <button type="object" name="grievance_inprgress" class="text-center btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+		<record id="resolve_remark_form_view" model="ir.ui.view">
+            <field name="name">Resolve_remark_form_view</field>
+            <field name="model">kw.grievance</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="99"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                        $(document).ready(function(){
+                            $(".modal-footer").hide();
+                            $(".modal-title").show();
+                            $(".o_form_statusbar").hide();
+                        });
+                    </script>
+                
+                    <div class="row">
+                        <div class="text-center col-sm-12 mx-auto">
+                            <p class="h6 font-weight-light text-left text-justify">
+                              
+                                <field name="remark" required="1"/>
+                            </p>
+                            <button type="object" name="grievance_resolve" class="text-center btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+
+		<record model="ir.ui.view" id="kw_grievance_apply_kanban">
+			<field name="name">kw Grievance Kanban view</field>
+			<field name="model">kw.grievance</field>
+			<field name="priority" eval="1021" />
+			<field name="arch" type="xml">
+				<kanban>
+					<templates>
+						<t t-name="kanban-box">
+							<div t-attf-class="oe_kanban_global_click">
+								<div class="o_kanban_record_top">
+									<div class="o_kanban_record_headings">
+										<h2 class="text-primary font-weight-bold">
+											<field name="grievance_code" />
+										</h2>
+										<div class="mb-4" />
+										<h5 class="font-weight-bold">
+											<span class="fa fa-user-circle-o mr-3" title="Employee" />
+											<field name="employee_id" />
+										</h5>
+										<h5 class="font-weight-bold">
+											<span class="fa fa-map-marker mr-3" style="font-size:19px" title="Branch" />
+											<!-- <field name="emp_branch" /> -->
+										</h5>
+										<h5 class="font-weight-bold">
+											<span class="fa fa-file-text mr-3" title="Grievance" />
+											<field name="grievance_type_id" />
+										</h5>
+
+										<h5 class="font-weight-bold">
+											<span class="fa fa-calendar mr-3" title="Create Date" />
+											<field name="create_date" widget="date" />
+										</h5>
+									</div>
+								</div>
+							</div>
+						</t>
+					</templates>
+				</kanban>
+			</field>
+		</record>
+
+
+	</data>
+</odoo>

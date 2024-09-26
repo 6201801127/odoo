@@ -1,0 +1,53 @@
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+
+{
+    'name': 'Helpdesk Management',
+    'summary': """
+        Kwantify Helpdesk
+        """,
+    'version': '1.0',
+    'license': 'AGPL-3',
+    'category': 'Kwantify',
+    'author': 'Kwantify',
+    'website': 'https://csm.tech',
+    'depends': [
+        'base',
+        'mail',
+        'portal',
+    ],
+    'data': [
+        'data/helpdesk_data.xml',
+        'data/cron.xml',
+        'security/helpdesk_security.xml',
+        'security/ir.model.access.csv',
+        'views/helpdesk_status_report.xml',
+        'wizard/incident.xml',
+        'wizard/inprogress_remarks_wiz.xml',
+        'wizard/awaiting_remarks_wiz.xml',
+        'wizard/cancelled_remarks_wiz.xml',
+        'wizard/done_remarks_wiz.xml',
+        'wizard/new_team_assign_wiz.xml',
+        'views/assets.xml',
+        'views/helpdesk_calltype_master_view.xml',
+        'views/res_partner_view.xml',
+        'views/helpdesk_ticket_templates.xml',
+        'views/helpdesk_ticket_menu.xml',
+        'views/helpdesk_ticket_team_view.xml',
+        'views/helpdesk_ticket_stage_view.xml',
+        'views/helpdesk_ticket_subcategory.xml',
+        'views/helpdesk_ticket_category_view.xml',
+        'views/helpdesk_ticket_channel_view.xml',
+        'views/helpdesk_ticket_tag_view.xml',
+        'views/helpdesk_ticket_view.xml',
+        'views/helpdesk_dashboard_view.xml',
+        'views/report_helpdesk_ticket.xml',
+        'views/res_config_setting.xml',
+        'reports/helpdesk_status_report_pdf.xml',
+    ],
+    'demo': [
+        # 'demo/helpdesk_demo.xml',
+    ],
+    # 'development_status': 'Beta',
+    'application': True,
+    'installable': True,
+}

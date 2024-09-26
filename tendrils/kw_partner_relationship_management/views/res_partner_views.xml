@@ -1,0 +1,186 @@
+<odoo>
+	<data>
+		<!-- explicit list view definition -->
+
+		<record id="view_res_partner_relationship_management_form" model="ir.ui.view">
+			<field name="name">res.partner relationship management form</field>
+			<field name="model">res.partner</field>
+			<field name="inherit_id" ref="base.view_partner_form"/>
+			<field name="groups_id"
+			       eval="[(4,ref('kw_partner_relationship_management.group_partner_manager')),(4,ref('kw_partner_relationship_management.group_partner_user'))]"/>
+			<field name="arch" type="xml">
+
+				<xpath expr="//field[@name='child_ids']/form/sheet/group/group[2]/field[@name='email']"
+				       position="before">
+					<field name="branch_name" string="Branch Name" attrs="{'invisible': [('type','!=', 'branch')]}"/>
+				</xpath>
+				<!-- <xpath expr="//field[@name='child_ids']/form/sheet/group/group[2]/field[@name='name']"
+				       position="replace">
+					<field name="name" string="Contact Name"
+					       attrs="{'invisible': [('type','=', 'branch')],'required' : [('type', '=', 'contact')]}"/>
+				</xpath> -->
+				<xpath expr="//field[@name='child_ids']/kanban/templates//div[@class='oe_kanban_details']/field[@name='name']"
+				       position="after">
+					<div t-if="record.branch_name.raw_value">Branch Name :
+						<field name="branch_name"/>
+					</div>
+				</xpath>
+
+				<xpath expr="//field[@name='type']" position="before">
+					<field name="yoi" placeholder="Year Of Incorporation"/>
+				</xpath>
+				<!-- <xpath expr="//field[@name='type']" position="after">
+					<field name="branch_ids" options="{'no_create': True}" widget="many2many_tags"/>
+				</xpath> -->
+				<xpath expr="//field[@name='vat']" position="before">
+					<field name="certification_ids" options="{'no_create': True}" widget="many2many_tags"/>
+				</xpath>
+				<xpath expr="//field[@name='vat']" position="before">
+					<field name="geography_of_business" options="{'no_create': True}" widget="many2many_tags"/>
+				</xpath>
+
+				<xpath expr="//page[@name='sales_purchases']" position="attributes">
+					<attribute name="invisible">context.get('check_partner',False)</attribute>
+				</xpath>
+
+				<xpath expr="//page[@name='accounting']" position="attributes">
+					<attribute name="invisible">context.get('check_partner',False)</attribute>
+				</xpath>
+
+				<xpath expr="//page[@name='sales_purchases']" position="after">
+					<page name="Product &amp; Services" string="Product &amp; Services"
+					      invisible="context.get('is_partner',True)">
+						<group>
+							<group string="Product &amp; Services">
+								<field name="product_services_ids" widget='one2many_list'/>
+							</group>
+						</group>
+					</page>
+				</xpath>
+
+
+				<xpath expr="//page[@name='sales_purchases']" position="after">
+					<page name="partner_profiling" string="Partner Profiling"
+					      invisible="context.get('is_partner',True)">
+						<group>
+							<group>
+								<field name="is_partner"/>
+								<field name="partner_type_id"
+								       attrs="{'invisible': [('is_partner','=', False)],'required': [('is_partner','=', True)]}"
+								       options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"/>
+								<field name="maf" attrs="{'invisible': [('partner_type_alias','!=', 'oem')]}"
+								       widget='radio' options="{'horizontal': true}"/>
+
+								<field name="partner_type_alias" invisible="1"/>
+
+								<field name="products_focus_ids"
+								       attrs="{'invisible': [('partner_type_alias','!=', 'oem')]}"
+								       widget="many2many_tags" domain="[('type','=','3')]"
+								       options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"/>
+								<field name="geo_regions_to_focus"
+								       attrs="{'invisible': [('partner_type_alias','!=', 'oem')]}"
+								       widget="many2many_tags"
+								       options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"/>
+
+								<field name="date_of_incorporation"
+								       attrs="{'invisible': [('partner_type_alias','not in', ['oem','bd'])]}"
+								       options="{'datepicker':{'maxDate': 'now'}}" autocomplete="off"/>
+
+								<field name="incorporation_type" widget="radio" options="{'horizontal': true}"
+								       attrs="{'invisible': [('partner_type_alias','not in', ['oem','bd'])]}"/>
+								<separator/>
+								<field name="revenue" attrs="{'invisible': [('is_partner','=', False)]}"/>
+								<field name="experience_govt_sector" attrs="{'invisible': [('is_partner','=', False)]}"
+								       widget="integer"/>
+								<field name="partnership_area" attrs="{'invisible': [('is_partner','=', False)]}"
+								       options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"/>
+							</group>
+							<group>
+
+								<field name="industy_domain_ids" attrs="{'invisible': [('is_company', '=', False)]}"
+								       widget="many2many_tags"
+								       options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"/>
+
+
+								<field name="service_offering_ids" domain="[('type','=','1')]"
+								       attrs="{'invisible': [('is_company', '=', False)]}" widget="many2many_tags"
+								       options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"/>
+
+								<field name="tech_ids" domain="[('type','=','2')]"
+								       attrs="{'invisible': [('is_company', '=', False)]}" widget="many2many_tags"
+								       options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"/>
+							</group>
+						</group>
+					</page>
+				</xpath>
+			</field>
+		</record>
+
+
+		<!-- <record id="contacts.action_contacts" model="ir.actions.act_window">
+			<field name="name">Contacts</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">res.partner</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">kanban,tree,form,activity</field>
+			<field name="context">{'is_partner':True}</field>
+			<field name="search_view_id" ref="base.view_res_partner_filter"/>
+			<field name="help" type="html">
+			  <p class="o_view_nocontent_smiling_face">
+				Create a contact in your address book
+			  </p><p>
+				Odoo helps you to easily track all activities related to a customer.
+			  </p>
+			</field>
+		</record> -->
+
+		<record id="view_partner_inherit_search" model="ir.ui.view">
+			<field name="name">partner search</field>
+			<field name="model">res.partner</field>
+			<field name="inherit_id" ref="base.view_res_partner_filter"/>
+			<field name="arch" type="xml">
+				<xpath expr="//search" position="inside">
+					<field name="first_key_person_name"/>
+					<field name="second_key_person_name"/>
+				</xpath>
+			</field>
+		</record>
+
+		<!-- actions opening views on models -->
+
+		<record model="ir.actions.act_window" id="action_window_kw_partner_relationship_management">
+			<field name="name">Partner Profiling</field>
+			<field name="res_model">res.partner</field>
+			<field name="view_mode">kanban,tree,form</field>
+			<field name="domain">[('is_partner','=',True)]</field>
+			<field name="context">{'is_partner':False, 'partner_profile':True,'check_partner':True}</field>
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					Create a new partner profile
+				</p>
+			</field>
+		</record>
+
+		<record id="kw_partner_relationship_management_kanban_action_view" model="ir.actions.act_window.view">
+			<field eval="1" name="sequence"/>
+			<field name="view_mode">kanban</field>
+			<field name="view_id" ref="base.res_partner_kanban_view"/>
+			<field name="act_window_id" ref="action_window_kw_partner_relationship_management"/>
+		</record>
+
+		<record id="kw_partner_relationship_management_list_action_view" model="ir.actions.act_window.view">
+			<field eval="2" name="sequence"/>
+			<field name="view_mode">tree</field>
+			<field name="view_id" ref="base.view_partner_tree"/>
+			<field name="act_window_id" ref="action_window_kw_partner_relationship_management"/>
+		</record>
+
+		<record id="kw_partner_relationship_management_form_action_view" model="ir.actions.act_window.view">
+			<field eval="3" name="sequence"/>
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="view_res_partner_relationship_management_form"/>
+			<field name="act_window_id" ref="action_window_kw_partner_relationship_management"/>
+		</record>
+
+	</data>
+</odoo>

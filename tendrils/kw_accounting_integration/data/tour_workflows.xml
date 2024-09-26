@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+    	<!-- Apply Tour Workflow  -->
+
+		<record id="kw_tour_workflow_node_posted" model="odoo.workflow.node">
+			<field name="name">Posted</field>
+			<field name="workflow_id" ref="kw_tour.kw_tour_approval_workflow"/>
+			<field name="node_name">Posted</field>
+			<field name="sequence" eval="10"/>
+			<field name="is_visible" eval="False"/>
+			<field name="flow_end" eval="True"/>
+		</record>
+
+		<record id="kw_tour_dynamic_workflow_button_post" model="odoo.workflow.node.button">
+            <field name="sequence" eval="7"/>
+            <field name="workflow_id" ref="kw_tour.kw_tour_approval_workflow"/>
+            <field name="name">Post Journal Entries</field>
+            <field name="node_id" ref="kw_tour_workflow_node_posted"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('state', '!=', 'Finance Approved'),('finance_access','=',False)]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_accounting_integration.view_kw_tour_apply_post_journal_form").id 
+action= {
+    'name':'Create Journal Entry',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_tour',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'res_id': obj.id,
+    'view_id': form_view_id,
+    'target': 'new'
+}
+            </field>
+        </record>
+
+		<!-- Tour Advance Request Workflow  -->
+
+		<record id="kw_tour_advance_request_workflow_node_posted" model="odoo.workflow.node">
+			<field name="name">Posted</field>
+			<field name="workflow_id" ref="kw_tour.kw_tour_advance_request_approval_workflow"/>
+			<field name="node_name">Posted</field>
+			<field name="sequence" eval="5"/>
+			<field name="is_visible" eval="False"/>
+			<field name="flow_start" eval="False"/>
+			<field name="flow_end" eval="True"/>
+		</record>
+
+		<record id="kw_tour_advance_request_workflow_button_approve" model="odoo.workflow.node.button">
+			<field name="sequence" eval="1"/>
+			<field name="workflow_id" ref="kw_tour.kw_tour_advance_request_approval_workflow"/>
+			<field name="name">Post Journal Entries</field>
+			<field name="node_id" ref="kw_tour_advance_request_workflow_node_posted"/>
+			<field name="is_highlight" eval="True"/>
+			<field name="custom_domain" eval="True"/>
+			<field name="btn_hide_domain" eval="[('state', '!=', 'Grant')]"/>
+			<field name="btn_class">btn-success</field>
+			<field name="condition_code">
+result = True
+			</field>
+			<field name="action_type">code</field>
+			<field name="code">
+form_view_id = env.ref("kw_accounting_integration.view_kw_tour_advance_request_post_journal_form").id 
+action= {
+    'name':'Create Journal Entry',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_tour_advance_request',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'res_id': obj.id,
+    'view_id': form_view_id,
+    'target': 'new'
+}
+			</field>
+		</record>
+
+        <!-- Tour Settlement Workflow  -->
+
+		<record id="kw_tour_settlement_workflow_node_post" model="odoo.workflow.node">
+			<field name="name">Posted</field>
+			<field name="workflow_id" ref="kw_tour.kw_tour_settlement_approval_workflow"/>
+			<field name="node_name">Posted</field>
+			<field name="sequence" eval="8"/>
+			<field name="is_visible" eval="False"/>
+			<field name="flow_end" eval="True"/>
+		</record>
+
+		<record id="kw_tour_settlement_workflow_button_finance_paid" model="odoo.workflow.node.button">
+			<field name="sequence" eval="6"/>
+			<field name="workflow_id" ref="kw_tour.kw_tour_settlement_approval_workflow"/>
+			<field name="name">Post Journal Entries</field>
+			<field name="node_id" ref="kw_tour_settlement_workflow_node_post"/>
+			<field name="is_highlight" eval="True"/>
+			<field name="custom_domain" eval="True"/>
+			<field name="btn_hide_domain" eval="['|','|',('state', '!=', 'Payment Done'),('own_record','=',True),('finance_access','=',False)]"/>
+			<field name="btn_class">btn-success</field>
+			<field name="condition_code">
+result = True
+			</field>
+			<field name="action_type">code</field>
+			<field name="code">
+form_view_id = env.ref("kw_accounting_integration.view_kw_tour_settlement_post_journal_form").id 
+action= {
+    'name':'Create Journal Entry',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_tour_settlement',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'res_id': obj.id,
+    'view_id': form_view_id,
+    'target': 'new'
+}
+			</field>
+		</record>
+
+		<record id="kw_tour.kw_tour_settlement_workflow_button_reject" model="odoo.workflow.node.button">
+            <field name="sequence" eval="5"/>
+            <field name="workflow_id" ref="kw_tour.kw_tour_settlement_approval_workflow"/>
+            <field name="name">Reject</field>
+            <field name="node_id" ref="kw_tour.kw_tour_settlement_workflow_node_rejected"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('state', 'in', ['Draft','Granted','Payment Done','Posted']),('own_record','=',True)]"/>
+            <field name="btn_class">btn-danger</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_tour.view_kw_tour_settlement_reject_remark_form").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_tour_settlement',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'res_id': obj.id,
+    'view_id': form_view_id,
+    'target': 'new',
+    'domain': [('id', '=', obj.id)],
+    'nodestroy': True,
+    }
+            </field>
+        </record>
+
+    </data>
+</odoo>

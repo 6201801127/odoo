@@ -1,0 +1,161 @@
+<odoo>
+    <data>
+        <record id="induction_code" model="ir.sequence">
+            <field name="name">Induction</field>
+            <field name="code">self.kw_onboard_induction_emp_tagged</field>
+            <field name="prefix">/</field>
+            <field name="padding">4</field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_induction_config_list">
+            <field name="name">kw_induction_config_list</field>
+            <field name="model">kw_onboarding_induction_configuration</field>
+            <field name="arch" type="xml">
+                <tree import="false" create="true">
+                    <field name="cc_notify" string="cc_notify"  widget="many2many_tags"/>
+                    <field name="admin_reviewer"  widget="many2many_tags" string= "Onboarding feedback reviewer"/>
+                    <!-- <field name="it_reviewer" widget="many2many_tags" string="IT induction assessment reviewer"/>
+                    <field name="hr_reviewer" widget="many2many_tags" string="HR induction assessment reviewer"/>
+                    <field name="csm_reviewer"  widget="many2many_tags" string="KYC induction assessment reviewer"/> -->
+                </tree>
+            </field>
+        </record>
+
+
+
+
+        <record id="kw_onboard_induction_configuration_view_form" model="ir.ui.view">
+            <field name="name">kw_onboard_induction_view_form</field>
+            <field name="model">kw_onboarding_induction_configuration</field>
+            <field name="arch" type="xml">
+                <form string="Onboarding Induction" duplicate='0' create='0' delete='0'>
+                    <sheet>
+                    <group>
+                        <div class=" table-responsive" style="width:60%">
+                            <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                                <tbody class="ui-sortable">
+                                    <tr>
+                                        <td scope="row" style="width: 50%;"><strong>CC Notify</strong></td>
+                                        <td>
+                                            <field name="cc_notify"  groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_manager' widget="many2many_tags"  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td scope="row" style="width: 50%;"><strong>Onboard Feedback Review</strong></td>
+                                        <td>
+                                            <field name="admin_reviewer" groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_manager' widget="many2many_tags"  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_onboard_induction_action" model="ir.actions.act_window">
+            <field name="name">General Settings</field>
+            <field name="res_model">kw_onboarding_induction_configuration</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                    (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_onboarding_induction_feedback.kw_induction_config_list')}),
+                    (0, 0, {'view_mode': 'form', 'view_id': ref('kw_onboarding_induction_feedback.kw_onboard_induction_configuration_view_form')})]"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    No records found...
+                </p>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_feedback_employee_tagged_list">
+            <field name="name">kw_feedback_tagged_list</field>
+            <field name="model">kw_onboard_induction_emp_tagged</field>
+            <field name="arch" type="xml">
+                <tree import="false" create="true">
+                    <field name="emp_ids" string="Employee"  widget="many2many_tags"/>
+                    <field name="start_date"/>
+                    <field name="end_date" />
+                    <field name="feedback_form_tagged"  widget="many2many_tags"/>
+                    <field name="status_submit" readonly="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_onboarding_emp_tagged_form" model="ir.ui.view">
+            <field name="name">kw_onboarding_induction_tagged_form</field>
+            <field name="model">kw_onboard_induction_emp_tagged</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                    <!-- <button name="get_emp_tagged_form" type="object" class="btn-success" string='Submit' attrs="{'invisible': [('after_save_bool','=',False)]}"/> -->
+                    <button name="mail_send_employee" type="object" 
+                            class="btn-success" 
+                            confirm = "Are you sure to confirm ?"
+                            string='Confirm' attrs="{'invisible': ['|',('after_save_bool','=',False),('confirmed_bool','=',True)]}"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="after_save_bool" invisible="1"/>
+                                <field name="confirmed_bool" invisible="1"/>
+                                <field name="emp_ids" widget="many2many_tags" required='1' attrs="{'readonly':[('confirmed_bool','=',True)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="start_date" date='start_date' required='0'  attrs="{'readonly':[('confirmed_bool','=',True)]}"/>
+                                <field name="end_date" date='end_date' required='0'  attrs="{'readonly':[('confirmed_bool','=',True)]}"/>
+                                <field name="feedback_form_tagged" required='1'  attrs="{'readonly':[('confirmed_bool','=',True)]}" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="status_submit" readonly='1'/>
+                            </group>
+                            <group>
+                            </group>
+                            <div class="text-left">
+                                <button class="btn btn-sm btn-info" string='User Access' type="object" name="manage_user_access" />
+                            </div>
+                            <group>
+                                <field name="user_access_id" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Action Log Table">
+                                <field name="log_feedback_ids"  nolabel="1" readonly="1">
+                                    <tree editable="bottom">
+                                        <field name="emp_name" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="dept_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name ="deg_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name= "assign_feedback_form"/>
+                                        <field name="status_feedback"/>
+                                        <field name="tagged_feedback_id" invisible='1'/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        
+        <record id="kw_onboard_induction_tagged_action" model="ir.actions.act_window">
+            <field name="name">Employee Tagged for Onboarding Induction </field>
+            <field name="res_model">kw_onboard_induction_emp_tagged</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                    (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_onboarding_induction_feedback.kw_feedback_employee_tagged_list')}),
+                    (0, 0, {'view_mode': 'form', 'view_id': ref('kw_onboarding_induction_feedback.kw_onboarding_emp_tagged_form')})]"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    No records found...
+                </p>
+            </field>
+        </record>
+
+    </data>
+</odoo>        

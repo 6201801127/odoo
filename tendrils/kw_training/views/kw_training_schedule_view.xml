@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+		<record id="kw_training_schedule_tree" model="ir.ui.view">
+			<field name="name">kw_training_schedule.tree</field>
+			<field name="model">kw_training_schedule</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree import="false" delete="false">
+					<field name="is_attended" invisible="1"/>
+					<field name="session_type" string="Venue"/>
+					<field name="subject"/>
+					<field name="instructor_name"/>
+					<field name="date"/>
+					<field name="from_time"/>
+					<field name="to_time"/>
+					<field name="training_id" invisible="1"/>
+					<field name="instructor" invisible="1"/>
+					<field name="instructor_partner" invisible="1"/>
+					<field name="meeting_time_over" invisible="1"/>
+					<button name="schedule_meeting" string="Book Meeting" type="object" invisible="1"/>
+					<button name="view_meeting" string="Meeting" type="object" class="oe_highlight" invisible="1"/>
+					<button name="view_attendance" string="Update Attendance" type="object" class="oe_highlight" 
+					attrs="{'invisible': [('meeting_time_over','=',False)]}"/>
+				</tree>
+			</field>
+		</record>
+
+		<record id="view_kw_training_schedule_kanban" model="ir.ui.view">
+			<field name="name">view.kw_training_schedule.kanban</field>
+			<field name="model">kw_training_schedule</field>
+			<field name="type">kanban</field>
+			<field name="mode">primary</field>
+			<field name="priority" eval="16" />
+			<field name="active" eval="True" />
+			<field name="arch" type="xml">
+				<kanban import="false" delete="false">
+					<field name="is_attended" invisible="1"/>
+					<field name="session_type"/>
+					<field name="subject"/>
+					<field name="instructor"/>
+					<field name="instructor_name"/>
+					<field name="date"/>
+					<field name="from_time"/>
+					<field name="to_time"/>
+					<field name="training_id" invisible="1"/>
+					<field name="instructor" invisible="1"/>
+					<field name="instructor_partner" invisible="1"/>
+					<field name="meeting_time_over" invisible="1"/>
+					<templates>
+						<t t-name="kanban-box">
+							<div t-attf-class="oe_kanban_global_click">
+								<div class="o_kanban_record_top container p-2 m-0">
+									<div class="o_kanban_record_headings">
+										<div class="text-left">
+											<h3 class='text-uppercase'>
+												<field name="subject"/>
+											</h3>
+											<h3 class='text-uppercase badge badge-warning text-wrap font-weight-bold' style="font-size: 1rem;">
+												<field name="session_type"/>
+											</h3>
+											<div class="clearfix"/>
+											<div class="row">
+												<div class="col-sm-12">
+													<span class="font-weight-bold fa fa-user mb-2"/>
+                                                        &amp;nbsp; <b> Instructor: </b>
+													<field name="instructor_name"/>
+													<br />
+													<span class="font-weight-bold fa fa-calendar-o mb-2"/>
+                                                        &amp;nbsp; <b> Date: </b>
+													<field name="date" widget="date"/>
+													<br/>
+													<span class="font-weight-bold fa fa-clock-o mb-2"/>
+                                                        &amp;nbsp; <b> Start Time: </b>
+													<field name="from_time" />
+													<br/>
+													<span class="font-weight-bold fa fa-clock-o mb-2"/>
+                                                        &amp;nbsp; <b> End Time: </b>
+													<field name="to_time"/>
+												</div>
+											</div>
+											<div class="row mt-4">
+												<div class="col-12">
+													<button name="schedule_meeting" type="object" context="{'default_schedule_id': active_id}" invisible="1" class="btn btn-primary"> Book Meeting </button>
+													<button name="view_meeting" type="object" invisible="1" class="btn btn-primary"> Meeting </button>
+													<button name="view_attendance" type="object" class="btn btn-primary" attrs="{'invisible': [('meeting_time_over','=',False)]}">Update Attendance </button>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</t>
+					</templates>
+				</kanban>
+			</field>
+		</record>
+
+		<record id="kw_training_schedule_form" model="ir.ui.view">
+			<field name="name">kw_training_schedule.form</field>
+			<field name="model">kw_training_schedule</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form delete="false" duplicate='0'>
+					<style>
+                        .btn-primary:nth-child(2){
+                            display:none !important;
+                        }
+					</style>
+					<sheet>
+						<group>
+							<field name="instructor_visibility" invisible="1"/>
+							<field name="instructor" options="{'no_create': True, 'no_open': True,'no_edit':True}" attrs="{'invisible': [('instructor_visibility', '=', True)],'required':[('instructor_visibility', '=',False)]}"/>
+							<field name="instructor_partner" options="{'no_create': True, 'no_open': True,'no_edit':True}" string="Instructor" attrs="{'invisible': [('instructor_visibility', '=', False)],'required':[('instructor_visibility', '=',True)]}"/>
+							<field name="subject" autocomplete="off"/>
+							<field name="session_type" string="Venue"/>
+							<field name="date"/>
+							<field name="from_time"/>
+							<field name="to_time"/>
+						</group>
+						<group>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record id="kw_training_session_act_window" model="ir.actions.act_window">
+			<field name="type">ir.actions.act_window</field>
+			<field name="name">Sessions</field>
+			<field name="res_model">kw_training_schedule</field>
+			<field name="view_mode">kanban,tree</field>
+			<field name="view_type">form</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+				(0, 0, {'view_mode': 'kanban', 'view_id': ref('kw_training.view_kw_training_schedule_kanban')}),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_training.kw_training_schedule_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_training.kw_training_schedule_form')})]"/>
+
+		</record>
+
+		<record id="kw_training_schedule_view_only_tree" model="ir.ui.view">
+			<field name="name">kw_training_schedule.tree</field>
+			<field name="model">kw_training_schedule</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree create="false" delete="false" import="false">
+					<field name="is_attended" invisible="1"/>
+					<field name="session_type" string="Venue"/>
+					<field name="subject"/>
+					<field name="instructor_name"/>
+					<field name="date"/>
+					<field name="from_time"/>
+					<field name="to_time"/>
+					<field name="training_id" invisible="1"/>
+					<field name="instructor" invisible="1"/>
+					<field name="instructor_partner" invisible="1"/>
+					<field name="meeting_time_over" invisible="1"/>
+					<field name="instructor_name" invisible="1"/>
+					<field name="instructor_type" invisible="1"/>
+					<field name="attendance_present" string="Attendance Status"/>
+				</tree>
+			</field>
+		</record>
+
+		<record id="kw_training_schedule_view_only_kanban" model="ir.ui.view">
+			<field name="name">view_only.kw_training_schedule.kanban</field>
+			<field name="model">kw_training_schedule</field>
+			<field name="type">kanban</field>
+			<field name="mode">primary</field>
+			<field name="priority" eval="16" />
+			<field name="active" eval="True" />
+			<field name="arch" type="xml">
+				<kanban create="false" edit="false" delete="false" import="false">
+					<field name="is_attended" invisible="1"/>
+					<field name="session_type"/>
+					<field name="subject"/>
+					<field name="instructor"/>
+					<field name="date"/>
+					<field name="from_time"/>
+					<field name="to_time"/>
+					<field name="training_id" invisible="1"/>
+					<field name="instructor" invisible="1"/>
+					<field name="instructor_partner" invisible="1"/>
+					<field name="meeting_time_over" invisible="1"/>
+					<field name="instructor_name" invisible="1"/>
+					<field name="instructor_type" invisible="1"/>
+					<field name="attendance_present" string="Attendance Status"/>
+					<templates>
+						<t t-name="kanban-box">
+							<div t-attf-class="oe_kanban_global_click">
+								<div class="o_kanban_record_top container p-2 m-0">
+									<div class="o_kanban_record_headings">
+										<div class="text-left">
+											<h3 class='text-uppercase'>
+												<field name="subject"/>
+											</h3>
+											<h3 class='text-uppercase badge badge-warning text-wrap font-weight-bold' style="font-size: 1rem;">
+												<field name="session_type"/>
+											</h3>
+											<div class="clearfix"/>
+											<div class="row mb-3">
+												<div class="col-sm-12">
+													<span class="font-weight-bold fa fa-user mb-2"/>
+                                                        &amp;nbsp; <b> Instructor: </b>
+													<field name="instructor_name"/>
+													<br />
+													<span class="font-weight-bold fa fa-calendar-o mb-2"/>
+                                                        &amp;nbsp; <b> Date: </b>
+													<field name="date" widget="date"/>
+												</div>
+											</div>
+											<div class="row">
+												<div class="col-sm-7">
+													
+													<span class="font-weight-bold fa fa-clock-o mb-2"/>
+                                                        &amp;nbsp; <b> Start Time: </b>
+													<field name="from_time" />
+													<br/>
+													<span class="font-weight-bold fa fa-clock-o mb-2"/>
+                                                        &amp;nbsp; <b> End Time: </b>
+													<field name="to_time"/>
+
+												</div>
+												<div class="col-sm-5 text-center ">
+													<t t-if="record.attendance_present.raw_value == 'Attended'">
+														
+														<h3 class='badge text-white badge-success text-wrap font-weight-bold p-2' 
+														style="font-size: 1.2rem;">
+															<field name="attendance_present"/>
+														</h3>
+													</t>
+													<t t-elif="record.attendance_present.raw_value == 'Not Attended'">
+														<h3 class='badge text-white badge-primary text-wrap font-weight-bold p-2' 
+														style="font-size: 1.2rem;background-color:#198FBB;">
+															<field name="attendance_present"/>
+														</h3>
+													</t>
+													<t t-else="">
+													</t>
+												</div>
+											</div>
+										</div>
+										<div class="training_button_section"/>
+									</div>
+								</div>
+							</div>
+						</t>
+					</templates>
+				</kanban>
+			</field>
+		</record>
+
+		<record id="kw_training_schedule_view_only_tree_trainer" model="ir.ui.view">
+			<field name="name">kw_training_schedule.tree</field>
+			<field name="model">kw_training_schedule</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree create="false" delete="false" import="false">
+					<field name="is_attended" invisible="1"/>
+					<field name="training_id" invisible="1"/>
+					<field name="instructor" invisible="1"/>
+					<field name="instructor_partner" invisible="1"/>
+					<field name="meeting_time_over" invisible="1"/>
+					<field name="instructor_name" invisible="1"/>
+					<field name="instructor_type" invisible="1"/>
+					<field name="session_type" string="Venue"/>
+					<field name="subject"/>
+					<field name="instructor_name"/>
+					<field name="date"/>
+					<field name="from_time"/>
+					<field name="to_time"/>
+				</tree>
+			</field>
+		</record>
+
+		<record id="kw_training_schedule_view_only_kanban_trainer" model="ir.ui.view">
+			<field name="name">view_only_trainer.kw_training_schedule.kanban</field>
+			<field name="model">kw_training_schedule</field>
+			<field name="type">kanban</field>
+			<field name="mode">primary</field>
+			<field name="priority" eval="16" />
+			<field name="active" eval="True" />
+			<field name="arch" type="xml">
+				<kanban create="false" edit="false" delete="false" import="false">
+					<field name="is_attended" invisible="1"/>
+					<field name="training_id" invisible="1"/>
+					<field name="instructor" invisible="1"/>
+					<field name="instructor_partner" invisible="1"/>
+					<field name="meeting_time_over" invisible="1"/>
+					<field name="instructor_name" invisible="1"/>
+					<field name="instructor_type" invisible="1"/>
+					<field name="session_type"/>
+					<field name="subject"/>
+					<field name="instructor"/>
+					<field name="date"/>
+					<field name="from_time"/>
+					<field name="to_time"/>
+					<templates>
+						<t t-name="kanban-box">
+							<div t-attf-class="oe_kanban_global_click">
+								<div class="o_kanban_record_top container p-2 m-0">
+									<div class="o_kanban_record_headings">
+										<div class="text-left">
+											<h3 class='text-uppercase'>
+												<field name="subject"/>
+											</h3>
+											<h3 class='text-uppercase badge badge-warning text-wrap font-weight-bold' style="font-size: 1rem;">
+												<field name="session_type"/>
+											</h3>
+											<div class="clearfix"/>
+											<div class="row">
+												<div class="col-sm-12">
+													<span class="font-weight-bold fa fa-user mb-2"/>
+                                                        &amp;nbsp; <b> Instructor: </b>
+													<field name="instructor_name"/>
+													<br />
+													<span class="font-weight-bold fa fa-calendar-o mb-2"/>
+                                                        &amp;nbsp; <b> Date: </b>
+													<field name="date" widget="date"/>
+													<br/>
+													
+													<span class="font-weight-bold fa fa-clock-o mb-2"/>
+                                                        &amp;nbsp; <b> Start Time: </b>
+													<field name="from_time" />
+													<br/>
+													<span class="font-weight-bold fa fa-clock-o mb-2"/>
+                                                        &amp;nbsp; <b> End Time: </b>
+													<field name="to_time"/>
+													
+												</div>
+											</div>
+										</div>
+										<div class="training_button_section"/>
+									</div>
+								</div>
+							</div>
+						</t>
+					</templates>
+				</kanban>
+			</field>
+		</record>
+
+		<record id="kw_training_schedule_view_only_form" model="ir.ui.view">
+			<field name="name">kw_training_schedule.form</field>
+			<field name="model">kw_training_schedule</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form create="false" edit="false" delete="false" export="false" duplicate="false">
+					<style>
+                        .btn-primary:nth-child(2){
+                            display:none !important;
+                        }
+					</style>
+					<sheet>
+						<group>
+							<field name="instructor_visibility" invisible="1"/>
+							<field name="instructor" options="{'no_create': True, 'no_open': True,'no_edit':True}" attrs="{'invisible': [('instructor_visibility', '=', True)],'required':[('instructor_visibility', '=',False)]}"/>
+							<field name="instructor_partner" options="{'no_create': True, 'no_open': True,'no_edit':True}" string="Instructor" attrs="{'invisible': [('instructor_visibility', '=', False)],'required':[('instructor_visibility', '=',True)]}"/>
+							<field name="subject"/>
+							<field name="session_type" string="Venue"/>
+							<field name="date"/>
+							<field name="from_time"/>
+							<field name="to_time"/>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record id="kw_training_session_view_only_act_window" model="ir.actions.act_window">
+			<field name="type">ir.actions.act_window</field>
+			<field name="name">Sessions</field>
+			<field name="res_model">kw_training_schedule</field>
+			<field name="view_mode">tree,form</field>
+			<field name="view_type">form</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+				(0, 0, {'view_mode': 'kanban', 'view_id': ref('kw_training.kw_training_schedule_view_only_kanban')}),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_training.kw_training_schedule_view_only_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_training.kw_training_schedule_view_only_form')})]"/>
+		</record>
+
+		<record id="kw_training_session_view_only_trainer_act_window" model="ir.actions.act_window">
+			<field name="type">ir.actions.act_window</field>
+			<field name="name">Sessions</field>
+			<field name="res_model">kw_training_schedule</field>
+			<field name="view_mode">tree,form</field>
+			<field name="view_type">form</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'kanban', 'view_id': ref('kw_training.kw_training_schedule_view_only_kanban_trainer')}),
+				(0, 0, {'view_mode': 'tree', 'view_id': ref('kw_training.kw_training_schedule_view_only_tree_trainer')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_training.kw_training_schedule_view_only_form')})]"/>
+
+		</record>
+	</data>
+</odoo>
+    

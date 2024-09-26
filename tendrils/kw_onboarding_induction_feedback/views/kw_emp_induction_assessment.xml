@@ -1,0 +1,520 @@
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="kw_assessment_config_emp_list">
+            <field name="name">kw_assessment_config_list</field>
+            <field name="model">kw_employee_assessment_configuration</field>
+            <field name="arch" type="xml">
+                <tree import="false" create="false">
+                    <field name="onboard_id" invisible="1"/>
+                    <field name="name"/>
+                    <field name="department_id" string="Department"/>
+                    <field name="division" force_save="1"/>
+                    <field name="section" force_save="1"/>
+                    <field name="practise" force_save="1"/>
+                    <field name="job_id" string="Designation" force_save="1"/>
+                    <field name="date_of_joining"/>
+                    <field name="induction_config_status"/>
+                </tree>
+            </field>
+        </record>
+            
+        <record id="kw_assessment_config_action_window" model="ir.actions.act_window">
+            <field name="name">Employee Induction Assessment Configuration </field>
+            <field name="res_model">kw_employee_assessment_configuration</field>
+            <field name="view_id" ref="kw_assessment_config_emp_list"/>
+            <field name="domain">[]</field>
+            <field name="view_mode">tree</field>
+            <field name="view_type">form</field>
+        </record>
+
+        <menuitem name="Assessment Configuration" id="induction_assessment_master_menu3"
+                parent="kw_onboarding_induction_feedback.induction_master_menu"
+                action="kw_assessment_config_action_window"
+                groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_manager,kw_onboarding_induction_feedback.group_kw_onboarding_induction_officer,kw_skill_assessment.group_kw_skill_assessment_manager'
+                sequence="4"/>
+
+
+        <record id="induction_config_wizard_form" model="ir.ui.view">
+            <field name="name">induction_config_wizard form</field>
+            <field name="model">induction_assessment_configuration_wizard</field>
+            <field name="arch" type="xml">
+                <form string="Induction Configuration">
+                    <script>
+                        $(document).ready(function(){
+                        $(".modal-title").show();
+                        });
+                    </script>
+                    <header>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="induction_config_id" invisible="1"/>
+                                <field name="employee_ids">
+                                    <tree create = '0' edit = '0' delete = '0'>
+                                        <field name="onboard_id" string="Name" invisible="1" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                                        <field name="name"/>
+                                        <field name="department_id"/>
+                                        <field name="division"/>
+                                        <field name="section"/>
+                                        <field name="practise"/>
+                                        <field name="job_id"/>
+                                        <field name="date_of_joining"/>
+                                    </tree>
+                                </field>
+                                <field name="induction_id" widget="many2many_tags" required ="1" options="{'no_open': True, 'no_create': True, 'no_edit': True}" />
+                                <field name="date_of_induction" required="1"/>
+                                <field name="end_date_of_induction"/>
+                                <field name="emp_send_mail" invisible="1"/>
+
+                            </group>
+                            <group>
+                            </group>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="update_induction_employee" string="Confirm" type="object" class="btn btn-warning" icon="fa-check" confirm="Are you sure, you want to confirm?"/>
+                        <button string="Close" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <act_window id="action_induction_emp_config_wizard" name="Employee induction configuration" src_model="kw_employee_assessment_configuration" res_model="induction_assessment_configuration_wizard" view_type="form" view_mode="form" view_id="induction_config_wizard_form"  key2="client_action_multi" target="new"/>
+
+        <record id="induction_add_wizard_form" model="ir.ui.view">
+            <field name="name">induction_config_wizard form</field>
+            <field name="model">induction_assessment_configuration_wizard</field>
+            <field name="arch" type="xml">
+                <form string="Induction Configuration">
+                    <script>
+                        $(document).ready(function(){
+                        $(".modal-title").show();
+                        });
+                    </script>
+                    <header>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name = "emp_id" readonly="1" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                                <field name="induction_id" widget="many2many_tags" required ="1" options="{'no_open': True, 'no_create': True, 'no_edit': True}" />
+                                <field name="date_of_induction" required="1"/>
+                                <field name="end_date_of_induction"/>
+                                <field name="emp_send_mail" invisible="1"/>
+
+                            </group>
+                            <group>
+                            </group>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="update_induction_employee" string="Confirm" type="object" class="btn btn-warning" icon="fa-check" confirm="Are you sure, you want to confirm?"/>
+                        <button string="Close" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <record id="kw_induction_assessment_add_action_window" model="ir.actions.act_window">
+            <field name="name">Induction Assessment</field>
+            <field name="res_model">induction_assessment_configuration_wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="kw_onboarding_induction_feedback.induction_add_wizard_form"/>
+            <field name="target">new</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    No attendance found
+                </p>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="kw_induction_assessment_list">
+            <field name="name">Induction Assessment list</field>
+            <field name="model">kw_employee_induction_assessment</field>
+            <field name="arch" type="xml">
+                <tree import="false" create="false">
+                    <field name="emp_id" string="Name"/>
+                    <field name="induction_id"/>
+                    <field name="start_date_of"/>
+                    <field name="end_date_of"/>
+                    <field name="induction_id_name"/>
+                    <field name="manager_view_score" invisible="1"/>
+                    <field name="hide_reschedule" invisible="1"/>
+                    <field name="after_reschedule" invisible="1"/>
+                    <button name="view_reschdule_induction" string="Reschedule" context="{'current_record':active_id}" attrs="{'invisible':['|','|',('manager_view_score','=',False),('hide_reschedule','=',False),('after_reschedule','=',True)]}" 
+                        type="object" class="btn btn-primary"></button>
+                    <button name="%(kw_induction_assessment_add_action_window)d" string="Add Induction" context="{'current_record':active_id}"  
+                        type="action" class="btn btn-primary"></button>
+                </tree>
+            </field>
+        </record>
+        <record id="kw_assessment_list_view_search" model="ir.ui.view">
+            <field name="name">Assessment view search</field>
+            <field name="model">kw_employee_induction_assessment</field>
+            <field name="arch" type="xml">
+                <search string="Search">
+                    <field name="induction_id" />
+                    <field name="start_date_of"/>
+                    <field name="end_date_of"/>
+                    <group expand="0" string="Group By">
+                        <filter name="emp_id" string="Name" context="{'group_by':'emp_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        <!-- <record id="view_kw_induction_assessment_form" model="ir.ui.view">
+            <field name="name">view.kw_employee_induction_assessment.form</field>
+            <field name="model">kw_employee_induction_assessment</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="10" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <form create="false" delete="false">
+                    <style>
+                        .o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 333px;}
+                    </style>
+                    <sheet>
+                        <group>
+                            <group string="Applicant Induction Details">
+                                <field name="emp_id" string="Name" options="{'no_open': True, 'no_create': True, 'no_edit': True}" readonly="1"/>
+                                <field name="onboarding_applicant_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}" force_save= "1" invisible="1"/>
+                                <field name="induction_id" widget="many2many_tags" readonly="1"/>
+                                <field name="start_date_of" readonly="1"/>
+                                <field name="end_date_of" readonly="1"/>
+                                <field name="assessment_type" invisible="0" readonly="1"/>
+                                <field name="test_type" invisible="1" />
+                                <field name="assessment_started" invisible="1" />
+                                <field name ="hide_reschedule" invisible="1"/>
+                                <field name="after_reschedule" invisible="1"/>
+                                <field name="induction_emp_check"/>
+                            </group>
+
+                        </group>
+                        <group>
+                            <group string="Induction Feedback">
+                                <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                                    <thead>
+                                        <tr>
+                                            <th class="o_column_sortable" width="50%">Questions</th>
+                                            <th class="o_column_sortable" width="50%">Rating</th>
+                                            <th class="o_column_sortable" width="100%">Comments</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="ui-sortable">
+                                        <tr>
+                                            <td scope="row">How would you rate the induction overall?</td>
+                                            <td> <field name="induction_rate_no" readonly="1"/> </td>
+                                            <td>
+                                                <field name='induction_rate' readonly="1"/>
+                                            </td>
+                                            
+                                        </tr>
+                                        <tr>
+                                            <td scope="row">Did it provide you with valuable information to help you do your job?</td>
+                                            <td><field name="valuable_info_no" readonly="1"/> </td>
+                                            <td>
+                                                <field name='valuable_info' readonly="1"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td scope="row">Did it help you understand more about the organization?</td>
+                                            <td><field name="understand_organisation_no" readonly="1"/> </td>
+                                            <td>
+                                                <field name='understand_organisation' readonly="1"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td scope="row">How was the presentation skill of the Inductor?</td>
+                                            <td><field name="skill_of_inductor_no" readonly="1"/> </td>
+                                            <td>
+                                                <field name='skill_of_inductor' readonly="1"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td scope="row">Did the Inductor handle your queries properly?</td>
+                                            <td><field name="handel_queries_no" readonly="1"/> </td>
+                                            <td>
+                                                <field name='handel_queries' readonly="1"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td scope="row">How would you rate the Indution coordinated for you?</td>
+                                            <td><field name="induction_coordinated_no" readonly="1"/> </td>
+                                            <td>
+                                                <field name='induction_coordinated' readonly="1"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record> -->
+        <record id="view_induction_assessment_kanban" model="ir.ui.view">
+            <field name="name">view.kw_induction_assessment.kanban</field>
+            <field name="model">kw_employee_induction_assessment</field>
+            <field name="type">kanban</field>
+            <field name="mode">primary</field>
+            <field name="sequence" eval="1"/>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <kanban import="false" delete="false" create="false">
+                    <field name="emp_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                    <field name="induction_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}" />
+                    <field name="test_type" />
+                    <field name="start_date_of"/>
+                    <field name="end_date_of"/>
+                    <field name="assessment_started" invisible="1"/>
+                    <field name="test_available" invisible="1"/>
+                    <field name="manager_view_score" invisible="1"/>
+                    <field name="hide_reschedule" invisible="1"/>
+                    <field name="after_reschedule" invisible="1"/>
+
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_global_click">
+                                <div class="o_kanban_record_top ">
+                                    <div class="container p-0 m-0">
+										<div class="row">
+                                            <div class="col-sm-9">
+                                                <h3 class='text-uppercase text-info'>
+                                                    <field name="induction_id_name"/>
+                                                </h3>
+                                                <!-- <h6 class='text-uppercase badge badge-primary text-wrap font-weight-bold mb-2'
+                                                        style="font-size: 1.2rem; background-color:#108fbb;">
+                                                    <field name="test_type"/>
+                                                </h6> -->
+                                                <h6 class='text-uppercase badge badge-primary text-wrap font-weight-bold mb-2'
+                                                        style="font-size: 1.2rem; background-color:#108fbb">
+                                                    <field name="assessment_type"/>
+                                                </h6>
+                                                <div class="clearfix"/>
+                                                <p class="h6">Employee name :
+                                                    <field name="emp_id"/>
+                                                </p>
+                                                <p class="h6">Start date :
+                                                    <field name="start_date_of"/>
+                                                </p>
+                                                <p class="h6">Appeared on :
+                                                    <field name="create_date_ans"/>
+                                                </p>
+
+                                                <div class="clearfix"/>
+                                            </div>
+                                            <div class="col-sm-3 text-center">
+												<h6 class='text-danger'>Result</h6>
+												<p class="h1 text-danger">
+													<field name="percentage_scored" widget='percentpie' string=' '/>
+												</p>
+												<p class="h6 ml-0">
+													<field name="total_mark_obtained"/>
+													/
+													<field name="total_mark"/>
+												</p>
+											</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-8">
+                                                <p class="h6">Duration:
+                                                    <field name="duration" />
+                                                </p>
+                                                <p class="h6">Completed In:
+                                                    <field name="time_taken_duration" />
+                                                </p>
+                                            </div>
+                                           
+                                            <div class="col-sm-4">
+                                                <button name="view_reschdule_induction" context="{'current_record':active_id}" attrs="{'invisible':['|','|',('manager_view_score','=',False),('hide_reschedule','=',False),('after_reschedule','=',True)]}" 
+                                                    type="object" class="btn btn-primary">Reschedule</button>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="kw_induction_assessment_action_window" model="ir.actions.act_window">
+            <field name="name">Induction Assessment of Employee details</field>
+            <field name="res_model">kw_employee_induction_assessment</field>
+            <field name="view_mode">kanban,tree</field>
+            <field name="view_type">form</field>
+            <field name="search_view_id" ref="kw_onboarding_induction_feedback.kw_assessment_list_view_search"/>
+			<field name="context">{'search_default_emp_id':1}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'kanban', 'view_id': ref('kw_onboarding_induction_feedback.view_induction_assessment_kanban')}),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_onboarding_induction_feedback.kw_induction_assessment_list')})]"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    No data found
+                </p>
+            </field>
+        </record>
+       
+        <record id="view_kw_induction_assessment_user_readonly_kanban" model="ir.ui.view">
+            <field name="name">view_kw_employee_induction_assessment_kanban</field>
+            <field name="model">kw_employee_induction_assessment</field>
+            <field name="type">kanban</field>
+            <field name="mode">primary</field>
+            <field name="sequence" eval="1"/>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <kanban create="false" edit="false" delete="false" import="false">
+                    <field name="user_is_participant" invisible="1"/>
+                    <field name="user_has_given_assessment" invisible="1"/>
+                    <field name="feedback_hide_btn" invisible="1"/>
+                    <field name="test_available" invisible="1"/>
+                    <field name="induction_id" />
+                    <field name="assessment_type" />
+                    <field name="test_type" />
+                    <field name="start_date_of"/>
+                    <field name="end_date_of"/>
+                    <templates>
+                      <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_global_click">
+                                <div class="o_kanban_record_top ">
+                                    <div class="container p-0 m-0">
+										<div class="row">
+                                            <div class="col-sm-9">
+                                                <h3 class='text-uppercase text-info'>
+                                                    <field name="induction_id_name"/>
+                                                </h3>
+                                                <h6 class='text-uppercase badge badge-primary text-wrap font-weight-bold mb-2'
+                                                        style="font-size: 1.2rem; background-color:#108fbb">
+                                                    <field name="assessment_type"/>
+                                                </h6>
+                                            </div>
+                                           
+                                            <div class="clearfix"/>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-8">
+                                                <p class="h6">  &amp;nbsp; Duration:
+                                                    <field name="duration" />
+                                                </p>
+                                                <p class="h6" > &amp;nbsp; Start Date:
+                                                    <field name="start_date_of" />
+                                                </p>
+                                            </div>
+                                           
+                                            <div class="col-sm-4">
+                                                <button name="action_assessment_test" string="Take Test"  attrs="{'invisible':[('user_has_given_assessment','=',True)]}"
+                                                    type="object" class="btn btn-primary">Take Test</button>
+                                                <button name="action_feedback_test" string="Feedback" context = "{'current_record': active_id}" attrs="{'invisible':['|',('user_has_given_assessment','=',False),('feedback_hide_btn','=',True)]}"
+                                                    type="object" class="btn btn-primary">Feedback</button>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="action_kw_induction_assessment_user_readonly_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">My Induction Assessment</field>
+            <field name="res_model">kw_employee_induction_assessment</field>
+            <field name="view_mode">kanban</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>
+            <field name="domain">[]</field>
+            <field name="context">\{}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'kanban', 'view_id': ref('kw_onboarding_induction_feedback.view_kw_induction_assessment_user_readonly_kanban')})]"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    No record found
+                </p>
+            </field>
+        </record>
+
+        <menuitem name="My Assessment" id="induction_assessment_master_menu5"
+                parent="kw_onboarding_induction_feedback.induction_master_menu"
+                action="action_kw_induction_assessment_user_readonly_act_window"
+                groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_user'
+                sequence="13"/>
+        <record id="kw_induction_assessment_report_tree_view" model="ir.ui.view">
+            <field name="name">Employee Assessment Result tree</field>
+            <field name="model">kw_skill_answer_master</field>
+            <field name="arch" type="xml">
+                <tree create='false' edit='false' delete="false">
+                    <field name="user_id" string="Name" />
+                    <field name="employee_code" string="Emp Code" />
+                    <field name="emp_desg" string="Designation" />
+                    <field name="emp_date_of_joining"/>
+                    <field name="set_config_id" string="Test Name"/>
+                    <!-- <field name="skill_id" string="Skill"/>
+                    <field name="skill_type_id" string="Skill Category"/> -->
+                    <field name="percentage_scored" string="Percentage" class="text-center"/>
+                    <field name="create_date" string="Test Date"/>
+                    <field name="status" string="Test Status" />
+                    <field name="score_id" string="Assessment Status"/>
+                </tree>
+            </field>
+        </record>
+        <record id="kw_user_assessment_report_view_search" model="ir.ui.view">
+            <field name="name">kw_user_assessment_report.search</field>
+            <field name="model">kw_skill_answer_master</field>
+            <field name="arch" type="xml">
+                <search string="Search">
+                    <field name="user_id" string="Name" />
+                    <field name="emp_desg" string="Designation"/>
+                    <field name="set_config_id" string="Test Name"/>
+                    <!-- <field name="skill_id" string="Skill"/>
+                    <field name="skill_type_id" string="Skill Category"/> -->
+                    <field name="percentage_scored" string="Percentage"/>
+                    <field name="create_date" string="Test Date"/>
+                    <field name="status" string="Test Status" />
+                    <field name="score_id" string="Assessment Status"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Test Date" name="create_date" date="create_date"/>
+                        <filter name="emp_rel" string="Name" context="{'group_by':'emp_rel'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        <record id="kw_user_induction_assessment_report_action_window" model="ir.actions.act_window">
+            <field name="name">Employee Induction assessment Result</field>
+            <field name="res_model">kw_skill_answer_master</field>
+            <field name="view_id" ref="kw_onboarding_induction_feedback.kw_induction_assessment_report_tree_view"/>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('set_config_id.assessment_type','=','Induction')]</field>
+            <field name="search_view_id" ref="kw_onboarding_induction_feedback.kw_user_assessment_report_view_search"/>
+			<field name="context">{'search_default_emp_rel':1}</field>
+            <field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					Add a Employee test result...
+				</p>
+			</field>
+        </record>
+
+        <menuitem name="Assessment Report" id="induction_assessment_master_menu6"
+                parent="kw_onboarding_induction_feedback.induction_master_menu"
+                action="kw_user_induction_assessment_report_action_window"
+                groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_manager,kw_skill_assessment.group_kw_skill_assessment_manager,kw_onboarding_induction_feedback.group_kw_onboarding_induction_officer'
+                sequence="8"/>
+
+        
+
+    </data>
+</odoo>

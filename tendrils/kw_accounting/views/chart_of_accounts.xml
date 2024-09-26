@@ -1,0 +1,124 @@
+<odoo>
+	<data>
+    <!-- Chart of Account List View -->
+    <record id="account_view_list" model="ir.ui.view">
+        <field name="name">account.view.list.inherit</field>
+        <field name="model">account.account</field>
+        <field name="inherit_id" ref="account.view_account_list"/>
+        <field name="arch" type="xml">
+            <field name="user_type_id" position="replace" />
+            <field name="company_id" position="after">
+              <field name="branch_id" options='{"no_open": True, "no_create": True}'/>
+              <field name="is_budget_mandatory" widget="boolean_toggle" invisible="1"/>
+              <field name="group_type"/>
+              <field name="user_type_id" string="Group Head"/>
+              <field name="group_name"/>
+              <field name="account_head_id"/>
+              <field name="account_sub_head_id"/>
+              <field name="ledger_type" />
+            </field>
+        </field>
+    </record>
+
+    <!-- Chart of Account Form View -->
+    <record id="account_view_form" model="ir.ui.view">
+        <field name="name">account.view.form.inherit</field>
+        <field name="model">account.account</field>
+        <field name="inherit_id" ref="account.view_account_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form/sheet/group" position="before">
+            <div class="oe_button_box" name="button_box">
+                  <button name="toggle_active" type="object" class="oe_stat_button"
+                          icon="fa-archive" confirm="Are you sure to Archive the Chart of Account?">
+                      <field name="active" widget="boolean_button"
+                              options="{&quot;terminology&quot;: &quot;archive&quot;}"/>
+                  </button>
+            </div>
+            </xpath>
+            <xpath expr="//group/group" position="replace">
+              <group>
+                <field name="code" readonly="1" required="0" />
+                <field name="name" />
+                <field name="company_id" options="{'no_open': True, 'no_create': True}" />
+                <field name="branch_id" options="{'no_open': True, 'no_create': True}"/>
+                <field name="group_type" required="1" />
+                <field name="user_type_id" string="Group Head" />
+                <field name="group_name" required="1" />
+                <field name="account_head_id" required="1" />
+                <field name="account_sub_head_id" required="1" />
+              </group>
+              <group>
+                <field name="ledger_type" required="1"/>
+                <field name="tds" />
+                <field name="tds_type"/>
+                <field name="nature_of_payment" string="Nature" />
+                <field name="under_section" string="Under Section" />
+                <field name="internal_type" invisible="0" readonly="0" force_save="1" />
+                <field name="reconcile" readonly="1" invisible="1"/>
+                <field name="deprecated" ledger_type="1" />
+                <field name="effective_from" attrs="{'required': [('deprecated', '=', True)]}"/>
+                <field name="kw_ledger_code" />
+                <field name="advance_ledger" />
+              </group>
+              <group>
+                <field name="advance_opening_balance">
+                  <tree editable="top">
+                    <field name="parent_id" invisible="0"/>
+                    <field name="date" />
+                    <field name="employee_id" />
+                    <field name="opening_debit" />
+                    <field name="opening_credit" />
+                  </tree>
+                </field>
+              </group>
+            </xpath>
+        </field>
+    </record>
+
+		<record id="kw_action_chart_of_account_form" model="ir.actions.act_window">
+      <field name="name">Chart of Accounts</field>
+      <field name="res_model">account.account</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+          Add a new account
+        </p><p>
+          An account is part of a ledger allowing your company
+          to register all kinds of debit and credit transactions.
+          Companies present their annual accounts in two main parts: the
+          balance sheet and the income statement (profit and loss
+          account). The annual accounts of a company are required by law
+          to disclose a certain amount of information.
+        </p>
+      </field>
+    </record>
+
+    <template id="account_reports_backend_js" inherit_id="web.assets_backend" active="True">
+      <xpath expr="." position="inside">
+          <script type="text/javascript" src="/kw_accounting/static/src/js/ledger_report.js"/>
+          <script type="text/javascript" src="/kw_accounting/static/src/js/partner_dashboard.js"/>
+          <script type="text/javascript" src="/kw_accounting/static/src/js/preview_budget_account_vouchers.js"/>
+          <script type="text/javascript" src="/kw_accounting/static/src/js/advance_vs_payment_report.js"/>
+          <script type="text/javascript" src="/kw_accounting/static/src/js/day_book_report.js"/>
+          <script type="text/javascript" src="/kw_accounting/static/src/js/fd_bg_report.js"/>
+          <!-- <script type="text/javascript" src="/kw_accounting/static/src/js/qwebactionmanager.js"/> -->
+          <!-- <script type="text/javascript" src="/kw_accounting/static/src/js/pdf_options.js"/> -->
+          <script charset="UTF-8" type="text/javascript">
+            window["adrum-start-time"] = new Date().getTime();
+            (function(config){
+                config.appKey = "BO-AAB-FVA";
+                config.adrumExtUrlHttp = "http://cdn.appdynamics.com";
+                config.adrumExtUrlHttps = "https://cdn.appdynamics.com";
+                config.beaconUrlHttp = "http://bom-col.eum-appdynamics.com";
+                config.beaconUrlHttps = "https://bom-col.eum-appdynamics.com";
+                config.useHTTPSAlways = true;
+                config.resTiming = {"bufSize":200,"clearResTimingOnBeaconSend":true};
+                config.maxUrlLength = 512;
+            })(window["adrum-config"] || (window["adrum-config"] = {}));
+          </script>
+          <script src="//cdn.appdynamics.com/adrum/adrum-24.4.0.4454.js"></script>
+      </xpath>
+  </template>
+	</data>
+</odoo>

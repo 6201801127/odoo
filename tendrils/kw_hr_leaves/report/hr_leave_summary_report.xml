@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="view_all_hr_leave_summary_report_tree" model="ir.ui.view">
+            <field name="name">view.all_hr_leave_summary_report.tree</field>
+            <field name="model">all_hr_leave_summary_report</field>
+            <field name="arch" type="xml">
+                <tree string="all_hr_leave_summary_report_tree">
+                    <!-- <field name="applied_by"/> -->
+                    <field name="employee_id" />
+                    <field name="designation" />
+                    <field name="department" />
+                    <field name="division" />
+                    <!-- <field name="section"/> -->
+                    <!-- <field name="practice"/> -->
+                    <field name="leave_type" />
+                    <!-- <field name="reason"/> -->
+                    <field name="applied_date" />
+                    <field name="date_from" />
+                    <field name="date_to" />
+                    <field name="no_of_days" />
+                    <field name="status"/>
+                    <field name="pending_at"/>
+                    <!-- <field name="approved_date"/> -->
+                    <!-- <field name="authority_remark"/> -->
+                    <button class="btn btn-sm oe_highlight" name="view_leave_details" type="object" string="View Details"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_all_hr_leave_summary_report_form" model="ir.ui.view">
+            <field name="name">all_hr_leave_summary_report.view.form</field>
+            <field name="model">all_hr_leave_summary_report</field>
+            <field name="arch" type="xml">
+                <form create='false' edit='false'>
+                    <field name="holiday_type_id" invisible='1'/>
+                    <field name="leave_code" invisible='1'/>
+                    <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                    </script>
+                    <div>
+                        <group>
+                            <group>
+                                <field name="applied_by" readonly='1'/>
+                                <field name="employee_id" readonly='1' options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="designation" readonly='1' />
+                                <field name="department" readonly='1' />
+                                <field name="division" readonly='1' />
+                                <field name="section" readonly='1' attrs="{'invisible': [('section', '=',False)]}"/>
+                                <field name="practice" readonly='1' attrs="{'invisible': [('practice', '=',False)]}"/>
+                                <field name="leave_type" readonly='1' />
+                                <field name="leave_address1" readonly="1" attrs="{'invisible': [('leave_code', '!=', 'EL')]}"/>
+                                <field name="leave_address2" readonly="1" attrs="{'invisible': [('leave_code', '!=', 'EL')]}" />
+                                <field name="phone_no" readonly="1" attrs="{'invisible': [('leave_code', '!=', 'EL')]}" />
+                                <field name="medical_doc" readonly="1" attrs="{'invisible': ['|','&amp;',('leave_code', '=', 'ML'),('no_of_days','&lt;',3),('leave_code', 'not in', ['ML','SPL'])]}" filename="ref_name"/>
+                                <field name="ref_name" invisible="1"/>
+                                <field name="leave_status_reason" readonly="1" />
+                                 <!-- <field name="reason" readonly='1'/> -->
+                            </group>
+                            <group>
+                                <field name="applied_date" readonly='1' />
+                                <field name="date_from" readonly='1' />
+                                <field name="date_to" readonly='1' />
+                                <field name="no_of_days" readonly='1' />
+                                <field name="status" readonly='1'/>
+                                <field name="pending_at" readonly='1' options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="approved_date" readonly='1'/>
+                                <field name="authority_remark" readonly='1'/>
+                            </group>
+                        </group>
+                    </div>
+                    <footer></footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_all_hr_leave_summary_report_search" model="ir.ui.view">
+            <field name="name">view.all_hr_leave_summary_report.search</field>
+            <field name="model">all_hr_leave_summary_report</field>
+            <field name="arch" type="xml">
+                <search string="all_hr_leave_summary_report_search">
+                    <field name="employee_id" />
+                    <field name="leave_type"/>
+                    <field name="status"/>
+                    <filter string="Current Financial Year" name="current_financial_year" domain="[('current_financial_year','=',True)]"/>
+                    <filter string="Previous Financial Year" name="previous_financial_year" domain="[('previous_financial_year','=',True)]"/>
+                    <separator/>
+                    <filter string="This Month" name="this_month_leave" domain="['|','|',('req_date_from', 'like',context_today().strftime('%Y-%m')),
+                                                                                             ('req_date_to', 'like',context_today().strftime('%Y-%m')),
+                                                                                             '&amp;',('req_date_from','&lt;',(context_today().strftime('%Y-%m-01'))), ('req_date_to','&gt;=',(context_today()+relativedelta(months=1)).strftime('%Y-%m-01'))
+                                                                                    ]"/>
+                    <filter string="Last Month" name="last_month_leave" domain="['|','|',('req_date_from', 'like',(context_today()-relativedelta(months=1)).strftime('%Y-%m')),
+                                                                                    ('req_date_to', 'like',(context_today()-relativedelta(months=1)).strftime('%Y-%m')),
+                                                                                    '&amp;',('req_date_to','&lt;',(context_today().strftime('%Y-%m-01'))), ('req_date_from','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01'))
+                                                                           ]"/>
+                    <separator/>
+                    <filter string="Applied On" name='applied_date' date="applied_date"/>
+                    <separator/>
+                    <filter string="To Approve" domain="[('status', '=', 'confirm')]" name="confirmed"/>
+                    <filter string="On Hold" domain="[('status', '=', 'hold')]" name="hold"/>
+                    <filter string="Forwarded" domain="[('status', '=', 'forward')]" name="forward"/>
+                    <filter string="Approved" domain="[('status', '=', 'validate')]" name="approved"/>
+                    <filter string="Cancelled" domain="[('status', '=', 'cancel')]" name="cancelled"/>
+                    <filter string="Rejected" domain="[('status', '=', 'refuse')]" name="rejected"/>
+                    <separator/>
+                    <filter name="my_and_sub_ordinate_leave" string="My &amp; Sub-Ordinates Leave" domain="['|',('employee_id.user_id','=',uid),('employee_id.parent_id.user_id','=',uid)]" />
+                    <group expand="0" string="Group By">
+                        <filter name="company_id" string="Company" domain="[]" context="{'group_by':'company_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="view_all_hr_leave_summary_report_pivot" model="ir.ui.view">
+            <field name="name">view.all_hr_leave_summary_report.pivot</field>
+            <field name="model">all_hr_leave_summary_report</field>
+            <field name="arch" type="xml">
+                <pivot string="Pivot Description">
+                    <field name="leave_type" type="row"/>
+                    <field name="no_of_days" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <record id="action_all_hr_leave_summary_report_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Leave Report</field>
+            <field name="res_model">all_hr_leave_summary_report</field>
+            <field name="view_mode">tree,pivot</field>
+            <field name="target">current</field>
+            <field name="domain">[]</field>
+            <field name="context">{"search_default_current_financial_year":1,"search_default_this_month_leave":1,"search_default_my_and_sub_ordinate_leave":1,"create": False,"edit": False,"import": False,"delete": False,"toolbar":False,'pivot_measures': ['no_of_days']}</field>
+        </record>
+
+        <menuitem id="all_hr_leave_summary_report_menu" name="Leave Report" parent="hr_holidays.menu_hr_holidays_report" action="action_all_hr_leave_summary_report_act_window" groups="hr_holidays.group_hr_holidays_manager" sequence="1"/>
+
+    </data>
+</odoo>

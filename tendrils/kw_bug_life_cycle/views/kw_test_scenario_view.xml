@@ -1,0 +1,280 @@
+<odoo>
+    <data>
+        <record id="test_scenario_code" model="ir.sequence">
+            <field name="name">Test Scenario Code</field>
+            <field name="code">self.kw_test_scenario</field>
+            <field name="prefix">||</field>
+            <field name="padding">4</field>
+        </record>
+        <template id="assets_backend" name="Assets" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/kw_bug_life_cycle/static/src/js/tree_view_buttons.js"></script>
+            </xpath>
+        </template>
+
+
+        <!-- test_scenario_master tree view -->
+
+        <record model="ir.ui.view" id="test_scenario_master_tree">
+            <field name="name">test_scenario_master_tree</field>
+            <field name="model">test_scenario_master</field>
+            <field name="arch" type="xml">
+                <tree class="bug_raise_tree" delete="false" import="false" duplicate="false" >
+                    <field name="code" string="TS Id"/>
+                    <field name="project_id"/>
+                    <field name="module_id" string="Global Link"/>
+                    <field name="prepared_by"/>
+                    <field name="prepared_on"/>
+                    <field name="expected_no_of_test_case" string="Exp. No of TCs"/>
+                    <field name="scenario_description"/>
+                    <field name="state" invisible="1"/>
+                    <field name="revert_status_boolean" invisible="1"/>
+                    <field name="status_compute"/>
+                    <field name="modified_by" string="Modified By"/>
+                    <field name="changes_done_date" string="Modified On"/>
+                    <field name='is_view_scenario' invisible="1"/>
+                    <field name="pending_at_ids" widget='many2many_tags'/>
+                    <field name="test_lead_reject_boolean" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- test_scenario_master form view -->
+        <record model="ir.ui.view" id="test_scenario_master_form">
+            <field name="name">test_scenario_master_form</field>
+            <field name="model">test_scenario_master</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form duplicate="false" delete="false" export="false">
+                    <header>
+                        <button string="Send To TL" type="object" class="oe_highlight" name="button_submit_action" context="{'button':'send_to_tl'}"
+                                attrs="{'invisible': [('is_tester','!=',True)]}" confirm="Are you sure you want to Proceed?"/>
+
+                        <button string="Send To PM/BA" type="object" class="oe_highlight" name="button_send_pm_ba_action"
+                                attrs="{'invisible': [('is_user_tl','!=',True)]}" confirm="Are you sure you want to Proceed?"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <div class="oe_title" style="color: #3a7563 !important;font-weight: bold;">
+                                <h1>
+                                    <field name="code" placeholder="e.g. Project_name||module_name||TS001"/>
+                                </h1>
+                            </div>
+                        </group>
+                        <group style="background-color:#ebfdf8;">
+                            <group>
+                                <field name="pm_ba_btn_hide_bool" invisible="1"/>
+                                <field name="is_tester" invisible="1"/>
+                                <field name="is_user_tl" invisible="1"/>
+                                <field name="field_readonly_bool" invisible="1"/>
+                                <field name="prepared_by" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                                <field name="prepared_on"/>
+                                <field name="project_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}" attrs="{'readonly': [('field_readonly_bool', '=', True)]}"/>
+                                <field name="module_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}" attrs="{'readonly': [('field_readonly_bool', '=', True)]}"/>
+                                <field name="expected_no_of_test_case" attrs="{'readonly': [('state','!=','Draft')]}"/>
+                                <field name="scenario_description" attrs="{'readonly': [('state','!=','Draft')]}"/>
+                            </group>
+                            <group>
+                                <field name="not_ok_remark" style="color:red;" class="blink_bug_me" attrs="{'invisible':[('not_ok_remark','=',False)]}"
+                                       readonly = '1'/>
+                                <field name="comply"
+                                       attrs="{'invisible':[('not_ok_remark','=',False)]}"/>
+                            </group>
+                        </group>
+
+                        <group string="Action Log">
+                            <field name="action_log_ids" style="pointer-events:none;">
+                                <tree class="bug_raise_tree">
+                                    <field name="test_scenario_id" invisible="1"/>
+                                    <field name="action_taken_by_id"/>
+                                    <field name="action_taken_on"/>
+                                    <field name="action_state"/>
+                                    <field name="action_remark" invisible="0"/>
+                                </tree>
+                            </field>
+                            <group>
+
+                            </group>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Search View -->
+
+        <record id="test_scenario_master_search_view" model="ir.ui.view">
+            <field name="name">test_scenario_master_search_view</field>
+            <field name="model">test_scenario_master</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="prepared_by"/>
+                    <field name="project_id"/>
+                    <field name="module_id"/>
+                    <filter string="My Projects" domain="[('prepared_by', '=',uid)]" name="my_projects"/>
+                    <filter string="This Month" domain="[('prepared_on', 'like',context_today().strftime('%Y-%m'))]" name="current_month_test_scenario"/>
+                    <separator/>
+                    <filter string="Draft" domain="[('state', '=','Draft'), ('revert_status_boolean', '!=',True)]" name="draft_records"/>
+                    <filter string="Submitted" domain="[('state', '=','Submitted')]" name="submitted_records"/>
+                    <filter string="TL Approved" domain="[('state', '=','TL Approved')]" name="tl_records"/>
+                    <filter string="PM/BA Approved" domain="[('state', '=','PM/BA Approved')]" name="pm/ba_records"/>
+                    <filter string="Reverted" domain="[('revert_status_boolean', '=',True)]" name="revert_records"/>
+
+                    <filter name="group_by_employee" string="Prepared By" context="{'group_by':'prepared_by'}" />
+                    <filter name="group_by_project" string="Project" context="{'group_by':'project_id'}" />
+                    <filter name="group_by_module" string="Module" context="{'group_by':'module_id'}" />
+                    <filter name="group_by_state" string="State" context="{'group_by':'state'}" />
+                </search>
+            </field>
+        </record>
+
+        <!-- window Action  -->
+
+        <record model="ir.actions.act_window" id="test_scenario_master_action_window">
+            <field name="name">Test Scenario</field>
+            <field name="res_model">test_scenario_master</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="test_scenario_master_tree"/>
+            <field name="search_view_id" ref="test_scenario_master_search_view"/>
+            <field name="context">{'export': False}</field>
+            <field name="domain">[('create_uid', '=', uid)]</field>
+        </record>
+
+        <!-- wizard view -->
+
+        <record model="ir.ui.view" id="test_scenario_wizard_view">
+            <field name="name">Test Scenario</field>
+            <field name="model">scenario_submit_wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group attrs="{'invisible':[('pm_ba_btn_hide_boolean','=',True), ('approve_btn_hide_boolean', '=', True)]}">
+                        <div style="background-color: #d4edda; padding: 15px; border: 1px solid #c3e6cb; color: #155724;">
+                            Are you sure you want to proceed?
+                        </div>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="remark" string="Description" attrs="{'invisible':['|', ('pm_ba_btn_hide_boolean','=',True), ('approve_btn_hide_boolean', '=', True)], 'required':[('revert_back_btn_hide_boolean','=',True)]}" />
+                            <field name="pm_ba_btn_hide_boolean" invisible='1'/>
+                            <field name="revert_back_btn_hide_boolean" invisible='1'/>
+                            <field name="approve_btn_hide_boolean" invisible='1'/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button string="Send To PM/BA" class="oe_highlight" type="object" name="send_btn_pm_ba" style="margin-left: 5px;"
+                                groups="kw_bug_life_cycle.group_Test_lead_bug_life_cycle" attrs="{'invisible': [('pm_ba_btn_hide_boolean','!=',True)]}"/>
+
+                        <button string="Approve" class="oe_highlight" type="object" name="button_approved_pm_ba" style="margin-left: 5px;"
+                                groups="kw_bug_life_cycle.group_ba_bug_life_cycle,kw_bug_life_cycle.group_pm_bug_life_cycle"
+                                attrs="{'invisible': [('approve_btn_hide_boolean','!=',True)]}"/>
+
+                        <button string="Revert" class="btn-warning" type="object" name="btn_revert_back_to_author" style="margin-left: 5px;"
+                                attrs="{'invisible': [('revert_back_btn_hide_boolean','!=',True)]}"
+                                groups="kw_bug_life_cycle.group_Test_lead_bug_life_cycle,kw_bug_life_cycle.group_ba_bug_life_cycle,kw_bug_life_cycle.group_pm_bug_life_cycle"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="test_scenario_wizard_view_act_send_pm_ba">
+            <field name="name">Test Scenario</field>
+            <field name="model">scenario_submit_wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group attrs="{'invisible':[('pm_ba_btn_hide_boolean','=',True), ('approve_btn_hide_boolean', '=', True)]}">
+                        <div style="background-color: #d4edda; padding: 15px; border: 1px solid #c3e6cb; color: #155724;">
+                            Are you sure you want to proceed?
+                        </div>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="pm_ba_btn_hide_boolean" invisible='1'/>
+                            <field name="revert_back_btn_hide_boolean" invisible='1'/>
+                            <field name="approve_btn_hide_boolean" invisible='1'/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button string="Send To PM/BA" class="oe_highlight" type="object" name="send_pm_ba_act_btn" style="margin-left: 5px;"
+                                groups="kw_bug_life_cycle.group_Test_lead_bug_life_cycle" attrs="{'invisible': [('pm_ba_btn_hide_boolean','!=',True)]}"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+
+
+        <record model="ir.ui.view" id="test_scenario_wizard_view_send_tl">
+            <field name="name">Test Scenario</field>
+            <field name="model">scenario_submit_wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <div style="background-color: #d4edda; padding: 15px; border: 1px solid #c3e6cb; color: #155724;">
+                            Are you sure you want to send?
+                        </div>
+                    </group>
+
+                    <footer>
+                        <button string="Send To TL" class="oe_highlight" type="object" name="send_tl_act_btn" style="margin-left: 5px;"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="ts_wizard_view_act_delegate_tester">
+            <field name="name">Delegate Tester</field>
+            <field name="model">delegate_ts_wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <group>
+                            <field name="tester_id" string="Tester" required="1" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                            <div><span style="color:red">(You can not select multiple project records at a time.)</span> </div>
+                        </group>
+                    </group>
+                    <footer>
+                        <button string="Submit" class="oe_highlight" type="object" name="delegate_act_btn" style="margin-left: 5px;"
+                                groups="kw_bug_life_cycle.group_Test_lead_bug_life_cycle"/>
+                        <button string="Cancel" class="btn btn-default" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <!-- Act Window   -->
+
+        <act_window id="test_scenario_send_tl"
+                    name="Send to TL"
+                    src_model="test_scenario_master"
+                    res_model="scenario_submit_wizard"
+                    view_type="form" view_mode="form" view_id="test_scenario_wizard_view_send_tl"
+                    groups='kw_bug_life_cycle.group_tester_bug_life_cycle'
+                    context="{'default_selected_record_ids': active_ids}"
+                    key2="client_action_multi" target="new"
+        />
+        <act_window id="test_scenario_send_pm_ba"
+                    name="Send to PM/BA"
+                    src_model="test_scenario_master"
+                    res_model="scenario_submit_wizard"
+                    view_type="form" view_mode="form" view_id="test_scenario_wizard_view_act_send_pm_ba"
+                    groups='kw_bug_life_cycle.group_Test_lead_bug_life_cycle'
+                    context="{'default_selected_record_ids': active_ids, 'default_pm_ba_btn_hide_boolean': True}"
+                    key2="client_action_multi" target="new"
+        />
+
+        <act_window id="test_scenario_delegate"
+                    name="Delegate"
+                    src_model="test_scenario_master"
+                    res_model="delegate_ts_wizard"
+                    view_type="form" view_mode="form" view_id="ts_wizard_view_act_delegate_tester"
+                    groups='kw_bug_life_cycle.group_Test_lead_bug_life_cycle'
+                    context="{'default_selected_record_ids': active_ids, 'delegate': context.get('delegate', False)}"
+                    key2="client_action_multi" target="new"
+        />
+
+    </data>
+</odoo>

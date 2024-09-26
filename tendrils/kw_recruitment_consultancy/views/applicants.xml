@@ -1,0 +1,631 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<template id='consultancy_view_applicants' name='View Applicants'>
+		<t t-call="website.layout">
+			<div class='container'>
+
+				<div class="application-tab">
+					<div class="d-flex">
+						<h3 class="flex-grow-1">
+							Applicants for
+							<strong>
+								<t t-esc="job.title"/>
+							</strong>
+							<small>
+								(<t t-esc="job.job_code"/>)
+							</small>
+						</h3>
+						<a class="btn btn-info ml-4" t-attf-href="/c/add-applicant?{{keep_query(job_id=job.id)}}" title="Add New Applicant">
+							Add New Applicant
+						</a>
+						<a class="btn btn-info ml-4 pull-right" href="/c/job-openings" title="Go Back">
+							<span class="fa fa-arrow-circle-left mr-1"/>
+							Go Back
+						</a>
+					</div>
+
+					<!-- No Content section -->
+					<div class="no-data" t-if="not applicants">
+						<p>No Applicant Available</p>
+					</div>
+					<!-- Ends: No Content section -->
+
+					<div class="applicant-list" t-if="applicants">
+						<div class="row">
+							<table border="1" class="table table-bordered table-hover table-striped">
+								<thead>
+									<tr>
+										<th scope="col" class="col-sm-1">Sl#</th>
+										<th scope="col" class="col-sm-2">Applied Date</th>
+										<th scope="col" class="col-sm-2">Name</th>
+										<th scope="col" class="col-sm-2">Email</th>
+										<th scope="col" class="col-sm-1">Mobile</th>
+										<th scope="col" class="col-sm-2">Status</th>
+										<th scope="col" class="col-sm-2">Details</th>
+									</tr>
+								</thead>
+								<tbody>
+							<t t-set="index" t-value="1"/>
+							<t t-foreach='applicants' t-as='applicant'>
+								<tr>
+									<td class="text-left font-weight-bold" t-esc="index"> 
+									</td>
+									<td>
+										<t t-if='applicant.create_date'>
+											<t t-esc='applicant.create_date.strftime("%d-%b-%Y")'/>
+										</t>
+									</td>
+									<td>
+										<t t-if='applicant.partner_name'>
+											<t t-esc='applicant.partner_name'/>
+										</t>
+									</td>
+									<td>
+										<t t-if='applicant.email_from'>
+											<t t-esc='applicant.email_from'/>
+										</t>
+									</td>
+									<td>
+										<t t-if='applicant.partner_mobile'>
+											<t t-esc='applicant.partner_mobile'/>
+										</t>
+									</td>
+									
+									<td>
+										<t t-if='applicant.stage_id'>
+											<t t-esc='applicant.stage_id.name'/>
+										</t>
+									</td>
+									<td style="vertical-align:middle;text-align: left;" >
+										<a t-attf-href="/c/applicant-details?{{keep_query(applicant_id=applicant.id,job_id=job.id)}}"
+											class="btn btn-outline-info btn-sm">
+											View Details
+										</a>
+										<a t-if="applicant.consultancy_id.consultancy_type == 'rpo'" t-attf-href="/c/schedule-interview?{{keep_query(applicant_id=applicant.id)}}"
+											class="btn btn-outline-info btn-sm">
+											Schedule Interview
+										</a>
+									</td>
+									<t t-set="index" t-value="index+1" />
+								</tr>
+							</t>
+							</tbody>
+                        </table>
+									<!-- <t t-foreach='applicants' t-as='applicant'> -->
+										<!-- <div class="col-12 col-md-6 col-xl-4">
+											<div class="card applicant-card mb-4">
+												<div class="card-body">
+													<div class="applicant-content">
+														<h5 class="mb-3">
+															<t t-esc='applicant.partner_name'/>
+														</h5>
+														<ul class="mb-4">
+															<li>
+																<strong>Mobile:</strong>
+																<t t-esc='applicant.partner_mobile'/>
+															</li>
+															<li>
+																<strong>Email:</strong>
+																<t t-esc='applicant.email_from'/>
+															</li>
+															<li>
+																<strong>Applied Date:</strong>
+																<t t-if='applicant.create_date'>
+																	<t t-esc='applicant.create_date.strftime("%d-%b-%Y")'/>
+																</t>
+															</li>
+														</ul>
+													</div>
+													<a t-attf-href="/c/applicant-details?{{keep_query(applicant_id=applicant.id,job_id=job.id)}}"
+														class="btn btn-outline-info btn-sm">
+														View Details
+													</a>
+													<a t-attf-href="/c/interviews?{{keep_query(applicant_id=applicant.id)}}"
+													class="btn btn-outline-success btn-sm ml-3">
+														<span class="fa fa-users mr-2"/>
+														<span t-esc='applicant.schedule_meeting_count' class="mr-1"/>
+														Meeting
+													</a>
+												</div>
+											</div>
+										</div> -->
+									<!-- </t> -->
+						</div>
+					</div>
+				</div>
+			</div>
+		</t>
+	</template>
+	<template id='consultancy_applicant_details' name='Applicant Details'>
+		<t t-call="website.layout">
+			<div class='container'>
+				<div class="application-tab">
+					<div class='d-flex'>
+						<h3 class="flex-grow-1">Applicant Details</h3>
+						<a class="btn btn-info ml-4" t-attf-href="/c/applicants?{{keep_query(job_id=applicant.job_position.id)}}">
+								<span class="fa fa-arrow-circle-left mr-1"/>
+								Go Back
+						</a>
+					</div>
+
+					<div class="applicant-details mt-4">
+						<table class="table table-bordered">
+							<tr>
+								<td width="200">
+									<strong>Name</strong>
+								</td>
+								<td>
+									<span name="partner_name" t-esc="applicant.partner_name"/>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<strong>Mobile</strong>
+								</td>
+								<td>
+									<span name="partner_mobile"
+									       t-esc="applicant.partner_mobile"/>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<strong>Alternate Mobile Number</strong>
+								</td>
+								<td>
+									<t t-if="applicant.partner_phone">
+										<span name="partner_phone" t-esc="applicant.partner_phone"/>
+									</t>
+									<t t-else="">
+										NA
+									</t>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<strong>Email</strong>
+								</td>
+								<td>
+									<span name="email-from" t-esc="applicant.email_from"/>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<strong>Gender</strong>
+								</td>
+								<td>
+									<span name="gender" t-esc="applicant.gender.capitalize() if applicant.gender else 'NA'"/>
+								</td>
+							</tr>
+							
+							<tr>
+								<td>
+									<strong>Applied Date</strong>
+								</td>
+								<td>
+									<t t-esc="applicant.write_date.strftime('%d-%b-%Y')"/>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<strong>Experience</strong>
+								</td>
+								<td>
+									<span name="exp_year" style="width: 23px;" t-esc="applicant.exp_year"/>
+									years
+									<span type="text" name="exp_month" style="width: 15px;"
+										  t-esc="applicant.exp_month"/>
+									months
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<strong>Qualification</strong>
+								</td>
+								<td>
+									<t t-esc="applicant.qualification_ids.name"/>
+								</td>
+							</tr>
+							<tr t-if="applicant.qualification_ids == '' ">
+								<td>
+									<strong>Other Qualification</strong>
+								</td>
+								<td>
+									<t>
+										<span name="other_qualification" t-esc="applicant.other_qualification"/>
+									</t>
+									<!-- <t t-else="">
+										NA
+									</t> -->
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<strong>Technical Skills</strong>
+								</td>
+								<td>
+									<span name="tech_skills">
+										<t t-esc="','.join(applicant.skill_ids.mapped('name')) if applicant.skill_ids else 'NA'"/> 
+									</span>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<strong>Current CTC (Annum)</strong>
+								</td>
+								<td>
+									<t t-esc="'%.2f'% applicant.current_ctc"/>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<strong>Expected CTC (Annum)</strong>
+								</td>
+								<td>
+									<t t-esc="'%.2f'% applicant.salary_expected"/>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<strong>Notice Period (Days)</strong>
+								</td>
+								<td>
+									<t t-esc="applicant.notice_period"/>
+								</td>
+							</tr>
+
+							<tr>
+								<td>
+									<strong>Description</strong>
+								</td>
+								<td>
+									<t t-if="applicant.description">
+										<span name="description" t-esc="applicant.description"/>
+									</t>
+									<t t-else="">
+										NA
+									</t>
+								</td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>
+									<a t-attf-href="/web/applicant/cv/#{applicant.document_ids.id}/#{applicant.document_ids.file_name}"
+									   target="_blank" class="mt-2 mb-3 d-inline-block text-danger">
+										<strong>View CV</strong>
+										<span class="fa fa-file-pdf-o ml-2"></span>
+									</a>
+									
+
+								</td>
+							</tr>
+						</table>
+
+						<div class="mt-4">
+							<a type="submit"
+								t-attf-href='/c/add-applicant?{{keep_query(applicant_id=applicant.id,job_id=applicant.job_position.id)}}'
+						        class="btn px-4 btn-primary"
+						        value="Submit" name="Submit">Modify
+							</a>
+							<a t-if="feedback" role='button' class='btn btn-primary' 
+								t-attf-href="/web/applicant/consolidate/#{feedback}" target="_blank">
+								View Feedback
+							</a>
+							<a t-if="consultancy.consultancy_type == 'rpo'" t-attf-href="/c/schedule-interview?{{keep_query  (applicant_id=applicant.id)}}"
+								class="btn btn-success ml-2">Schedule Interview
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</t>
+	</template>
+
+	<template id='consultancy_edit_applicant' name='Edit Applicant Details'>
+		<t t-call="website.layout">
+			<div class='container mt-5'>
+				<div class="application-tab">
+					<div class="d-flex">
+						<h3 class="flex-grow-1">
+							<t t-esc="applicant.job_position.title"/>
+							<small>
+								(<t t-esc="applicant.job_position.job_code"/>)
+							</small>
+						</h3>
+
+						<a class="btn btn-info ml-4" onclick="javascript:window.history.back();" href="#">
+							<span class="fa fa-arrow-circle-left mr-1"/>
+							Go Back
+						</a>
+					</div>
+					<div class="edit-applicant-form mt-3">
+						<div class="row">
+							<!--applicant form-->
+							<div class="col-lg-6 col-12 offset-lg-1">
+								<div class="edit-applicant-box">
+									<form 
+										action="/c/applicant/update"
+										method="post"
+										class="s_website_form"
+										enctype="multipart/form-data"
+										id="applicant_submit"
+										autocomplete="off"
+									>
+										
+										<input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+										<div class="form-section py-lg-0 mt-3">
+											<div class="row">
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant.partner_name else 'control-group'">
+															<label>
+																Applicant Name
+															</label>
+															<input type='hidden' t-att-value='applicant.id' name='applicant_id'/>
+															<input type="text" name="partner_name" id="editPartnerName"
+															       class="form-control " 
+                                                                   t-att-value="applicant.partner_name" autocomplete="off"
+															       required="true"/>
+															<span class="border_line"></span>
+															<p id='name_error' class='text-danger' style='font-weight:bold;'>This Field is Required!</p>
+														</div>
+													</div>
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant.email_from else 'control-group'">
+															<label>
+																Applicant Email
+																
+															</label>
+															<input type="text" name="email_from" id="editEmailFrom" 
+                                                                    t-att-value="applicant.email_from"
+															       class="form-control " autocomplete="off"
+															       required="true"/>
+															<span class="border_line"></span>
+															<p id='email_error' class='text-danger' style='font-weight:bold;'>Invalid Email!</p>
+														</div>
+													</div>
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant.partner_mobile else 'control-group'">
+															<label>
+																Mobile
+																
+															</label>
+															<input type="text" name="partner_mobile" id="editPartnerMobile"
+															       t-att-value="applicant.partner_mobile" class="form-control "
+															       autocomplete="off"
+															       required="true"/>
+																<span class="border_line"></span>
+															<p id='mobile_error' class='text-danger' style='font-weight:bold;'>This Field is Required!</p>
+														</div>
+													</div>
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant.partner_mobile else 'control-group'">
+															<label>
+																Alternate Mobile Number
+																
+															</label>
+															<input type="text" name="partner_phone" id="editPartnerPhone"
+															       t-att-value="applicant.partner_phone" class="form-control "
+															       autocomplete="off"/>
+																<span class="border_line"></span>
+															<p id='alt_mobile_error' class='text-danger' style='font-weight:bold;'></p>
+														</div>
+													</div>
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant.partner_mobile else 'control-group'">
+															<label>Gender</label>
+															<select class="form-control" id="FormControlSelectGender" name="gender" >
+																<option></option>
+																<option value='male' t-att-selected="applicant.gender == 'male'">Male</option>
+																<option value='female' t-att-selected="applicant.gender == 'female'">Female</option>
+																<option value='other' t-att-selected="applicant.gender == 'other'">Others</option>
+															</select>
+															
+														</div>
+													</div>
+												</div>
+                                                <div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant.write_date else 'control-group'">
+															<label>
+																Applied Date
+																
+															</label>
+															<input type="text" name="partner_mobile" id="cmobile"
+															       t-att-value="applicant.write_date.strftime('%d-%b-%Y')"
+                                                                   maxlength="15" class="form-control "
+															       onkeypress="return isNumberKey(event);"
+															       autocomplete="off"
+															       required="true"/>
+																<span class="border_line"></span>
+														</div>
+													</div>
+												</div>
+												
+												<div class="col-12">
+													<div class="form-group mb-5">
+															<label class="mb-4">
+																Experience
+															</label>
+															<div class="row">
+																<div class="col-sm-12 col-md-6 col-lg-6">
+																	<div t-att-class="'control-group margin-bottom-3 focused' if applicant.exp_year else 'control-group margin-bottom-3'">
+																		<select class="form-control" name="exp_year"
+																				id="editYear" required="true">
+
+																			<t t-foreach='years' t-as='year'>
+																				<option t-att-value="year[0]" t-att-selected="applicant.exp_year == year[1]"><t t-esc="year[1]"/> Years</option>
+																			</t>
+																		</select>
+																		<span class="border_line"></span>
+																		<p class='text-danger' id='edit_year_error' style='font-weight:bold; display:none;'>Please Mention Your Experience in Year!</p>
+																	</div>
+																</div>
+
+																<div class="col-sm-12 col-md-6 col-lg-6">
+																	<div t-att-class="'control-group margin-bottom-3 focused' if applicant.exp_month else 'control-group margin-bottom-3'">
+																		<select class="form-control" name="exp_month"
+																				id="editMoth" required="true">
+
+																			<t t-foreach='months' t-as='month'>
+																				<option t-att-value="month[0]" t-att-selected="applicant.exp_month == month[1]"><t t-esc="month[1]"/> Months</option>
+																			</t>
+																		</select>
+																		<span class="border_line"></span>
+																		<p class='text-danger' id='edit_month_error' style='font-weight:bold; display:none;'>Please Mention Your Experience in Month!</p>
+																	</div>
+																</div>
+															</div>
+														</div>
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant.qualification_ids else 'control-group'">
+															<label>Qualification</label>
+															<input type="hidden" id="lastQli" value="" name="lastQli"/>
+															<select class="form-control" id="EditFormControlSelectQuali"
+															        name="qualification_ids" required="true">
+																<option></option>
+																<t t-foreach='qualifications' t-as='qualification'>
+																	<option t-att-value="qualification.id" t-att-selected="qualification.id in applicant.qualification_ids.ids"><t t-esc="qualification.name"/></option>
+																</t>
+															</select>
+															<span class="border_line"></span>
+															<p class='text-danger' id='qualification_error' style='font-weight:bold;'>Please Mention Your Qualification!</p>
+														</div>
+													</div>
+												</div>
+												<div class="col-12" id="OtheQualification">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant.other_qualification else 'control-group'">
+															<label>
+																Other Qualification
+																<span class="text-red">*</span>
+															</label>
+															<input type="text" name="other_qualification"
+															       id="otherQualificationT" maxlength="50"
+															       class="form-control" t-att-value="applicant.other_qualification" autocomplete="off"
+																   
+																/>
+
+															<p id='other_required_message' class='text-danger' style='font-weight:bold;'>Please Mention Your Other Qualification!</p>
+														</div>
+													</div>
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant.qualification_ids else 'control-group'">
+															<label>Technical Skill</label>
+															<input type="hidden" id="lastSkill" value="" name="lastQli"/>
+															<select class="form-control" id="FormControlSelectSkill"
+															        name="skills" multiple="multiple" required="true">
+																<option></option>
+																<t t-foreach='skill_ids' t-as='skill'>
+																	<option t-att-value="skill.id" t-att-selected="skill.id in applicant.skill_ids.ids"><t t-esc="skill.name"/></option>
+																</t>
+															</select>
+															<input name="skill_ids" id="skill_id" class="form-control"
+														        style="display:none;"/>
+															<span class="border_line"></span>
+														</div>
+													</div>
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant.current_ctc else 'control-group'">
+															<label>Current CTC
+															</label>
+															<input type="text" name="current_ctc" id="cCurrCTC" t-att-value="applicant.current_ctc"
+															       maxlength="500" class="form-control "
+															       autocomplete="off"
+															       required="true"/>
+															<span class="border_line"></span>
+														</div>
+													</div>
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant.salary_expected else 'control-group'">
+															<label>Expected CTC
+															</label>
+															<input type="text" name="salary_expected" id="cDesc" t-att-value="applicant.salary_expected"
+															       maxlength="500" class="form-control "
+															       autocomplete="off"
+															       required="true"/>
+															<span class="border_line"></span>
+														</div>
+													</div>
+												</div>
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant.notice_period else 'control-group'">
+															<label>Notice Period
+															</label>
+															<input type="text" name="notice_period" id="cNoticePeriod" t-att-value="applicant.notice_period"
+															       maxlength="500" class="form-control "
+															       autocomplete="off"
+															       required="true"/>
+															<span class="border_line"></span>
+														</div>
+													</div>
+												</div>
+												
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<div t-att-class="'control-group focused' if applicant.description else 'control-group'">
+															<label>Description
+															</label>
+															<input type="text" name="description" id="cDesc" t-att-value="applicant.description"
+															       maxlength="500" class="form-control "
+															       autocomplete="off"
+															       required="true"/>
+															<span class="border_line"></span>
+														</div>
+													</div>
+												</div>
+												
+												<div class="col-12">
+													<div class="form-group mb-5">
+														<label class="mb-1">
+															Upload Resume
+															<span class="text-red"></span>
+														</label>
+														<div class="control-group ">
+															<div class="form-group">
+																<input type="file"
+																       class="form-control-file form-control"
+																       name="filename" id="fileDocument"
+																       />
+															</div>
+														</div>
+													</div>
+												</div>
+
+												<div class="col-lg-12 col-md-4 mb-3">
+													<button id='submit2' type="button" class="btn px-4 btn-info" disable="disable">
+														Submit
+													</button>
+												</div>
+											</div>
+										</div>
+									</form>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</t>
+	</template>
+
+</odoo>

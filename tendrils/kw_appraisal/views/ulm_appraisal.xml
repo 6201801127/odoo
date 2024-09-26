@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="ulm_appraisal_tree_view">
+            <field name="name">ULM appraisal tree</field>
+            <field name="model">hr.appraisal</field>
+            <!-- <field name="view_id" ref="kw_appraisal.ulm_appraisal_tree_view"/> -->
+            <field name="arch" type="xml">
+                <tree create='false' edit='false' delete="0" import='false'>
+                    <field name="emp_id"/>
+                    <field name="deg_id"/>
+                    <field name="dept_id"/>
+                    <field name="state_sequence" invisible="1"/>
+                    <field name="employee_ra" string='Reporting Authority'/>
+                    <field name="hr_ulm_start_date"/>
+                    <field name="hr_ulm_end_date"/>
+                    <field name="state" invisible="1"/>
+                    <field name="survey_state_id" invisible="1"/>
+                    <field name="self_status"/>
+					<field name="lm_status"/>
+					<field name="ulm_status"/>
+                    <field name="company_id" invisible="1"/>
+                    <field name="compare_ulm_date" invisible="1"/>
+                    <field name="compare_ulm_end_date" invisible="1"/>
+                    <button name="action_start_appraisal" type="object" string="Take Action" class="btn btn-primary o_select_file_button" attrs="{'invisible': ['|',('compare_ulm_date','=',True),'|',('compare_ulm_end_date','=',True),'|',('state','=', 1),'|',('state','=', 5),'|',('state','=',3),'|',('state','=',2),('state','=',6)]}"></button>
+                    <button name="view_results" attrs="{'invisible': [('state_sequence','in',[1,2])]}" type="object" string="View Form" class="btn btn-primary o_select_file_button"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="ulm_appraisal_kanban" model="ir.ui.view">
+            <field name="name">ULM appraisal kanban</field>
+            <field name="model">hr.appraisal</field>
+            <field name="arch" type="xml">
+                <kanban edit="false" quick_create="false">
+                    <field name="color"/>
+                    <field name="state"/>
+                    <field name="self_status"/>
+					<field name="lm_status"/>
+					<field name="ulm_status"/>
+                    <field name="compare_ulm_date" invisible="1"/>
+                    <field name="compare_ulm_end_date" invisible="1"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click mt-3">
+                                <div class="oe_kanban_content">
+                                    <div class="row">
+                                        <div class="col-sm-8">
+                                            <div>
+                                                <strong>
+                                                    <field name="emp_id"/>
+                                                </strong>
+                                            </div>
+                                            Start Date:                                            
+                                            <span>
+                                                <i>
+                                                    <field name="hr_ulm_start_date"/>
+                                                </i>
+                                            </span>
+                                            <br/>
+                                            <t t-if="record.hr_ulm_end_date.raw_value and record.hr_ulm_end_date.raw_value &lt; (new Date())" t-set="red">oe_kanban_text_red</t>
+                                            End Date: 
+                                            <span t-attf-class="#{red}">
+                                                <i>
+                                                    <field name="hr_ulm_end_date"/>
+                                                </i>
+                                            </span>
+                                            <br/>
+                                            SELF Status: 
+                                            <span>
+                                                <field name="self_status"/>
+                                            </span>
+                                            <br/>
+                                            LM Status: 
+                                            <span>
+                                                <field name="lm_status"/>
+                                            </span>
+                                        </div>
+                                        <div class="col-sm-4 text-right">
+                                            <div class="mb-5">
+                                               <t t-if="record.ulm_status.raw_value == 'In Progress'">
+													<span class="h3 text-default">
+														<i>
+															<field name="ulm_status"/>
+														</i>
+													</span>
+												</t>
+												<t t-elif="record.ulm_status.raw_value == 'Draft'">
+													<span class="h3 text-info">
+														<i>
+															<field name="ulm_status"/>
+														</i>
+													</span>
+												</t>
+												<t t-elif="record.ulm_status.raw_value == 'Completed'">
+													<span class="h3 text-success">
+														<i>
+															<field name="ulm_status"/>
+														</i>
+													</span>
+												</t>
+												<t t-elif="record.ulm_status.raw_value == 'Not Started'">
+													<span class="h3 text-danger">
+														<i>
+															<field name="ulm_status"/>
+														</i>
+													</span>
+												</t>
+                                            </div>
+                                            <div>
+                                                <field name="date_time" invisible="1"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="oe_footer">
+                                        <button name="action_start_appraisal" type="object" class="btn btn-primary o_select_file_button float-left" attrs="{'invisible': ['|',('compare_ulm_date','=',True),'|',('compare_ulm_end_date','=',True),'|',('state','=', 1),'|',('state','=', 5),'|',('state','=',3),'|',('state','=',2),('state','=',6)]}">Take Action</button>
+                                        <button name="view_results" type="object" class="btn btn-primary o_select_file_button float-right"> View Form</button>
+                                    </div>
+                                    <div class="oe_clear"></div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+        <record id="ulm_actions_window" model="ir.actions.act_window">
+            <field name="name">ULM Appraisal</field>
+            <field name="res_model">hr.appraisal</field>
+            <field name="domain">[('hr_collaborator_id.user_id','=',uid)]</field>
+            <field name="search_view_id" ref='kw_appraisal.appraisal_search_view'/>
+            <field name="context">{'financial_year_check':1}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('ulm_appraisal_tree_view')}),
+        (0, 0, {'view_mode': 'kanban', 'view_id': ref('ulm_appraisal_kanban')})]"/>
+            <field name='view_mode'>kanban,tree</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+					You have no ULM Appraisal...
+                </p>
+            </field>
+        </record>
+        <menuitem name="Review" id="menu_review" parent="menu_hr_appraisal_root" action="" sequence="4"/>
+        <menuitem name="LM Appraisal" id="menu_kw_lm_appraisal" parent="menu_review" action="lm_actions_window" sequence="1"/>
+        <menuitem name="ULM Appraisal" id="menu_kw_ulm_appraisal" parent="menu_review" action="ulm_actions_window" sequence="2"/>
+    </data>
+</odoo>

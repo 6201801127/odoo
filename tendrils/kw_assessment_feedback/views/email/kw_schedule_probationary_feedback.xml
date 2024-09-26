@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="kw_schedule_probationary_feedback_email_template" model="mail.template">
+            <field name="name">Schedule Feedback | Assessment Feedback</field>
+            <field name="email_from">${object.create_uid.email or ''}</field>
+            <field name="subject">${object.assessment_tagging_id.name} Schedule | ${object.assessee_id.name}</field>
+            <field name="email_to">${object.assessee_id.work_email}</field>
+            <field name="email_cc">${object.get_cc_emails() or ''}</field>
+            <field name="model_id" ref="kw_assessment_feedback.model_kw_feedback_details"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                    <table border="0">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">Dear</span>
+                                        ${object.assessee_id.name},
+                                    </h5>
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                       Your Final Assessment has been scheduled. Please go through the mentioned details.
+                                    </p>
+                                </div>
+                               
+                                <table border="0" style="border-collapse: collapse;font-size: 16px;">
+                                    % if not object.meeting_id:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;height: 34px;" width="200px">
+                                                Date
+                                            </td>
+                                            <td style="color:#167b9e;height: 34px;">
+                                                ${format_tz(object.assessment_date, format='%d-%b-%Y')}
+                                            </td>
+                                        </tr>
+                                    % endif
+                                    % if object.meeting_id:
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;height: 34px;" width="200px">
+                                                Date
+                                            </td>
+                                            <td style="color:#167b9e;height: 34px;">
+                                                ${format_tz(object.meeting_id.kw_start_meeting_date, format='%d-%b-%Y')}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;height: 34px;" width="200px">
+                                                Time
+                                            </td>
+                                            <td style="color:#167b9e;height: 34px;">
+                                                ${dict (object.fields_get (allfields = ['meeting_time']) ['meeting_time'] ['selection']) [object.meeting_time]}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;height: 34px;" width="200px">
+                                                Duration
+                                            </td>
+                                            <td style="color:#167b9e;height: 34px;">
+                                                ${dict (object.fields_get (allfields = ['meeting_duration']) ['meeting_duration'] ['selection']) [object.meeting_duration]}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="color:#676767;padding-left: 20px;height: 34px;" width="200px">
+                                                Venue
+                                            </td>
+                                            <td style="color:#167b9e;height: 34px;">
+                                                % if object.meeting_id.meeting_room_id:
+                                                    ${object.meeting_id.meeting_room_id.name}(${object.meeting_id.meeting_room_id.floor_name})
+                                                % else:
+                                                    Virtual
+                                                % endif
+                                            </td>
+                                        </tr>
+                                    % endif
+                                    <tr>
+                                        <td style="color:#676767;padding-left: 20px;height: 34px;" width="200px">
+                                            Assessor Details
+                                        </td>
+                                        <td style="color:#167b9e;height: 34px;">
+                                            
+                                            % for assessors in object.assessor_id:
+                                                <li>${assessors.name}</li>
+                                            % endfor
+                                            
+                                        </td>
+                                    </tr>
+                                    % if object.meeting_id.online_meeting_join_url:
+                                    <tr>
+                                        <td>
+                                            <table border="0" style="width: 100%;">
+                                                <tr>
+                                                    <td>
+                                                        <a style="padding: .5rem 4rem;border-radius: .2em;border: none;color: #fff;background-color:#d71828;font-size: 16px;margin-top: 1.5rem;display:inline-block;white-space: nowrap;text-decoration: NONE;" href="${object.meeting_id.online_meeting_join_url}">
+                                                            Join Online Meeting
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    % endif
+                                </table>
+                                
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                        -------------------------------------------------------------------
+                                        <br/>
+                                        This is a system generated mail. Please do not reply to this email. 
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                ]]>
+            </field>
+        </record>
+    </data>
+</odoo>

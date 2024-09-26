@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="kw_employee_apply_attendance_view_form" model="ir.ui.view">
+            <field name="name">Employee Attendance Request Form View</field>
+            <field name="model">kw_employee_apply_attendance</field>
+            <field name="arch" type="xml">
+                <form string="Apply Attendance">
+                    <script>
+                        $(document).ready(function(){ 
+                            status=  $("[aria-pressed=true]").text().trim();
+                            
+                            if (status == 'Approved'){
+                                $('.o_form_button_edit').hide();
+                            }
+                            if (status == 'Rejected'){
+                                $('.o_form_button_edit').hide();
+                            }
+                        });
+                    </script>
+                    <header>
+						
+						<field name="state" widget="statusbar" statusbar_visible="1,2,3" />
+
+                        <button string='Approve'  class="btn font-weight-bold text-white" style="background-color: #108fbb;" attrs="{'invisible':[('btn_visibility_status','=',False)]}"  name="approve_attendance_request"  type="object" />
+                        
+                        <button string='Reject'  class="btn font-weight-bold text-white" style="background-color: #d83d2b;"  attrs="{'invisible':[('btn_visibility_status','=',False)]}" name="reject_attendance_request"  type="object" />
+
+                        <button string='Cancel'  class="btn font-weight-bold text-white" style="background-color: #d83d2b;"  attrs="{'invisible':['|',('cancel_btn_visibility','=',False),('state','in',['1','3','5','6'])]}" name="cancel_attendance_request" type="object"/>
+
+                       
+                        <field name="btn_visibility_status" invisible="1" />  
+                        <field name="cancel_btn_visibility" invisible="1" />  
+					</header>
+                    <sheet>
+                        <group>
+                            <group> 
+                                <field name="applied_for" widget="radio" options="{'horizontal': true}" attrs="{'readonly':[('state','in',['2','3','5','6'])]}" />  
+                                <field name="employee_id" options="{'no_create_edit': True, 'no_create': True, 'no_open': True}" attrs="{'readonly':[('state','in',['2','3','5','6'])]}"/>  
+
+                                
+                                <field name="attendance_date" autocomplete="off" options="{'datepicker':{'maxDate': 'now'}}" />  
+                                <field name="check_in_datetime" autocomplete="off" options="{'datepicker':{'warn_future': true}}" />  
+                                <field name="check_out_datetime" autocomplete="off" options="{'datepicker':{'warn_future': true}}"/>  
+                                <field name="request_for" />  
+                                <field name="reason" attrs="{'readonly':[('state','in',['2','3','5','6'])]}"/> 
+                                
+                            </group>
+                            <group>  
+                                <field name="portal_login_ids" readonly="1" string="Portal Log-in">
+                                    <tree>                                    
+                                        <field name="date_time" />
+                                    </tree>
+                                </field>                             
+
+                                <field name="attendance_log_ids" readonly="1" invisible="1">
+                                    <tree>                                    
+                                        <field name="check_in" string="In Time"/>
+                                        <field name="check_out" string="Out Time" />
+                                        <field name="check_in_mode_display" string="Mode" />
+                                    </tree>
+                                </field>
+                                <field name="shift_name" />  
+                                <field name="shift_in" string="Shift In Time" />  
+                                <field name="shift_out" string="Shift Out Time"/> 
+                                <field name="is_cross_shift" />  
+                            </group>
+                            
+                            <span class=""><i>** The Office-in datetime and Office-out datetime should not be earlier than current datetime <br/>and Office-in time should not be after shift out time</i></span>
+
+                            <separator/>
+                            <group attrs="{'invisible':[('state','not in',['2','3','5','6'])]}" >
+                            <field name="authority_remark" string="Remark"  attrs="{'required':[('state','in',['2'])],'invisible':[('state','not in',['2','3','5','6'])]}"/>
+                            </group>
+                            
+                            
+                        </group>
+                    </sheet>
+                   
+                </form>
+            </field>
+        </record>
+    
+        <record id="view_kw_employee_apply_attendance_tree" model="ir.ui.view">
+            <field name="name">Employee Attendance Request List View</field>
+            <field name="model">kw_employee_apply_attendance</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">            
+                <tree string="Attendance Request" delete="false" import="false"  default_order="create_date asc" >
+                    <field name="employee_id" />  
+                    <field name="designation_id" />  
+                    <field name="department_id" />  
+                    <field name="attendance_date" />  
+                    <field name="check_in_datetime" />  
+                    <field name="check_out_datetime" />  
+                    <field name="create_date" widget="date" string="Applied On"/>
+                    <field name="action_taken_by" string="Pending At" attrs="{'invisible':[('state','not in',['2'])]}" />
+                    <field name="action_taken_by" string="Action Taken By" attrs="{'invisible':[('state','not in',['3','5','6'])]}" />  
+                    <field name="state" /> 
+
+                   <!--  <button name="request_take_action" type="object" string="Take Action" class="oe_highlight" attrs="{'invisible':[('cancel_btn_visibility','=',False)]}" />   -->
+
+                    <field name="cancel_btn_visibility" invisible="1"/> 
+
+                    <button string="Cancel"  icon="fa-ban text-danger"  attrs="{'invisible':['|',('cancel_btn_visibility','=',False),('state','in',['1','3','5','6'])]}"  name="request_take_action" type="object"/>
+ 
+                </tree>                
+            </field>
+        </record> 
+
+
+        <record id="view_kw_employee_apply_attendance_search" model="ir.ui.view">
+            <field name="name">Employee Attendance Request Search View</field>
+            <field name="model">kw_employee_apply_attendance</field>
+            <field name="arch" type="xml">
+                <search string="Search Description">
+                    <field name="attendance_date"/>    
+                    <field name="employee_id"/>    
+                    <field name="branch_id" />        
+                    <filter string="Apply Date" name="filter_attendance_date" date="attendance_date"/>    
+                    
+                    <filter string="This Month" name="filter_current_month" domain="[('attendance_date', 'like',context_today().strftime('%Y-%m-%'))]"  />
+                    <separator/>
+                    <filter string="My Requests" name="filter_my_requests" domain="[('employee_id.user_id', '=',uid)]"  />
+
+                    <group expand="0" string="Group By">
+						<filter name="state" string="Status" context="{'group_by':'state'}"/>
+                        <filter name="group_by_branch_id" string="Branch" context="{'group_by':'branch_id'}" />
+					</group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_kw_employee_apply_attendance_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Attendance Request</field>
+            <field name="res_model">kw_employee_apply_attendance</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>          
+            <field name="domain">['|',('create_uid','=',uid),'|',('employee_id.user_id','=',uid),('employee_id.parent_id.user_id','=',uid)]</field>   
+            <field name="context">{"search_default_filter_current_month":1,"search_default_filter_my_requests":1,"edit": False,"import": False}</field>     
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No record found
+                </p>
+            </field>
+        </record> 
+
+        <record id="action_attendance_req_window_view_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_kw_employee_apply_attendance_tree"/>
+            <field name="act_window_id" ref="action_kw_employee_apply_attendance_window"/>
+        </record>
+
+        <!--Start - Tree view for attendance take action request -->
+        <record id="view_kw_employee_take_action_attendance_tree" model="ir.ui.view">
+            <field name="name">Attendance Request Take Action List View</field>
+            <field name="model">kw_attendance_request_take_action</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">            
+                <tree string="Attendance Request" delete="false" import="false"  default_order="create_date desc" >
+                    <field name="employee_id" />  
+                    <field name="designation_id" />
+                    <field name="department_id" /> 
+                    <field name="attendance_date" />  
+                    <field name="check_in_datetime" />  
+                    <field name="check_out_datetime" />  
+                    <field name="create_date" widget="date" string="Applied On"/>
+                    <field name="reason" />  
+                    <field name="request_for" /> 
+                    <field name="btn_visibility_status" invisible="1" />    
+                    <button name="request_take_action" type="object" string="Take Action" class="oe_highlight" attrs="{'invisible':[('btn_visibility_status','=',False)]}" />   
+                </tree>                
+            </field>
+        </record> 
+
+        <record id="view_kw_employee_take_action_attendance_search" model="ir.ui.view">
+            <field name="name">Employee Attendance Take Action Search View</field>
+            <field name="model">kw_attendance_request_take_action</field>
+            <field name="arch" type="xml">
+                <search string="Search Description">
+                    <field name="attendance_date"/>    
+                    <field name="employee_id"/>    
+                    <field name="branch_id" />        
+                    <filter string="Apply Date" name="filter_attendance_date" date="attendance_date"/>   
+                    
+                    <filter string="This Month" name="filter_current_month" domain="[('attendance_date', 'like',context_today().strftime('%Y-%m-%'))]"  />
+                    
+                    <group expand="0" string="Group By">
+						<filter name="state" string="Status" context="{'group_by':'state'}"/>
+                        <filter name="group_by_branch_id" string="Branch" context="{'group_by':'branch_id'}" />
+					</group>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="action_window_kw_employee_apply_attendance_approve_requests" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Attendance Request Approval </field>
+            <field name="res_model">kw_attendance_request_take_action</field>
+            <field name="view_mode">tree</field>       
+            <field name="domain">[('state','in',['2']),('employee_id.parent_id.user_id','=',uid)]</field>
+            <field name="context">{"create": False,"import": False}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No record found
+                </p>
+            </field>
+        </record>
+        
+       <record id="action_attendance_req_approve_window_view_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_kw_employee_take_action_attendance_tree"/>
+            <field name="act_window_id" ref="action_window_kw_employee_apply_attendance_approve_requests"/>
+        </record>
+
+
+     </data>
+</odoo>

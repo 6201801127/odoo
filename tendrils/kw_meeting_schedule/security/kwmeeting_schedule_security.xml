@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+      <data noupdate='0'>
+
+            <record model="ir.module.category" id="module_category_kw_meeting_schedule">
+                  <field name="name">Meeting Schedule</field>
+                  <field name="description">User access level for this module</field>
+                  <field name="sequence">5</field>
+            </record>
+
+            <record id="group_kw_meeting_schedule_user" model="res.groups">
+                  <field name="name">User</field>
+                  <field name="category_id" ref="kw_meeting_schedule.module_category_kw_meeting_schedule"/>
+                  <field name="users" eval="[(4, ref('base.user_root'))]"/>
+            </record>
+
+                      
+            <record id="group_kw_meeting_schedule_manager" model="res.groups">
+                  <field name="name">Manager</field>
+                  <field name="category_id" ref="kw_meeting_schedule.module_category_kw_meeting_schedule"/>
+                  <field name="implied_ids" eval="[(4, ref('kw_meeting_schedule.group_kw_meeting_schedule_user'))]"/>
+                 <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+            </record>
+
+            <record id="base.default_user" model="res.users">
+                  <field name="groups_id" eval="[(4,ref('kw_meeting_schedule.group_kw_meeting_schedule_user'))]"/>
+                  <field name="tz">Asia/Kolkata</field>
+            </record>
+
+
+             <record id="group_kw_meeting_schedule_nsa_authority" model="res.groups">
+                  <field name="name">IT Authority</field>
+                  <field name="category_id" ref="kw_meeting_schedule.module_category_kw_meeting_schedule"/>
+                  <field name="implied_ids" eval="[(4, ref('kw_meeting_schedule.group_kw_meeting_schedule_user'))]"/>
+            </record>
+            <record id="group_kw_meeting_schedule_admin_authority" model="res.groups">
+                  <field name="name">Admin Authority</field>
+                  <field name="category_id" ref="kw_meeting_schedule.module_category_kw_meeting_schedule"/>
+                  <field name="implied_ids" eval="[(4, ref('kw_meeting_schedule.group_kw_meeting_schedule_user'))]"/>
+            </record>
+
+            <!-- Hide contact menu from main menus -->
+            <record model="ir.ui.menu" id="contacts.menu_contacts">
+                  <field name="groups_id" eval="[(6,False,[ref('kw_meeting_schedule.group_kw_meeting_schedule_manager')])]"/>
+            </record>
+
+            <!-- Category Record rule to show the records for assigned group only For Publisher group -->
+            
+            <record model="ir.rule" id="meeting_schedule_rule_user_read_responsible_only">
+                  <field name="name">Read Meetings</field>
+                  <field name="model_id" ref="model_kw_meeting_events"/>
+                  <field name="domain_force">['|', ('mom_controller_id.user_id', '=', user.id), ('user_id', '=', user.id)]</field>
+                  <field name="perm_read" eval="True"/>
+                  <field name="perm_create" eval="True"/>
+                  <field name="perm_write" eval="True"/>
+                  <field name="perm_unlink" eval="False"/>
+                  <field name="groups" eval="[(4,ref('kw_meeting_schedule.group_kw_meeting_schedule_user'))]"/>
+            </record>
+
+<!--            <record model="ir.rule" id="meeting_schedule_rule_publisher_user">-->
+<!--                  <field name="name">Edit/Delete Created Announcements</field>-->
+<!--                  <field name="model_id" ref="model_kw_meeting_events"/>-->
+<!--                  <field name="domain_force">['|', ('mom_controller_id.user_id', '=', user.id), ('user_id', '=', user.id)]</field>-->
+<!--                  <field name="perm_read" eval="False"/>-->
+<!--                  <field name="perm_create" eval="True"/>-->
+<!--                  <field name="perm_write" eval="True"/>-->
+<!--                  <field name="perm_unlink" eval="False"/>-->
+<!--                  <field name="groups" eval="[(4,ref('kw_meeting_schedule.group_kw_meeting_schedule_user'))]"/>-->
+<!--            </record>-->
+
+            <record model="ir.rule" id="meeting_schedule_rule_user_read_all">
+                  <field name="name">Read All Meetings</field>
+                  <field name="model_id" ref="model_kw_meeting_events"/>
+                  <field name="domain_force">[(1, '=', 1)]</field>
+                  <field name="perm_read" eval="True"/>
+                  <field name="perm_create" eval="False"/>
+                  <field name="perm_write" eval="False"/>
+                  <field name="perm_unlink" eval="False"/>
+                  <field name="groups" eval="[(4,ref('kw_meeting_schedule.group_kw_meeting_schedule_user'))]"/>
+            </record>
+
+            
+            <record model="ir.rule" id="meeting_agenda_proposal_rule_user_read_creater_only">
+                  <field name="name">Read Agenda Proposal</field>
+                  <field name="model_id" ref="model_kw_meeting_agenda_proposals"/>
+                  <field name="domain_force">[('create_uid', '=', user.id)]</field>
+                  <field name="perm_read" eval="True"/>
+                  <field name="perm_create" eval="True"/>
+                  <field name="perm_write" eval="True"/>
+                  <field name="perm_unlink" eval="False"/>
+                  <field name="groups" eval="[(4,ref('kw_meeting_schedule.group_kw_meeting_schedule_user'))]"/>
+            </record>
+<!--            <record model="ir.rule" id="meeting_agenda_proposal_rule_user_edit_creater_only">-->
+<!--                  <field name="name">Edit Agenda Proposal</field>-->
+<!--                  <field name="model_id" ref="model_kw_meeting_agenda_proposals"/>-->
+<!--                  <field name="domain_force">[('create_uid', '=', user.id)]</field>-->
+<!--                  <field name="perm_read" eval="False"/>-->
+<!--                  <field name="perm_create" eval="True"/>-->
+<!--                  <field name="perm_write" eval="True"/>-->
+<!--                  <field name="perm_unlink" eval="False"/>-->
+<!--                  <field name="groups" eval="[(4,ref('kw_meeting_schedule.group_kw_meeting_schedule_user'))]"/>-->
+<!--            </record>-->
+<!--            <record model="ir.rule" id="meeting_agenda_proposal_rule_user_read_all">-->
+<!--                  <field name="name">Read All  Agenda Proposal</field>-->
+<!--                  <field name="model_id" ref="model_kw_meeting_agenda_proposals"/>-->
+<!--                  <field name="domain_force">[('create_uid', '=', user.id)]</field>-->
+<!--                  <field name="perm_read" eval="True"/>-->
+<!--                  <field name="perm_create" eval="False"/>-->
+<!--                  <field name="perm_write" eval="False"/>-->
+<!--                  <field name="perm_unlink" eval="False"/>-->
+<!--                  <field name="groups" eval="[(4,ref('kw_meeting_schedule.group_kw_meeting_schedule_user'))]"/>-->
+<!--            </record>-->
+<!--             <record model="ir.rule" id="meeting_location_user">-->
+<!--                  <field name="name">User Own Meeting Location</field>-->
+<!--                  <field name="model_id" ref="kw_branch_master.model_kw_res_branch"/>-->
+<!--                  <field name="domain_force">[('id', 'in', user.branch_ids.ids)]</field>-->
+<!--                  <field name="groups" eval="[(4,ref('kw_meeting_schedule.group_kw_meeting_schedule_user'))]"/>-->
+<!--            </record>-->
+<!--            -->
+<!--             <record model="ir.rule" id="meeting_location_manager">-->
+<!--                  <field name="name">Manager All Meeting Location</field>-->
+<!--                  <field name="model_id" ref="kw_branch_master.model_kw_res_branch"/>-->
+<!--                  <field name="domain_force">[(1, '=', 1)]</field>-->
+<!--                  <field name="groups" eval="[(4,ref('kw_meeting_schedule.group_kw_meeting_schedule_manager'))]"/>-->
+<!--            </record>-->
+            
+      </data>
+</odoo>

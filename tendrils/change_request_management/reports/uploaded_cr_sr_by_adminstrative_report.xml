@@ -1,0 +1,115 @@
+<odoo>
+    <data>
+        <!-- Define the tree view for Uploaded By Report -->
+        <record id="view_uploaded_by_report_tree" model="ir.ui.view">
+            <field name="name">Uploaded Report By Administrators</field>
+            <field name="model">uploaded_by_administrators_report</field>
+            <field name="arch" type="xml">
+                <tree create="false" import="false" delete="false">
+                    <field name="uploaded_by"/>
+                    <field name="cr_count" sum="cr_count"/>
+                    <field name="service_count" sum="service_count"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_uploaded_by_report_graph">
+            <field name="name">Uploaded Report By Administrators (Graph)</field>
+            <field name="model">uploaded_by_administrators_report</field>
+            <field name="arch" type="xml">
+                <graph string="Uploaded Report By Administrators" type="bar" stacked="True" orientation="vertical">
+                    <field name="uploaded_by" type="row"/>
+                    <field name="cr_count" type="measure" string="CR Count"/>
+                    <field name="service_count" type="measure" string="Service Count"/>
+                </graph>
+            </field>
+        </record>
+
+        <record id="view_uploaded_by_report_search_view" model="ir.ui.view">
+            <field name="name">Uploaded Report By Administrators .search</field>
+            <field name="model">uploaded_by_administrators_report</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="uploaded_by" string="Uploaded By"/>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="view_uploaded_by_report_action" model="ir.actions.act_window">
+            <field name="name">Uploaded Report By Administrators</field>
+            <field name="res_model">uploaded_by_administrators_report</field>
+            <field name="view_mode">tree,graph</field>
+        </record>
+
+        <!-- list view of day wise cr sr count report -->
+
+        <record id="view_day_wise_report_tree" model="ir.ui.view">
+            <field name="name">Day Wise CR/SR Count</field>
+            <field name="model">day_wise_cr_sr_report</field>
+            <field name="arch" type="xml">
+                <tree create="false" import="false" delete="false">
+                    <field name="uploaded_date"/>
+                    <field name="cr_count" sum="cr_count"/>  
+                    <field name="sr_count" sum="sr_count"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record model="ir.ui.view" id="view_day_wise_report_search">
+            <field name="name">day_wise_cr_sr_report</field>
+            <field name="model">day_wise_cr_sr_report</field>
+            <field name="arch" type="xml">
+                <search>
+               
+                <field name="uploaded_date"/>
+
+                <filter string="This Year" domain="[('uploaded_date', 'like', context_today().strftime('%Y'))]" name="current_year"/>
+                <filter string="Last Year" domain="['&amp;', ('uploaded_date', '&gt;=', (context_today() - relativedelta(years=1)).strftime('%Y-01-01 00:00:00')), ('uploaded_date', '&lt;', context_today().strftime('%Y-01-01 00:00:00'))]" name="last_year"/>
+                <separator/>
+
+                <filter string="This Month" name="filter_current_month" domain="[('uploaded_date','&lt;',(context_today()+relativedelta(months=1)).strftime('%%Y-%%m-01')), ('uploaded_date','&gt;=',time.strftime('%%Y-%%m-01'))]"/>
+
+                <filter string="Last Month" domain="[('uploaded_date', '&gt;=', (context_today()-relativedelta(months=1)).strftime('%Y-%m-01')), ('uploaded_date', '&lt;', (context_today()).strftime('%Y-%m-01'))]" name="last_month"/>
+                <separator/>
+
+                <filter string="This Week" domain="[('uploaded_date', '&gt;=', (context_today() - relativedelta(weeks=1, weekday=0)).strftime('%Y-%m-%d')), ('uploaded_date', '&lt;', (context_today() + relativedelta(weeks=0, weekday=7)).strftime('%Y-%m-%d'))]" name="this_week"/>
+                <filter string="Last Week" domain="[('uploaded_date', '&gt;=', (context_today() - relativedelta(weeks=2, weekday=0)).strftime('%Y-%m-%d')), ('uploaded_date', '&lt;', (context_today() - relativedelta(weeks=1, weekday=0)).strftime('%Y-%m-%d'))]" name="last_week"/>
+
+                <!-- <filter string="Quarter 1" domain="[('uploaded_date', '>=', context_today().strftime('%Y-04-01')), ('uploaded_date', '&lt;', context_today().strftime('%Y-07-01'))]" name="quarter1_day_wise_cr_sr_report"/>
+                <filter string="Quarter 2" domain="[('uploaded_date', '>=', context_today().strftime('%Y-07-01')), ('uploaded_date', '&lt;', context_today().strftime('%Y-10-01'))]" name="quarter2_day_wise_cr_sr_report"/>
+                <filter string="Quarter 3" domain="[('uploaded_date', '>=', context_today().strftime('%Y-10-01')), ('uploaded_date', '&lt;', (context_today() + relativedelta(years=1)).strftime('%Y-01-01'))]" name="quarter3_day_wise_cr_sr_report"/>
+                <filter string="Quarter 4" domain="[('uploaded_date', '>=', (context_today() + relativedelta(years=1)).strftime('%Y-01-01')), ('uploaded_date', '&lt;', context_today().strftime('%Y-04-01'))]" name="quarter4_day_wise_cr_sr_report"/> -->
+
+
+
+             
+                <filter string="Today" name="filter_today" domain="[('uploaded_date','=',time.strftime('%%Y-%%m-%%d'))]"/>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="day_wise_report_action" model="ir.actions.act_window">
+            <field name="name">Day Wise CR/SR Count</field>
+            <field name="res_model">day_wise_cr_sr_report</field>
+            <field name="view_mode">tree</field>
+            <field name="context">{'search_default_filter_current_month': 1, 'search_default_current_year': 1}</field>
+
+            <!-- <field name="context">{'search_default_filter_current_month': 1,'search_default_current_year': 1}</field> -->
+        </record>
+
+<!-- menu for uploaded by Report -->
+
+        <menuitem id="uploaded_by_adminstrator_menu" name="Administrator wise count CR/SR" parent="menu_report_root" sequence="15"
+                  action="view_uploaded_by_report_action"
+                  groups="change_request_management.group_cr_manager"/>
+
+<!-- menu for day wise Report -->
+
+        <menuitem id="day_wise_report_menu" name="Day Wise CR/SR Count" parent="menu_report_root" sequence="14"
+                  action="day_wise_report_action"
+                    groups="change_request_management.group_cr_manager"/>
+    </data>
+</odoo>

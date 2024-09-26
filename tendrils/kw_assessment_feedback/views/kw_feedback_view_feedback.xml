@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="kw_feedback_view_feedback_kanban_view" model="ir.ui.view">
+            <field name="name">View Feedback</field>
+            <field name="model">kw_feedback_details</field>
+            <field name="arch" type="xml">
+                <kanban class="o_event_kanban_view" disable_sort_column='true' disable_sort_record='true'
+                        disable_drag_drop_record='true' default_group_by="weightage_id" create="false" delete="false"
+                        import='false' edit="false" quick_create="false" group_create='false' group_edit="false"
+                        banner_route="/assessment_feedback/weightage_score">
+                    <field name="assessor_id"/>
+                    <field name="assessee_id"/>
+                    <field name="period_id"/>
+                    <field name="assessment_tagging_id" />
+                    <field name="assessment_from_date"/>
+                    <field name="assessment_to_date"/>
+                    <field name="feedback_status"/>
+                    <field name="color"/>
+                    <field name="total_score"/>
+                    <field name="count_score"/>
+                    <field name="weightage_id" />
+                    <field name="weightage_value" />
+                    <field name="weightage_from_range"/>
+                    <field name="weightage_to_range"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_global_click">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <h4>
+                                            <img t-att-src="kanban_image('hr.employee', 'image_small', record.assessee_id.raw_value)" t-att-title="record.assessee_id.value" t-att-alt="record.assessee_id.value" width="40" height="40" class="rounded-circle"/>
+                                            <b t-esc="record.assessee_id.value">
+                                            </b>
+                                        </h4>
+                                    </div>
+                                </div>
+                                <div class="text-left mb-2">
+                                    <h1 class="text-uppercase badge text-wrap font-weight-bold p-2" style="background-color:#ade4ef; font-size: 1rem;" modifiers="{}">
+                                        <span t-esc="record.assessment_tagging_id.value"/>
+                                    </h1>
+                                </div>
+                                <div class="row mt-2 mb-2">
+                                    <div class="col-sm-8">
+                                        <div class="mb-2">
+                                            <h1 class="text-uppercase badge text-wrap font-weight-bold p-2" style="background-color:#ade4ef; font-size: 1rem;" modifiers="{}">
+                                                <span t-esc="record.period_id.value"/>
+                                            </h1>
+                                        </div>
+                                        <div class="font-weight-bold">
+                                            <t t-if="record.weightage_value.value == 'B'">
+                                             Score (in %) : <span class="text-danger font-weight-bold" t-esc="record.total_score.value" />
+                                            </t>
+                                            <t t-else="">
+                                             Score (in %) : <span class="font-weight-bold" t-esc="record.total_score.value" />
+                                            </t>
+                                        </div>
+                                        <button attrs="{'invisible': [('feedback_status','in',['0','1','2'])]}" class="btn btn-primary float-left btn-sm mt-1" title="Click to view feedback" type="object" name="view_feedback" style="background: #108fbb">View Feedback <i class="fa fa-eye fa-inverse" role="img"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="col-sm-4 text-center my-auto">
+                                        <t t-if="record.weightage_value.value == 'B'">
+                                            <div style="width: 3vw; height: 3vw; border-radius: 50%; background: #d7182a; line-height:40px; font-size:16px; color: #fff;">
+                                                <span class="text-white font-weight-bold" t-esc="record.weightage_value.value" />
+                                            </div>
+                                        </t>
+                                        <t t-elif="record.weightage_value.value == 'E'">
+                                            <div style="width: 3vw; height: 3vw; border-radius: 50%; background: #f7941d; line-height:40px; font-size:16px; color: #fff;">
+                                                <span class="text-white font-weight-bold" t-esc="record.weightage_value.value" />
+                                            </div>
+                                        </t>
+                                        <t t-elif="record.weightage_value.value == 'M'">
+                                            <div style="width: 3vw; height: 3vw; border-radius: 50%; background: #108fbb; line-height:40px; font-size:16px; color: #fff;">
+                                                <span class="text-white font-weight-bold" t-esc="record.weightage_value.value" />
+                                            </div>
+                                        </t>
+                                        <t t-else="">
+                                            <div style="width: 3vw; height: 3vw; border-radius: 50%; background: green; line-height:40px; font-size:16px; color: #fff;">
+                                                <span class="text-white font-weight-bold" t-esc="record.weightage_value.value" />
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="kw_feedback_view_feedback_search_view" model="ir.ui.view">
+            <field name="name">View Feedback Search</field>
+            <field name="model">kw_feedback_details</field>
+            <field name="arch" type="xml">
+                <search string="Search Feedback">
+                    <field name="assessor_id"/>
+                    <field name="assessee_id"/>
+                    <field name="feedback_status"/>
+
+                    <filter string="Active" domain="[('active', '=',True)]" name="enable_feedback_details"/>
+                    <filter string="Inactive" domain="[('active', '=',False)]" name="disable_feedback_details"/>
+                    <separator/>
+
+                    <filter string="By Current Year &amp; Month" domain="['&amp;',('assessment_from_date', '&gt;=',context_today().strftime('%Y-%m-01')),('assessment_from_date', '&lt;',(context_today()+relativedelta(months=1)).strftime('%Y-%m-01')),'&amp;',('assessment_from_date', '&gt;=',context_today().strftime('%Y-01-01')),('assessment_from_date', '&lt;',(context_today()+relativedelta(years=1)).strftime('%Y-01-01'))]" name="by_current_month_year"/>
+                    <!-- <filter name="group_by_assessment_tagging_id" string="Assessment Type" domain="[]" context="{'group_by':'assessment_tagging_id'}" help="Group Assessment Type Wise"/>
+                    <filter name="group_by_period_id" string="Period" domain="[]" context="{'group_by':'period_id'}" help="Group Period Wise"/>
+                    <filter name="group_by_state" context="{'group_by': 'feedback_status'}" string="Status" help="Group Feedback by State"/> -->
+                </search>
+            </field>
+        </record>
+
+        <record id="kw_feedback_view_feedback_action" model="ir.actions.act_window">
+            <field name="name">View Feedback</field>
+            <field name="res_model">kw_feedback_details</field>
+            <field name="view_mode">kanban</field>
+            <field name="view_type">form</field>
+            <field name="search_view_id" ref='kw_assessment_feedback.kw_feedback_view_feedback_search_view'/>
+            <field name="domain">['&amp;',('assessee_id.user_id','=',uid),('feedback_status','=','6')]</field>
+            <field name="context"></field>
+            <field name="help" type="html">
+                <p >
+                </p>
+            </field>
+        </record>
+
+        <record id="kw_feedback_view_feedback_actions_view_kanban" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">kanban</field>
+            <field name="view_id" ref="kw_feedback_view_feedback_kanban_view"/>
+            <field name="act_window_id" ref="kw_feedback_view_feedback_action"/>
+        </record>
+
+    </data>
+</odoo>

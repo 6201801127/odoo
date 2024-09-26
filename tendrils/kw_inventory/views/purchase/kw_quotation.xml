@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="kw_quotation_view_tree" model="ir.ui.view">
+            <field name="name">kw_quotation.view.tree</field>
+            <field name="model">kw_quotation</field>
+            <field name="arch" type="xml">
+                <tree delete='0'>
+                    <!-- Add your fields here -->
+                    <field name="qo_no" string="Quotation No" />
+                    <field name="partner_id" string="Vendor" />
+                    <field name="partner_ref" string="Vendor Reference" />
+                    <field name="indent" string="Indent No" widget="many2many_tags" invisible='1'/>
+                    <field name="requisition_ids" string="Requisition No" widget="many2many_tags"/>
+                    <field name="date_order" string="Quotation Date"/>
+                    <field name="state" string="State"/>
+                </tree>
+            </field>
+        </record>
+        <record id="kw_product_view_form" model="ir.ui.view">
+			<field name="name">kw_product_viem.form</field>
+			<field name="model">kw_quotation_items</field>
+			<field name="arch" type="xml">
+				<form>
+					<sheet>
+						<group>
+							<group>
+								<field name="order_id" invisible="0" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+								<field name="product_id" string="Item Code" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+								<field name="name" string="Item Name" />
+								<field name="date_planned" string="Date" />
+								<field name="company_id" string="Company" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+								<field name="product_qty" string="Quantity" />
+								<field name="product_uom" string="Uom" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+								<field name="price_unit" string="Unit Price" />
+								<field name="last_pp" string="Last Procurement Price" />
+								<field name="price_tax" widget="monetary"/>
+								<field name="price_subtotal" string="Subtotal" widget="monetary" />
+								<field name="price_total" widget="monetary"/>
+								<field name="taxes_id" string="Taxes" widget="many2many_tags" domain="[('type_tax_use','=','purchase')]" context="{'default_type_tax_use': 'purchase', 'search_view_ref': 'account.account_tax_view_search'}" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+							</group>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+        <record id="kw_quotation_view_form" model="ir.ui.view">
+            <field name="name">kw_quotation.view.form</field>
+            <field name="priority" eval="1"/>
+            <field name="model">kw_quotation</field>
+            <field name="arch" type="xml">
+                <form string="Quotation" delete='0' duplicate='0'>
+                    <header>
+                        <button name="action_rfq_send" states="draft" string="Send by Email" type="object" context="{'send_rfq':True}" class="oe_highlight"/>
+                        <button name="btn_response" string="Move to Response Received" states="draft" type="object" class="oe_highlight"/>
+                        <button name="kw_print_quotation" string="Print RFQ" type="object" states="draft,response" class="oe_highlight" groups="base.group_user"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,response,negotiation" readonly="1"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <!-- Add your fields here -->
+
+                                <field name="vendor_required" string="Vendor Required" invisible="1"/>
+                                <field name="qo_no" string="Quotation No" />
+                                <field name="partner_id" readonly='1' options="{'no_open': True,'no_create':True,'no_edit':True}" string="Vendor" attrs="{'readonly': [('state', 'in', ['approved','sent','negotiation'])],'required':[('vendor_required','=',True)]}" />
+                                <field name="partner_ref" readonly='1' string="Vendor Reference" attrs="{'readonly': [('state', 'in', ['approved','sent','negotiation'])]}" options="{ 'no_open': True}" />
+                                <field name="file_name" invisible="1"/>
+                                <field name="qo_attachment" filename="file_name" widget="FieldBinary" string="Attachment" attrs="{'readonly': [('state', 'in', ['approved','sent','negotiation'])]}"/>
+                                <field name="vendor_required" string="Vendor Required" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="indent" string="Indent No" invisible='1' options="{'no_create': True, 'no_create_edit':True}" widget='many2many_tags' attrs="{'readonly': [('state', 'in', ['approved','sent','negotiation'])]}"/>
+                                <field name="requisition_ids" readonly='1' string="Requisition No" options="{'no_create': True, 'no_create_edit':True}" widget='many2many_tags' attrs="{'readonly': [('state', 'in', ['approved','sent','negotiation'])]}"/>
+                                <field name="date_order" readonly='1' string="Quotation Date" attrs="{'readonly': [('state', 'in', ['approved','sent','negotiation'])]}"/>
+                                <field name="company_id" readonly='1' string="Company" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" attrs="{'readonly': [('state', 'in', ['approved','sent','negotiation'])]}" />
+                                <field name="currency_id" string="Currency" groups="base.group_multi_currency" force_save="1" attrs="{'readonly': [('state', 'in', ['approved','sent','negotiation'])]}"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Products">
+                                <field name="order_line" string="Products" attrs="{'readonly': [('state', 'in', ['approved','sent','negotiation'])]}" context="{'form_view_ref': 'kw_inventory.kw_product_view_form'}">
+                                    <tree editable="bottom" options="{ 'no_open': True}" create='false' delete='false'>
+                                        <field name="currency_id" invisible="1"/>
+                                        <field name="product_id" string="Item Code" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                                        <field name="name" string="Item Name" invisible='1'/>
+                                        <field name="date_planned" string="Date" />
+                                        <!-- <field name="company_id" string="Company" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/> -->
+                                        <field name="product_qty" string="Quantity" />
+                                        <field name="product_uom" string="UoM" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                                        <field name="price_unit" string="Unit Price" />
+                                        <field name="last_pp" string="Last Procurement Price" />
+                                        <field name="taxes_id" string="Taxes" widget="many2many_tags" domain="[('type_tax_use','=','purchase')]" context="{'default_type_tax_use': 'purchase', 'search_view_ref': 'account.account_tax_view_search'}" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                                        <field name="price_tax" widget="monetary"/>
+                                        <field name="price_subtotal" string="Subtotal" widget="monetary" />
+                                        <field name="price_total" widget="monetary"/>
+                                        <field name="indent_record_id" string="Indent Record Id" invisible="1"/>
+
+                                    </tree>
+                                </field>
+                                <field name="notes" class="oe_inline" placeholder="Define your terms and conditions ..." attrs="{'readonly': [('state', 'in', ['approved','sent','negotiation'])]}"/>
+                                <group>
+                                    <field name="contact_prsn_name" attrs="{'readonly': [('state', 'in', ['approved','sent','negotiation'])]}"/>
+                                    <field name="contact_prsn_number" attrs="{'readonly': [('state', 'in', ['approved','sent','negotiation'])]}"/>
+                                </group>
+                                
+                            </page>
+
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+        
+        <record id="kw_quotation_view_search" model="ir.ui.view">
+            <field name="name">kw_quotation.search</field>
+            <field name="model">kw_quotation</field>
+            <field name="arch" type="xml">
+                <search string="Search">
+                    <group expand="0" string="Group By">                                                                                 
+                        <filter name="group_state" string="Status" context="{'group_by':'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        <record id="kw_quotation_action_window" model="ir.actions.act_window">
+            <field name="name">Quotation</field>
+            <field name="res_model">kw_quotation</field>
+            <field name="view_mode">tree,form,pivot,graph</field>
+            <field name="view_type">form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_quotation_view_tree')}),    
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_quotation_view_form')})]"/>
+            <field name="domain">[('state', '!=', 'negotiation')]</field>
+            <field name="search_view_id" ref="kw_quotation_view_search"></field>
+            <field name="context">{'search_default_group_state': 1,'create':False}</field>
+        </record>
+
+    <!-- Report View -->
+        <record id="kw_quotation_view_report_tree" model="ir.ui.view">
+            <field name="name">kw_quotation.report.view.tree</field>
+            <field name="model">kw_quotation</field>
+            <field name="arch" type="xml">
+                <tree create="false" edit="false" delete="false">
+                    <field name="qo_no" string="Quotation No" />
+                    <field name="partner_id" string="Vendor" />
+                    <field name="partner_ref" string="Vendor Reference" />
+                    <field name="indent" string="Indent No" widget="many2many_tags"/>
+                    <field name="date_order" string="Quotation Date"/>
+                    <field name="state" string="State"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_quotation_report_action_window" model="ir.actions.act_window">
+            <field name="name">Quotation Report</field>
+            <field name="res_model">kw_quotation</field>
+            <field name="view_mode">tree</field>
+            <field name="view_type">form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_quotation_view_report_tree')})]"/>
+        </record>
+
+    </data>
+</odoo>

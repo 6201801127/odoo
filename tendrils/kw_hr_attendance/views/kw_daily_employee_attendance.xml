@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="view_kw_daily_employee_attendance_form" model="ir.ui.view">
+            <field name="name">view.kw_daily_employee_attendance. log form</field>
+            <field name="model">kw_daily_employee_attendance</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Late Entry">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="employee_id" options="{'no_open': True, 'no_create': True}"/>
+                                <field name="shift_name" options="{'no_open': True, 'no_create': True}"/>
+                                <field name="tz" />
+                                <field name="work_mode" string="Working From"/>
+                            </group>
+                             <group>
+                                <field name="attendance_recorded_date" />
+                                <field name="day_status" />
+                                <field name="state" />
+                                <field name="status" />
+                            </group>
+
+                            <group>
+                                <field name="shift_in" />
+                                <field name="emp_tz_check_in" string="Check In Time"/>
+                                <field name="check_in_status" />     
+                               <!--   <field name="shift_second_half_time" />    -->                                         
+                                <field name="lunch_out_time" />
+                                <field name="shift_rest_time" widget="float_time" />
+                            </group>
+
+                            <group>
+                                <field name="shift_out" />
+                                <field name="emp_tz_check_out" string="Check Out Time" />
+                                <field name="check_out_status" />
+                                <field name="lunch_in_time" />
+                                <field name="worked_hours" widget="float_time" />
+                            </group>                          
+                        </group>
+                        <group attrs="{'invisible': [('check_in_status','not in',['2','3'])]}">
+                            <group>
+                                <field name="late_entry_reason" />
+                                <field name="le_forward_to" />
+                                <field name="le_forward_reason" />
+                                <field name="le_state" />
+                                <field name="le_action_status" />
+                            </group>
+                            <group>
+                                <!--<field name="late_entry_duration" widget="float_time" /> -->
+                                <field name="le_authority_remark" />
+                                <field name="le_action_taken_by" />
+                                <field name="le_action_taken_on" />
+                            </group>
+                        </group>
+                        <group groups="base.group_no_one">
+                            <group>
+                                <field name="create_uid" />
+                                <field name="create_date" />
+                                <field name="attendance_update_logs" attrs="{'invisible': [('attendance_update_logs','=',False)]}"/>
+                            </group>
+                            <group>    
+                                <field name="write_uid" />
+                                <field name="write_date" />
+                                
+                            </group>
+                        </group>
+                    </sheet>
+                    <!-- <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread" />
+                    </div> -->
+                </form>
+            </field>
+        </record>
+
+
+        <record model="ir.ui.view" id="view_kw_daily_employee_attendance_tree">
+            <field name="name">kw_daily_employee_attendance.view.report tree</field>
+            <field name="model">kw_daily_employee_attendance</field>
+            <field name="arch" type="xml">
+                <tree create="false"  edit="false" delete="false" import="false" default_order="attendance_recorded_date desc,employee_id">	<!--decoration-danger="day_status in ['2']"  decoration-warning="day_status in ['5']"  decoration-info="day_status in ['4']"   -->			
+                    <field name="employee_id" string="Name"/>
+                    <field name="department_id" string="Department"/>      
+                    <field name="branch_id" string="Branch"/>     
+                    <field name="infra_unit_location_id" />               
+                    <field name="attendance_recorded_date" string="Date"/> 
+                    <field name="shift_name" string="Work Shift"/>
+                    <field name="shift_in" string="Shift In Time"/>                   
+                    <field name="check_in_time" string="In Time"/>
+                    <field name="state" invisible="1"/>
+                    <!-- <field name="day_status" invisible="1"/>
+                    <field name="is_on_tour" invisible="1"/>
+                    <field name="leave_status" invisible="1"/> -->
+                    <!-- <field name="lunch_out_time" string="Lunch Out"/>
+                    <field name="lunch_in_time" string="Lunch In"/> -->
+                    <field name="check_out_time" string="Out Time"/>
+                    <field name="status" class="your_class_name" options='{"fw": "bold:is_fixed_holiday ==True or is_weekoff ==True or is_roster_weekoff ==True","fg_color": "#d83d2b:is_fixed_holiday ==True;#1f8bbb:is_weekoff ==True;purple:is_roster_weekoff ==True;"}' />
+                    
+                    <field name="leave_day_value" invisible="1" />                    
+                    <field name="payroll_day_value" groups="base.group_no_one" string="Payroll Status" invisible="1"/>
+                    <field name="is_valid_working_day" groups="base.group_no_one" string="Working Day" invisible="1"/>
+                    <field name="employee_status" groups="base.group_no_one" string="Emp Status" invisible="1"/>
+                    <field name="check_in_status" string="In Status"/>
+                    <field name="check_out_status" string="Out Status"/>
+                    <field name="worked_hours" string="Working Hour" widget="float_time"/>
+                    <field name="late_entry_reason" string="Late Reason"/>
+                    <field name="le_authority_remark" string="Remarks"/>                    
+                    <field name="work_mode" string="Mode"/>
+                    <field name="check_in_through"/>
+                    <field name="is_fixed_holiday" invisible="1"/>
+                    <field name="is_weekoff" invisible="1" />
+                    <field name="is_roster_weekoff" invisible="1"/>
+                    <field name="day_status" string="Day Status"  />
+                    
+                </tree>
+            </field>
+        </record>
+
+        <record id="search_view_kw_daily_employee_attendance" model="ir.ui.view">
+            <field name="name">Employee Daily Attendance Search View</field>
+            <field name="model">kw_daily_employee_attendance</field>
+            <field name="arch" type="xml">
+                <search string="Search Attendance">
+                    <field name="employee_id" string="Employee" />
+                    <field name="attendance_recorded_date"/>
+                    <field name="branch_id" />
+                    <field name="department_id" />
+                    <field name="shift_id"/>
+
+                    <filter string="Attendance Date" name="filter_attendance_date" date="attendance_recorded_date"/>
+                    <filter string="Today" name="filter_attendance_day" domain="[('attendance_recorded_date', 'like',context_today().strftime('%Y-%m-%d'))]" />
+                     <separator/>
+                    <filter string="Absent" name="filter_attendance_absent" domain="[('check_in','=',False),('leave_status','not in',['1','2','3']),('is_on_tour','=',False),('day_status', 'in',['0','3'])]" />
+                    <filter string="Present" name="filter_attendance_present" domain="[('check_in','!=',False)]" />
+                    <filter string="On Leave" name="filter_attendance_on_leave" domain="[('leave_status','!=',False)]" />
+                    <filter string="On Tour" name="filter_attendance_on_tour" domain="[('is_on_tour','=',True)]" />
+                    <separator/>
+                    <filter string="WFO" name="filter_attendance_wfo" domain="[('work_mode','=','1')]" />
+                    <filter string="WFH" name="filter_attendance_wfh" domain="[('work_mode','=','0')]" />
+                    <filter string="WFA" name="filter_attendance_wfa" domain="[('work_mode','=','2')]" />
+                    <separator/>
+                    <filter string="Early Entry" name="filter_attendance_early_entry" domain="[('check_in_status','in',['-1','0']),('day_status','in',['0','3'])]" />
+                    <filter string="Late Entry" name="filter_attendance_late_entry" domain="[('check_in_status','in',['2','3']),('day_status','in',['0','3'])]" />
+                    <filter string="Late Exit" name="filter_attendance_late_exit" domain="[('check_in_status','in',['2','3']),('day_status','in',['0','3'])]" />
+                    <filter string="Present + Early Entry + Late Entry" name="filter_attendance_present_early_late_entry" domain="[('check_in_status','in',['-1','0','2','3']),('day_status','in',['0','3'])]" />
+                    <separator/>
+                    <filter name="my_and_sub_ordinate_attendance" string="My &amp; Sub-Ordinates" domain="['|',('employee_id.user_id','=',uid),('employee_id.parent_id.user_id','=',uid)]" />
+                    <separator/>
+                    <filter name="portal" string="Portal"       domain="[('check_in','!=',False),('check_in_mode','=','0')]" />
+                    <filter name="biometric" string="Biometric" domain="[('check_in','!=',False),('check_in_mode','=','1')]" />
+                    <filter name="manual" string="Manual"       domain="[('check_in','!=',False),('check_in_mode','=','2')]" />
+                    <filter name="attendance_request" string="Attendance Request" domain="[('check_in','!=',False),('check_in_mode','=','3')]" />
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_employee" string="Employee" context="{'group_by':'employee_id'}"/>
+                        <filter name="group_by_branch_id" string="Branch" context="{'group_by':'branch_id'}" />
+                        <filter name="group_by_department" string="Department" context="{'group_by':'department_id'}" />                        
+                        <filter name="group_by_work_mode" string="Work Mode" context="{'group_by':'work_mode'}" />
+
+                        <filter name="group_by_attendance_date" string="Attendance Date" context="{'group_by':'attendance_recorded_date'}" />
+
+                        <!-- <filter name="group_by_state" string="Attendance Status" context="{'group_by':'state'}" /> -->
+                        <filter name="group_by_day_status" string="Day Status" context="{'group_by':'day_status'}" />
+                        <!-- <filter name="group_by_check_in_status" string="Office-in Status" context="{'group_by':'check_in_status'}" />
+                        <filter name="group_by_check_out_status" string="Office-out Status" context="{'group_by':'check_out_status'}" /> -->
+                        <!-- <filter name="le_state" string="Late Entry Status" context="{'group_by':'le_state'}" />
+                        <filter name="le_action_status" string="Late Entry Action Status" context="{'group_by':'le_action_status'}" /> -->
+                        <separator/>
+                    </group>
+                    <filter name="last_30_days_attendance" string="Attendance Date: Last 30 Days" domain="[('attendance_recorded_date','&lt;=',context_today().strftime('%Y-%m-%d')),('attendance_recorded_date', '&gt;',(context_today()-relativedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                    <filter name="last_45_days_attendance" string="Attendance Date: Last 45 Days" domain="[('attendance_recorded_date','&lt;=',context_today().strftime('%Y-%m-%d')),('attendance_recorded_date', '&gt;',(context_today()-relativedelta(days=45)).strftime('%Y-%m-%d'))]"/>
+
+                </search>
+            </field>
+        </record>
+
+        <record id="kw_daily_attendance_pivot_report_view_pivot" model="ir.ui.view">
+            <field name="name">view.kw_daily_attendance_pivot_report.pivot</field>
+            <field name="model">kw_daily_employee_attendance</field>
+            <field name="arch" type="xml">
+                <pivot string="Daily Attendance Tracker">
+                    <field name="employee_id" type="row"/>
+                    <field name="attendance_recorded_date" type="col"/>
+                    <field name="worked_hours"     type="measure" widget="float_time"/>
+                    <!-- <field name="no_of_wfa"     type="measure"/> -->
+                </pivot>
+            </field>
+        </record>
+
+
+        <record id="action_window_kw_daily_employee_attendance_detail" model="ir.actions.act_window">
+            <field name="name">Attendance Report</field>
+            <field name="res_model">kw_daily_employee_attendance</field>
+            <field name="view_mode">tree,form,pivot</field>
+            <field name="domain">[]</field>
+            <field name="context">{"search_default_filter_attendance_day":1,"search_default_my_and_sub_ordinate_attendance":1,"create": False,"edit": False}</field>
+          
+            <field name="search_view_id" ref="search_view_kw_daily_employee_attendance"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No record found
+                </p>
+            </field>
+        </record>
+
+    </data>
+</odoo>

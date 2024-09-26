@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="kw_training_calendar_view_tree" model="ir.ui.view">
+            <field name="name">kw_training_calendar.tree</field>
+            <field name="model">kw_training_calendar_report</field>
+            <field name="arch" type="xml">
+                <tree create='0' delete='0'>
+                    <field name="name"/>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+                </tree>
+            </field>
+        </record>
+        <record id="kw_training_cal_form_view" model="ir.ui.view">
+            <field name="name">kw_training_calendar.form</field>
+            <field name="model">kw_training_calendar_report</field>
+            <field name="priority" eval="200"/>
+            <field name="arch" type="xml">
+                <form string="Training" create="0" delete="0">
+                    <group>
+                        <group>
+                            <field name="name" readonly="1"/>
+                            <field name="start_date" readonly="1"/>
+                            <field name="end_date" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="course_id" readonly="1" options="{'no_create': True,'no_open': True,'no_edit': True}"/>
+                            <field name="instructor_type" readonly="1" options="{'no_create': True,'no_open': True,'no_edit': True}"/>
+                            <field name="nominate_btn_hide" invisible="1"/>
+                            <field name="empl_id"/>
+                            <field name="training_approve_bool" invisible="1"/>
+                            <field name="training_date_bool" invisible="1"/>
+                        </group>
+                        <group  class="col-sm-12">
+                            <label for="training_calender_doc" string="Training plan document" class="col-md-50 o_light_label"/>
+                            <button class="oe_highlight" type="object"
+                                    icon="fa-download fa-lg"
+                                    aria-label="Download" string="Download"
+                                    name="action_download_training_document"/>
+                        </group>
+                         <group>
+                        </group>
+                        <group attrs="{'invisible':[('training_approve_bool','=',True)]}">
+                            <div>
+                                <p style="color:red;font-size:18px"> <strong>Note: </strong> This training is pending for Approval.</p>
+                            </div>
+                        </group>
+                       
+                        
+                    </group>
+                    <footer>
+                        <center> 
+                            <button name="get_training_nominate_form" type="object" string="Self Nominate" class="btn-success" attrs="{'invisible':['|','|',('training_approve_bool','=',False),('nominate_btn_hide','=',True),('training_date_bool','=',False)]}" context="{'active_id':id}"/>
+                        </center>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <record id="kw_training_calendar_view" model="ir.ui.view">
+            <field name="name">kw_training_view.calendar</field>
+            <field name="model">kw_training_calendar_report</field>
+            <field name="arch" type="xml">
+                <calendar string="Training Calendar" date_start="start_date" date_stop="start_date" mode="month" 
+                 readonly_form_view_id="%(kw_training.kw_training_cal_form_view)s" 
+                 event_open_popup="true" quick_add="False" color="name">
+                    <field name="name"/>
+                </calendar>
+            </field>
+        </record>
+
+        <record id="kw_training_cal_action" model="ir.actions.act_window">
+            <field name="name">Training Calendar</field>
+            <field name="res_model">kw_training_calendar_report</field>
+            <field name="view_mode">calendar,form,tree</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                     (0, 0, {'view_mode': 'calendar', 'view_id': ref('kw_training_calendar_view')})]"/>
+        </record>
+        <menuitem name="Training Calendar" parent="menu_kw_training_my_training" id="menu_kw_training_calendar" action="kw_training_cal_action" sequence="1"/>
+
+
+        <record id="kw_training_cal_wizard_form_view" model="ir.ui.view">
+            <field name="name">kw_training_calendar_wizard.form</field>
+            <field name="model">training_nominate_form_wizard</field>
+            <field name="arch" type="xml">
+                <form string="Training" >
+                    <group>
+                        <group>
+                            <field name="empl_id" required="1" readonly="1" options="{'no_create': True,'no_open': True,'no_edit': True}"/>
+                            <field name="remark" required="1"/>
+                            <field name="training_calendar_id" invisible="1" options="{'no_create': True,'no_open': True,'no_edit': True}"/>
+                            
+                        </group>
+                    </group>
+                    <footer>
+                        <center>
+                            <button name="get_self_nominate_training" type="object" string="Confirm" class="btn-success"/>
+                            <button string="Cancel" class="btn-danger" special="cancel" style="margin-left: 5px;"/>
+                        </center>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_training_calendar_nominate_approve_view_tree" model="ir.ui.view">
+            <field name="name">kw_training_calendar_nominate.tree</field>
+            <field name="model">kw_training_nominate_approve</field>
+            <field name="arch" type="xml">
+                <tree create='0' delete='0'>
+                    <field name="course_id" string="Training"/>
+                    <field name="name"/>
+                    <field name="empl_id" string="Requested By"/>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+                </tree>
+            </field>
+        </record>
+        <record id="kw_training_cal_nominate_form_view" model="ir.ui.view">
+            <field name="name">kw_training_calendar_nominate.form</field>
+            <field name="model">kw_training_nominate_approve</field>
+            <field name="priority" eval="200"/>
+            <field name="arch" type="xml">
+                <form string="Training" create="0" delete="0" edit="0">
+                    <header>
+                        <button name="get_training_approve_ra" type="object" string="Approve" attrs="{'invisible':[('hide_approve','=',True)]}" 
+                                class="btn-success" context="{'current_id':id,'button_name':'Approve'}"/>
+                        <button name="get_training_reject_ra" type="object" string="Reject" attrs="{'invisible':[('hide_approve','=',True)]}"
+                                class="btn-danger" context="{'current_id':id,'button_name':'Reject'}"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name" readonly="1"/>
+                                <field name="start_date" readonly="1"/>
+                                <field name="end_date" readonly="1"/>
+                                <field name="course_id" readonly="1" options="{'no_create': True,'no_open': True,'no_edit': True}"/>
+                                <field name="instructor_type" readonly="1" options="{'no_create': True,'no_open': True,'no_edit': True}"/>
+                                <field name="empl_id" options="{'no_create': True,'no_open': True,'no_edit': True}" readonly="1"/>
+                                <field name="hide_approve" invisible="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_training_cal_nominate_action" model="ir.actions.act_window">
+            <field name="name">Take Action</field>
+            <field name="res_model">kw_training_nominate_approve</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="domain">[('empl_id.parent_id.user_id','=',uid),('state','=','Applied')]</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                     (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_training_calendar_nominate_approve_view_tree')}),
+                     (0, 0, {'view_mode': 'form', 'view_id': ref('kw_training_cal_nominate_form_view')})]"/>
+        </record>
+        <menuitem name="Take Action" parent="menu_kw_training_my_training" groups="kw_employee.group_hr_ra"
+                id="menu_kw_training_calendar_nominate_take_action" action="kw_training_cal_nominate_action" 
+                sequence="2"/>
+
+        
+        <record id="kw_training_approved_ra_wizard_form_view" model="ir.ui.view">
+            <field name="name">kw_training_calendar_wizard_ra.form</field>
+            <field name="model">training_nominate_form_wizard</field>
+            <field name="arch" type="xml">
+                <form string="Training" >
+                    <group>
+                        <group>
+                            <field name="remark" required="1"/>
+                            <field name="training_approve_id" invisible="1" options="{'no_create': True,'no_open': True,'no_edit': True}"/>
+                            
+                        </group>
+                    </group>
+                    <footer>
+                        <center>
+                            <button name="approved_training" type="object" string="Confirm" class="btn-success"/>
+                            <button string="Cancel" class="btn-default" special="cancel" style="margin-left: 5px;"/>
+                        </center>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_training_calendar_nominate_report_tree" model="ir.ui.view">
+            <field name="name">kw_training_calendar_nominate_report.tree</field>
+            <field name="model">kw_training_nominate_approve</field>
+            <field name="arch" type="xml">
+                <tree create='0' delete='0' import="0">
+                    <field name="name" readonly="1"/>
+                    <field name="start_date" readonly="1"/>
+                    <field name="end_date" readonly="1"/>
+                    <field name="course_id" readonly="1" options="{'no_create': True,'no_open': True,'no_edit': True}"/>
+                    <field name="instructor_type" readonly="1" options="{'no_create': True,'no_open': True,'no_edit': True}"/>
+                    <field name="create_uid" string="Applied by"/>
+                    <field name="nominate_user_remark" string="Applied remark"/>
+                    <field name="approver_id" string="Approved/Rejected by"/>
+                    <field name="ra_approve_remark"/>
+                    <field name="ra_reject_remark"/>
+                    <field name="cancel_by_id"/>
+                    <field name="manager_remark"/>
+                    <field name="state"/>
+                    <button string="Cancel Nomination" name="get_cancel_nomination_manager" type="object" class="btn-warning" 
+                     context="{'current_id':id,'button_name':'manager_cancel'}" attrs="{'invisible':[('state','!=','Approved')]}"/>
+                </tree>
+            </field>
+        </record>
+        <record id="kw_training_cal_nominate_report_action" model="ir.actions.act_window">
+            <field name="name">Training Calendar Report</field>
+            <field name="res_model">kw_training_nominate_approve</field>
+            <field name="view_mode">tree</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                     (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_training_calendar_nominate_report_tree')})]"/>
+        </record>
+
+        <menuitem name="Training Calendar Nominate Report"
+         parent="kw_training.menu_kw_training_report" 
+         id="kw_training_cal_nominate_report" 
+         action="kw_training_cal_nominate_report_action"
+         sequence="425"/>
+
+
+        <record id="kw_training_cancel_manager_wizard_form_view" model="ir.ui.view">
+            <field name="name">kw_training_calendar_wizard_ra.form</field>
+            <field name="model">training_nominate_form_wizard</field>
+            <field name="arch" type="xml">
+                <form string="Training" >
+                    <group>
+                        <group>
+                            <field name="remark" required="1"/>
+                            <field name="training_approve_id" invisible="1" options="{'no_create': True,'no_open': True,'no_edit': True}"/>
+                            
+                        </group>
+                    </group>
+                    <footer>
+                        <center>
+                            <button name="approved_training" type="object" string="Confirm" class="btn-success"/>
+                            <button string="Cancel" class="btn-default" special="cancel" style="margin-left: 5px;"/>
+                        </center>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+    </data>
+</odoo>

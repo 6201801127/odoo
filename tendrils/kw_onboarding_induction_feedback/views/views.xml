@@ -1,0 +1,575 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+
+
+
+    <record model="ir.ui.view" id="kw_feedback_page_list">
+      <field name="name">kw_feedback_list</field>
+      <field name="model">kw_onboarding_feedback</field>
+      <field name="arch" type="xml">
+        <tree import="false" create="false">
+          <field name="emp_id" string="Employee"/>
+          <field name="deg_id" string="Designation"/>
+          <field name="dept_id" string="Department"/>
+          <field name="work_email" string="Work mail"/>
+          <field name="onboard_ind_bool" string="Onboarding and Induction Feedback"/>
+          <!-- <field name="hr_ind_bool" string="HR Induction Assessment Form"/>
+          <field name="it_ind_bool" string="IT Induction Assessment Form"/>
+          <field name="comp_ind_boolean" string="Know Your Company Induction Assessment Form"/> -->
+          <field name="status_feedback"/>
+        </tree>
+      </field>
+    </record>
+    
+    <record id="kw_onboarding_feedback_form" model="ir.ui.view">
+      <field name="name">kw_onboarding_induction_feedback_form</field>
+      <field name="model">kw_onboarding_feedback</field>
+      <field name="type">form</field>
+      <field name="arch" type="xml">
+        <form import="false" create="false">
+        <style>
+
+        </style>
+          <header>
+            <button string="Submit" name="feedback_submit_button" type="object" 
+                    class = "btn-success" attrs="{'invisible':[('submit_bool','=',True)]}" 
+                    groups="kw_onboarding_induction_feedback.group_kw_onboarding_induction_user"/>
+
+            <button string="Confirm" name="feedback_reviewer_submit_button" type="object" 
+                    confirm="Are you sure to confirm ?"
+                    context="{'button':'onboard'}"
+                    class = "btn-success" attrs="{'invisible':['|',('onboard_forward_to_manager','=',True),('officer_manger','=',True)]}" 
+                    groups="kw_onboarding_induction_feedback.group_kw_onboarding_induction_officer"/>
+
+            <button string="Submit" name="feedback_manager_submit_button" type="object" 
+                    confirm="Are you sure to submit the onboarding induction feedback ?"
+                    class = "btn-success" attrs="{'invisible':['|','|',('manager_confirm_form','=',True),('submit_bool','=',False),('officer_manger','=',True)]}"
+                    groups="kw_onboarding_induction_feedback.group_kw_onboarding_induction_manager"/>
+            <button string="Submit" name="feedback_submit_manger_officer_check" type="object" 
+                    confirm="Are you sure to submit the onboarding induction feedback ?"
+                    class = "btn-success" attrs="{'invisible':['|','|','|',('onboard_forward_to_manager','=',True),('submit_bool','=',False),('officer_manger','=',False),('manager_confirm_form','=',True)]}"
+                    />
+
+
+          </header>
+          <sheet>
+            <style>
+              .table-responsive .o_list_view thead tr:nth-child(1) th{
+                background-color: #8585ad;
+                color:#fff;
+                }
+            </style>
+            <group>
+              <group>
+                <field name="emp_id" string="Employee" readonly="1" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                <field name="deg_id" string="Designation" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                <field name="dept_id" string="Department" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                <field name="work_email" string="Work mail"/>
+                <field name="remark_reviewer" attrs="{'invisible':[('user_check_bool','=',True)],'required':[('onboard_ind_officer_bool','=',True)]}"/>
+                <field name="user_check_bool"  invisible="1"/>
+                <field name="officer_manger"  invisible="1"/>
+
+
+                <field name="form_assign" widget="many2many_tags" readonly="1" invisible="1"/>
+                <field name="status_feedback"  invisible="1"/>
+                <field name="manager_confirm_form"  invisible = '1'/>
+                <field name="tagged_id"  invisible = '1'/>
+                <field name ="manager_check_bool"  invisible = '1'/>
+                <field name ="onboard_forward_to_manager" invisible = '1'/>
+               
+                <field name="onboard_ind_bool" string="Onboard" invisible = '1'/>
+                <field name="submit_bool" invisible="1" force_save = "1"/>
+               
+                <field name="onboard_ind_officer_bool" invisible="1"/>
+                <field name="reviewer_employees" invisible="1" widget="many2many_tags"/>
+
+              </group>
+            
+            </group>
+            <notebook>
+              <page string="Onboarding and Induction Feedback"   
+                  attrs="{'invisible':[('onboard_ind_bool', '=', False)],
+                         'required':[('onboard_ind_bool','=',True)]}">
+                <h5> Did you get off to a good start?
+                  <br></br>
+                  <br></br>
+                  <p>Please take out 5 minutes of your valuable time and complete this Onboarding and Induction Feedback sheet.</p>
+                </h5>
+                <br></br>
+                <br></br>
+                  <div class=" table-responsive" style="width:100%">
+                    <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                      <tbody class="ui-sortable">
+                          <tr>
+                          <th class="o_column_sortable"
+                            style='background-color: #e6f9ff !important;color:black;width:25%'>Onboarding and Induction Feedback Form
+                          </th>
+                          <th class="o_column_sortable"
+                            style='background-color: #e6f9ff !important;color:black;width:25%'>Option
+                          </th>
+                          </tr>
+                          <tr>
+                            <td scope="row" style="width: 55%;">1. Did you feel welcomed by Onboarding SPOC when you reached office on the date of joining?</td>
+                            <td>
+                              <field name="onboarding_spoc" required='1' widget="radio" options="{'horizontal': false}" attrs="{'readonly':['|','|',('onboard_ind_officer_bool','=',True),('manager_check_bool','=',True),('submit_bool','=',True)]}"/>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td scope="row">2. Is your Organizational Tour completed on the first day and toured through all the important places of your workplace?</td>
+                            <td>
+                              <field name="tour_completed"  widget="radio" options="{'horizontal': false}" attrs="{'readonly':['|','|',('onboard_ind_officer_bool','=',True),('manager_check_bool','=',True),('submit_bool','=',True)]}"/>
+                            </td>
+                          </tr>
+                          <tr>
+                              <td scope="row">3. I was assigned with a buddy and got all assistance to settle on the first day.</td>
+                              <td>
+                                <field name="all_assistance"  widget="radio" options="{'horizontal': true}"  attrs="{'readonly':['|','|',('onboard_ind_officer_bool','=',True),('manager_check_bool','=',True),('submit_bool','=',True)]}"/>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td scope="row">4. How was your onboarding experience at CSM?</td>
+                              <td>
+                                  <field name="onboarding_experience"  widget="radio" options="{'horizontal': false}" attrs="{'readonly':['|','|',('onboard_ind_officer_bool','=',True),('manager_check_bool','=',True),('submit_bool','=',True)]}"/>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td scope="row">5. Are your all Inductions completed? (Know About the Company, Digital Presence,
+                                      IT Induction and HR Induction)</td>
+                              <td>
+                                <field name="inductions_completed" widget="radio" options="{'horizontal': true}" attrs="{'readonly':['|','|',('onboard_ind_officer_bool','=',True),('manager_check_bool','=',True),('submit_bool','=',True)]}" />
+                                <field name="inductions_completed_specify" placeholder="Please specify which Induction is still pending" attrs="{'invisible':[('inductions_completed', 'in', ['yes',False])],
+                                                      'required':[('inductions_completed','=',True)],'readonly':['|','|',('onboard_ind_officer_bool','=',True),('submit_bool','=',True),('manager_check_bool','=',True)]}"/>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td scope="row">6. How satisfied are you with the information provided to you during your induction period?</td>
+                              <td>
+                                <field name="how_satisfied"  widget="radio" options="{'horizontal': true}" attrs="{'readonly':['|','|',('onboard_ind_officer_bool','=',True),('submit_bool','=',True),('manager_check_bool','=',True)]}" />
+                              </td>
+                          </tr>
+                          <tr>
+                              <td scope="row">7. I have read &amp; understood the HR processes mentioned in the employee handbook.</td>
+                              <td>
+                                <field name="hr_processes"  widget="radio" options="{'horizontal': true}"  attrs="{'readonly':['|','|',('onboard_ind_officer_bool','=',True),('submit_bool','=',True),('manager_check_bool','=',True)]}"/>
+                              </td>
+                          </tr>
+                            <tr>
+                              <td scope="row">8. I was provided with workstation, Tendrils user ID and Email ID within 1 day of my joining.</td>
+                              <td>
+                                <field name="with_workstation" widget="radio" options="{'horizontal': true}" attrs="{'readonly':['|','|',('onboard_ind_officer_bool','=',True),('submit_bool','=',True),('manager_check_bool','=',True)]}"/>
+                                <field name="specify" placeholder="Please specify" attrs="{'invisible':[('with_workstation', 'in', ['yes',False])],'readonly':['|','|',('onboard_ind_officer_bool','=',True),('submit_bool','=',True),('manager_check_bool','=',True)]}"/>
+                              </td>
+                          </tr>
+                            <tr>
+                              <td scope="row">9. I am being introduced to my Reporting Authority on the day of joining.</td>
+                              <td>
+                                <field name="reporting_authority"  widget="radio" options="{'horizontal': false}" attrs="{'readonly':['|','|',('onboard_ind_officer_bool','=',True),('submit_bool','=',True),('manager_check_bool','=',True)]}"/>
+                              </td>
+                          </tr>
+                            <tr>
+                              <td scope="row">10. I am confident I have understood how to use Tendrils Portal.</td>
+                              <td>
+                                <field name="use_kwantify"  widget="radio" options="{'horizontal': false}" attrs="{'readonly':['|','|',('onboard_ind_officer_bool','=',True),('submit_bool','=',True),('manager_check_bool','=',True)]}"/>
+                              </td>
+                          </tr>
+                            <tr>
+                              <td scope="row">11. Please provide any further comments you think would be helpful, including any issues that you would like addressing.</td>
+                              <td>
+                                <field name="additional_comments" attrs="{'readonly':['|','|',('onboard_ind_officer_bool','=',True),('submit_bool','=',True),('manager_check_bool','=',True)]}"/>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td></td>
+                              <td></td>
+                          </tr>
+                      </tbody>
+                    </table>
+                  </div>
+              </page>
+            </notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="kw_onboard_induction_answer_list">
+      <field name="name">kw_feedback_induction_Answer_list</field>
+      <field name="model">onboard_induction_answer_sheet</field>
+      <field name="arch" type="xml">
+        <tree import="false" create="true">
+          <field name="levels_hierarchy"/>
+          <field name="many_departments" />
+          <field name="procurement_division" />
+          <field name="attendance_procedure" />
+          <field name="regular_shift" />
+          <field name="approves_leaves" />
+          <field name="is_en_cashable" />
+          <field name="consecutive_medical_leaves" />
+          <field name="maternity_leave" />
+          <field name="paternity_leave" />
+          <field name="special_leave" />
+          <field name="tour_settlement" />
+          <field name="fixed_holidays" />
+          <field name="amount_accidental" />
+          <field name="conducts_appraisals" />
+          <field name="minimum_effort" />
+          <field name="Salary_linked" />
+          <field name="dress_code" />
+          <field name="use_local_language" />
+          <field name="how_many_days" />
+          <field name="csm_firewall" />
+          <field name="iP_extension_phone" />
+          <field name="server_30" />
+          <field name="server_9" />
+          <field name="extension_number_it" />
+          <field name="established_yr" />
+          <field name="acronym_system" />
+          <field name="csm_values" />
+          <field name="crossed_onshore" />
+          <field name="landmark_project" />
+          <field name="e_Gov_Award" />
+          <field name="certified_for_cmmi" />
+          <field name="csm_hockey_world_cup" />
+          <field name="handling_the_recruitment" />
+          <field name="heads_the_hr" />
+          <field name="hold_quality" />
+          <field name="transformation_framework" />
+
+        </tree>
+      </field>
+    </record>
+    <record id="kw_onboarding_induction_feedback_form" model="ir.ui.view">
+      <field name="name">kw_onboarding_induction_answer_form</field>
+      <field name="model">onboard_induction_answer_sheet</field>
+      <field name="type">form</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group>
+              <group string="HR Induction Assessment Form" width="60%" >
+                <field name="levels_hierarchy" string="1. How many levels are there in CSM’s Organizational hierarchy?"/>
+                <field name="many_departments" string="2. How many departments are there in CSM?"/>
+                <field name="procurement_division" string="3. Procurement Division comes under which Department?" />
+                <field name="attendance_procedure" string="4. Which attendance procedure is applicable for people working from Bhubaneswar City Office and Campus?" />
+                <field name="regular_shift" string="5. What is the Regular shift timing for CSM?" />
+                <field name="approves_leaves" string="6. Who approves your leaves?" />
+                <field name="is_en_cashable" string="7. Which Leave Type is en-cashable and can be carried forwarded to the next FY?" />
+                <field name="consecutive_medical_leaves" string="8. If you apply ___consecutive medical leaves, Medical certificate needs to be submitted in Tendrils" />
+                <field name="maternity_leave" string="9. The Maternity Leave will comprise of how many days of consecutive leave for women employees?" />
+                <field name="paternity_leave" string="10. Paternity leave/Maternity leave can be applied how many times in an employee’s total tenure?" />
+                <field name="special_leave" string="11. Special Leave can be taken for which reasons?"/>
+                <field name="tour_settlement" string="12. Tour Settlement to be done within how many days of return from Tour?"/>
+                <field name="fixed_holidays" string="13. CSM provides how many fixed holidays in a year?" />
+                <field name="amount_accidental" string="14. What is the total coverage amount for each employee under Accidental policy?" />
+                <field name="conducts_appraisals" string="15. In how many Intervals does CSM conducts Appraisals?" />
+                <field name="minimum_effort" string="16. What is the minimum effort hours per day to be filled in timesheet?" />
+                <field name="Salary_linked" string="17. Is salary linked with Attendance and Timesheet?" />
+                <field name="dress_code" string="18. Which dress code is to be followed from Monday to Thursday?" />
+                <field name="use_local_language" string="19. One can use Local Language in official meetings." />
+                <field name="how_many_days" string="20. We work for how many days a week?" />
+              </group>
+            </group>
+            <group>
+              <group string="IT Induction Assessment Form">
+                <field name="csm_firewall" string="CSM is using which of the below Firewall ?" />
+                <field name="iP_extension_phone" string=" While dialling a local mobile phone number  from IP/Extension Phone, use prefix ?" />
+                <field name="server_30" string="Server 30 is which of the below  folder ?"/>
+                <field name="server_9" string="Server 9 is which of the below folder ?" />
+                <field name="extension_number_it" string="What is the extension number of IT Helpdesk ?" />
+              </group>
+            </group>
+            <group string="Know Your Company Induction Assessment Form">
+              <field name="established_yr" string="When was CSM Tech established?" />
+              <field name="acronym_system" string="The acronym for our value system is:" />
+              <field name="csm_values" string="Which among the below is one of the CSM Values?" />
+              <field name="crossed_onshore" string="CSM crossed 100 onshore employees in which year?" />
+              <field name="landmark_project" string="In 2009, CSM launched a landmark project in the field of education for the Govt of Odisha. What was it?" />
+              <field name="e_Gov_Award" string="SAMS bagged an important award in the form of National e-Gov Award. Which year did it happen?"/>
+              <field name="certified_for_cmmi" string="CSM currently is certified with CMMI Level 5 v2.0. Which year did we get certified for CMMI Level 5?" />
+              <field name="csm_hockey_world_cup" string="The 2018 hockey world cup was special for the state of Odisha and for CSM too. What role did we play in the world cup?" />
+              <field name="handling_the_recruitment" string="Which department is responsible for handling the recruitment, and acts as a liaison between management and CSMers?" />
+              <field name="heads_the_hr" string="Who heads the HR department?" />
+              <field name="hold_quality" string="Which department ensures the solutions that go out of CSM hold their quality?" />
+              <field name="transformation_framework" string=" Our Digital Transformation Framework is also called the 3E framework. Evaluate &amp; Envisage, _____, and Evolve. What’s the missing ‘E’?" />
+            </group>
+            
+            
+          </sheet>
+        </form>
+      </field>
+    </record>
+    
+    <record model="ir.actions.act_window" id="onboarding_induction_feedback_answer_action_window">
+      <field name="name">Onboarding feedback Answer</field>
+      <field name="res_model">onboard_induction_answer_sheet</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_type">form</field>
+      <!-- <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_onboarding_induction_feedback.kw_feedback_page_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('kw_onboarding_induction_feedback.kw_onboarding_feedback_form')})]"/> -->
+      <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+            No settlement found...
+            </p>
+        </field>
+    </record>
+   
+
+
+   
+
+    <!-- actions opening views on models -->
+    
+    <record model="ir.actions.act_window" id="onboarding_induction_feedback_action_window">
+      <field name="name">Feedback &amp; Assessment</field>
+      <field name="res_model">kw_onboarding_feedback</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_type">form</field>
+      <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_onboarding_induction_feedback.kw_feedback_page_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('kw_onboarding_induction_feedback.kw_onboarding_feedback_form')})]"/>
+      <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+            No settlement found...
+            </p>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="kw_onboard_survey_type_action_window">
+      <field name="name">Survey Type Master</field>
+      <field name="res_model">onboard_survey_type_master</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+    <record model="ir.ui.view" id="kw_induction_feedback_list">
+      <field name="name">Induction list</field>
+      <field name="model">kw_employee_induction_assessment</field>
+      <field name="arch" type="xml">
+          <tree import="false" create="false">
+              <field name="emp_id" string="Name"/>
+              <field name="induction_id"/>
+              <field name="start_date_of"/>
+              <field name="end_date_of"/>
+              <field name="induction_id_name"/>
+          </tree>
+      </field>
+  </record>
+    <record id="view_kw_induction_feedback_form" model="ir.ui.view">
+      <field name="name">view.kw_employee_induction_assessment.form</field>
+      <field name="model">kw_employee_induction_assessment</field>
+      <field name="arch" type="xml">
+          <form create="false" delete="false">
+              <style>
+                  .o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 333px;}
+              </style>
+              <sheet>
+                  <group>
+                      <group string="Applicant Induction Details">
+                          <field name="emp_id" string="Name" options="{'no_open': True, 'no_create': True, 'no_edit': True}" readonly="1"/>
+                          <field name="onboarding_applicant_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}" force_save= "1" invisible="1"/>
+                          <field name="induction_id" widget="many2many_tags" readonly="1"/>
+                          <field name="start_date_of" readonly="1"/>
+                          <field name="end_date_of" readonly="1"/>
+                          <field name="assessment_type" invisible="0" readonly="1"/>
+                      </group>
+
+                  </group>
+                  <group>
+                      <group string="Induction Feedback">
+                          <table class="o_list_view table table-sm table-hover table-striped o_list_view_ungrouped">
+                              <thead>
+                                  <tr>
+                                      <th class="o_column_sortable" width="50%">Questions</th>
+                                      <th class="o_column_sortable" width="50%">Rating</th>
+                                      <th class="o_column_sortable" width="100%">Comments</th>
+                                  </tr>
+                              </thead>
+                              <tbody class="ui-sortable">
+                                  <tr>
+                                      <td scope="row">How would you rate the induction overall?</td>
+                                      <td> <field name="induction_rate_no" readonly="1"/> </td>
+                                      <td>
+                                          <field name='induction_rate' readonly="1"/>
+                                      </td>
+                                      
+                                  </tr>
+                                  <tr>
+                                      <td scope="row">Did it provide you with valuable information to help you do your job?</td>
+                                      <td><field name="valuable_info_no" readonly="1"/> </td>
+                                      <td>
+                                          <field name='valuable_info' readonly="1"/>
+                                      </td>
+                                  </tr>
+                                  <tr>
+                                      <td scope="row">Did it help you understand more about the organization?</td>
+                                      <td><field name="understand_organisation_no" readonly="1"/> </td>
+                                      <td>
+                                          <field name='understand_organisation' readonly="1"/>
+                                      </td>
+                                  </tr>
+                                  <tr>
+                                      <td scope="row">How was the presentation skill of the Inductor?</td>
+                                      <td><field name="skill_of_inductor_no" readonly="1"/> </td>
+                                      <td>
+                                          <field name='skill_of_inductor' readonly="1"/>
+                                      </td>
+                                  </tr>
+                                  <tr>
+                                      <td scope="row">Did the Inductor handle your queries properly?</td>
+                                      <td><field name="handel_queries_no" readonly="1"/> </td>
+                                      <td>
+                                          <field name='handel_queries' readonly="1"/>
+                                      </td>
+                                  </tr>
+                                  <tr>
+                                      <td scope="row">How would you rate the Indution coordinated for you?</td>
+                                      <td><field name="induction_coordinated_no" readonly="1"/> </td>
+                                      <td>
+                                          <field name='induction_coordinated' readonly="1"/>
+                                      </td>
+                                  </tr>
+                                  <tr>
+                                      <td></td>
+                                      <td></td>
+                                      <td></td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                      </group>
+                  </group>
+              </sheet>
+          </form>
+      </field>
+  </record>
+
+  <menuitem name="Assessment Details" id="induction_assessment_master_menu4"
+          parent="induction_master_menu"
+          action="kw_induction_assessment_action_window"
+          groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_manager,kw_onboarding_induction_feedback.group_kw_onboarding_induction_officer,kw_skill_assessment.group_kw_skill_assessment_manager'
+          sequence="5"/>
+
+  <record id="view_kw_induction_assessment_readonly_tree" model="ir.ui.view">
+      <field name="name">view.kw_employee_induction_assessment_user.tree</field>
+      <field name="model">kw_employee_induction_assessment</field>
+      <field name="type">tree</field>
+      <field name="mode">primary</field>
+      <field name="priority" eval="16" />
+      <field name="active" eval="True" />
+      <field name="arch" type="xml">
+          <tree create="false" edit="false" delete="false" import="false">
+              <field name="assessment_id" invisible="1"/>
+              <field name="emp_id"/>
+              <field name="user_has_given_assessment" invisible="1"/>
+              <field name="induction_id" />
+              <field name="assessment_type" />
+              <field name="test_type" />
+          </tree>
+      </field>
+  </record>
+
+  <record id="view_kw_induction_assessment_user_readonly_form" model="ir.ui.view">
+      <field name="name">view.induction_assessment_user.form</field>
+      <field name="model">kw_employee_induction_assessment</field>
+      <field name="type">form</field>
+      <field name="mode">primary</field>
+      <field name="priority" eval="16" />
+      <field name="active" eval="True" />
+      <field name="arch" type="xml">
+          <form create="false" edit="false" delete="false" duplicate="false">
+              <sheet>
+                  <group>
+                      <field name="emp_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                      <field name="assessment_type"/>
+                      <field name="test_type" invisible="1"/>
+                      <field name="start_date_of"/>
+                      <field name="end_date_of"/> 
+                      <field name="user_has_given_assessment" invisible="1"/>
+                      <field name="test_available" invisible="1"/>
+                      <!-- <field name="marks" attrs="{'invisible' : [('assessment_type','=','online')]}"/> -->
+
+                  </group>
+              </sheet>
+          </form>
+      </field>
+  </record>
+
+    <record id="kw_induction_feedback_action_window" model="ir.actions.act_window">
+      <field name="name">Induction Feedback of Employee</field>
+      <field name="res_model">kw_employee_induction_assessment</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_type">form</field>
+      <!-- <field name="search_view_id" ref="kw_onboarding_induction_feedback.kw_assessment_list_view_search"/> -->
+			<!-- <field name="context">{'search_default_emp_id':1}</field> -->
+      <field name="view_ids" eval="[(5, 0, 0),
+          (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_onboarding_induction_feedback.kw_induction_feedback_list')}),
+          (0, 0, {'view_mode': 'form', 'view_id': ref('kw_onboarding_induction_feedback.view_kw_induction_feedback_form')})]"/>
+      <field name="help" type="html">
+        <p class="oe_view_nocontent_create">
+            No data found
+        </p>
+      </field>
+    </record>
+   
+
+    
+    
+    <menuitem name="Feedback &amp; Assessment" id="onboarding_feedback_menu_root"
+              parent="kw_onboarding.kwonboard_onboard_parent_menu"
+              sequence="6"/>
+   
+    <!-- menu categories -->
+    
+    <menuitem name="Induction Form" id="onboarding_feedback_menu1" 
+              parent="onboarding_feedback_menu_root"
+              groups="kw_onboarding_induction_feedback.group_kw_onboarding_induction_officer,group_kw_onboarding_induction_manager,group_kw_onboarding_induction_user"
+              sequence="1"
+              action="onboarding_induction_feedback_action_window"/>
+    <menuitem name="Induction Type Master" id="onboarding_feedback_menu2" 
+              parent="onboarding_feedback_menu_root"
+              groups="group_kw_onboarding_induction_manager"
+              action="kw_onboarding_induction_feedback.kw_onboard_survey_type_action_window"
+              sequence="2"/>
+    <menuitem name="General Settings" id="onboarding_feedback_menu3" 
+              parent="onboarding_feedback_menu_root"
+              action="kw_onboard_induction_action"
+              groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_manager'
+              sequence="3"/>
+    <menuitem name="Tagged employee Induction Form" id="onboarding_feedback_menu4" 
+              parent="onboarding_feedback_menu_root"
+              action="kw_onboard_induction_tagged_action"
+              groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_manager,kw_onboarding_induction_feedback.group_kw_onboarding_induction_officer'
+              sequence="4"/>
+    <!-- <menuitem name="Induction Answer Form" id="onboarding_feedback_menu5" 
+              parent="onboarding_feedback_menu_root"
+              action="onboarding_induction_feedback_answer_action_window"
+              groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_manager,group_kw_onboarding_induction_officer'
+              sequence="5"/> -->
+
+    <menuitem name="Onboarding Induction" id="induction_master_menu"
+              parent="kw_skill_assessment.kw_assessment_parent_menu"
+              groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_manager,kw_onboarding_induction_feedback.group_kw_onboarding_induction_officer,kw_skill_assessment.group_kw_skill_assessment_manager,kw_skill_assessment.group_kw_skill_assessment_user'
+              sequence="7"/>
+    <menuitem name="Induction Type Master" id="induction_master_menu1"
+              parent="induction_master_menu"
+              action="kw_onboarding_induction_feedback.kw_skill_master_induction_action_window"
+              groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_manager,kw_onboarding_induction_feedback.group_kw_onboarding_induction_officer,kw_skill_assessment.group_kw_skill_assessment_manager'
+              sequence="1"/>
+    <menuitem name="Question Master" id="induction_question_master_menu2"
+                parent="induction_master_menu"
+                action="kw_onboarding_induction_feedback.kw_question_bank_master_induction_action_window"
+                groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_manager,kw_onboarding_induction_feedback.group_kw_onboarding_induction_officer,kw_skill_assessment.group_kw_skill_assessment_manager'
+                sequence="2"/>
+
+    <menuitem name="Induction Feedback" id="induction_feedback_master_menu"
+              parent="kw_skill_assessment.kw_assessment_parent_menu"
+              groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_manager,kw_onboarding_induction_feedback.group_kw_onboarding_induction_officer'
+              sequence="8"/>
+    <menuitem name="Feedback" id="induction_feedback_master_menu1"
+              parent="induction_feedback_master_menu"
+              action="kw_induction_feedback_action_window"
+              groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_manager,kw_onboarding_induction_feedback.group_kw_onboarding_induction_officer'
+              sequence="1"/>
+    
+    
+  </data>
+</odoo>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- kw_eos_checklist form view -->
+        <record id="kw_eos_checklist_view_form" model="ir.ui.view">
+            <field name="name">Apply EOS</field>
+            <field name="model">kw_eos_checklist</field>
+            <field name="priority" eval="245"/>
+            <field name="arch" type="xml">
+                <form string="EOS Checklist" create="false">
+                    <script>
+                        $(document).ready(function(){ 
+                            $('.o_form_button_edit').hide();
+                            $('.o_form_button_save').hide();
+                            $('.o_form_button_cancel').hide();
+                            $('.o_field_x2many_list_row_add').hide();
+                        });
+                    </script>
+                    <header>
+                        <button name="initiate_api_call" type="object" string="Apply" class="btn btn-success" attrs="{'invisible':[('pending_checklist','=', True)]}"/>
+                    </header>
+                    <sheet string="Existing Reporting Authority">
+                        <group>
+                            <field name="is_RA" invisible="1"/>
+                            <field name="user_id" invisible="1"/>
+
+                            <div style="font-weight:bold;color:red;text-align:right;font-size:16px;" attrs="{'invisible':[('pending_checklist','=', False)]}">You can't apply EOS due to the following reasons</div>
+                            <field name="display_name" invisible="1"/>
+                            <field name="eos_apply_for" widget="radio" options="{'horizontal': true}" />
+                            <!-- <field name="applicant_id" options="{'no_open': True,'no_create': True}" domain="[('parent_id.user_id.id','=',uid)]" attrs="{'invisible':[('eos_apply_for','=', 'self')]}"/> -->
+                            <field name="application_id" options="{'no_open': True,'no_create': True}" attrs="{'invisible':[('eos_apply_for','=', 'self')]}"/>
+                            <field name="applicant_id" options="{'no_open': True,'no_create': True}" invisible="1"/>
+                            <field name="pending_checklist" invisible="1"/>
+                            
+                            <field name="reason_ids" >
+                                <tree editable="bottom" delete="false" create="0">
+                                    <field name="name" />
+                                    <field name="status" />
+                                </tree>
+                            </field>
+                            <field name="activity_ids" >
+                                <tree editable="bottom" delete="false" create="0">
+                                    <field name="name" />
+                                    <field name="applied" />
+                                    <field name="pending" />
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <!-- model.name tree view -->
+       
+        <!-- kw_eos_checklist action window -->
+         <record id="eos_checklist_action" model="ir.actions.act_window">
+            <field name="name">Apply EOS</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kw_eos_checklist</field>
+            <field name="view_mode">form</field>
+            <field name="view_type">form</field>
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No records available
+                </p>
+            </field>
+        </record>
+
+
+        <record id="eos_take_action_action_menu" model="ir.actions.server">
+            <field name="name">Apply EOS</field>
+            <field name="model_id" ref="model_kw_eos_checklist" />
+            <field name="state">code</field>
+            <field name="code">
+                action = model.menu_render()
+            </field>
+        </record>
+        
+        <record id="kw_eos_checklist_validate_wizard" model="ir.ui.view">
+        <field name="name">Validation Error</field>
+        <field name="model">kw_eos_checklist</field>
+        <field name="priority" eval="90"/>
+        <field name="arch" type="xml">
+            <form create="false" edit="false">
+                <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                </script>
+                <sheet>
+                    <group>
+                        <p style="margin-left:200px;">You can apply for EOS only when you have applied Offboarding and it is Granted.</p>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+        </record>
+            <!-- <field name="code"> 
+if env.user.has_group('kw_eos.group_kw_eos_manager'):
+    view_id = env.ref('kw_eos_integrations.kw_eos_checklist_view_tree').id
+    form_view_id = env.ref('kw_eos.kw_eos_checklist_view_form').id
+    action = {
+        'name': 'EOS Apply',
+        'type': 'ir.actions.act_window',
+        'res_model': 'kw_eos_checklist',
+        'view_mode':  'tree,form',
+        'views': [(view_id, 'tree'),(form_view_id,'form')],
+    }
+else:
+    view_id = env.ref('kw_eos.kw_eos_checklist_view_form').id
+    action = {
+        'name': 'EOS Apply',
+        'type': 'ir.actions.act_window',
+        'res_model': 'kw_eos_checklist',
+        'view_mode':  'form',
+        'views': [(view_id, 'form')],
+        'context': {'default_applicant_id' : env.user.employee_ids.id},
+    }
+            </field> -->
+		    
+    </data>
+</odoo>

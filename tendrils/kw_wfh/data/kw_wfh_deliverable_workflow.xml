@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="kw_wfh_deliverables_workflow_main" model="odoo.workflow">
+            <field name="name">WFH Deliverables</field>
+            <field name="activities_add" eval="True"/>
+            <field name="followers_add" eval="False"/>
+            <field name="mail_thread_add" eval="True"/>
+            <field name="remove_default_attrs_mod" eval="False"/>
+            <field name="model_id" ref="kw_wfh.model_kw_wfh_deliverables"/>
+        </record>
+
+
+        <record id="kw_wfh_deliverables_workflow_node_1" model="odoo.workflow.node">
+            <field name="name">New</field>
+            <field name="workflow_id" ref="kw_wfh_deliverables_workflow_main"/>
+            <field name="node_name">assigned</field>
+            <field name="sequence" eval="1"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_start" eval="True"/>
+        </record>
+
+        <record id="kw_wfh_deliverables_workflow_node_2" model="odoo.workflow.node">
+            <field name="name">Inprogress</field>
+            <field name="workflow_id" ref="kw_wfh_deliverables_workflow_main"/>
+            <field name="node_name">inprogress</field>
+            <field name="sequence" eval="2"/>
+            <field name="is_visible" eval="True"/>
+        </record>
+        <record id="kw_wfh_deliverables_workflow_node_3" model="odoo.workflow.node">
+            <field name="name">Completed</field>
+            <field name="workflow_id" ref="kw_wfh_deliverables_workflow_main"/>
+            <field name="node_name">completed</field>
+            <field name="sequence" eval="3"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+        <record id="kw_wfh_deliverables_workflow_node_4" model="odoo.workflow.node">
+            <field name="name">Closed</field>
+            <field name="workflow_id" ref="kw_wfh_deliverables_workflow_main"/>
+            <field name="node_name">closed</field>
+            <field name="sequence" eval="4"/>
+            <field name="is_visible" eval="True"/>
+        </record>
+
+
+
+        <!-- <record id="kw_wfh_deliverables_workflow_button_1" model="odoo.workflow.node.button">
+            <field name="sequence" eval="1"/>
+            <field name="workflow_id" ref="kw_wfh_deliverables_workflow_main"/>
+            <field name="name">Assign Task</field>
+            <field name="node_id" ref="kw_wfh_deliverables_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('show_assign_btn','=',False),('state', '!=', 'assigned')]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+obj.assign_daily_task()       
+            </field>
+        </record> -->
+
+        <record id="kw_wfh_deliverables_workflow_button_2" model="odoo.workflow.node.button">
+            <field name="sequence" eval="2"/>
+            <field name="workflow_id" ref="kw_wfh_deliverables_workflow_main"/>
+            <field name="name">Submit Response</field>
+            <field name="node_id" ref="kw_wfh_deliverables_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|','|',('show_response_btn','=',False),('state', 'not in', ['assigned']),('emp_task','=',False)]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_wfh.kw_wfh_deliverable_wizard_view_form").id 
+action= {
+    'name':'Response',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_wfh_deliverables_wizard',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'view_id': form_view_id,
+    'target': 'new',
+    'context': {'default_deliverable_record_id': obj.id},
+    }
+            </field>
+        </record>
+
+    </data>
+</odoo>

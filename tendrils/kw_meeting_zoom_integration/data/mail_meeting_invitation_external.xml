@@ -1,0 +1,465 @@
+<?xml version="1.0"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="kw_meeting_calendar_template_meeting_invitation_external_zoom" model="mail.template">
+            <field name="name">Calendar: Meeting Invitation</field>
+            <field name="model_id" ref="kw_meeting_schedule.model_kw_meeting_external_participants"/>
+            <field name="subject">Meeting Scheduled for ${object.meeting_id.name} by ${object.meeting_id.user_id.name} | ${object.meeting_id.display_time}</field>
+            <field name="email_from">${object.create_uid.email}</field>
+            <field name="email_to" >${(False if object.partner_id and object.partner_id.email and object.partner_id.email==object.email else object.email|safe)}</field>
+            <field name="partner_to">${object.partner_id and object.partner_id.email and object.partner_id.email==object.email and object.partner_id.id or False }</field>
+            <field name="lang">${object.partner_id.lang}</field>
+            <field name="body_html" type="html">
+		        <span>
+					% set colors = {'needsAction': 'grey', 'accepted': 'green', 'tentative': '#FFFF00',  'declined': 'red'}
+					<table border="0">
+						<tr>
+							<td>
+								<div style="margin-left: 1.2rem;">
+									<h5 style="font-weight: 400;margin-bottom: 0;font-size: 18px;color:#676767;">
+										<span style="color:rgb(22, 123, 158);font-size: 18px;margin-right: 2px;font-weight: 600;">Hello</span>
+										${object.partner_id.name},
+									</h5>
+									<p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 17px;">
+										${object.meeting_id.user_id.partner_id.name} invited you for the
+										<strong>${object.meeting_id.name}</strong>
+										meeting.
+									</p>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>
+
+								<div style="margin:0 20px;padding:20px 0 0px 0;">
+									<h2 style="font-size: 2rem;font-weight: unset;color: #444141;">
+										Meeting Details
+									</h2>
+								</div>
+
+								<table border="0" style="border-collapse: collapse;font-size: 16px;">
+									<tr>
+										<td style="padding-left: 20px;height: 50px;"
+										    width="200px">
+											Where
+										</td>
+										<td style="color:#167b9e;height: 50px;">
+											% if object.meeting_id.meeting_room_id:
+												${object.meeting_id.meeting_room_id.name}
+												% if object.meeting_id.meeting_room_id.floor_name:
+													(${object.meeting_id.meeting_room_id.floor_name})
+												% endif
+											% else:
+												Virtual
+											% endif
+										</td>
+									</tr>
+									% if not object.meeting_id.recurrency:
+									<tr>
+										<td style="padding-left: 20px;height: 50px;"
+										    width="200px">
+											When
+										</td>
+										<td style="color:#167b9e;height: 50px;">
+	                                    	${object.meeting_id.get_interval('dayname', tz=object.partner_id.tz if not object.meeting_id.allday else None)}
+											${object.meeting_id.get_interval('day', tz=object.partner_id.tz if not object.meeting_id.allday else None)}
+											${object.meeting_id.get_interval('month', tz=object.partner_id.tz if not object.meeting_id.allday else None)},
+											At:
+											${not object.meeting_id.allday and object.meeting_id.get_interval('time', tz=object.partner_id.tz) or ''}
+										</td>
+									</tr>
+									% endif
+									% if object.meeting_id.agenda_ids:
+									<tr>
+										<td style="padding-left: 20px;height: 50px;"
+										    width="200px">
+											Agenda
+										</td>
+										<td style="color:#167b9e;height: 50px;">
+											
+											% for agenda in object.meeting_id.agenda_ids:
+											    <li>${agenda.name}</li>
+											% endfor
+											
+										</td>
+									</tr>
+									% endif
+									% if object.meeting_id.description:
+									<tr>
+										<td style="padding-left: 20px;height: 50px;"
+										    width="200px">
+											Required Information
+										</td>
+										<td style="color:#167b9e;height: 50px;">
+											% if object.meeting_id.description:
+												${object.meeting_id.description}
+											% endif
+										</td>
+									</tr>
+									% endif
+									% if object.meeting_id.recurrency:
+									<tr>
+										<td style="padding-left: 20px;height: 50px;"
+										    width="200px">
+											Meeting Date
+										</td>
+										<td style="color:#167b9e;height: 50px;">
+											<ul style="list-style-type:disc">
+												% for recurring_event in object.meeting_id.child_ids:
+													<li>${recurring_event.display_time}</li>
+												% endfor
+											</ul>
+										</td>
+									</tr>
+									% endif
+									% if not object.meeting_id.allday and object.meeting_id.duration:
+									<tr>
+										<td style="padding-left: 20px;height: 50px;"
+										    width="200px">
+											Duration
+										</td>
+										<td style="color:#167b9e;height: 50px;">
+											 ${('%dH:%dM' % (object.meeting_id.duration,(object.meeting_id.duration*60)%60))}
+										</td>
+									</tr>
+									% endif
+									% if object.meeting_id.mom_required:
+									<tr>
+										<td style="padding-left: 20px;height: 50px;"
+										    width="200px">
+											MoM Controller
+										</td>
+										<td style="color:#167b9e;height: 50px;">
+											${object.meeting_id.mom_controller_id.name}
+										</td>
+									</tr>
+									% endif
+									<tr t-if="object.meeting_id.attendee_ids">
+										<td style="padding-left: 20px;height: 60px;"
+										    width="200px">
+											Attendees
+										</td>
+										<td style="color:#167b9e;height: 50px;">
+											% for attendee in object.meeting_id.attendee_ids:
+													${attendee.common_name},
+											% endfor
+										</td>
+									</tr>
+									% if object.meeting_id.external_attendee_ids:
+									<tr>
+										<td style="padding-left: 20px;height: 50px;vertical-align: text-top;"
+										    width="200px">
+											External Participants
+										</td>
+										<td style="color:#167b9e;height: 50px;">
+											% for ext_attendee in object.meeting_id.external_attendee_ids:
+												${ext_attendee.partner_id.name} ${ext_attendee.partner_id.mobile_no},
+											% endfor
+										</td>
+									</tr>
+									% endif
+									 % if object.meeting_id.mpin:
+	                                      <tr>
+	                                          <td style="padding-left: 20px;height: 50px;vertical-align: text-top;"
+										    width="200px"> Mpin</td>
+	                                          <td style="color:#167b9e;height: 50px;">
+	                                            ${object.meeting_id.mpin}
+	                                          </td>
+	                                      </tr>
+									% endif
+								</table>
+							</td>
+
+						</tr>
+						<tr>
+							<td>
+								<table border="0" style="width: 100%;">
+									<tr>
+										<td style="padding-left: 20px;">
+											<a style="padding: .5rem 3rem;border-radius: .2em;border: none;color: #fff;background-color: #30a20f;font-size: 16px;margin-top: 1.5rem;display:inline-block;white-space: nowrap;text-decoration: NONE;"
+											   href="/meeting_schedule/meeting/accept?db=${'dbname' in ctx and ctx['dbname'] or ''}&amp;token=${object.access_token}&amp;action=${'action_id' in ctx and ctx['action_id'] or ''}&amp;id=${object.meeting_id.id}">
+												Accept
+											</a>
+										</td>
+										<td>
+											<a style="padding: .5rem 3rem;border-radius: .2em;border: none;color: #fff;background-color: #656565;font-size: 16px;margin-top:1.5rem;display:inline-block;white-space: nowrap;text-decoration: NONE;"
+											    href="/meeting_schedule/meeting/decline?db=${'dbname' in ctx and ctx['dbname'] or '' }&amp;token=${object.access_token}&amp;action=${'action_id' in ctx and ctx['action_id'] or ''}&amp;id=${object.meeting_id.id}">
+												Decline
+											</a>
+										</td>
+										<td>
+											<a style="padding: .5rem 3rem;border-radius: .2em;border: none;color: #fff;background-color: #098bb9;font-size: 16px;margin-top: 1.5rem;display:inline-block;white-space: nowrap;text-decoration: NONE;"
+											   href="/meeting_schedule/meeting/view?db=${'dbname' in ctx and ctx['dbname'] or ''}&amp;token=${object.access_token}&amp;action=${'action_id' in ctx and ctx['action_id'] or ''}&amp;id=${object.meeting_id.id}">
+												View
+											</a>
+										</td>
+										 % if object.meeting_id.online_meeting_join_url:
+										<td>
+											<a style="padding: .5rem 4rem;border-radius: .2em;border: none;color: #fff;background-color:#d71828;font-size: 16px;margin-top: 1.5rem;display:inline-block;white-space: nowrap;text-decoration: NONE;"
+											   href="${object.meeting_id.online_meeting_join_url}">
+												Join Online Meeting
+											</a>
+										</td>
+										% endif
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<div style="margin:0 20px;padding:20px 0 0px 0;">
+									<p>Thank You.</p>
+									% if object.meeting_id.user_id and object.meeting_id.user_id.signature:
+										<p>${object.meeting_id.user_id.signature | safe}</p>
+									% endif
+								</div>
+							</td>
+						</tr>
+					</table>
+					
+				</span>
+            </field>
+            <field name="auto_delete" eval="False"/>
+            <field name="user_signature" eval="False"/>
+        </record>
+
+
+        <record id="kw_meeting_calendar_template_meeting_dataupdate_external_zoom" model="mail.template">
+            <field name="name">Calendar: Data updated</field>
+            <field name="model_id" ref="kw_meeting_schedule.model_kw_meeting_external_participants"/>
+            <field name="subject">${('Meeting Cancelled' if object.meeting_id.state == 'cancelled' else 'Meeting Information Modified')} for ${object.meeting_id.name} scheduled by ${object.meeting_id.user_id.name} </field>
+            <field name="email_from">${object.create_uid.email}</field>
+            <field name="email_to" >${(False if object.partner_id and object.partner_id.email and object.partner_id.email==object.email else object.email|safe)}</field>
+            <field name="partner_to">${object.partner_id and object.partner_id.email and object.partner_id.email==object.email and object.partner_id.id or False }</field>
+            <field name="lang">${object.partner_id.lang}</field>
+            <field name="body_html" type="html">
+            <span>
+				% set colors = {'needsAction': 'grey', 'accepted': 'green', 'tentative': '#FFFF00',  'declined': 'red'}
+				<table border="0">
+					<tr>
+						<td>
+							<div style="margin-left: 1.2rem;">
+								<h5 style="font-weight: 400;margin-bottom: 0;font-size: 18px;color:#676767;">
+									<span style="color:rgb(22, 123, 158);font-size: 18px;margin-right: 2px;font-weight: 600;">Hello</span>
+									${object.partner_id.name},
+								</h5>
+								<p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 17px;">
+								% if object.meeting_id.state == 'cancelled':
+                    The meeting ${object.meeting_id.name} created by ${object.meeting_id.user_id.partner_id.name} scheduled
+                    for ${object.meeting_id.get_display_time_tz(tz=object.partner_id.tz)} has been cancelled.
+                    Please click on below view button to view meeting details.
+                    <br/>
+                    Reason of Cancellation: ${object.meeting_id.meeting_cancel_reason}
+                % else:
+                    Few information of the meeting have been updated for ${object.meeting_id.name} created
+                    by ${object.meeting_id.user_id.partner_id.name} scheduled for ${object.meeting_id.get_display_time_tz(tz=object.partner_id.tz)}.
+                    Please click on below view button to view meeting details.
+                % endif   
+								</p>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+
+							<div style="margin:0 20px;padding:20px 0 0px 0;">
+								<h2 style="font-size: 2rem;font-weight: unset;color: #444141;">
+									Meeting Details
+								</h2>
+							</div>
+
+							<table border="0" style="border-collapse: collapse;font-size: 16px;">
+								% if object.meeting_id.meeting_room_id:
+								<tr>
+									<td style="padding-left: 20px;height: 50px;"
+									    width="200px">
+										Where
+									</td>
+									<td style="color:#167b9e;height: 50px;">
+										% if object.meeting_id.meeting_room_id:
+											${object.meeting_id.meeting_room_id.name}
+											% if object.meeting_id.meeting_room_id.floor_name:
+												(${object.meeting_id.meeting_room_id.floor_name})
+											% endif
+										% else:
+											Virtual
+										% endif
+									</td>
+								</tr>
+                                % endif
+								% if not object.meeting_id.recurrency:
+								 <tr>
+									<td style="padding-left: 20px;height: 50px;"
+									    width="200px">
+										When
+									</td>
+									<td style="color:#167b9e;height: 50px;">
+										${object.meeting_id.get_interval('dayname', tz=object.partner_id.tz if not object.meeting_id.allday else None)}
+										${object.meeting_id.get_interval('day', tz=object.partner_id.tz if not object.meeting_id.allday else None)}
+										${object.meeting_id.get_interval('month', tz=object.partner_id.tz if not object.meeting_id.allday else None)},
+										At:
+										${not object.meeting_id.allday and object.meeting_id.get_interval('time', tz=object.partner_id.tz) or ''}
+									</td>
+								</tr>
+								% endif
+								% if object.meeting_id.agenda_ids:
+								<tr>
+									<td style="padding-left: 20px;height: 50px;"
+									    width="200px">
+										Agenda
+									</td>
+
+									<td style="color:#167b9e;height: 50px;">
+										
+										% for agenda in object.meeting_id.agenda_ids:
+											<li>${agenda.name}</li>
+										% endfor
+										
+									</td>
+								</tr>
+								% endif
+								% if object.meeting_id.description:
+								<tr>
+									<td style="padding-left: 20px;height: 50px;"
+									    width="200px">
+										Required Information
+									</td>
+									<td style="color:#167b9e;height: 50px;">
+										% if object.meeting_id.description:
+											${object.meeting_id.description}
+										% endif
+									</td>
+								</tr>
+								% endif
+								% if object.meeting_id.recurrency:
+								<tr>
+									<td style="padding-left: 20px;height: 50px;"
+									    width="200px">
+										Meeting Date
+									</td>
+									<td style="color:#167b9e;height: 50px;">
+										<ul style="list-style-type:disc">
+											% for recurring_event in object.meeting_id.child_ids:
+												<li>${recurring_event.display_time}</li>
+											% endfor
+										</ul>
+									</td>
+								</tr>
+								% endif
+								% if not object.meeting_id.allday and object.meeting_id.duration:
+								<tr>
+									<td style="padding-left: 20px;height: 50px;"
+									    width="200px">
+										Duration
+									</td>
+									<td style="color:#167b9e;height: 50px;">
+										 ${('%dH:%dM' % (object.meeting_id.duration,(object.meeting_id.duration*60)%60))}
+									</td>
+								</tr>
+								% endif
+								% if object.meeting_id.mom_required:
+								<tr>
+									<td style="padding-left: 20px;height: 50px;"
+									    width="200px">
+										MoM Controller
+									</td>
+									<td style="color:#167b9e;height: 50px;">
+										${object.meeting_id.mom_controller_id.name}
+									</td>
+								</tr>
+								% endif
+								<tr t-if="object.meeting_id.attendee_ids">
+									<td style="padding-left: 20px;height: 50px;"
+									    width="200px">
+										Attendees
+									</td>
+									<td style="color:#167b9e;height: 50px;">
+										% for attendee in object.meeting_id.attendee_ids:
+												${attendee.common_name},
+                    					% endfor
+									</td>
+								</tr>
+								% if object.meeting_id.external_attendee_ids:
+								<tr>
+									<td style="padding-left: 20px;height: 50px;vertical-align: text-top;"
+									    width="200px">
+										External Participants
+									</td>
+									<td style="color:#167b9e;height: 50px;">
+										% for ext_attendee in object.meeting_id.external_attendee_ids:
+											${ext_attendee.partner_id.name} ${ext_attendee.partner_id.mobile_no},
+										% endfor
+									</td>
+								</tr>
+								% endif
+								% if object.meeting_id.mpin:
+                                      <tr>
+                                          <td style="padding-left: 20px;height: 50px;vertical-align: text-top;"
+									    width="200px">> Mpin</td>
+                                          <td style="color:#167b9e;height: 50px;">
+                                            ${object.meeting_id.mpin}
+                                          </td>
+                                      </tr>
+								% endif
+							</table>
+						</td>
+
+					</tr>
+					<tr>
+						<td>
+							<table border="0" style="width: 100%;">
+								<tr>
+									% if object.meeting_id.state != 'cancelled':
+									<td style="padding-left: 20px;">
+										<a style="padding: .5rem 3rem;border-radius: .2em;border: none;color: #fff;background-color: #30a20f;font-size: 16px;margin-top: 1.5rem;display:inline-block;white-space: nowrap;text-decoration: NONE;"
+										   href="/meeting_schedule/meeting/accept?db=${'dbname' in ctx and ctx['dbname'] or ''}&amp;token=${object.access_token}&amp;action=${'action_id' in ctx and ctx['action_id'] or ''}&amp;id=${object.meeting_id.id}">
+											Accept
+										</a>
+									</td>
+									<td>
+										<a style="padding: .5rem 3rem;border-radius: .2em;border: none;color: #fff;background-color: #656565;font-size: 16px;margin-top:1.5rem;display:inline-block;white-space: nowrap;text-decoration: NONE;"
+										    href="/meeting_schedule/meeting/decline?db=${'dbname' in ctx and ctx['dbname'] or '' }&amp;token=${object.access_token}&amp;action=${'action_id' in ctx and ctx['action_id'] or ''}&amp;id=${object.meeting_id.id}">
+											Decline
+										</a>
+									</td>
+									% endif
+									<td>
+										<a style="padding: .5rem 3rem;border-radius: .2em;border: none;color: #fff;background-color: #098bb9;font-size: 16px;margin-top: 1.5rem;display:inline-block;white-space: nowrap;text-decoration: NONE;"
+										   href="/meeting_schedule/meeting/view?db=${'dbname' in ctx and ctx['dbname'] or ''}&amp;token=${object.access_token}&amp;action=${'action_id' in ctx and ctx['action_id'] or ''}&amp;id=${object.meeting_id.id}">
+											View
+										</a>
+									</td>
+									% if object.meeting_id.online_meeting_join_url:
+										%if object.meeting_id.state != 'cancelled':
+									<td>
+										<a style="padding: .5rem 4rem;border-radius: .2em;border: none;color: #fff;background-color:#d71828;font-size: 16px;margin-top: 1.5rem;display:inline-block;white-space: nowrap;text-decoration: NONE;"
+										   href="${object.meeting_id.online_meeting_join_url}">
+											Join Online Meeting
+										</a>
+									</td>
+										% endif
+									% endif
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div style="margin:0 20px;padding:20px 0 0px 0;">
+								<p>Thank You.</p>
+									% if object.meeting_id.user_id and object.meeting_id.user_id.signature:
+										<p>${object.meeting_id.user_id.signature | safe}</p>
+									% endif
+							</div>
+						</td>
+					</tr>
+				</table>
+				
+	        </span>
+            </field>
+            <field name="auto_delete" eval="False"/>
+            <field name="user_signature" eval="False"/>
+        </record>
+    </data>
+</odoo>

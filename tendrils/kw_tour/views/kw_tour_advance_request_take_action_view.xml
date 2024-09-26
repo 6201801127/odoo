@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="view_kw_tour_advance_request_take_action_tree" model="ir.ui.view">
+            <field name="name">view.kw_tour_advance_request_take_action.tree</field>
+            <field name="model">kw_tour_advance_request</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <tree create="false" import="false" delete="false">
+                    <field name="state" invisible="1"/>
+                    <field name="code" />
+                    <field name="tour_id"/>
+                    <field name="job_id"/>
+                    <field name="dept_id"/>
+                    
+                    <field name="tour_type_id"/>
+                    <field name="date_travel"/>
+                    <field name="date_return"/>
+                   
+                    <field name="city_id"/>
+                    <field name="request_inr"/>
+                    <field name="request_usd"/>
+                    
+                    <button name="take_action" string="Take Action" class="oe_highlight " type="object"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_kw_tour_advance_request_take_action_form" model="ir.ui.view">
+            <field name="name">view.kw_tour_advance_request.form</field>
+            <field name="model">kw_tour_advance_request</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <form create="false" import="false" delete="false" duplicate="false">
+                    <script>
+                        $(document).ready(function(){
+                            $(".modal-title").show();
+                        });
+                    </script>
+                    <header>
+                        <field name="state"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="ra_access" invisible="1"/>
+                                <field name="code" />
+                                <field name="tour_id" options="{'no_edit': True,'no_open':True,'no_create':True}" readonly="1"/>
+                                <field name="tour_type_id" options="{'no_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="purpose"/>
+                                <field name="date_travel"/>
+                                <field name="city_id" options="{'no_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="date_return"/>
+                                <field name="travel_arrangement"/>
+                            </group>
+                            <group >
+                                <field name="tour_detail_ids">
+                                    <tree >
+                                        <field name="from_date"/>
+                                        <field name="from_city_id"/>
+                                        <field name="to_date" />
+                                        <field name="to_city_id"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            <group >
+                                <field name="travel_expense_details_ids">
+                                    <tree editable="bottom" delete="false" create="false">
+                                        <field name="expense_id" style="pointer-events:none;"/>
+                                        <field name="no_of_night_inr" style="pointer-events:none;"/>
+                                        <field name="amount_domestic" style="pointer-events:none;" sum="Total(INR)"/>
+                                        <field name="no_of_night_usd" style="pointer-events:none;"/>
+                                        <field name="amount_international" style="pointer-events:none;" sum="Total(USD)"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            <group>
+                                <field name="ancillary_expense_ids">
+                                    <tree>
+                                        <field name="ancillary_expense_id"/>
+                                        <field name="amount"/>
+                                        <field name="currency_id"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            <group  string="Advance Disbursed Log">
+                                <field name="advance_ids" readonly="1" nolabel="1">
+                                <tree>
+                                    <field name="create_date" string="Date"/>
+                                    <field name="create_uid" string="Disbursed By"/>
+    
+                                    <field name="disbursed_amount_inr"/>
+                                   
+                                    <field name="disbursed_amount_usd"/>
+                                        
+                                    <field name="exchange_rate"/>
+                                </tree>
+                                </field>
+                            </group>
+                            <group string="Advance Deatils">
+                                <field name="can_apply_inr" invisible="1"/>
+                                <field name="can_apply_usd" invisible="1"/>
+
+                                <field name="disbursed_inr" attrs="{'invisible':[('can_apply_inr','=',False)]}"/>
+
+                                <field name="request_inr" 
+                                attrs="{'readonly':[('state','=','Approved')],
+                                    'invisible':[('can_apply_inr','=',False)],'required':[('can_apply_inr','=',True)]}"/>
+
+                                <field name="to_be_given_inr" attrs="{'invisible':['|',('state','=','Applied'),('can_apply_inr','=',False)],
+                                'required':[('can_apply_inr','=',True),('state','=','Approved')]}"/>
+
+                                <field name="disbursed_usd" attrs="{'invisible':[('can_apply_usd','=',False)]}"/>
+
+                                <field name="request_usd" attrs="{'readonly':[('state','=','Approved')],'invisible':[('can_apply_usd','=',False)],'required':[('can_apply_usd','=',True)]}"/>
+
+                                <field name="to_be_given_usd" attrs="{'invisible':['|',('state','=','Applied'),('can_apply_usd','=',False)], 
+                                'required':[('can_apply_usd','=',True),('state','=','Approved')]}"/>
+
+                                <field name="new_exchange_rate" string="Exchange Rate" attrs="{'invisible':['|',('state','=','Applied'),('can_apply_usd','=',False)], 
+                                'required':[('can_apply_usd','=',True),('state','=','Approved')]}" />
+
+                            </group>
+                            
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_kw_tour_advance_request_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Take Action</field>
+            <field name="res_model">kw_tour_advance_request</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>
+            <field name="domain">[]</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('view_kw_tour_advance_request_take_action_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('view_kw_tour_advance_request_take_action_form')})]"/>
+            <field name="context">{'access_check':1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                No Advance Request found...
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="kw_tour_advance_request_menu" name="Take Action" 
+        parent="kw_tour_advance" sequence="1" 
+        action="action_kw_tour_advance_request_act_window"/>
+        
+    </data>
+</odoo>

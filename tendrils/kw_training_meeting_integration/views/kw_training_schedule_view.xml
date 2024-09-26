@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="kw_training_schedule_tree_meeting_integration" model="ir.ui.view">
+            <field name="inherit_id" ref="kw_training.kw_training_schedule_tree" />
+            <field name="model">kw_training_schedule</field>
+            <field name="arch" type="xml">
+
+                <xpath expr="//button[@name='schedule_meeting']" position="replace">
+                <field name="meeting_id" invisible="1"/>
+                <field name="time_mismatch" invisible="1"/>
+
+                    <button name="schedule_meeting" string="Book Meeting" type="object" class="oe_highlight" 
+                    context="{'default_schedule_id': active_id,'default_training_id':training_id}" 
+                    attrs="{'invisible': ['|','|',('meeting_id', '!=', False),('session_type','in',['outside','online']),('meeting_time_over','=',True)]}"/>
+
+                    <button name="schedule_meeting" string="Reschedule Meeting" type="object"
+                    class="oe_highlight" attrs="{'invisible': [('time_mismatch', '=', False)]}"/>
+                    
+                </xpath>
+
+                <xpath expr="//button[@name='view_meeting']" position="replace">
+                    <button name="view_meeting" string="Meeting" type="object" class="oe_highlight" 
+                    attrs="{'invisible': ['|','|',('meeting_id', '=', False),('meeting_time_over','=',True),('time_mismatch', '=', True)]}"/>
+                </xpath>
+
+                <xpath expr="//button[@name='view_attendance']" position="after">
+                    <field name="online_meeting" invisible="1"/>
+                    <field name="is_create_user" invisible="1"/>
+                    <field name="participant_meeting" invisible="1"/>
+                    <field name="disable_meeting" invisible="1"/>
+
+                    <!-- <button class="btn btn-md btn-primary ml-2" type="object" name="action_start_online_meeting" string="Start Online Meeting" 
+                    attrs="{'invisible':['|','|','|',('is_create_user','=',False),('online_meeting', '=', False),('disable_meeeting','=', True),('participant_meeeting','=', False)]}"/> -->
+
+                    <!-- <button class="btn btn-sm btn-warning ml-2" type="object" name="action_join_meeting" string="Join Online Training" 
+                    attrs="{'invisible':['|','|','|',('is_create_user','=',True),('online_meeting', '=', False),
+                    ('disable_meeeting','=', True),('participant_meeeting','=', False)]}"/> -->
+
+                </xpath>
+
+                <xpath expr="//button[@name='view_attendance']" position="replace">
+                    <button name="view_attendance" string="Update Attendance" type="object" class="oe_highlight" 
+                    attrs="{'invisible': ['|',('meeting_time_over','=',False),('time_mismatch', '=', True)]}"/>
+                </xpath>
+
+
+            </field>
+        </record>
+        
+
+        <record id="view_kw_training_schedule_kanban_meeting_integration" model="ir.ui.view">
+            <field name="model">kw_training_schedule</field>
+            <field name="inherit_id" ref="kw_training.view_kw_training_schedule_kanban" />
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='schedule_meeting']" position="after">
+                    <field name="online_meeting" invisible="1"/>
+                    <field name="is_create_user" invisible="1"/>
+                    <field name="participant_meeting" invisible="1"/>
+                    <field name="disable_meeting" invisible="1"/>
+
+                    <t t-if="record.online_meeting.raw_value!=false">
+                        <!-- <div class="pull-right"> -->
+                            <!-- <div t-if="record.disable_meeting.raw_value==true"> -->
+                        <button class="btn btn-warning m-2" attrs="{'invisible': [('disable_meeting','=',False)]}"
+                                name="action_join_online_meeting" 
+                                type="object">
+                                    Join Online Training
+                        </button>
+                            <!-- </div> -->
+                        <!-- </div> -->
+                    </t>
+                </xpath>
+                
+                <xpath expr="//button[@name='schedule_meeting']" position="replace">
+                    <field name="meeting_id" invisible="1"/>
+                     <button name="manage_meeting" type="object" 
+                     context="{'default_schedule_id': active_id}" 
+                    attrs="{'invisible': [('session_type','=','outside')]}" 
+                    class="btn btn-primary"> Manage Meeting </button>
+                </xpath>
+                
+                <!-- <xpath expr="//button[@name='view_meeting']" position="replace">
+                    <field name="time_mismatch" invisible="1"/>
+                    <button name="view_meeting" type="object" 
+                    attrs="{'invisible': ['|','|',('meeting_id', '=', False),('meeting_time_over','=',True),('time_mismatch','=',True)]}" class="btn btn-primary"> Meeting </button>
+                    <button name="schedule_meeting" type="object" 
+                    attrs="{'invisible': [('time_mismatch', '=', False)]}" class="btn btn-primary">Reschedule Meeting </button>
+                </xpath> -->
+
+                <xpath expr="//button[@name='view_attendance']" position="replace">
+                    <field name="time_mismatch" invisible="1"/>
+
+				    <button name="view_attendance" type="object" class="btn btn-primary" 
+                    attrs="{'invisible': ['|',('meeting_time_over','=',False),('time_mismatch', '=', True)]}">
+                        Update Attendance
+                    </button>                                 
+               </xpath>
+               
+               <xpath expr="//field[@name='to_time']" position="after">
+                    <field name="venue"/>
+                </xpath>
+               <xpath expr="//div[hasclass('col-sm-12')]/field[@name='to_time']" position="after">
+                   <br/>
+                   <t t-if="record.venue.raw_value">
+                        <span class="font-weight-bold fa fa-info-circle mb-2" aria-label="Venue" title="Venue"/>
+					    &amp;nbsp; <b> Venue: </b> <field name="venue"/>
+                    </t>
+               </xpath>
+                
+            </field>
+        </record>
+        
+        <record id="view_kw_training_schedule_form_meeting_integration" model="ir.ui.view">
+            <field name="name">view.kw_training_schedule.form.meeting_integration</field>
+            <field name="model">kw_training_schedule</field>
+             <field name="inherit_id" ref="kw_training.kw_training_schedule_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='session_type']" position="replace">
+                    <field name="meeting_id" invisible="1"/>
+                    <field name="session_type"
+                    attrs="{'readonly' : [('meeting_id', '!=', False)]}"/>
+                </xpath>
+                <field name="date" position="replace">
+                    <field name="date" attrs="{'readonly' : [('meeting_id', '!=', False)]}"/>
+                </field>
+                <field name="from_time" position="replace">
+                    <field name="from_time" attrs="{'readonly' : [('meeting_id', '!=', False)]}"/>
+                </field>
+                <field name="to_time" position="replace">
+                    <field name="to_time" attrs="{'readonly' : [('meeting_id', '!=', False)]}"/>
+                </field>
+            </field>
+        </record>
+        
+        
+
+        <record id="kw_training_schedule_view_only_kanban_meeting_integration" model="ir.ui.view">
+            <field name="model">kw_training_schedule</field>
+            <field name="inherit_id" ref="kw_training.kw_training_schedule_view_only_kanban"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//div[hasclass('training_button_section')]" position="inside">
+                    <field name="online_meeting" invisible="1"/>
+                    <t t-if="record.online_meeting.raw_value!=false">
+                        <field name="is_create_user" invisible="1"/>
+                        <field name="participant_meeting" invisible="1"/>
+                        <field name="disable_meeting" invisible="1"/>
+                        <div class="pull-right">
+                            <div t-if="record.disable_meeting.raw_value==true">
+                                <button class="btn btn-md btn-warning mt-2" 
+                                name="action_join_online_meeting" type="object">
+                                    Join Online Training
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+                </xpath>
+
+                <xpath expr="//field[@name='to_time']" position="after">
+                    <field name="venue"/>
+                </xpath>
+                <xpath expr="//div[hasclass('col-sm-7')]/field[@name='to_time']" position="after">
+                   <br/>
+                    <t t-if="record.venue.raw_value">
+                        <span class="font-weight-bold fa fa-info-circle mb-2" aria-label="Venue" title="Venue" />
+					    &amp;nbsp; <b> Venue: </b>
+                        <field name="venue"/>
+                    </t>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="kw_training_schedule_view_only_kanban_trainer_meeting_integration" model="ir.ui.view">
+            <field name="model">kw_training_schedule</field>
+            <field name="inherit_id" ref="kw_training.kw_training_schedule_view_only_kanban_trainer" />
+            <field name="arch" type="xml">
+                <xpath expr="//div[hasclass('training_button_section')]" position="inside">
+                    <field name="online_meeting" invisible="1"/>
+                    <t t-if="record.online_meeting.raw_value!=false">
+                        <field name="is_create_user" invisible="1"/>
+                        <field name="participant_meeting" invisible="1"/>
+                        <field name="disable_meeting" invisible="1"/>
+                        <div class="pull-right">
+                            <div t-if="record.disable_meeting.raw_value==true">
+                                <button class="btn btn-md btn-warning mt-2" 
+                                name="action_join_online_meeting" type="object">
+                                Join Online Training
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+                </xpath>
+
+                <xpath expr="//field[@name='to_time']" position="after">
+                    <field name="venue"/>
+                </xpath>
+                <xpath expr="//div[hasclass('col-sm-12')]/field[@name='to_time']" position="after">
+                    <br/>
+                    <t t-if="record.venue.raw_value">
+                        <span class="font-weight-bold fa fa-info-circle mb-2" aria-label="Venue" title="Venue"/>
+					    &amp;nbsp; <b> Venue: </b>
+                        <field name="venue"/>
+                    </t>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,664 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+        <!-- Employee-Self Report  -->
+        <record model="ir.ui.view" id="kw_wfh_emp_report_tree">
+            <field name="name">kw_wfh_emp_report.tree</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <tree import='false' default_order='create_date desc' create='false' edit='false' delete='false'>
+                    <field name="ref_no"/>
+                    <field name="employee_id"/>
+                    <field name="job_id"/>
+                    <field name="req_department_id"/>
+                    <field name="req_division_id"/>
+                    <field name="req_section_id"/>
+                    <field name="req_practise_id"/>
+                    <field name="wfh_type" invisible="1"/>
+                    <field name="reason_id"/>
+                    <field name="action_taken_by"/>
+                    <field name="request_from_date"/>
+                    <field name="request_to_date"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_wfh_emp_report_form">
+            <field name="name">kw_wfh_emp_report.form</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <form create='false' edit='false' delete='false'>
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="emp_id" attrs="{'invisible': [('emp_id','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="job_id" attrs="{'invisible': [('job_id','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="req_department_id" attrs="{'invisible': [('req_department_id','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="req_division_id" attrs="{'invisible': [('req_division_id','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="req_section_id" attrs="{'invisible': [('req_section_id','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="req_practise_id" attrs="{'invisible': [('req_practise_id','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            </group>
+                            <group>
+                                <field name="reason_id" domain="[('type', '=', 'employee' )]" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1" attrs="{'invisible': [('reason_id','=', False)]}"/>
+                                <field name="days_count" required="1" readonly="1"/>
+                                <p>
+                                (Maximum days: <field name="allowed_days" readonly='1' attrs="{'invisible': [('allowed_days','=', False)]}"/>
+                                )
+                               </p>
+                                <field name="computer_info" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="inter_connectivity" required="1" options="{'horizontal': true}" widget="radio"/>
+                                <field name="citrix_access" required="1" options="{'horizontal': true}" widget="radio"/>
+                                <field name="request_from_date" attrs="{'invisible': [('request_from_date','=', False)]}"/>
+                                <field name="request_to_date" attrs="{'invisible': [('request_to_date','=', False)]}"/>
+                                <field name="remark" string="Employee Remark" readonly="1" attrs="{'invisible': [('remark','=', False)]}"/>
+                                <field name="ra_remark" string="Remark" attrs="{'invisible': [('ra_remark','=', False)]}"/>
+                                <field name="show_btn_cancel" invisible="1"/>
+                                <field name="hide_btn_cancel" invisible="1"/>
+                                <field name="show_apply_btn" invisible="1"/>
+                                <field name="show_apply_extension_btn" invisible="1"/>
+                                <field name="show_grant_button" invisible="1"/>
+                                <field name="hide_extension_grant_btn" invisible="1"/>
+                                <field name="show_hr_grant_button" invisible="1"/>
+                                <field name="hide_extension_record" invisible="1"/>
+                                <field name="show_hr_extension_button" invisible="1"/>
+                                <field name="hide_csm_wfh_extended_record" invisible="1"/>
+                                <field name="hr_created_wfh_active_link" invisible='1'/>
+                            </group>
+                            <group>
+                                <field name="revised_to_date" attrs="{'invisible': [('revised_to_date','=', False)]}"/>
+                                <field name="extension_remark" attrs="{'invisible': [('extension_remark','=', False)]}"/>
+                                <field name="emp_record_report" invisible="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="search_view_kw_wfh_employee_report" model="ir.ui.view">
+            <field name="name">kw wfh Employee Report Search View</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <search string="Search WFH Record">
+                    <field name="request_from_date"/>
+                    <field name="state"/>
+                    <field name="wfh_active_link"/>
+                    <filter string="View by Date" name="filter_attendance_date" date="request_from_date"/>
+                    <!-- <filter string="Active" name="filter_active_wfh_active_link" domain="[('wfh_active_link','=',True)]"/> -->
+                    <!-- <filter string="Inactive" name="filter_inactive_wfh_active_link" domain="[('wfh_active_link','=',False)]"/> -->
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_request_from_date" string="View by Date" context="{'group_by':'request_from_date'}" />
+                        <filter name="group_by_state" string="State" context="{'group_by':'state'}" />
+                        <separator/>
+
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_wfh_emp_report_action">
+            <field name="name">My WFH</field>
+            <field name="res_model">kw_wfh</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">['|',('employee_id.user_id','=',uid),('create_uid','=',uid),('hide_hr_request_record','=',False)]</field>
+            <field name="context">{'report_view_loaded':True}</field>
+            <field name='search_view_id' ref='search_view_kw_wfh_employee_report'/>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_wfh_emp_report_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_wfh_emp_report_form')}),]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+						No records to show...
+                </p>
+            </field>
+        </record>
+
+        <!-- Ra-Child Employee Report  -->
+        <record model="ir.ui.view" id="kw_wfh_team_report_tree">
+            <field name="name">kw_wfh_ra_report.tree</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <tree import='false' default_order='create_date desc' create='false' edit='false' delete='false'>
+                    <field name="ref_no"/>
+                    <field name="employee_id"/>
+                    <field name="job_id"/>
+                    <field name="req_department_id"/>
+                    <field name="req_division_id"/>
+                    <field name="req_section_id"/>
+                    <field name="req_practise_id"/>
+                    <field name="wfh_type" invisible="1"/>
+                    <field name="reason_id"/>
+                    <field name="action_taken_by"/>
+                    <field name="request_from_date"/>
+                    <field name="request_to_date"/>
+                    <field name="attendance_mode_ids"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_wfh_team_report_form">
+            <field name="name">kw_wfh_ra_report.form</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <form create='false' edit='false' delete='false'>
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="emp_id" attrs="{'invisible': [('emp_id','=', False)],'readonly': [('state','in', ['applied','cancel','reject','expired'])]}"  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="job_id" attrs="{'invisible': [('job_id','=', False)],'readonly': [('state','in', ['applied','cancel','reject','expired'])]}"  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="req_department_id" attrs="{'invisible': [('req_department_id','=', False)],'readonly': [('state','in', ['applied','cancel','reject','expired'])]}"  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="req_division_id" attrs="{'invisible': [('req_division_id','=', False)],'readonly': [('state','in', ['applied','cancel','reject','expired'])]}"  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="req_section_id" attrs="{'invisible': [('req_section_id','=', False)],'readonly': [('state','in', ['applied','cancel','reject','expired'])]}"  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="req_practise_id" attrs="{'invisible': [('req_practise_id','=', False)],'readonly': [('state','in', ['applied','cancel','reject','expired'])]}"  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            </group>
+                            <group>
+                                <field name="reason_id" domain="[('type', '=', 'employee' )]" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1" attrs="{'invisible': [('reason_id','=', False)]}"/>
+                                <field name="days_count" required="1" readonly="1"/>
+                                <p>
+                                (maximun days: <field name="allowed_days" readonly='1' attrs="{'invisible': [('allowed_days','=', False)]}"/>
+                                )
+                               </p>
+                                <field name="computer_info"/>
+                                <field name="inter_connectivity" required="1" options="{'horizontal': true}" widget="radio"/>
+                                <field name="citrix_access" required="1" options="{'horizontal': true}" widget="radio"/>
+                                <field name="request_from_date" attrs="{'invisible': [('request_from_date','=', False)]}"/>
+                                <field name="request_to_date" attrs="{'invisible': [('request_to_date','=', False)]}"/>
+                                <field name="remark" string="Employee Remark" readonly="1" attrs="{'invisible': [('remark','=', False)]}"/>
+                                <field name="ra_remark" string="Remark" attrs="{'invisible': [('ra_remark','=', False)]}"/>
+                                <field name="show_btn_cancel" invisible="1"/>
+                                <field name="hide_btn_cancel" invisible="1"/>
+                                <field name="show_apply_btn" invisible="1"/>
+                                <field name="show_apply_extension_btn" invisible="1"/>
+                                <field name="show_grant_button" invisible="1"/>
+                                <field name="hide_extension_grant_btn" invisible="1"/>
+                                <field name="show_hr_grant_button" invisible="1"/>
+                                <field name="hide_extension_record" invisible="1"/>
+                                <field name="show_hr_extension_button" invisible="1"/>
+                                <field name="hide_csm_wfh_extended_record" invisible="1"/>
+                                <field name="hr_created_wfh_active_link" invisible='1'/>
+                                <field name="emp_record_report" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="revised_to_date" attrs="{'invisible': [('revised_to_date','=', False)]}"/>
+                                <field name="extension_remark" attrs="{'invisible': [('extension_remark','=', False)]}"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="search_view_kw_wfh_team_report" model="ir.ui.view">
+            <field name="name">kw wfh RA Report Search View</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <search string="Search WFH Record">
+                    <field name="employee_id"/>
+                    <field name="job_id"/>
+                    <field name="ref_no"/>
+                    <field name="req_department_id"/>
+                    <field name="req_division_id"/>
+                    <field name="req_section_id"/>
+                    <field name="req_practise_id"/>
+                    <field name="wfh_type"/>
+                    <field name="reason_id"/>
+                    <field name="request_to_date"/>
+                    <field name="request_from_date"/>
+                    <field name="wfh_active_link"/>
+                    <field name="state"/>
+                    <filter string="View by Date" name="filter_attendance_date" date="request_from_date"/>
+                    <filter string="Applied" name="filter_applied_state" domain="[('state','=','applied')]"/>
+                    <filter string="Granted" name="filter_grant_state" domain="[('state','=','grant')]"/>
+                    <filter string="Rejected" name="filter_reject_state" domain="[('state','=','reject')]"/>
+                    <filter string="Cancelled" name="filter_cancel_state" domain="[('state','=','cancel')]"/>
+                    <filter string="Expired" name="filter_expired_state" domain="[('state','=','expired')]"/>
+                    <!-- <filter string="Active" name="filter_active_wfh_active_link" domain="[('wfh_active_link','=',True)]"/>
+                    <filter string="Inactive" name="filter_inactive_wfh_active_link" domain="[('wfh_active_link','=',False)]"/> -->
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_request_from_date" string="View by Date" context="{'group_by':'request_from_date'}" />
+                        <filter name="group_by_state" string="State" context="{'group_by':'state'}" />
+                        <separator/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+
+        <record model="ir.actions.act_window" id="kw_wfh_team_report_action">
+            <field name="name">Team WFH</field>
+            <field name="res_model">kw_wfh</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">['|',('employee_id.department_id.manager_id.user_id','=',uid),('employee_id.parent_id.user_id','=',uid),('hide_hr_request_record','=',False)]</field>
+            <field name='search_view_id' ref='search_view_kw_wfh_team_report'/>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_wfh_team_report_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_wfh_team_report_form')}),]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+						No records to show...
+                </p>
+            </field>
+        </record>
+
+
+        <!-- IT teams report  -->
+        <record model="ir.ui.view" id="kw_wfh_it_teams_report_tree">
+            <field name="name">kw_wfh_it_teams_report.tree</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <tree import='false' default_order='create_date desc' create='false' edit='false' delete='false'>
+                    <field name="ref_no"/>
+                    <field name="employee_id"/>
+                    <field name="job_id"/>
+                    <field name="req_department_id"/>
+                    <field name="req_division_id"/>
+                    <field name="req_section_id"/>
+                    <field name="req_practise_id"/>
+                    <field name="wfh_type" invisible="1"/>
+                    <field name="request_from_date"/>
+                    <field name="request_to_date"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_wfh_it_teams_report_form">
+            <field name="name">kw_wfh_it_teams_report.form</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <form create='false' edit='false' delete='false'>
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="emp_id" attrs="{'invisible': [('emp_id','=', False)]}"/>
+                                <field name="job_id" attrs="{'invisible': [('job_id','=', False)]}"/>
+                                <field name="req_department_id" attrs="{'invisible': [('req_department_id','=', False)]}"/>
+                                <field name="req_division_id" attrs="{'invisible': [('req_division_id','=', False)]}"/>
+                                <field name="req_section_id" attrs="{'invisible': [('req_section_id','=', False)]}"/>
+                                <field name="req_practise_id" attrs="{'invisible': [('req_practise_id','=', False)]}"/>
+                            </group>
+                            <group>
+                               <field name="reason_id" domain="[('type', '=', 'employee' )]" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1" attrs="{'invisible': [('reason_id','=', False)]}"/>
+                                <field name="days_count" required="1" readonly="1"/>
+                                <p>
+                                (maximun days: <field name="allowed_days" readonly='1' attrs="{'invisible': [('allowed_days','=', False)]}"/>
+                                )
+                               </p>
+                                <field name="computer_info"/>
+                                <field name="inter_connectivity" required="1" options="{'horizontal': true}" widget="radio"/>
+                                <field name="citrix_access" required="1" options="{'horizontal': true}" widget="radio"/>
+                                <field name="request_from_date" attrs="{'invisible': [('request_from_date','=', False)]}"/>
+                                <field name="request_to_date" attrs="{'invisible': [('request_to_date','=', False)]}"/>
+                                <field name="remark" string="Employee Remark" readonly="1" attrs="{'invisible': [('remark','=', False)]}"/>
+                                <field name="ra_remark" string="Remark" attrs="{'invisible': [('ra_remark','=', False)]}"/>
+                                <field name="show_btn_cancel" invisible="1"/>
+                                <field name="hide_btn_cancel" invisible="1"/>
+                                <field name="show_apply_btn" invisible="1"/>
+                                <field name="show_apply_extension_btn" invisible="1"/>
+                                <field name="show_grant_button" invisible="1"/>
+                                <field name="hide_extension_grant_btn" invisible="1"/>
+                                <field name="show_hr_grant_button" invisible="1"/>
+                                <field name="hide_extension_record" invisible="1"/>
+                                <field name="show_hr_extension_button" invisible="1"/>
+                                <field name="hide_csm_wfh_extended_record" invisible="1"/>
+                                <field name="hr_created_wfh_active_link" invisible='1'/>
+                                <field name="emp_record_report" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="revised_to_date" attrs="{'invisible': [('revised_to_date','=', False)]}"/>
+                                <field name="extension_remark" attrs="{'invisible': [('extension_remark','=', False)]}"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="search_view_kw_wfh_it_teams_report" model="ir.ui.view">
+            <field name="name">kw wfh IT Teams Report Search View</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <search string="Search WFH Record">
+                    <field name="employee_id"/>
+                    <field name="job_id"/>
+                    <field name="ref_no"/>
+                    <field name="req_department_id"/>
+                    <field name="req_division_id"/>
+                    <field name="req_section_id"/>
+                    <field name="req_practise_id"/>
+                    <field name="wfh_type"/>
+                    <field name="request_from_date"/>
+                    <field name="request_to_date"/>
+                    <field name="wfh_active_link"/>
+                    <field name="state"/>
+                    <!-- <filter string="Active" name="filter_active_wfh_active_link" domain="[('wfh_active_link','=',True)]"/> -->
+                    <!-- <filter string="Inactive" name="filter_inactive_wfh_active_link" domain="[('wfh_active_link','=',False)]"/> -->
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_request_from_date" string="View by Date" context="{'group_by':'request_from_date'}" />
+                        <separator/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_wfh_it_teams_report_action">
+            <field name="name">Employee Applied WFH</field>
+            <field name="res_model">kw_wfh</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','=','grant'),('hide_hr_request_record','=',False)]</field>
+            <field name='search_view_id' ref='search_view_kw_wfh_it_teams_report'/>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_wfh_it_teams_report_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_wfh_it_teams_report_form')}),]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+						No records to show...
+                </p>
+            </field>
+        </record>
+
+
+        <!-- Initiative By CSM  -->
+        <record model="ir.ui.view" id="kw_wfh_initiative_by_csm_report_tree">
+            <field name="name">kw_wfh_csm_initiative_report.tree</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <tree import='false' default_order='create_date desc' create='false' edit='false' delete='false'>
+                    <field name="ref_no"/>
+                    <field name="search_by" invisible="1"/>
+                    <field name="department_id" widget="many2many_tags"/>
+                    <field name="division" widget="many2many_tags"/>
+                    <field name="section" widget="many2many_tags"/>
+                    <field name="practise" widget="many2many_tags"/>
+                    <field name="location_type"/>
+                    <field name="location_id" widget="many2many_tags"/>
+                    <field name="searched_user"/>
+                    <field name="reason_id"/>
+                    <field name="request_from_date"/>
+                    <field name="request_to_date"/>
+                    <field name="state"/>
+                    <button name="view_employee_list" string="View Employee List" type="object" help="message" class="oe_highlight"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_wfh_initiative_by_csm_report_form">
+            <field name="name">kw_wfh_csm_initiative_report.form</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <form create='false' edit='false' delete='false'>
+                    <header>
+                         <field name="state" widget="statusbar" statusbar_visible=""/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="old_reff_no" attrs="{'invisible': [('old_reff_no','=', False)],'readonly': [('state','=', 'grant')]}"/>
+                                <field name="search_by" widget="radio" options="{'horizontal': true}" attrs="{'readonly': [('state','=', 'grant')]}"/>
+                                <field name="department_id" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}" domain="[('dept_type.code', '=', 'department')]" attrs= "{'invisible': [('search_by', 'in', ['user'])],'required': [('search_by', 'in', ['hierarchy'])],'readonly': [('state','=', 'grant')]}"/>
+                                <field name="division" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}" domain="[('dept_type.code', '=', 'division')]" attrs= "{'invisible': [('search_by', 'in', ['user'])],'readonly': [('state','=', 'grant')]}"/>
+                                <field name="section" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}" domain="[('dept_type.code', '=', 'section')]" attrs= "{'invisible': [('search_by', 'in', ['user'])],'readonly': [('state','=', 'grant')]}"/>
+                                <field name="practise" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}" domain="[('dept_type.code', '=', 'practice')]" attrs= "{'invisible': [('search_by', 'in', ['user'])],'readonly': [('state','=', 'grant')]}"/>
+                                <field name="location_type" widget="radio" options="{'horizontal': true}" attrs="{'readonly': [('state','=', 'grant')]}"/>
+                                <field name="location_id" options="{'no_open': True,'no_create':True,'no_edit':True}" widget="many2many_tags" attrs= "{'invisible': [('location_type', 'in', ['all'])],'required': [('location_type', 'in', ['location'])],'readonly': [('state','=', 'grant')]}"/>
+
+                                <field name="reason_id" domain="[('type.type', 'in', ['By CSM'])]" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'readonly': [('state','=', 'grant')]}"/>
+                                <field name="allowed_days" invisible='1' attrs="{'readonly': [('state','=', 'grant')]}"/>
+                                <field name="request_from_date" required="1" attrs="{'readonly': [('state','=', 'grant')]}"/>
+                                <field name="request_to_date" required="1" attrs="{'readonly': [('state','=', 'grant')]}"/>
+                                <field name="days_count" required="1" readonly="1"/>
+                                <field name="remark" attrs="{'invisible': [('remark','=', False)],'readonly': [('state','=', 'grant')]}"/>
+                                <field name="employee_id" invisible="1"/>
+                                <field name="emp_record_report" invisible="1"/>
+                            </group>
+
+                            <group>
+                                <field name="searched_user"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs= "{'required': [('search_by', 'in', ['user'])],'readonly': [('state','=', 'grant')]}"
+                                       context="{'tree_view_ref':'kw_wfh.kw_wfh_hr_employee_recruitment_tree'}" widget="many2many_tags" />
+                                       
+                                    
+                                <field name="show_btn_cancel" invisible="1"/>
+                                <field name="hide_btn_cancel" invisible="1"/>
+                                <field name="show_apply_btn" invisible="1"/>
+                                <field name="show_grant_button" invisible="1"/>
+                                <field name="show_apply_extension_btn" invisible="1"/>
+                                <field name="hide_extension_grant_btn" invisible="1"/>
+                                <field name="hide_extension_record" invisible="1"/>
+                                <field name="revised_to_date" attrs="{'invisible': [('revised_to_date','=', False)],'readonly': [('state','=', 'grant')]}"/>
+                                <field name="extension_remark" attrs="{'invisible': [('extension_remark','=', False)],'readonly': [('state','=', 'grant')]}"/>
+                                <field name="show_apply_extension_btn" invisible="1"/>
+                                <field name="hide_csm_wfh_extended_record" invisible="1"/>
+                                <field name="show_hr_grant_button" invisible="1"/>
+                                <field name="show_hr_extension_button" invisible="1"/>
+                                <field name="show_wfh_record" invisible="1"/>
+                                <field name="hr_created_wfh_active_link" invisible="1"/>
+                                <field name="hide_csm_initiated_record" invisible="1"/>
+                                <field name="filter_hr_record" invisible="1"/>
+                                <field name="act_from_date" invisible="1"/>
+                                <field name="act_to_date" invisible="1"/>
+                                <field name="is_extended" invisible='1'/>
+                                <field name="emp_status_ids" readonly='1' force_save="1" limit='40' style='height:200px; overflow-y:auto'>
+                                    <tree editable="top" style="pointer-events:none;">
+                                        <field name="empl_id" readonly='1' style="pointer-events:none;" force_save="1"/>
+                                        <field name="from_date" readonly='1' style="pointer-events:none;" force_save="1"/>
+                                        <field name="to_date" readonly='1' style="pointer-events:none;" force_save="1"/>
+                                        <field name="status" readonly='1' style="pointer-events:none;" force_save="1" widget="boolean_toggle"/>
+                                    </tree>
+                                </field>
+                            </group>
+
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="search_view_kw_wfh_initiative_by_csm_report" model="ir.ui.view">
+            <field name="name">WFH by HR Search View</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <search string="Search WFH Record">
+                    <field name="reason_id"/>
+                    <field name="ref_no"/>
+                    <field name="search_by" invisible="1"/>
+                    <field name="department_id"/>
+                    <field name="division"/>
+                    <field name="section"/>
+                    <field name="practise"/>
+                    <field name="location_type"/>
+                    <field name="location_id"/>
+                    <field name="searched_user"/>
+                    <field name="state"/>
+                    <field name="request_from_date"/>
+                    <filter string="View by Date" name="filter_attendance_date" date="request_from_date"/>
+                    <filter string="Applied" name="filter_applied_state" domain="[('state','=','applied')]"/>
+                    <filter string="Granted" name="filter_grant_state" domain="[('state','=','grant')]"/>
+                    <filter string="Rejected" name="filter_reject_state" domain="[('state','=','reject')]"/>
+                    <filter string="Cancelled" name="filter_cancel_state" domain="[('state','=','cancel')]"/>
+                    <filter string="Expired" name="filter_expired_state" domain="[('state','=','expired')]"/>
+                    <!-- <filter string="Active" name="filter_active_wfh_active_link" domain="[('wfh_active_link','=',True)]"/> -->
+                    <!-- <filter string="Inactive" name="filter_inactive_wfh_active_link" domain="[('wfh_active_link','=',False)]"/> -->
+                    <separator/>
+                    <filter string="Current Month" name="current_month" domain="[('request_from_date','&lt;',(context_today()+relativedelta(months=1)).strftime('%%Y-%%m-01')), ('request_from_date','&gt;=',time.strftime('%%Y-%%m-01'))]"/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_request_from_date" string="View by Date" context="{'group_by':'request_from_date'}" />
+                        <separator/>
+
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_wfh_initiative_by_csm_reports_action">
+            <field name="name">WFH By HR</field>
+            <field name="res_model">kw_wfh</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','!=','draft'),('hide_hr_request_record','=',True),('hide_emp_request_record','=',False)]</field>
+            <field name="context">{'report_view_loaded':True,'search_default_current_month':1,'default_hide_btn_cancel':True}</field>
+            <field name='search_view_id' ref='search_view_kw_wfh_initiative_by_csm_report'/>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_wfh_initiative_by_csm_report_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_wfh_initiative_by_csm_report_form')}),]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+						No records to show...
+                </p>
+            </field>
+        </record>
+
+         <!-- WFH by user reports-->
+        <record model="ir.ui.view" id="kw_wfh_employee_report_tree">
+            <field name="name">kw_wfh_employee_report.tree</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <tree import='false' default_order='state asc' create='false' edit='false' delete='false'>
+                    <field name="ref_no" invisible="1"/>
+                    <field name="emp_job_location_id"/>
+                    <field name="req_department_id"/>
+                    <field name="employee_id"/>
+                    <field name="job_id"/>
+                    <field name="req_division_id" invisible="1"/>
+                    <field name="req_section_id" invisible="1"/>
+                    <field name="req_practise_id" invisible="1"/>
+                    <field name="wfh_type" invisible="1"/>
+                    <field name="issued_system"/>
+                    <field name="computer_info"/>
+                    <field name="inter_connectivity"/>
+                    <field name="citrix_access"/>
+                    <field name="reason_id"/>
+                    <field name="action_to_be_taken_by"/>
+                    <field name="request_from_date"/>
+                    <field name="request_to_date"/>
+                    <field name="attendance_mode_ids" widget="many2many_tags"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_wfh_employee_report_form">
+            <field name="name">kw_wfh_emp_report.form</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <form create='false' edit='false' delete='false'>
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="emp_id" attrs="{'invisible': [('emp_id','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="job_id" attrs="{'invisible': [('job_id','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="req_department_id" attrs="{'invisible': [('req_department_id','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="req_division_id" attrs="{'invisible': [('req_division_id','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="req_section_id" attrs="{'invisible': [('req_section_id','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="req_practise_id" attrs="{'invisible': [('req_practise_id','=', False)]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            </group>
+                            <group>
+                                <field name="reason_id" domain="[('type', '=', 'employee' )]" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1" attrs="{'invisible': [('reason_id','=', False)]}"/>
+                                <field name="days_count" required="1" readonly="1"/>
+                                <p>(maximum days: <field name="allowed_days" readonly='1' attrs="{'invisible': [('allowed_days','=', False)]}"/>)</p>
+                                <field name="computer_info" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="inter_connectivity" required="1" options="{'horizontal': true}" widget="radio"/>
+                                <field name="citrix_access" required="1" options="{'horizontal': true}" widget="radio"/>
+                                <field name="request_from_date" attrs="{'invisible': [('request_from_date','=', False)]}"/>
+                                <field name="request_to_date" attrs="{'invisible': [('request_to_date','=', False)]}"/>
+                                <field name="remark" string="Employee Remark" readonly="1" attrs="{'invisible': [('remark','=', False)]}"/>
+                                <field name="ra_remark" string="Remark" attrs="{'invisible': [('ra_remark','=', False)]}"/>
+                                <field name="show_btn_cancel" invisible="1"/>
+                                <field name="hide_btn_cancel" invisible="1"/>
+                                <field name="show_apply_btn" invisible="1"/>
+                                <field name="show_apply_extension_btn" invisible="1"/>
+                                <field name="show_grant_button" invisible="1"/>
+                                <field name="hide_extension_grant_btn" invisible="1"/>
+                                <field name="show_hr_grant_button" invisible="1"/>
+                                <field name="hide_extension_record" invisible="1"/>
+                                <field name="show_hr_extension_button" invisible="1"/>
+                                <field name="hide_csm_wfh_extended_record" invisible="1"/>
+                                <field name="hr_created_wfh_active_link" invisible='1'/>
+                                <field name="previous_attendance_mode_ids" groups="base.group_no_one"/>
+                            </group>
+                            <group>
+                                <field name="revised_to_date" attrs="{'invisible': [('revised_to_date','=', False)]}"/>
+                                <field name="extension_remark" attrs="{'invisible': [('extension_remark','=', False)]}"/>
+                                <field name="emp_record_report" invisible="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="search_view_kw_wfh_emp_report" model="ir.ui.view">
+            <field name="name">HR Employee Report Search View</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <search string="Search WFH Record">
+                    <field name="employee_id" string="Employee"/>
+                    <field name="request_from_date"/>
+                    <field name="state" invisible="1"/>
+                    <field name="emp_job_location_id"/>
+                    <field name="job_id" string="Designation"/>
+                    <field name="req_department_id" string="Department"/>
+                    <field name="ref_no" string="Ref. no"/>
+                    <field name="wfh_type" invisible="1"/>
+                    <field name="reason_id"/>
+                    <field name="wfh_active_link"/>
+                    <field name="inter_connectivity"/>
+                    <field name="computer_info"/>
+                    <field name="citrix_access"/>
+                    <!-- <field name="manager_created_record_id"/> -->
+                    <filter string="View by Date" name="filter_attendance_date" date="request_from_date"/>
+                    <filter string="Applied" name="filter_applied_state" domain="[('state','=','applied')]"/>
+                    <filter string="Granted" name="filter_grant_state" domain="[('state','=','grant')]"/>
+                    <filter string="Rejected" name="filter_reject_state" domain="[('state','=','reject')]"/>
+                    <filter string="Cancelled" name="filter_cancel_state" domain="[('state','=','cancel')]"/>
+                    <filter string="Expired" name="filter_expired_state" domain="[('state','=','expired')]"/>
+                    <!-- <filter string="On Hold" name="filter_hold_state" domain="[('state','=','hold')]"/> -->
+                    <!-- <filter string="Active" name="filter_active_wfh_active_link" domain="[('wfh_active_link','=',True)]"/> -->
+                    <!-- <filter string="Inactive" name="filter_inactive_wfh_active_link" domain="[('wfh_active_link','=',False)]"/> -->
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_request_from_date" string="View by Date" context="{'group_by':'request_from_date'}" />
+                        <filter name="group_by_state" string="Status" context="{'group_by':'state'}" />
+                        <!-- <filter name="group_by_manager_created_record_id" string="HR Record" context="{'group_by':'manager_created_record_id'}" /> -->
+                        <separator/>
+
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_wfh_employee_report_action">
+            <field name="name">WFH by User</field>
+            <field name="res_model">kw_wfh</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('wfh_type','=','self'),('state','!=','draft'),'|',('hide_emp_request_record','=',True),('hide_hr_request_record','=',False)]</field>
+            <field name='search_view_id' ref='search_view_kw_wfh_emp_report'/>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_wfh_employee_report_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_wfh_employee_report_form')}),]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+						No records to show...
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,717 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+		<record id="infra_view" model="ir.actions.act_url">
+			<field name="name">Infrastructure Seat Map View</field>
+			<field name="url">/seat-map</field>
+			<field name="target">new</field>
+		</record>
+		<template id="kw_workstation_seat_map" name="Seat Map">
+			<t t-call="website.layout">
+				<div class="container mt-3">
+					<div class="card">
+						<div class="card-body">
+							<div class="d-flex row relative">
+								<div class="col-sm-2 mt-1">
+									<lable for="branchSelect">Select Branch</lable>
+									<select class="browser-default custom-select seatmap-select" id="branchSelect" t-att-rel="branch_code">
+										<option value="all">Choose Branch</option>
+										<t t-foreach="branches" t-as="branch">
+											<option t-att-value="branch.code"
+													t-attf-id="branch#{branch.code}"
+													t-att-selected="branch.code==branch_code"><t t-esc="branch.alias"/></option>
+										</t>
+									<option value="all" id="all" t-att-selected="'all'==infra_code">All</option>
+									</select>
+								</div>
+								<div class="col-sm-2 mt-1">
+									<lable for="branchUnitSelect">Select Unit</lable>
+									<select class="browser-default custom-select seatmap-select" id="branchUnitSelect">
+										<option value="all">Choose Unit</option>
+										<t t-foreach="branch_unit" t-as="unit">
+											<option t-att-value="unit.code"
+												t-att-selected="unit.code==unit_code"
+												t-att-id="unit.code"><t t-esc="unit.name"/></option>
+										</t>
+										<option value="all" id="all" t-att-selected="'all'==infra_code">All</option>
+									</select>
+								</div>
+								<div class="col-sm-2 mt-1">
+									<lable for="infraSelect">Select Infrastructure</lable>
+									<select class="browser-default custom-select seatmap-select" id="infraSelect" t-att-rel="infra_code">
+										<option value="all">Choose Infrastructure</option>
+										<t t-foreach="infrastructure" t-as="infra">
+											<option t-att-value="infra.code" t-att-id="infra.id"
+											        t-att-selected="infra.code==infra_code"><t t-esc="infra.name"/></option>
+										</t>
+										<option value="all" id="all" t-att-selected="'all'==infra_code">All</option>
+									</select>
+								</div>
+
+								<div class="col-sm-2 mt-1">
+									<lable for="projectSelect">Select Project</lable>
+									<select class="browser-default custom-select seatmap-select select2" id="projectSelect">
+										<option value="0">Choose Project</option>
+									</select>
+								</div>
+
+								<div class="col-sm-2 mt-1">
+									<lable for="EmployeeSelect">Select Employee</lable>
+									<select class="browser-default custom-select seatmap-select select2" id="EmployeeSelect">
+										<option value="0">Choose Employee</option>
+									</select>
+								</div>
+								<div class="col-sm-2 mt-1">
+									<lable for="DesignationSelect">Select Designation</lable>
+									<select class="browser-default custom-select seatmap-select select2" id="DesignationSelect">
+										<option value="0">Choose Designation</option>
+									</select>
+								</div>
+								<div class="col-sm-2 mt-1">
+									<lable for="GradeSelect">Select Grade</lable>
+									<select class="browser-default custom-select seatmap-select select2" id="GradeSelect">
+										<option value="0">Choose Grade</option>
+									</select>
+								</div>
+
+								<div class="col-sm-7 mt-2 ws-info offset-2">
+
+								</div>
+
+								<div class="clearfix"/>
+							</div>
+							<div class="clearfix"/>
+							<t t-set="stats">
+								<table class="ws-table table table-bordered">
+									<tr>
+										<th class="text-uppercase text-center" style="width:50%;background-color:#E6E6E6;" colspan="2">Workstation</th>
+									</tr>
+									<tr>
+										<th class="text-uppercase font-weight-bold" style="width:60%">Total</th>
+										<td class=" text-center font-weight-bold" style="width:40%"><span id="total_work_station"/></td>
+									</tr>
+									<tr>
+										<th class="text-uppercase">Assigned</th>
+										<td class=" text-center"><span id="tot_assigned"/></td>
+									</tr>
+									<tr>
+										<th class="text-uppercase">Not Assigned</th>
+										<td class=" text-center"><span id="tot_not_assigned"/></td>
+									</tr>
+									<tr>
+										<th class="text-uppercase text-center" style="width:50%;background-color:#E6E6E6;" colspan="2">ASSIGNED WS - Break up</th>
+									</tr>
+									<tr>
+										<th class="text-uppercase">WFO</th>
+										<td class=" text-center"><span id="tot_wfo"/></td>
+									</tr>
+									<tr>
+										<th class="text-uppercase">WFH</th>
+										<td class=" text-center"><span id="tot_wfh"/></td>
+									</tr>
+									<tr>
+										<th class="text-uppercase">Contractual</th>
+										<td class=" text-center"><span id="tot_contract"/></td>
+									</tr>
+									<tr>
+										<th class="text-uppercase">Reserved</th>
+										<td class=" text-center"><span id="tot_reserved"/></td>
+									</tr>
+									<tr>
+										<th class="text-uppercase font-weight-bold">Total Assigned WS</th>
+										<td class=" text-center font-weight-bold"><span id="tot_assigned_ws"/></td>
+									</tr>
+								</table>
+
+								<table class="table">
+									<tr>
+										<td class="text-center m-0 p-0">
+											<button class="btn btn-sm1 ml-1 col-sm-12 btn-wfo light-ic pr-2 pl-2"><strong>WFO</strong> <span class="badge bg-secondary font-small" id="tot_wfo_ico"/></button>
+										</td>
+										<td class="text-center m-0 p-0">
+											<button class="btn btn-sm1 mr-1 col-sm-12 btn-wfh pr-2 pl-2"><strong>WFH</strong> <span class="badge bg-secondary font-small" id="tot_wfh_ico"/></button>
+										</td>
+									</tr>
+									<tr>
+										<td class="text-center m-0 p-0">
+											<button class="btn btn-sm1 ml-1 col-sm-12 btn-hybrid dark-ic pr-2 pl-2"><strong>Hybrid</strong> <span class="badge bg-secondary font-small" id="tot_hybrid_ico"/></button>
+										</td>
+										<td class="text-center m-0 p-0">
+											<button class="btn btn-sm1 mr-1 col-sm-12 btn-reserved light-ic pr-2 pl-2"><strong>Reserved</strong> <span class="badge bg-secondary font-small" id="tot_reserved_ico"/></button>
+										</td>
+									</tr>
+									<tr>
+										<td class="text-center m-0 p-0">
+											<button class="btn btn-sm1 ml-1 col-sm-12 btn-contractual light-ic pr-2 pl-2"><strong>Contractual</strong> <span class="badge bg-secondary font-small" id="tot_contract_ico"/></button>
+										</td>
+										<td class="text-center m-0 p-0">
+											<button class="btn btn-sm1 mr-1 col-sm-12 btn-not-assigned light-ic pr-2 pl-2"><strong>Not Assigned</strong> <span class="badge bg-secondary font-small" id="tot_not_assigned_ico"/></button>
+										</td>
+									</tr>
+									<tr>
+										<td class="text-center m-0 p-0">
+											<button class="btn btn-sm1 ml-1 col-sm-12 btn-project-sbu light-ic pr-2 pl-2"><strong>SBU User</strong></button>
+										</td>
+										<td class="text-center m-0 p-0">
+											<button class="btn btn-sm1 mr-1 col-sm-12 btn-project-horizontal light-ic pr-2 pl-2"><strong>Horizontal User</strong></button>
+										</td>
+									</tr>
+								</table>
+							</t>
+							<!-- SVG rendering start-->
+							<t t-if="infra_code == 'sixth-c'">
+								<div class="row">
+									<div class="col-sm-9">
+										<t t-call="kw_workstation.seat_map_sixth_floor_c_block"/>
+									</div>
+									<div class="col-sm-3">
+										<div class="alert alert-primary txt_floor_name" role="alert"/>
+										<t t-raw="stats"/>
+									</div>
+								</div>
+
+							</t>
+							<t t-if="infra_code == 'sixth-s'">
+								<div class="row">
+									<div class="col-sm-9">
+										<t t-call="kw_workstation.seat_map_sixth_floor_s_block"/>
+									</div>
+									<div class="col-sm-3">
+										<div class="alert alert-primary txt_floor_name" role="alert"/>
+										<t t-raw="stats"/>
+									</div>
+								</div>
+							</t>
+							<t t-if="infra_code == 'sixth-m'">
+								<div class="row">
+									<div class="col-sm-9">
+										<t t-call="kw_workstation.seat_map_sixth_floor_m_block"/>
+									</div>
+									<div class="col-sm-3">
+										<div class="alert alert-primary txt_floor_name" role="alert"/>
+										<t t-raw="stats"/>
+									</div>
+								</div>
+							</t>
+							<t t-elif="infra_code == 'fifth'">
+								<div class="row">
+									<div class="col-sm-9">
+										<t t-call="kw_workstation.seat_map_fifth_floor"/>
+									</div>
+									<div class="col-sm-3">
+										<div class="alert alert-primary txt_floor_name" role="alert"/>
+										<t t-raw="stats"/>
+									</div>
+								</div>
+							</t>
+							<t t-elif="infra_code == 'patia_ground_floor'">
+								<div class="row">
+									<div class="col-sm-9">
+										<t t-call="kw_workstation.seat_map_patia_ground_floor"/>
+									</div>
+									<div class="col-sm-3">
+										<div class="alert alert-primary txt_floor_name" role="alert"/>
+										<t t-raw="stats"/>
+									</div>
+								</div>
+							</t>
+							<t t-elif="infra_code == 'patia_first_floor'">
+								<div class="row">
+									<div class="col-sm-9">
+										<t t-call="kw_workstation.seat_map_patia_first_floor"/>
+									</div>
+									<div class="col-sm-3">
+										<div class="alert alert-primary txt_floor_name" role="alert"/>
+										<t t-raw="stats"/>
+									</div>
+								</div>
+							</t>
+							<t t-elif="infra_code == 'patia_security_block'">
+								<div class="row">
+									<div class="col-sm-9">
+										<t t-call="kw_workstation.seat_map_patia_security_block"/>
+									</div>
+									<div class="col-sm-3">
+										<div class="alert alert-primary txt_floor_name" role="alert"/>
+										<t t-raw="stats"/>
+									</div>
+								</div>
+							</t>
+							<t t-elif="infra_code == 'gfihub'">
+								<div class="row">
+									<div class="col-sm-9">
+										<t t-call="kw_workstation.seat_map_ihub_ground_floor"/>
+									</div>
+									<div class="col-sm-3">
+										<div class="alert alert-primary txt_floor_name" role="alert"/>
+										<t t-raw="stats"/>
+									</div>
+								</div>
+							</t>
+							<t t-elif="infra_code == 'delhi_office'">
+								<div class="row">
+									<div class="col-sm-9">
+										<t t-call="kw_workstation.seat_map_delhi_office_layout"/>
+									</div>
+									<div class="col-sm-3">
+										<div class="alert alert-primary txt_floor_name" role="alert"/>
+										<t t-raw="stats"/>
+									</div>
+								</div>
+							</t>
+							<t t-elif="infra_code == 'jaipur_office'">
+								<div class="row">
+									<div class="col-sm-9">
+										<t t-call="kw_workstation.seat_map_jaipur_office_layout"/>
+									</div>
+									<div class="col-sm-3">
+										<div class="alert alert-primary txt_floor_name" role="alert"/>
+										<t t-raw="stats"/>
+									</div>
+								</div>
+							</t>
+							<t t-elif="infra_code == 'noida_office'">
+								<div class="row">
+									<div class="col-sm-9">
+										<t t-call="kw_workstation.seat_map_noida_office_layout"/>
+									</div>
+									<div class="col-sm-3">
+										<div class="alert alert-primary txt_floor_name" role="alert"/>
+										<t t-raw="stats"/>
+									</div>
+								</div>
+							</t>
+							<t t-elif="infra_code == 'patna_office'">
+								<div class="row">
+									<div class="col-sm-9">
+										<t t-call="kw_workstation.seat_map_patna_office_layout"/>
+									</div>
+									<div class="col-sm-3">
+										<div class="alert alert-primary txt_floor_name" role="alert"/>
+										<t t-raw="stats"/>
+									</div>
+								</div>
+							</t>
+							<t t-elif="infra_code == 'ranchi_office'">
+								<div class="row">
+									<div class="col-sm-9">
+										<t t-call="kw_workstation.seat_map_ranchi_office_layout"/>
+									</div>
+									<div class="col-sm-3">
+										<div class="alert alert-primary txt_floor_name" role="alert"/>
+										<t t-raw="stats"/>
+									</div>
+								</div>
+							</t>
+
+							<t t-elif="infra_code == 'all' ">
+
+								<div class="row">
+									<div class="col-sm-9">
+										<div class="row">
+
+											<t t-if="branch_code == 'BBS' or branch_code == 'all'">
+												<t t-call="kw_workstation.seat_map_office_layout_bbsr"/>
+											</t>
+											<t t-if="branch_code == 'DL' or branch_code == 'all'">
+												<t t-call="kw_workstation.seat_map_office_layout_delhi"/>
+											</t>
+											<t t-if="branch_code == 'JP' or branch_code == 'all'">
+												<t t-call="kw_workstation.seat_map_office_layout_jaipur_office_unit"/>
+											</t>
+											<t t-if="branch_code == 'PN' or branch_code == 'all'">
+												<t t-call="kw_workstation.seat_map_office_layout_patna_office_unit"/>
+											</t>
+											<t t-if="branch_code == 'RNC' or branch_code == 'all'">
+												<t t-call="kw_workstation.seat_map_office_layout_ranchi_office_unit"/>
+											</t>
+										</div>
+									</div>
+									<div class="col-sm-3">
+										<t t-raw="stats"/>
+									</div>
+								</div>
+							</t>
+
+							<t t-else="">
+
+							</t>
+
+							<div class="col-sm-6 ws-info">
+								<table class="ws-table table table-bordered">
+									<tr>
+										<th style="background-color:#E6E6E6;">WS Type</th>
+										<th style="background-color:#E6E6E6;">Total WS</th>
+										<th style="background-color:#E6E6E6;">Assigned</th>
+										<th style="background-color:#E6E6E6;">Not Assigned</th>
+										<th style="background-color:#E6E6E6;">PPL Occupied</th>
+									</tr>
+									<tr>
+										<td>Cabin</td>
+										<td><span id="tot_ws_cabin"/></td>
+										<td><span id="tot_ws_cabin_assign"/></td>
+										<td><span id="tot_ws_cabin_notassign"/></td>
+										<td><span id="tot_cab_occupied"/></td>
+									</tr>
+									<tr>
+										<td>Sr. WS</td>
+										<td><span id="tot_ws_sr"/></td>
+										<td><span id="tot_ws_sr_assign"/></td>
+										<td><span id="tot_ws_sr_notassign"/></td>
+										<td><span id="tot_sr_occupied"/></td>
+									</tr>
+									<tr>
+										<td>Mid WS</td>
+										<td><span id="tot_ws_mid"/></td>
+										<td><span id="tot_ws_mid_assign"/></td>
+										<td><span id="tot_ws_mid_notassign"/></td>
+										<td><span id="tot_mid_occupied"/></td>
+									</tr>
+									<tr>
+										<td>Running WS</td>
+										<td><span id="tot_ws_running"/></td>
+										<td><span id="tot_ws_run_assign"/></td>
+										<td><span id="tot_ws_run_notassign"/></td>
+										<td><span id="tot_run_occupied"/></td>
+									</tr>
+									<tr>
+										<td>Intern WS</td>
+										<td><span id="tot_ws_intern"/></td>
+										<td><span id="tot_ws_intern_assign"/></td>
+										<td><span id="tot_ws_intern_notassign"/></td>
+										<td><span id="tot_int_occupied"/></td>
+									</tr>
+									<tr>
+										<td>Reception</td>
+										<td><span id="tot_reception_ws"/></td>
+										<td><span id="tot_reception_ws_assign"/></td>
+										<td><span id="tot_reception_ws_notassign"/></td>
+										<td><span id="tot_rec_occupied"/></td>
+									</tr>
+									<tr>
+										<td class="font-weight-bold">Total</td>
+										<td class="font-weight-bold"><span id="tot_ws"/></td>
+										<td class="font-weight-bold"><span id="tot_ws_assigned"/></td>
+										<td class="font-weight-bold"><span id="tot_ws_notassigned"/></td>
+										<td class="font-weight-bold"><span id="total_occupied"/></td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="card ws-employee-tag-block" id="ws-employee-tag-block">
+					<div class="card-body">
+						<div class="row">
+							<div class="col-sm-12">
+								<select id="ws-workstation-tag" class="select2">
+									<option value="">Select Workstation</option>
+									<t t-foreach="workstations" t-as="workstation">
+										<option t-att-value="workstation[0]"><t t-esc="workstation[1]"/></option>
+									</t>
+								</select>
+								<div class="error-msg" id="ws-workstation-tag-msg">Please select workstation</div>
+							</div>
+							<div class="col-sm-12 mt-2 ws-employee-field">
+								<select id="ws-employee-tag" class="select2" multiple="true">
+<!--									<option value="">Select Employee</option>-->
+									<t t-foreach="employees" t-as="employee">
+										<option t-att-value="employee.id"><t t-esc="employee.emp_display_name"/></option>
+									</t>
+								</select>
+								<div class="error-msg" id="ws-employee-tag-msg">Please select employee</div>
+							</div>
+							<div class="col-sm-12">
+								<button class="btn btn-link btn-sm" id="btn-ws-tag-cancel">Cancel</button>
+								<button class="btn btn-primary btn-sm" id="btn-ws-tag-save">Save</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="toast-container" class="md-toast-bottom-right" aria-live="polite" role="alert">
+
+				</div>
+				<div id="kw_workstation_employee_information_block" class="hovertext">
+					<div class="container mt-0 employee_information_block p-2 rounded">
+						<button type="button" class="close close_hovertext pull-right" aria-label="Close" style="">
+							<i class="fa fa-close"/>
+						</button>
+						<table class="table table-bordered mt-1 mb-0 emp-modal-table">
+							<tbody>
+								<tr>
+									<td class="bg-info">Name</td>
+									<td class="bg-info-light emp_info_items" id="emp_info_name">XXXXX</td>
+									<td class="bg-info-light emp_info_items_ex" id="emp_info2_name">XXXXX</td>
+								</tr>
+								<tr>
+									<td class="bg-info">Employee Code</td>
+									<td class="bg-info-light emp_info_items" id="emp_info_code">XXXXX</td>
+									<td class="bg-info-light emp_info_items_ex" id="emp_info2_code">XXXXX</td>
+								</tr>
+								<tr>
+									<td class="bg-info">Workstation</td>
+									<td class="bg-info-light emp_info_items font-weight-bold" id="emp_info_workstation">XXXXX</td>
+									<td class="bg-info-light emp_info_items_ex font-weight-bold" id="emp_info2_workstation">XXXXX</td>
+								</tr>
+								<tr>
+									<td class="bg-info">Email</td>
+									<td class="bg-info-light emp_info_items" id="emp_info_email">XXXXX</td>
+									<td class="bg-info-light emp_info_items_ex" id="emp_info2_email">XXXXX</td>
+								</tr>
+								<tr>
+									<td class="bg-info">Phone</td>
+									<td class="bg-info-light emp_info_items" id="emp_info_phone">XXXXX</td>
+									<td class="bg-info-light emp_info_items_ex" id="emp_info2_phone">XXXXX</td>
+								</tr>
+								<tr>
+									<td class="bg-info">Date of Joining</td>
+									<td class="bg-info-light emp_info_items" id="emp_info_doj">XXXXX</td>
+									<td class="bg-info-light emp_info_items_ex" id="emp_info2_doj">XXXXX</td>
+								</tr>
+								<tr>
+									<td class="bg-info">Designation</td>
+									<td class="bg-info-light emp_info_items" id="emp_info_job">XXXXX</td>
+									<td class="bg-info-light emp_info_items_ex" id="emp_info2_job">XXXXX</td>
+								</tr>
+								<tr>
+									<td class="bg-info">Department</td>
+									<td class="bg-info-light emp_info_items" id="emp_info_department">XXXXX</td>
+									<td class="bg-info-light emp_info_items_ex" id="emp_info2_department">XXXXX</td>
+								</tr>
+<!--								<tr>-->
+<!--									<td class="bg-info">Division</td>-->
+<!--									<td class="bg-info-light emp_info_items" id="emp_info_division">Proj. Reviewer Group</td>-->
+<!--								</tr>-->
+<!--								<tr>-->
+<!--									<td class="bg-info">Section</td>-->
+<!--									<td class="bg-info-light" id="emp_info_section">Project Reviewers</td>-->
+<!--								</tr>-->
+<!--								<tr>-->
+<!--									<td class="bg-info">Practice</td>-->
+<!--									<td class="bg-info-light emp_info_items" id="emp_info_practice">Service</td>-->
+<!--								</tr>-->
+								<tr>
+									<td class="bg-info">Office Location</td>
+									<td class="bg-info-light emp_info_items" id="emp_info_location">XXXXX</td>
+									<td class="bg-info-light emp_info_items_ex" id="emp_info2_location">XXXXX</td>
+								</tr>
+								<tr>
+									<td class="bg-info">Reporting Authority</td>
+									<td class="bg-info-light emp_info_items" id="emp_info_ra">XXXXX</td>
+									<td class="bg-info-light emp_info_items_ex" id="emp_info2_ra">XXXXX</td>
+								</tr>
+
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div id="kw_workstation_blocked_block" class="hovertext col-sm-3 p-0 p-2 bg-light">
+					<div class="p-0 bg-light border rounded-3">
+						<button type="button" class="close close_hovertext pull-right" aria-label="Close" style="position:absolute; right:2px; top:0px; z-index:2;">
+							<i class="fa fa-close"/>
+						</button>
+						<h4 id="ws_blocked_title">XXXXX</h4>
+						<h5 class="font-weight-bold" id="ws_blocked_workstation">XXXXX</h5>
+						<h5 id="ws_blocked_note">Reserved for XXX</h5>
+					</div>
+				</div>
+			</t>
+		</template>
+		<template id="seat_map_office_layout_bbsr">
+			<t t-if="unit_code == 'hq' or unit_code == 'all'">
+				<t t-call="kw_workstation.seat_map_office_layout_hq"/>
+			</t>
+			<t t-if="unit_code == 'camp' or unit_code == 'all'">
+				<t t-call="kw_workstation.seat_map_office_layout_campus"/>
+			</t>
+			<t t-if="unit_code == 'ihub' or unit_code == 'all'">
+				<t t-call="kw_workstation.seat_map_office_layout_ihub"/>
+			</t>
+		</template>
+
+		<template id="seat_map_office_layout_hq">
+			<t t-if="'sixth-c' in infra_codes">
+				<t t-call="kw_workstation.seat_map_office_layout_c_block"/>
+			</t>
+			<t t-if="'sixth-s' in infra_codes">
+				<t t-call="kw_workstation.seat_map_office_layout_s_block"/>
+			</t>
+			<t t-if="'sixth-m' in infra_codes">
+				<t t-call="kw_workstation.seat_map_office_layout_m_block"/>
+			</t>
+			<t t-if="'fifth' in infra_codes">
+				<t t-call="kw_workstation.seat_map_office_layout_t_block"/>
+			</t>
+		</template>
+		<template id="seat_map_office_layout_c_block">
+			<div class="col-sm-6">
+				<div class="card m-1">
+					<div class="alert alert-primary mt-0 txt_floor_name_sixth-c" role="alert"/>
+					<t t-call="kw_workstation.seat_map_sixth_floor_c_block"/>
+				</div>
+			</div>
+		</template>
+		<template id="seat_map_office_layout_s_block">
+			<div class="col-sm-6">
+				<div class="card m-1">
+					<div class="alert alert-primary mt-0 txt_floor_name_sixth-s" role="alert"/>
+					<t t-call="kw_workstation.seat_map_sixth_floor_s_block"/>
+				</div>
+			</div>
+		</template>
+		<template id="seat_map_office_layout_m_block">
+			<div class="col-sm-6">
+				<div class="card m-1">
+					<div class="alert alert-primary mt-0 txt_floor_name_sixth-m" role="alert"/>
+					<t t-call="kw_workstation.seat_map_sixth_floor_m_block"/>
+				</div>
+			</div>
+		</template>
+		<template id="seat_map_office_layout_t_block">
+			<div class="col-sm-6">
+				<div class="card m-1">
+					<div class="alert alert-primary mt-0 txt_floor_name_fifth" role="alert"/>
+					<t t-call="kw_workstation.seat_map_fifth_floor"/>
+				</div>
+			</div>
+		</template>
+		<template id="seat_map_office_layout_campus">
+			<t t-if="'patia_ground_floor' in infra_codes">
+				<t t-call="kw_workstation.seat_map_office_layout_campus_c_block"/>
+			</t>
+			<t t-if="'patia_first_floor' in infra_codes">
+				<t t-call="kw_workstation.seat_map_office_layout_campus_s_block"/>
+			</t>
+			<t t-if="'patia_security_block' in infra_codes">
+				<t t-call="kw_workstation.seat_map_office_layout_campus_m_block"/>
+			</t>
+		</template>
+		<template id="seat_map_office_layout_campus_c_block">
+			<div class="col-sm-6">
+				<div class="card m-1">
+					<div class="alert alert-primary mt-0 txt_floor_name_patia_ground_floor" role="alert"/>
+					<t t-call="kw_workstation.seat_map_patia_ground_floor"/>
+				</div>
+			</div>
+		</template>
+		<template id="seat_map_office_layout_campus_s_block">
+			<div class="col-sm-6">
+				<div class="card m-1">
+					<div class="alert alert-primary mt-0 txt_floor_name_patia_first_floor" role="alert"/>
+					<t t-call="kw_workstation.seat_map_patia_first_floor"/>
+				</div>
+			</div>
+		</template>
+		<template id="seat_map_office_layout_campus_m_block">
+			<div class="col-sm-6">
+				<div class="card m-1">
+					<div class="alert alert-primary mt-0 txt_floor_name_patia_security_block" role="alert"/>
+					<t t-call="kw_workstation.seat_map_patia_security_block"/>
+				</div>
+			</div>
+		</template>
+		<template id="seat_map_office_layout_ihub">
+			<t t-if="'gfihub' in infra_codes">
+				<div class="col-sm-6">
+					<div class="card m-1">
+						<div class="alert alert-primary mt-0 txt_floor_name_gfihub" role="alert"/>
+						<t t-call="kw_workstation.seat_map_ihub_ground_floor"/>
+					</div>
+				</div>
+			</t>
+		</template>
+
+		<template id="seat_map_office_layout_delhi">
+			<t t-if="unit_code == 'delhi_office' or unit_code == 'all'">
+				<t t-call="kw_workstation.seat_map_office_layout_delhi_office"/>
+			</t>
+			<t t-if="unit_code == 'noida_office' or unit_code == 'all'">
+				<t t-call="kw_workstation.seat_map_office_layout_noida_office"/>
+			</t>
+		</template>
+		<template id="seat_map_office_layout_delhi_office">
+			<t t-if="'delhi_office' in infra_codes">
+				<div class="col-sm-6">
+					<div class="card m-1">
+						<div class="alert alert-primary mt-0 txt_floor_name_delhi_office" role="alert"/>
+						<t t-call="kw_workstation.seat_map_delhi_office_layout"/>
+					</div>
+				</div>
+			</t>
+		</template>
+		<template id="seat_map_office_layout_noida_office">
+			<t t-if="'noida_office' in infra_codes">
+				<div class="col-sm-6">
+					<div class="card m-1">
+						<div class="alert alert-primary mt-0 txt_floor_name_noida_office" role="alert"/>
+						<t t-call="kw_workstation.seat_map_noida_office_layout"/>
+					</div>
+				</div>
+			</t>
+		</template>
+
+		<template id="seat_map_office_layout_jaipur_office_unit">
+			<t t-if="unit_code == 'jaipur_office' or unit_code == 'all'">
+				<t t-call="kw_workstation.seat_map_office_layout_jaipur_office"/>
+			</t>
+		</template>
+		<template id="seat_map_office_layout_jaipur_office">
+			<t t-if="'jaipur_office' in infra_codes">
+				<div class="col-sm-6">
+					<div class="card m-1">
+						<div class="alert alert-primary mt-0 txt_floor_name_jaipur_office" role="alert"/>
+						<t t-call="kw_workstation.seat_map_jaipur_office_layout"/>
+					</div>
+				</div>
+			</t>
+		</template>
+
+		<template id="seat_map_office_layout_patna_office_unit">
+			<t t-if="unit_code == 'patna_office' or unit_code == 'all'">
+				<t t-call="kw_workstation.seat_map_office_layout_patna_office"/>
+			</t>
+		</template>
+		<template id="seat_map_office_layout_patna_office">
+			<t t-if="'patna_office' in infra_codes">
+				<div class="col-sm-6">
+					<div class="card m-1">
+						<div class="alert alert-primary mt-0 txt_floor_name_patna_office" role="alert"/>
+						<t t-call="kw_workstation.seat_map_patna_office_layout"/>
+					</div>
+				</div>
+			</t>
+		</template>
+
+		<template id="seat_map_office_layout_ranchi_office_unit">
+			<t t-if="unit_code == 'ranchi_office' or unit_code == 'all'">
+				<t t-call="kw_workstation.seat_map_office_layout_ranchi_office"/>
+			</t>
+		</template>
+		<template id="seat_map_office_layout_ranchi_office">
+			<t t-if="'ranchi_office' in infra_codes">
+				<div class="col-sm-6">
+					<div class="card m-1">
+						<div class="alert alert-primary mt-0 txt_floor_name_ranchi_office" role="alert"/>
+						<t t-call="kw_workstation.seat_map_ranchi_office_layout"/>
+					</div>
+				</div>
+			</t>
+		</template>
+		<template id="kw_workstation_seat_map_styles" inherit_id="kw_workstation.kw_workstation_seat_map">
+			<xpath expr="." position="inside">
+				<link href="/kwantify_theme/static/src/mdb/css/mdb.min.css" rel="stylesheet"/>
+				<link href="/kwantify_theme/static/src/lib/bootstrap-sweetalert/dist/sweetalert.css" rel="stylesheet"/>
+				<link href="/kw_workstation/static/src/css/seatmap.css" rel="stylesheet"/>
+
+				<script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js"/>
+				<script type="text/javascript" src="/kwantify_theme/static/src/lib/bootstrap-sweetalert/dist/sweetalert.js"/>
+				<script type="text/javascript" src="/kw_workstation/static/src/js/seatmap.js"/>
+			</xpath>
+		</template>
+
+	</data>
+</odoo>
+
+
+

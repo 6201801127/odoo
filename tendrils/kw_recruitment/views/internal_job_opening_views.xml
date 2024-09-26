@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	
+	<data>
+		<record id="ijp_job_openings_form_view" model="ir.ui.view">
+			<field name="name">job_openings_view_form</field>
+			<field name="model">kw_hr_job_positions</field>
+			<field name="priority">400</field>
+			<field name="arch" type="xml">
+				<form string="Job Opening Form View" duplicate="false" delete='false' create='false' edit='false'>
+					<header>
+						<!-- <button name="set_recruit" string="Open Position" states="open" type="object"
+								class="oe_highlight" groups="base.group_user"/>
+						<button name="set_open" string="Close Position" states="recruit" type="object"
+								groups="base.group_user"/> -->
+						<button name="apply_for_self" string="Apply for Self" states="recruit" type="object"
+								groups="base.group_user" class="oe_highlight" context="{'self_reffered_ctx':True}"/>
+						<button name="refer_a_candidate" string="Refer a Candidate" states="recruit" type="object"
+								groups="base.group_user" class="btn btn-warning" context="{'referred_candidate':True}"/>
+						<field name="state" widget="statusbar" invisible='1' statusbar_visible="recruit,open"/>
+					</header>
+					<sheet>
+						<group>
+							<group>
+								<field name="title"/>
+								<!-- <field name="job_id" options="{'no_create_edit': True, 'no_create':True, 'no_open':True}"/> -->
+								<field name="job_code"/>
+								<!-- <field name="website_id" options="{'no_create_edit': True, 'no_create':True, 'no_open':True}"/> -->
+								<!-- <field name="survey_id" string="Interview feedback Form" options="{'no_create_edit': True, 'no_create':True, 'no_open':True}"/> -->
+								<field name="company_id" invisible="1"/>
+								<field name="address_id"
+									   options="{'no_edit': True, 'no_create':True, 'no_open':True}"
+									   widget="many2many_tags"/>
+								<field name="min_exp_year" string="Min. Year (Exp.)"
+									   attrs="{'invisible':[('min_exp_year','&gt;',1)]}"/>
+								<field name="min_exp_year" string="Min. Years (Exp.)"
+									   attrs="{'invisible':['|',('min_exp_year','=',False),('min_exp_year','&lt;',2)]}"/>
+								<field name="max_exp_year" string="Max. Year (Exp.)"
+									   attrs="{'invisible':[('max_exp_year','&gt;',1)]}"/>
+								<field name="max_exp_year" string="Max. Years (Exp.)"
+									   attrs="{'invisible':['|',('max_exp_year','=',False),('max_exp_year','&lt;',2)]}"/>
+								<field name="referred_amount"
+									   string="Referral Amount (Only for Employee Reference) (INR)"/>
+								<p class='text-muted font-weight-light font-size'>Employee Referral Bonus will be
+									disbursed after successful completion of the probation of the candidate.
+								</p>
+								<!-- <field name="experience_id" options="{'no_create_edit': True, 'no_create':True, 'no_open':True}"/> -->
+							</group>
+							<label for="description" class="font-weight-bold"/>
+							<field name="description" widget='html'/>
+		
+							<label for="candidate_profile" class="font-weight-bold"/>
+							<field name="candidate_profile" widget='html'/>
+		
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<!-- hr.applicant job opening form view -->
+		<record id="ijp_applicant_job_openings_form_view" model="ir.ui.view">
+			<field name="name">hr.applicant.job.opening.view</field>
+			<field name="model">hr.applicant</field>
+			<field name="priority">500</field>
+			<field name="arch" type="xml">
+				<form string="Applicant Job Opening Form View" duplicate="false" delete='false' create='false'
+					  edit='true'>
+					<script>
+						$(document).ready(function(){
+                            $('.o_statusbar_buttons').hide();
+                            stage_id = $("[aria-pressed=true]").text().trim();
+                            console.log("aaaaaaaaa",stage_id);
+                            if (stage_id != 'Applied'){
+                                $('.o_form_button_edit').hide();
+                            }
+							else{
+								$('.o_form_button_edit').show();
+							}
+                        });
+
+                    </script>
+					<header>
+						<field name="job_id" invisible='1'/>
+						<field name="active" invisible='1'/>
+						<field name="emp_id" invisible='1'/>
+						<field name="stage_code" invisible='1'/>
+						<field name="stage_id" widget="statusbar" attrs="{'readonly':True}" />
+					</header>
+					<sheet>
+						<group>
+							<group>
+								<field name="job_position"
+									   options="{'no_edit': True, 'no_create':True, 'no_open':True}"
+									   readonly='1'/>
+								<field name="partner_name"/>
+								<field name="email_from" required="1"/>
+
+								<field name="company_id" invisible="1"/>
+								<field name="partner_mobile" required="1"/>
+								<field name="current_location"
+									   options="{'no_edit': True, 'no_create':True, 'no_open':True}"
+									   required="1"/>
+								<field name="gender"
+									   options="{'no_edit': True, 'no_create':True, 'no_open':True}"
+									   required="1"/>
+								<field name="job_location_id"
+									   options="{'no_edit': True, 'no_create':True, 'no_open':True}"
+									   required="1"/>
+								<field name="qualification_ids" string='Highest Qualification' widget='many2many_tags'
+									   required='1' options="{'no_create': True, 'no_edit':True}"/>
+								<!-- <field name ='highest_qualification_ids' widget='many2many_tags' required='1' options="{'no_create': True, 'no_create_edit':True}"/> -->
+								<field name="other_qualification" string="Other Qualification"
+									   attrs="{'invisible': ['|',('qualification_ids','=',False),('other_qualification','=',False)]}"/>
+								<field name="certification"/>
+
+								<label for="exp_year" string="Experience" class="oe_inline"/>
+								<div>
+									<group>
+										<field name="exp_year" string="Year"
+											   attrs="{'invisible':[('exp_year','&gt;',1)]}" required="1"/>
+										<field name="exp_year" string="Years"
+											   attrs="{'invisible':['|',('exp_year','=',False),('exp_year','&lt;',2)]}"
+											   required="1"/>
+										<field name="exp_month" string="Month"
+											   attrs="{'invisible':[('exp_month','&gt;',1)]}" required="1"/>
+										<field name="exp_month" string="Months"
+											   attrs="{'invisible':['|',('exp_month','=',False),('exp_month','&lt;',2)]}"
+											   required="1"/>
+									</group>
+								</div>
+							</group>
+							<group>
+								<!-- <label for="description" class="font-weight-bold"/> -->
+								<!-- <field name="responsible_id" options="{'no_create_edit': True, 'no_create':True, 'no_open':True}"/> -->
+			
+								<!-- <label for="candidate_profile" class="font-weight-bold"/> -->
+								<field name="is_referred" invisible='1'/>
+								<field name='code_ref' invisible='1'/>
+								<field name="source_id"
+									   options="{'no_edit': True, 'no_create':True, 'no_open':True}"
+									   invisible='1'/>
+								<field name="employee_referred"
+									   options="{'no_edit': True, 'no_create':True, 'no_open':True}"
+									   attrs="{'invisible':['|',('code_ref','=','IJP'),('code_ref', '!=', 'employee')]}"
+									   invisible='1'/>
+								<field name="referred_amount" invisible="0" widget='monetary'
+									   attrs="{'invisible':['|',('code_ref','=','IJP'),('code_ref', '!=', 'employee')]}"
+									   string="Referral Amount (INR)"/>
+								<p class='text-muted font-weight-light font-size'
+								   attrs="{'invisible':['|',('code_ref','=','IJP'),('code_ref', '!=', 'employee')]}">
+									Employee Referral Bonus will be disbursed after successful completion of the
+									probation of the candidate.
+								</p>
+								<field name="candidate_relation" string="How do you know the candidate?"
+									   attrs="{'invisible':['|',('is_referred', '=', False),('code_ref', '!=', 'employee')], 'required':[('is_referred', '=', True),('code_ref', '=', 'employee')]}"/>
+								<field name="candidate_relation_info"
+									   attrs="{'invisible':[('candidate_relation', '!=', '4')], 'required':[('candidate_relation', '=', '4')]}"/>
+								<p class='text-muted font-weight-light font-size'
+								   attrs="{'invisible':[('candidate_relation', '!=', '4')]}">Disclaimer: Please don't
+									refer candidates from social media and other unknown sources.
+								</p>
+								<field name="candidate_info" widget='radio'
+									   attrs="{'invisible':['|',('is_referred', '=', False),('code_ref', '!=', 'employee')],'required':[('candidate_relation','!=',False)]}"/>
+								<field name="mention_details"
+									   attrs="{'invisible':['|',('candidate_info', '=', 'no'),('candidate_info', '=', False)],'required':[('candidate_info', '=', 'yes')]}"/>
+								<!-- <field name="referred_amount"/> -->
+							</group>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+
+		<record id="ijp_view_kw_hr_job_positions_tree" model="ir.ui.view">
+			<field name="name">kw_hr_job_positions_tree</field>
+			<field name="model">kw_hr_job_positions</field>
+			<field name="priority">400</field>
+			<field name="arch" type="xml">
+				<tree string="Job Positions" create="false" import="false" delete="false" edit="false">
+					<!-- <field name="is_published"/>  style="pointer-events:none;"-->
+					<!-- <field name="job_id"/> -->
+					<!-- <field name="user_id"/> -->
+					<!-- <field name="website_id"/> -->
+					<!-- <field name="state"/> -->
+					<field name="title"/>
+					<field name="job_code"/>
+					<field name="qualification" widget="many2many_tags"/>
+					<field name="min_exp_year" string="Min. Years (Exp.)"/>
+					<field name="max_exp_year" string="Max. Years (Exp.)"/>
+					<field name="no_of_recruitment" invisible="1"/>
+					<field name="address_id" widget="many2many_tags"/>
+					<field name="expiration" invisible="1"/>
+				</tree>
+			</field>
+		</record>
+		<record id="internal_job_opening_action_window" model="ir.actions.act_window">
+			<field name="name">Job Openings</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">kw_hr_job_positions</field>
+			<field name="view_mode">tree,form</field>
+			<field name="view_type">form</field>
+			<field name="domain">[('internal_job_posting','=',True), ('is_published', '=', True)]</field>
+			<field name="context">{'create': False,'edit':False,'delete':False,'import':False, 'ijp_applicant':True,'referred_candidate':True}</field>
+			<field name="view_ids" eval="[(5, 0, 0), 
+				(0, 0, {'view_mode': 'tree', 'view_id': ref('kw_recruitment.ijp_view_kw_hr_job_positions_tree')}),
+				(0, 0, {'view_mode': 'form', 'view_id': ref('kw_recruitment.ijp_job_openings_form_view')})]"/>
+		</record>
+		<menuitem parent="menu_internal_jobs_posting"
+				  id="sub_menu_internal_jobs_openings"
+				  name="Job Openings"
+				  sequence="2"
+				  action="internal_job_opening_action_window"
+				  groups="kw_recruitment.group_hr_recruitment_internal_job_posting"
+		/>
+    </data>
+</odoo>

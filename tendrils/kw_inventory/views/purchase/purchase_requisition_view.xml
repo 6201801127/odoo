@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+      
+        
+        <record id="kw_purchase_requisition_view_tree" model="ir.ui.view">
+            <field name="name">kw_purchase_requisition.view.tree</field>
+            <field name="model">kw_purchase_requisition</field>
+            <field name="arch" type="xml">
+                <tree import='0'
+                default_order="date desc"
+                >
+                    <!-- Add your fields here -->
+                    <field name="requisition_number" string="Requisition Number" />
+                    <field name="material_id" string='Material Request ref.'/>
+                    <field name="department_name" string="Department Name" />
+                    <field name="date" string="Requisition Date" />
+                    <field name="type_of_po" string='Purchase Order Type' invisible='1'/>
+                    <!-- <field name="department_code" string="Department Code" /> -->
+                    <field name="indenting_department" string="Indenting Department" invisible='1'/>
+                    <!-- <field name="project_code" string="Project Code"/> -->
+                    <field name="applied_by" string='Employee'/>
+                    <field name="pending_at" string='Pending At'/>
+                    <field name="state" string="Status"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="kw_requisition_requested_view_form" model="ir.ui.view">
+        <field name="name">kw_requisition_requested.form</field>
+        <field name="model">kw_requisition_requested</field>
+        <field name="arch" type="xml">
+            <form string="" create="false" edit="false">
+                <sheet>
+                    <group>
+                        <field name="product_type" string="Product Category" />
+                        <field name="product_template_id" string=" Product Type" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+                        <field name="item_code" string="Item Code" options="{'no_create':True,'no_edit':True,'no_open': True,}" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                        <field name="item_description" string="Item Description" readonly='0'/>
+                        <field name="quantity_required" string="Quantity Required" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                        <field name="uom" string="UoM" style="pointer-events:none;" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                        <field name="expected_days"   required='1' string="Required Date" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                        <field name="check_availability" invisible="1" force_save='1' />
+                        <field name="employee_id" string='Issued to' force_save='1' required='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                        <field name="item_in_stock" invisible='1'/>
+                        <field name="alternate_name" invisible='1'/>
+                        <field name="status" string="Status" readonly="1" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+        <record id="kw_purchase_requisition_view_form" model="ir.ui.view">
+            <field name="name">kw_purchase_requisition.view.form</field>
+            <field name="model">kw_purchase_requisition</field>
+            <field name="arch" type="xml">
+                <form string="" duplicate="0" delete='0'>
+                    <script>
+                        $(document).ready(function() {
+                            // Get the text content of the button
+                            var state = $("button[aria-checked=true]").text().trim();
+                            var states=  $("button[aria-pressed=true]").text().trim();
+
+                            // Check if the state is 'Pending'
+                            if (state === 'Pending' || states === 'Pending' || state === 'Rejected' || states === 'Rejected' || state === 'Cancelled' || states === 'Cancelled') {
+                                // Hide the edit button
+                                $('.o_form_button_edit').hide();
+                            }
+                        });
+
+                    </script>
+                    <header>
+                        <button name="redirect_request_action" context='{"apply_requisition_request":True}' attrs="{'invisible': [('state', '!=', 'Draft')]}" string="Apply" type="object" class="btn btn-success"/>
+                        
+                        <button name="redirect_request_action" context='{"send_back_requisition":True}' attrs="{'invisible': [('state', '!=', 'Pending')]}" string="Send Back" type="object" class="btn btn-info"/>
+                        <button name="redirect_request_action" context='{"cancel_requisition":True}' attrs="{'invisible': [('state', '!=', 'Pending')]}" string="Cancel" type="object" class="btn btn-danger"/>
+                        <field name="state" widget="statusbar" statusbar_visible="Draft,Approved,Cancelled,Rejected" readonly="1"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <!-- Add your fields here -->
+                                <field name="requisition_number" string="Requisition Number" readonly='1'/>
+                                <field name="department_name" string="Department Name" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" attrs="{'readonly': [('state', 'not in', ['Draft'])]}"/>
+                                <field name="date" string=" Requisition Date" readonly='1'/>
+                                <field name="type_of_po" string='Purchase Order Type' attrs="{'readonly': [('state', 'not in', ['Draft'])]}" invisible='1'/>
+                            </group>
+                            <group>
+                                <!-- <field name="department_code" string="Department Code" attrs="{'readonly': [('state', 'not in', ['Draft'])]}"/> -->
+                                <field name="indenting_department" string="Indenting Department" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" attrs="{'readonly': [('state', 'not in', ['Draft'])]}" invisible='1'/>
+                                <field name="requirement_type" string="Requirement Type" required='1' attrs="{'readonly': [('state', 'not in', ['Draft'])]}"/>
+
+                                <field name="project_code" string="Project Code" attrs="{'required': [('requirement_type', '=', 'project')],'invisible':[('requirement_type', '=', 'treasury')]}"/>
+                                
+                            </group>
+                            <h1 class="my-3"> Item Details </h1>
+                            <field name="add_requisition_rel_ids" string="Item Details" context="{'form_view_ref' : 'kw_inventory.kw_requisition_requested_view_form'}" attrs="{'readonly': [('state', 'not in', ['Draft'])]}">
+                                <tree editable="bottom"  create='1' edit='1' delete='1'>
+                                    <field name="product_type" string="Product Category" />
+                                    <field name="product_template_id" string=" Product Type" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+                                    <field name="item_code" string="Item Code" options="{'no_create':True,'no_edit':True,'no_open': True,}" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                                    <field name="item_description" string="Item Description" readonly='0' invisible='1'/>
+                                    <field name="quantity_required" string="Quantity Required" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                                    <field name="uom" string="UoM" style="pointer-events:none;" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                                    <field name="expected_days"   required='1' string="Required Date" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                                    <field name="check_availability" invisible="1" force_save='1' />
+                                    <field name="employee_id" string='Issued to' force_save='1' required='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                                    <field name="item_in_stock" invisible='1'/>
+                                    <field name="alternate_name" invisible='1'/>
+                                    <field name="status" string="Status" readonly="1" />
+                                </tree>
+                            </field>
+                            <!-- <group>
+                                <field name="cost_center_code" string="Cost Center Code"/>
+                                <field name="budget_code" string="Budget Code"/>
+                            </group>
+                            <group>
+                                <field name="estimated_value" string="Estimated Value" />
+                                <field name="budgeted_value" string="Budget Value"/>
+                                <field name="status" string="PR Status"/>
+                            </group> -->
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+         <record id="kw_purchase_requisition_approve_view_form" model="ir.ui.view">
+            <field name="name">kw_purchase_requisition.view.form</field>
+            <field name="model">kw_purchase_requisition</field>
+            <field name="arch" type="xml">
+                <form string="" duplicate="0" delete='0'>
+                    <header>
+                        <button name="redirect_request_action" context='{"approve_requisition_request":True}' attrs="{'invisible': ['|',('state', '=', 'Approved'),('state', '=', 'Rejected')]}" string="Approve" type="object" class="btn btn-success"/>
+                        <button name="redirect_request_action" context='{"reject_requisition":True}' attrs="{'invisible': ['|',('state', '=', 'Approved'),('state', '=', 'Rejected')]}" string="Reject" type="object" class="btn btn-danger"/>
+                        <field name="state" widget="statusbar"  readonly="1"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <!-- Add your fields here -->
+                                <field name="requisition_number" string="Requisition Number" readonly='1'/>
+                                <field name="department_name" string="Department Name" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" attrs="{'readonly': [('state', 'not in', ['Draft'])]}"/>
+                                <field name="type_of_po" string='Purchase Order Type' attrs="{'readonly': [('state', 'not in', ['Draft'])]}" invisible='1'/>
+                            </group>
+                            <group>
+                                <!-- <field name="department_code" string="Department Code" attrs="{'readonly': [('state', 'not in', ['Draft'])]}"/> -->
+                                <field name="date" string="Requisition Date" attrs="{'readonly': [('state', 'not in', ['Draft'])]}"/>
+                                <field name="indenting_department" string="Indenting Department" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" attrs="{'readonly': [('state', 'not in', ['Draft'])]}" invisible='1'/>
+                                <field name="requirement_type" string="Requirement Type" required='1'/>
+
+                                <field name="project_code" string="Project Code" attrs="{'required': [('requirement_type', '=', 'project')],'invisible':[('requirement_type', '=', 'treasury')]}"/>
+                           
+                            </group>
+                            <h1 class="my-3"> Item Details </h1>
+                            <field name="add_requisition_rel_ids" string="Item Details" context="{'form_view_ref' : 'kw_inventory.kw_requisition_requested_view_form'}" attrs="{'readonly': [('state', 'not in', ['Draft'])]}">
+                                <tree editable="bottom"  create='1' edit='1' delete='1'>
+                                    <field name="product_type" string="Product Category" />
+                                    <field name="product_template_id" string=" Product Type" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+                                    <field name="item_code" string="Item Code" options="{'no_create':True,'no_edit':True,'no_open': True,}" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                                    <field name="item_description" string="Item Description" readonly='0' invisible='1'/>
+                                    <field name="quantity_required" string="Quantity Required" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                                    <field name="uom" string="UoM" style="pointer-events:none;" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                                    <field name="expected_days"   required='1' string="Required Date" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                                    <field name="check_availability" invisible="1" force_save='1' />
+                                    <field name="employee_id" string='Issue to' force_save='1' required='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                                    <field name="item_in_stock" invisible='1'/>
+                                    <field name="alternate_name" invisible='1'/>
+                                    <field name="status" string="Status" readonly="1" />
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_pr_view_tree" model="ir.ui.view">
+            <field name="name">kw_pr_view_tree</field>
+            <field name="model">kw_purchase_requisition</field>
+            <field name="arch" type="xml">
+                <tree default_order="status desc" create='false' delete='false' import='false'>
+                    <field name="requisition_number" string="Requisition Number" />
+                    <field name="department_name" string="Department Name" />
+                    <field name="date" string="Requisition Date" />
+                    <field name="type_of_po" string='Purchase Order Type' invisible='1'/>
+                    <!-- <field name="department_code" string="Department Code" /> -->
+                    <!-- <field name="indenting_department" string="Indenting Department" /> -->
+                    <!-- <field name="project_code" string="Project Code"/> -->
+                    <field name="status" string="PR Status"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_pr_action_window" model="ir.actions.act_window">
+            <field name="name">Purchase Requisition Report</field>
+            <field name="res_model">kw_purchase_requisition</field>
+            <field name="view_mode">tree</field>
+            <field name="view_ids" eval="[(5, 0, 0),(0, 0, {'view_mode': 'tree', 'view_id': ref('kw_pr_view_tree')})]"/>
+            <field name="context">{'group_by':'status'}</field>
+        </record>
+        <record id="kw_purchase_requisition_action_window" model="ir.actions.act_window">
+            <field name="name">Purchase Requisition</field>
+            <field name="res_model">kw_purchase_requisition</field>
+            <field name="view_mode">tree,form,pivot,graph</field>
+            <field name="view_ids" eval="[(5, 0, 0),(0, 0, {'view_mode': 'tree', 'view_id': ref('kw_purchase_requisition_view_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('kw_purchase_requisition_view_form')})]"/>
+            <field name="context">{'group_by':'state'}</field>
+            <field name="domain">[('create_uid','=',uid)]</field> 
+        </record>
+
+        <record id="kw_purchase_requisition_take_action_window" model="ir.actions.act_window">
+            <field name="name">Take action</field>
+            <field name="res_model">kw_purchase_requisition</field>
+            <field name="view_mode">tree,form,pivot,graph</field>
+            <field name="view_ids" eval="[(5, 0, 0),(0, 0, {'view_mode': 'tree', 'view_id': ref('kw_purchase_requisition_view_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('kw_purchase_requisition_approve_view_form')})]"/>
+            <field name="context">{'create':False,'edit':False,'delete':False,'import':False}</field>
+            <field name="domain">[('state','=','Pending')]</field> 
+        </record>
+    </data>
+</odoo>

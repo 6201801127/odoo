@@ -1,0 +1,132 @@
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="kw_lv_settlement_take_action_list">
+            <field name="name">Settlement Take Action</field>
+            <field name="model">kw_lv_settlement</field>
+            <field name="arch" type="xml">
+                <tree string="Local Visit Settlement take action" import='false' create='false' edit='false' delete='false' duplicate='false'>
+                    <field name="emp_name"/>
+                    <field name="lv_id" string='No. of Local Visits'/>
+                    <field name="applied_date"/>
+                    <field name="total_km"/>
+                    <field name="price"/>
+                    <field name="taken_by"/>
+                    <field name="taken_on"/>
+                    <field name="payment_state"/>
+                    <field name="state" invisible='1'/>
+                    <field name="group_access" invisible='1'/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_lv_settlement_take_action_form">
+            <field name="name">Settlement Take Action</field>
+            <field name="model">kw_lv_settlement</field>
+            <field name="arch" type="xml">
+                <form string="Local Visit Settlement take action" create='false' delete='false' duplicate='false'>
+                    <field name="group_access" invisible='1'/>
+                    <field name="stage_id" invisible="1"/>
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe-tittle">
+                            <h1 style="color:#108fbb">
+							Applicant Information
+                            </h1>
+                        </div>
+                        <group>
+                            <field name="emp_name" readonly='1' options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="job_id" string="Designation" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly='1' force_save="1"/>
+                            <field name="department_id" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly='1' force_save="1"/>
+                            <field name="division" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly='1' force_save="1"/>
+                            <field name="section" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'invisible':[('section','=',False)]}" readonly='1' force_save="1"/>
+                            <field name="practise" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'invisible':[('practise','=',False)]}" readonly='1' force_save="1"/>
+                           <field name="grade_id" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly='1' force_save="1"/>
+                            <field name="applied_date" readonly='1'/>
+                        </group>
+                        <group>
+
+                            <field name="lv_id" attrs="{'readonly': [('state','not in',['applied'])]}" context="{'form_view_ref': 'kw_local_visit.kw_lv_view_form'}">
+                                <tree create='false' editable='bottom' delete='false'>
+                                    <field name="compute_price" invisible='1'/>
+                                    <field name="auto_calculation" invisible='1'/>
+                                    <field name="visit_category" readonly='1' options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                                    <field name="visit_date" readonly='1' />
+                                    <field name="vehicle_type" options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                                    <field name="out_time" readonly='1' />
+                                    <field name="actual_in_time" readonly='1' />
+                                    <field name="total_km"/>
+                                    <field name="attachment_id" readonly='1'/>
+                                    <field name="settlement_state" invisible='1'/>
+                                    <field name="price" force_save='1' attrs="{'readonly': [('auto_calculation','=',True)]}"/>
+                                    <button name="reject_from_settlement" type="object" icon="fa-trash-o" class='float-right btn-lg oe_edit_only' attrs="{'invisible': [('settlement_state','not in',['applied'])]}"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <div class='h4 text-primary float-right'>
+                            <div class='float-right pr-5'>
+                                <span>Total KM : </span>
+                                <field class='text-dark' name='total_km' readonly='1'/>
+                                <br/>
+                                <span>Price : </span>
+                                <field class='text-dark' name="price" readonly='1'/>
+                            </div>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="payment_mode" required='1' attrs="{'readonly': [('state','not in',['applied'])]}"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_lv_settlement_take_action_search" model="ir.ui.view">
+            <field name="name">Settlement Take Action</field>
+            <field name="model">kw_lv_settlement</field>
+            <field name="arch" type="xml">
+                <search>
+                    <!-- SEARCH -->
+                    <field name="emp_name"/>
+                    <!-- GROUP BY -->
+                    <group expand="0" string="Group By">
+                        <filter string="Settlement State" name="settlement_state" context="{'group_by':'state'}"/>
+                        <filter string="Payment State" name="payment_state" context="{'group_by':'payment_state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_lv_settlement_take_action_action_window">
+            <field name="name">Settlement Take Action</field>
+            <field name="res_model">kw_lv_settlement</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','in',['applied'])]</field>            
+            <field name="search_view_id" ref="kw_lv_settlement_take_action_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No take action settlement(s) here...
+                </p>
+            </field>
+        </record>
+
+        <record id="action_kw_lv_settlement_take_action_act_window_view_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kw_lv_settlement_take_action_list"/>
+            <field name="act_window_id" ref="kw_lv_settlement_take_action_action_window"/>
+        </record>
+
+        <record id="action_kw_lv_settlement_take_action_act_window_view_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="kw_lv_settlement_take_action_form"/>
+            <field name="act_window_id" ref="kw_lv_settlement_take_action_action_window"/>
+        </record>
+
+
+    </data>
+</odoo>

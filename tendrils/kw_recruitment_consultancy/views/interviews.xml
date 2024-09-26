@@ -1,0 +1,664 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<template id='view_applicant_meetings' name='Interviews'>
+		<t t-call="website.layout">
+			<div class='container'>
+				<div class="all-interview">
+					<div class="mb-5">
+						<div class='d-flex '>
+							<h3 class='flex-grow-1'>All Interviews</h3>
+							<a class="btn btn-info ml-4" t-attf-href="/c/schedule-interview?{{keep_query(applicant_id=applicant.id)}}">Add New</a>
+							<!-- <a class="btn btn-info ml-4 pull-right" onclick="javascript:window.history.back();" href="#">
+								<span class="fa fa-arrow-circle-left mr-1"/>
+								Go Back
+							</a> -->
+							<a class="btn btn-info ml-4 pull-right" t-attf-href="/c/applicants?{{keep_query(job_id=applicant.job_position.id)}}" title="Go Back">
+							<span class="fa fa-arrow-circle-left mr-1"/>
+							Go Back
+							</a>		
+						</div>
+					</div>
+					<!-- No Content section -->
+					<div class="no-data" t-if="not meetings">
+						<p>No interview scheduled yet.</p>
+					</div>
+					<div class="applicant-list" t-if="meetings">
+						<div class="row">
+							<t t-foreach="meetings" t-as="meeting">
+								<div class="col-12 col-md-4 d-flex mb-lg-1">
+									<div class="card applicant-card mb-4 w-100">
+										<div class="card-body">
+											<div class="applicant-content">
+												<div class="dropdown dropleft float-right">
+													<div class="dropdown-toggle card-menu" data-toggle="dropdown">
+														<span class="fa fa-ellipsis-v"></span>
+													</div>
+													<div class="dropdown-menu">
+														<a class="dropdown-item" t-attf-href="/c/schedule-interview?{{keep_query(applicant_id=applicant.id,meeting_id=meeting.id)}}">Re-schedule</a>
+														<a class="dropdown-item" href="#">Participants</a>
+														<a class="dropdown-item cancle_msg" t-att-data-applicant_id='applicant.id' t-att-data-meeting_id="meeting.id">Cancel</a>
+													</div>
+												</div>
+												<h5 class="mb-3">
+													<a t-attf-href="/c/meeting-details?{{keep_query(meeting_id=meeting.id,applicant_id=applicant.id)}}" class="text-info meeting_details">
+														<t t-esc='meeting["name"]'/>
+													</a>
+												</h5>
+												<div class="mb-2">
+													<span class="fa fa-clock-o"></span>
+													<t t-esc='meeting["kw_start_meeting_date"].strftime("%d-%b-%Y")'/>
+													<t t-esc='meeting["kw_start_meeting_time"][0:5]' />
+													<!-- <t t-esc='meeting["kw_start_meeting_time"].strptime("%H:%M:%S)'/> -->
+
+												</div>
+											</div>
+											<div class="d-flex justify-content-between mt-4">
+												<a t-attf-href="/c/schedule-interview?{{keep_query(applicant_id=applicant.id,meeting_id=meeting.id)}}" class="btn btn-success btn-sm px-3">Re-schedule</a>
+												<a href="#" class="btn btn-outline-danger btn-sm px-3 cancle_msg" t-att-data-applicant_id='applicant.id' t-att-data-meeting_id="meeting.id">Cancel</a>
+											</div>
+										</div>
+									</div>
+								</div>
+							</t>
+						</div>
+					</div>
+				</div>
+			</div>
+		</t>
+	</template>
+	<template id='schedule_meeting' name='Schedule Interview'>
+		<t t-call="website.layout">
+			<div class='container'>
+				<!-- start -->
+				<div class="schedule-interview">
+					<div class='mb-5'>
+						<div class='d-flex'>
+							<h3 class='flex-grow-1'>Schedule Interview</h3>
+							<a class="btn btn-info ml-4" onclick="javascript:window.history.back();" href="#">
+								<span class="fa fa-arrow-circle-left mr-1"/>
+								Go Back
+							</a>
+						</div>
+					</div>
+					<div class="message" id="error_server_msg" t-att-style="'' if message else 'display:none;' ">
+						<h3 id="er_msg"><t t-esc="message" /></h3>
+					</div>
+					<div class="meeting-form">
+						<div class="row">
+							<div class="col-8 col-lg-8">
+								<form method="post" enctype="multipart/form-data" id="schedule_meeting" autocomplete="off"
+								      action="/c/interview/create" class="s_website_form">
+									<div class="form-section py-lg-0">
+										<div class="row">
+											<div class="col-8">
+												<div class="form-group mb-5">
+													<div class='control-group focused'>
+														<label class="mb-4">Interview Title <span class="text-red">*</span> </label>
+														<div class="row">
+															<div class="col-sm-12 col-md-12 col-lg-12">
+																<input name="meeting_type_id"
+																       t-att-value="meeting_type.id" type="hidden"/>
+																<input name="meeting_id" t-att-value="meeting.id"
+																       type="hidden"/>
+
+																<input type="hidden" name="csrf_token"
+																       t-att-value="request.csrf_token()"/>
+																<input type="text" name="name" id="meeting_title"
+																       readonly='True'
+																       class="form-control " t-att-value="meeting_title"
+																       autocomplete="off" required="true"/>
+																<span class="border__line"></span>
+																<small class="error error--danger" id="error-cname"
+																       style="display: inline;">
+																</small>
+
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="col-8">
+												<div class="form-group mb-5 ">
+													<div class="row">
+														<div class="col-sm-6 col-md-6 col-lg-6">
+															<div class="control-group focused">
+																<label class="mb-4">Date &amp; Time <span class="text-red">*</span> </label>
+																<input type="date" name="kw_start_meeting_date"
+																       id="kw_start_meeting_date" class="form-control clear"
+																       t-att-value="meeting.kw_start_meeting_date" autocomplete="off"  />
+																<span class="border__line"></span>
+																<small class="error error--danger" id="error-cYears">This Field is Required!</small>
+															</div>
+														</div>
+
+														<div class="col-sm-6 col-md-6 col-lg-6">
+															<div class="control-group focused">
+																<label class="mb-4"> </label>
+																<!-- <input type="time" name="kw_start_meeting_time"
+																       id="kw_start_meeting_time" class="form-control "
+																       value="" autocomplete="off"/> -->
+														       <select class="clear form-control" id="meeting_times" name="kw_start_meeting_time" >
+																	<option></option>
+																	<t t-foreach='meeting_times' t-as='meet_time'>
+																		<option t-att-value="meet_time[0]" t-att-selected="meeting.kw_start_meeting_time == meet_time[0]">
+																			<t t-esc="meet_time[1]"/>
+																		</option>
+																	</t>
+																</select>
+																<span class="border__line"></span>
+																<small class="error error--danger" id="error_time">This Field is Required!</small>
+															</div>
+														</div>
+													</div>
+													<span class="border__line"></span>
+													<small class="error" id="error-cExperience"></small>
+												</div>
+											</div>
+										
+											<div class="col-8">
+												<div class="form-group mb-5">
+													<div t-att-class="'control-group focused' if meeting else 'control-group' ">
+														<label>Duration(hh:mm)</label>
+														<input type="hidden" id="lastQli" value="" name="lastQli"/>
+														<select class="form-control clear" id="m-duration" name="duration" >
+															<option></option>
+															<t t-foreach='duration' t-as='dur'>
+																<option t-att-value="dur[0]" t-att-selected="str(meeting.duration) == str(dur[0])">
+																	<t t-esc="dur[1]"/>
+																</option>
+															</t>
+														</select>
+														<span class="border__line"></span>
+														<small class="error error--danger" id="error_duration_msg">This Field is Required!</small>
+													</div>
+												</div>
+											</div>
+											<div class="col-8">
+												<div class="form-group mb-5">
+													<div t-att-class="'control-group focused' if meeting else 'control-group' ">
+														<label>Mode of Meeting
+															<span class="text-red">*</span>
+														</label>
+
+														<select class="form-control clear" id="moi" name="mode_of_interview">
+															<option></option>
+															<t t-foreach='mode_of_interview' t-as='mof'>
+																<option t-att-value="mof[0]" t-att-selected="meeting.mode_of_interview == mof[0]"><t t-esc="mof[1]"/></option>
+															</t>
+														</select>
+														<span class="border__line"></span>
+														<small class="error error--danger" id="error_moi">This Field is Required!</small>
+													</div>
+												</div>
+											</div>
+											<div class="col-8">
+												<div class="form-group mb-5">
+													<div t-att-class="'control-group focused' if meeting else 'control-group' ">
+														<label>Interview Form
+															<span class="text-red">*</span>
+														</label>
+
+														<select class="form-control clear" id="inter_form" name="survey_id">
+															<option></option>
+															<t t-foreach="interview_forms" t-as='sur'>
+																<option t-att-value="sur.id" t-att-selected="meeting.survey_id.id == sur.id">
+																	<t t-esc="sur.display_name"/>
+																</option>
+															</t>
+														</select>
+														<!-- <input type='text' name="survey_id" id="survey_id" class="form-control"
+														       style="display:none;"/> -->
+														<span class="border__line"></span>
+														<small class="error error--danger" id="error_interview">This Field is Required!</small>
+													</div>
+												</div>
+											</div>
+											<div class="col-8 div_location">
+												<div class="form-group mb-5">
+													<div t-att-class="'control-group focused' if meeting else 'control-group' ">
+														<label>Location</label>
+														<input type="hidden" id="lastQli" value="" name="lastQli"/>
+														<select class="form-control clear" id="location" name="location_id">
+															<option></option>
+															<t t-foreach='location' t-as='loc'>
+																<option t-att-value="loc.id" t-att-selected="meeting.location_id.id == loc.id">
+																	<t t-esc="loc.alias"/>
+																</option>
+															</t>
+														</select>
+														<span class="border__line"></span>
+														<p id='error_loc' class='text-danger' style='font-weight:bold;'>Please Mention Your Location! </p>
+													</div>
+												</div>
+											</div>
+											<div class="col-8 div_room">
+												<div class="form-group mb-5">
+													<div t-att-class="'control-group focused' if meeting else 'control-group' ">
+														<label>Meeting Room
+															<span class="text-red">*</span>
+														</label>
+														<select class="form-control clear" id="meeting_room" name="meeting_room_id">
+															<option></option>
+															<t t-foreach='meeting_room' t-as='mt_room'>
+																<option t-att-value="mt_room.id" t-att-selected="meeting.meeting_room_id.id == mt_room.id">
+																	<t t-esc="mt_room.name"/>
+																</option>
+															</t>
+														</select>
+														<span class="border__line"></span>
+														<p id='error_room' class='text-danger' style='font-weight:bold;'>Please Mention The Room! </p>
+													</div>
+												</div>
+											</div>
+											<div class="col-8 div_phone" style='display:none;'>
+												<div class="form-group mb-5">
+													<div t-att-class="'control-group focused' if meeting else 'control-group' ">
+														<label>Phone Number
+															<span class="text-red">*</span>
+														</label>
+														<input type="text" name="telephone" id="ph_number" class="form-control " t-att-value="meeting.telephone" autocomplete="off"/>
+														<span class="border__line"></span>
+														<p id='ph_error_message' class='text-danger' style='font-weight:bold;'>Please Provide Your Phone Number Details!</p>
+													</div>
+												</div>
+											</div>
+
+											<div class="col-8">
+												<div class="form-group mb-5">
+													<div class="control-group focused">
+														<label for="applicant">Applicant</label>
+														<select class="form-control clear" id="applicant"
+														         multiple="multiple">
+															<option></option>
+															<t t-foreach='applicant' t-as='appcnt'>
+																<option t-att-value="appcnt.id" t-att-selected="appcnt.id in default_applicant.ids if default_applicant else None">
+																	<t t-esc="appcnt.partner_name"/>
+																</option>
+															</t>
+														</select>
+														<span class="border__line"></span>
+														<small class="error error--danger" id="applicant_error"
+														       style="display: inline;">Required!
+														</small>
+													</div>
+													<input name="applicant_ids" id="applicant_id" class="form-control"
+														       t-att-value="','.join([str(elem) for elem in default_applicant.ids])" style="display:none;"/>
+											       	<input name="applicant_id"  class="form-control" t-att-value="default_applicant[0].id"
+														       style="display:none;"/>
+												</div>
+											</div>
+
+											<!-- <div class="col-8">
+												<div class="form-group mb-5">
+													<div t-att-class="'control-group focused' if meeting else 'control-group' ">
+														<label for="vc">VC Details</label>
+														<select class="form-control" id="vc" name="recr_online_meeting">
+															<option></option>
+															<t t-foreach='online_meeting' t-as='olm'>
+																<option t-att-value="olm[0]" t-att-selected="meeting.recr_online_meeting == olm[0]">
+																	<t t-esc="olm[1]"/>
+																</option>
+															</t>
+														</select>
+														<span class="border__line"></span>
+													</div>
+												</div>
+											</div> -->
+
+
+
+											<div class="col-8 meeting_url" id="other_url">
+												<div class="form-group mb-5">
+													<div t-att-class="'control-group focused' if meeting else 'control-group' ">
+														<div class="form-group" id="other_url">
+															<label for="other_url_input">Online Meeting URL</label>
+															<input name="recr_other_meeting_url" id="other_url_input" t-att-value="meeting.recr_other_meeting_url"
+															       class="clear form-control"/>
+														</div>
+														<small class="error error--danger" id="error_url"
+														       style="display: inline;">
+														</small>
+													</div>
+												</div>
+											</div>
+
+											<!-- <div class="col-8">
+												<div class="form-group mb-5">
+													<div t-att-class="'control-group focused' if meeting else 'control-group' ">
+														<div class="form-group">
+															<label for="agenda">Agenda</label>
+															<input name="agenda" id="agenda" t-att-value="meeting.agenda_ids[0].name if meeting.agenda_ids else ''" class="form-control"/>
+														</div>
+													</div>
+												</div>
+											</div> -->
+											
+											<div class="col-8">
+												<div class="form-group mb-5">
+													<div t-att-class="'control-group focused' if meeting else 'control-group' ">
+														<label for="participant_details">Panel Members
+															<span class="text-red">*</span>
+														</label>
+														<select class="clear form-control" multiple="multiple"
+														        id="participant_details" >
+															<option></option>
+															<t t-foreach='participant' t-as='partic'>
+																<option t-att-value="partic.id" t-att-selected="partic.id in meeting.employee_ids.ids">
+																	<t t-esc="partic.name"/>
+																</option>
+															</t>
+														</select>
+														<input type='text' name="employee_ids" id="employee_id" t-att-value="','.join([str(elem) for elem in meeting.employee_ids.ids]) " class="form-control"
+														       style="display:none;"/>
+														<span class="border__line"></span>
+														<small class="error error--danger" id="error_panel"
+															style="display: inline;">Please Add Atleast One Panel Member!
+														</small>
+													</div>
+													<div class= 'mt-3' t-att-style="'' if meeting else 'display:none;'">
+														<div class="form-check form-check-inline">
+															<input class="form-check-input" name='send_to_panel' type="checkbox" id="inlineCheckbox1" value="option1"/>
+															<label class="form-check-label" for="inlineCheckbox1">Notify Panel Members</label>
+														</div>
+														<div class="form-check form-check-inline">
+															<input class="form-check-input" name='send_to_applicant' type="checkbox" id="inlineCheckbox2" value="option2"/>
+															<label class="form-check-label" for="inlineCheckbox2">Notify Applicants</label>
+														</div>
+													</div>
+												</div>
+											</div>
+
+											<div class="col-lg-12 col-md-4">
+												<button type="button" class="btn px-4 btn-primary" value="Submit" id='meetingSubmit' name="Submit">Submit</button>
+												<button type="button" class="btn px-4 ml-3 btn-outline-danger"
+												       value="Reset" name="reset" id='reset_form'>Reset</button>
+											
+											    		   
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- end -->
+
+			</div>
+		</t>
+	</template>
+	<template id='consultancy_meeting_details' name='Interview Details'>
+		<t t-call="website.layout">
+			<div class='container'>
+
+				<div class="application-tab">
+					<div class="meeting-details">
+						<div class="mb-4">
+							<a t-attf-href="/c/schedule-interview?{{keep_query(applicant_id=applicant.id,meeting_id=meeting.id)}}" class="btn btn-info">Modify / Edit</a>
+							<a class="btn btn-info ml-4 pull-right" onclick="javascript:window.history.back();" href="#">
+								<span class="fa fa-arrow-circle-left mr-1"/>
+								Go Back
+							</a>
+						</div>
+						<div class="card p-5 mb-4">
+							<div class="row">
+								<div class="col-12 col-lg-6">
+									<h5 class="mb-4">Meeting Details</h5>
+									<div class="form-group">
+										<label>Meeting Title</label>
+										<p>
+											<t t-esc="meeting.name"/>
+										</p>
+									</div>
+
+									<div class="form-group">
+										<label>Date &amp; Time</label>
+										<p>
+											<t t-esc="meeting.kw_start_meeting_date.strftime('%d-%b-%Y')"/>,
+											<t t-esc="meeting_time"/>
+										</p>
+									</div>
+									<div class="form-group">
+										<label>Duration</label>
+										<p>
+											<t t-esc="duration"/>
+											hr
+										</p>
+									</div>
+								</div>
+
+								<div class="col-12 col-lg-6">
+									<h5 class="mb-4">Interview Details</h5>
+									<div class="form-group">
+										<label>Applicant</label>
+										<p>
+											<t t-esc="applicant.partner_name"/>
+										</p>
+									</div>
+									<div class="form-group" t-if="meeting.survey_id">
+										<label>Interview Form</label>
+										<p><t t-esc="meeting.survey_id.title"/></p>
+									</div>
+									<div class="form-group" t-if="moi">
+										<label>Mode of Interview</label>
+										<p>
+											<t t-esc="moi"/>
+										</p>
+									</div>
+									<div class="form-group" t-if="meeting.telephone">
+										<label>Phone Number</label>
+										<p>
+											<t t-esc="meeting.telephone"/>
+										</p>
+									</div>
+									<div class="form-group" t-if="meeting.recr_online_meeting">
+										<label>VC Details</label>
+										<p>
+											<t t-esc="meeting.recr_online_meeting"/>
+										</p>
+									</div>
+									<div class="form-group" t-if="meeting.recr_other_meeting_url">
+										<label>Other Meeting URL</label>
+										<p>
+											<t t-esc="meeting.recr_other_meeting_url"/>
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="card p-5 mb-4">
+							<div class="row">
+								<div class="col-12">
+									<h5 class="mb-4">Participants Details</h5>
+									<h6>Internal:</h6>
+									<table class="table table-bordered">
+										<thead>
+											<th width="10%">Photo</th>
+											<th width="40%">Name</th>
+											<th>Designation</th>
+										</thead>
+										<tbody>
+											<tr t-foreach='meeting.employee_ids' t-as='employee'>
+
+												<td>
+													<span t-if="employee.image_small"  t-esc="employee.image_small" t-options="{'widget': 'image'}"
+													      role="img" height="25px" width="25px"/>
+												</td>
+												<td>
+													<t t-esc="employee.name"/>
+												</td>
+												<td>
+													<t t-esc="employee.job_id.name"/>
+												</td>
+											</tr>
+
+										</tbody>
+									</table>
+
+								<t t-if="meeting.external_attendee_ids">
+									<h6 class="mt-5">External:</h6>
+									<table class="table table-bordered">
+										<thead>
+											<th>Name</th>
+											<th>Phone</th>
+											<th>Email</th>
+										</thead>
+										<tbody>
+											<tr t-foreach='meeting.external_attendee_ids' t-as='external'>
+												<td>
+												
+													<span >
+														<t t-esc="external['name']"/>
+													</span>
+												</td>
+										
+												<td>
+													<span >
+														<t t-esc='external["phone"]'/>
+													</span>
+												</td>
+												<td>
+													<span>
+														<t t-esc='external["email"]'/>
+													</span>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</t>
+								</div>
+							</div>
+						</div>
+
+						<div t-if="meeting.response_ids" class="card p-5">
+							<div class="row">
+								<div class="col-12">
+									<h5 class="mb-4">Interview Feedback:</h5>
+									<table class="table table-bordered">
+										<thead>
+											<th>Applicant</th>
+											<th>Interviewer</th>
+											<th>Score</th>
+											<th>Remark</th>
+											<th></th>
+											<th></th>
+											<th></th>
+
+										</thead>
+										<tbody>
+											<tr t-foreach='meeting.response_ids' t-as='feedback'>
+												<td>
+													<span >
+														<t t-esc="feedback['applicant_id'].name"/>
+													</span>
+												</td>
+												<td>
+													<span >
+														<t t-esc='feedback["partner_id"].name'/>
+													</span>
+												</td>
+												<td>
+													<span >
+														<t t-esc='feedback["score"]'/>
+													</span>
+												</td>
+												<td>
+													<span>
+														<t t-esc='feedback["remark"]'/>
+													</span>
+												</td>
+												<td>
+													<a role='button' class='btn btn-primary' 
+														t-attf-href="/web/applicant/cv/#{applicant.document_ids.id}/#{applicant.document_ids.file_name}">
+														View CV
+													</a>
+												</td>
+												<td>
+													<a t-if="feedback.state != 'new'" role='button' class='btn btn-primary' 
+													t-att-href="'/kw_recruitment/survey/print/%s/%s' % (slug(feedback.survey_id), 
+													feedback.token)">View Feedback</a>
+
+													<!-- <a t-if="feedback.state == 'new'" role='button' class='btn btn-primary' 
+													t-att-href="'/kw_recruitment/survey/start/%s/%s' % (slug(feedback.survey_id), 
+													feedback.token)">Give Feedback</a> -->
+												</td>
+												<td>
+													<a t-if="feedback.state != 'new'" role='button' class='btn btn-primary' t-attf-href="/web/applicant/feedback/#{feedback.id}">PDF</a>
+												</td>	
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+
+
+				</div>
+			</div>
+
+			
+		</t>
+		</template>
+	<template id='consultancy_interview_summary_reports' name='Interview Summary Details'>
+		<t t-call="website.layout">
+			<div class='container'>
+				<div class="application-tab">
+					<div class='d-flex'>
+						<h3 class="flex-grow-1">Interview Summary Details</h3>
+					</div>
+
+					<div class="applicant-details mt-4">
+						<table class="table table-bordered">
+							<thead>
+								<tr>
+									<td class="text-center" width="200">
+										<strong>Name</strong>
+									</td>
+									<td class="text-center">
+										<strong>Job positions</strong>
+									</td>
+									<td class="text-center"> 
+										<strong>Qualifications</strong>
+									</td>
+									<td class="text-center">
+										<strong>Experience</strong>
+									</td>
+									<td class="text-center">
+										<strong>Status</strong>
+									</td>
+									
+								</tr>
+							</thead>
+							<tbody>
+								<tr t-foreach='summary_applicant' t-as='sa'>
+									<td class="text-center">
+										<span name="partner_name"  
+										t-esc="sa['partner_name']"/>
+									</td>
+									<td class="text-center">
+										<span name="job_position"
+										 t-esc="sa['job_position'].title"/>
+									</td>
+									<td class="text-center">
+										<span name="qualification_ids"
+										t-esc="sa['qualification_ids'].name"/>
+									</td>
+									<td class="text-center">
+										<span name="exp_year"
+										 t-esc="sa['exp_year']"/>
+									</td>
+									<td class="text-center">
+										<span name="stage_id"
+										 t-esc="sa['stage_id'].name"/>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</t>
+	</template>
+</odoo>

@@ -1,0 +1,131 @@
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="view_test_scenario_tree">
+            <field name="name">view_test_scenario_tree</field>
+            <field name="model">test_scenario_master</field>
+            <field name="arch" type="xml">
+                <tree import="0" class="bug_raise_tree">
+                    <field name="prepared_by"/>
+                    <field name="code" string="TS Id"/>
+                    <field name="project_id"/>
+                    <field name="module_id"/>
+                    <field name="prepared_on"/>
+                    <field name="expected_no_of_test_case"/>
+                    <field name="scenario_description"/>
+                    <field name="tl_remark" invisible="0" groups="kw_bug_life_cycle.group_Test_lead_bug_life_cycle, kw_bug_life_cycle.group_tester_bug_life_cycle"/>
+                    <field name="pm_remark" invisible="0" groups="kw_bug_life_cycle.group_Test_lead_bug_life_cycle,kw_bug_life_cycle.group_pm_bug_life_cycle,kw_bug_life_cycle.group_tester_bug_life_cycle"/>
+                    <field name="ba_remark" invisible="0" groups="kw_bug_life_cycle.group_Test_lead_bug_life_cycle,kw_bug_life_cycle.group_ba_bug_life_cycle,kw_bug_life_cycle.group_tester_bug_life_cycle"/>
+                    <field name="state" invisible="1"/>
+                    <field name="revert_status_boolean" invisible="1"/>
+                    <field name="status_compute"/>
+                    <field name="modified_by" string="Modified By"/>
+                    <field name="write_date" string="Modified On"/>
+                    <field name="is_user_ba" invisible="1"/>
+                    <field name="is_user_tl" invisible="1"/>
+                    <field name="is_user_pm" invisible="1"/>
+                    <field name='is_view_scenario' invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="view_test_scenario_search_view" model="ir.ui.view">
+            <field name="name">view_test_scenario_search_view</field>
+            <field name="model">test_scenario_master</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="prepared_by"/>
+                    <field name="project_id"/>
+                    <field name="module_id"/>
+                    <field name="revert_status_boolean"/>
+                    <filter string="My Projects" domain="[('prepared_by', '=',uid)]" name="my_projects"/>
+                    <filter string="This Month" domain="[('prepared_on', 'like',context_today().strftime('%Y-%m'))]" name="current_month_test_scenario"/>
+                    <separator/>
+                    <filter string="Draft" domain="[('state', '=','Draft'), ('revert_status_boolean', '!=',True)]" name="draft_records"/>
+                    <filter string="Submitted" domain="[('state', '=','Submitted')]" name="submitted_records"/>
+                    <filter string="TL Approved" domain="[('state', '=','TL Approved')]" name="tl_records"/>
+                    <filter string="PM/BA Approved" domain="[('state', '=','PM/BA Approved')]" name="pm/ba_records"/>
+                    <filter string="Reverted" domain="[('revert_status_boolean', '=',True)]" name="revert_records"/>
+
+                    <filter name="group_by_employee" string="Prepared By" context="{'group_by':'prepared_by'}" />
+                    <filter name="group_by_project" string="Project" context="{'group_by':'project_id'}" />
+                    <filter name="group_by_module" string="Module" context="{'group_by':'module_id'}" />
+                    <filter name="group_by_state" string="State" context="{'group_by':'state'}" />
+                </search>
+            </field>
+        </record>
+
+
+        <record model="ir.ui.view" id="test_view_scenario_master_form">
+            <field name="name">test_scenario_master_form</field>
+            <field name="model">test_scenario_master</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form duplicate="false" delete="false" export="false">
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <div class="oe_title" style="color: #3a7563 !important;font-weight: bold;">
+                                <h1>
+                                    <field name="code" placeholder="e.g. Project_name||module_name||TS001"/>
+                                </h1>
+                            </div>
+                        </group>
+                        <group style="background: #ebfdf8;">
+                            <group>
+                                <field name="pm_ba_btn_hide_bool" invisible="1"/>
+                                <field name="is_tester" invisible="1"/>
+                                <field name="is_user_tl" invisible="1"/>
+                                <field name="field_readonly_bool" invisible="1"/>
+                                <field name="prepared_by" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                                <field name="prepared_on"/>
+                                <field name="project_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}" attrs="{'readonly': [('field_readonly_bool', '=', True)]}"/>
+                                <field name="module_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}" attrs="{'readonly': [('field_readonly_bool', '=', True)]}"/>
+                                <field name="expected_no_of_test_case" attrs="{'readonly': [('field_readonly_bool', '=', True)]}"/>
+                                <field name="scenario_description" attrs="{'readonly': [('state','!=','Draft')]}"/>
+                            </group>
+                            <group>
+                                <field name="not_ok_remark" style="color:red;" class="blink_bug_me" attrs="{'invisible':[('not_ok_remark','=',False)]}"
+                                       readonly='1'/>
+                            </group>
+                        </group>
+
+                        <group string="Action Log">
+                            <field name="action_log_ids" style="pointer-events:none;">
+                                <tree class="bug_raise_tree">
+                                    <field name="test_scenario_id" invisible="1"/>
+                                    <field name="action_taken_by_id"/>
+                                    <field name="action_taken_on"/>
+                                    <field name="action_state"/>
+                                    <field name="action_remark" invisible="1"/>
+                                </tree>
+                            </field>
+                            <group>
+
+                            </group>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="view_test_scenario_window">
+            <field name="name">View Scenario</field>
+            <field name="res_model">test_scenario_master</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                     (0, 0, {'view_mode': 'tree', 'view_id': ref('view_test_scenario_tree')}),
+                     (0, 0, {'view_mode': 'form', 'view_id': ref('test_view_scenario_master_form')})]"/>
+            <field name="context">{'create':False, 'edit':False, 'import':False, 'export': False, 'delete':False, 'group_by':'project_id', 'act_permission':True, 'delegate':True}</field>
+
+        </record>
+
+    </data>
+</odoo>

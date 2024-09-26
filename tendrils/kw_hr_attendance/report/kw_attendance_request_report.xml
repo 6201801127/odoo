@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    
+    <record id="kw_employee_apply_attendance_report_view_form" model="ir.ui.view">
+        <field name="name">Employee Attendance Request Report Form View</field>
+        <field name="model">kw_employee_apply_attendance</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <form string="Apply Attendance" create="false" import="false" delete="false" duplicate="false">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="1,2,3"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="applied_for" widget="radio" options="{'horizontal': true}"/>
+                            <field name="employee_id" options="{'no_create_edit': True, 'no_create': True, 'no_open': True}"/>
+                            <field name="request_for" />  
+                            <field name="attendance_date" autocomplete="off" options="{'datepicker':{'maxDate': 'now'}}"/>
+                            <field name="check_in_datetime" autocomplete="off" options="{'datepicker':{'warn_future': true}}"/>
+                            <field name="check_out_datetime" autocomplete="off" options="{'datepicker':{'warn_future': true}}"/>
+                            <field name="reason"/>
+                        </group>
+                        <group>
+                            <field name="portal_login_ids" readonly="1" string="Portal Log-in">
+                                <tree>
+                                    <field name="date_time"/>
+                                </tree>
+                            </field>
+
+                            <field name="attendance_log_ids" readonly="1" invisible="1">
+                                <tree>
+                                    <field name="check_in" string="In Time"/>
+                                    <field name="check_out" string="Out Time"/>
+                                    <field name="check_in_mode_display" string="Mode"/>
+                                </tree>
+                            </field>
+                            <field name="shift_name"/>
+                            <field name="shift_in" string="Shift In Time"/>
+                            <field name="shift_out" string="Shift Out Time"/>
+                            <field name="is_cross_shift"/>
+                        </group>
+
+                        <group string="Approval Details">
+                            <field name="action_taken_by" options="{'no_open':true}"/>
+                            <field name="authority_remark" string="Remark"/>
+                            <field name="action_taken_on" />
+                        </group>
+                    </group>
+                </sheet>
+
+            </form>
+        </field>
+    </record>
+
+    <record id="view_kw_attendance_request_report_tree" model="ir.ui.view">
+        <field name="name">Employee Attendance Request Report List View</field>
+        <field name="model">kw_attendance_request_report</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree string="Attendance Request" default_order="applied_on desc" create="false" import="false" delete="false">
+                <field name="emp_name"/>
+                <field name="designation"/>
+                <field name="department"/>
+                <field name="attendance_date"/>
+                <field name="check_in_datetime"/>
+                <field name="check_out_datetime"/>
+                <field name="applied_on" widget="date" string="Applied On"/>               
+                <field name="request_for" />  
+                <field name="reason"/>
+                <field name="action_authority"/>
+                <field name="authority_remark"/>
+                <field name="action_taken_on" />
+                <field name="status"/>
+                <button name="view_request_details" type="object" string="View Details" class="oe_highlight"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="kw_attendance_request_report_view_form" model="ir.ui.view">
+        <field name="name">Employee Attendance Request Report Form View</field>
+        <field name="model">kw_attendance_request_report</field>
+        <field name="arch" type="xml">
+            <form string="Attendance Request" create="false" import="false" delete="false" duplicate="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="emp_name"/>
+                            <field name="designation"/>
+                            <field name="department"/>
+                            <field name="attendance_date"/>
+                            <field name="check_in_datetime"/>
+                            <field name="check_out_datetime"/>
+                        </group>
+                        <group>
+                            <field name="applied_on" widget="date" string="Applied On"/>
+                            <field name="status"/>
+                            <field name="action_authority"/>
+                            <field name="reason"/>
+                            <field name="authority_remark"/>
+                        </group>
+                    </group>
+                </sheet>
+
+            </form>
+        </field>
+    </record>
+
+    <record id="view_kw_attendance_request_report_pivot" model="ir.ui.view">
+        <field name="name">Employee Attendance Request Pivot View</field>
+        <field name="model">kw_attendance_request_report</field>
+        <field name="arch" type="xml">
+            <pivot string="Attendance Request">
+                <field name="emp_name" type="row"/>
+                <field name="attendance_date" type="col"/>
+                <!-- <field name="designation" type="col"/> -->
+                <!-- <field name="department" type="col"/> -->
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_kw_attendance_request_report_search" model="ir.ui.view">
+        <field name="name">Employee Attendance Request Search View</field>
+        <field name="model">kw_attendance_request_report</field>
+        <field name="arch" type="xml">
+            <search string="Search Description">
+                <field name="attendance_date"/>
+                <field name="emp_name"/>
+                <filter string="This Year" domain="[('attendance_date', 'like',context_today().strftime('%Y'))]" name="current_year_attendance"/>
+                <separator/>
+                <filter string="Apply Date" name="filter_attendance_date" date="attendance_date"/>
+                <separator/>
+                <filter string="This Month" name="filter_current_month" domain="[('attendance_date', 'like',context_today().strftime('%Y-%m-%'))]"/>
+                <filter string="Last Month" domain="[('attendance_date','&gt;',(context_today()-relativedelta(months=2)).strftime('%Y-%m-01')),('attendance_date','&lt;',(context_today()).strftime('%Y-%m-01'))]" name="last_month_attendance"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="status" string="Status" context="{'group_by':'status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_kw_attendance_request_report_act_window" model="ir.actions.act_window">
+        <field name="type">ir.actions.act_window</field>
+        <field name="name">Attendance Request Report</field>
+        <field name="res_model">kw_attendance_request_report</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_type">form</field>
+        <field name="target">current</field>
+        <field name="domain">[]</field>
+        <field name="context">{"search_default_current_year_attendance":1,"search_default_filter_current_month":1,"edit": False,"import": False}</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('view_kw_attendance_request_report_tree')}),
+                (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_kw_attendance_request_report_pivot')},
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_attendance_request_report_view_form')}))]"/>
+        <field name="search_view_id" ref="view_kw_attendance_request_report_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No record found
+            </p>
+        </field>
+    </record>
+    
+    </data>
+</odoo>

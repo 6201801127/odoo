@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- START: My Late entries  -->
+        <record id="view_my_late_entry_tree" model="ir.ui.view">
+            <field name="name">view.my late entries.tree</field>
+            <field name="model">kw_daily_employee_attendance</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="My Late Entries" create="false" edit="false" delete="false" import="false" default_order="attendance_recorded_date desc,employee_id">
+                    <field name="employee_id" string="Name" />
+                    <field name="attendance_recorded_date" string="Date" />
+                    <field name="shift_in" string="Office Time" />
+                    <field name="check_in_time" string="In Time" />
+                    <field name="late_entry_reason" string="Late Reason" />
+                    <field name="le_state" string="Status" />
+                    <field name="le_forward_to" string="Action To Be Taken By" attrs="{'invisible': [('le_state','not in',['1','3'])]}" />
+                    <field name="le_authority_remark" string="Remarks" />
+                    <field name="le_action_status" string="Paycut Status" />
+
+                    <field name="this_month_record" invisible="1" />
+                    <!-- <button string="Enter LE Reason"  class="oe_highlight"  attrs="{'invisible':['|',('le_state','not in',['0',False]),('this_month_record','=',False)]}" name="%(kw_hr_attendance.late_entry_approval_wizard_window_action)d" type="action" context="{'default_action_type': 'update_le_reason'}"  />  -->
+
+                    <field name="is_le_authorized" invisible="1" />
+                    <button name="%(kw_hr_attendance.late_entry_approval_wizard_window_action)d" type="action" string="Take Action" class="oe_highlight" attrs="{'invisible':['|',('le_state','not in',['1','3']),('is_le_authorized','=',False)]}" />
+                </tree>
+            </field>
+        </record>
+
+
+        <!-- Form view for "model" -->
+        <record id="view_my_late_entry_form" model="ir.ui.view">
+            <field name="name">view.my late entries.form</field>
+            <field name="model">kw_daily_employee_attendance</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="My Late Entry">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="employee_id" string="Name" options='{"no_open": True, "no_create": True}'/>
+                                <field name="attendance_recorded_date" string="Date" />
+                                <field name="shift_in" string="Office Time" />
+                                <field name="check_in_time" string="In Time" />
+                            </group>
+                            <group>
+                                <field name="late_entry_reason" string="Late Reason" />
+                                <field name="le_authority_remark" string="Remarks" />
+                                <field name="le_state" string="Status" />
+                                <field name="le_action_status" string="Paycut Status" />
+                                <field name="le_forward_to" string="Action To Be Taken By" options='{"no_open": True, "no_create": True}'/>
+                            </group>
+                        </group>
+                        <separator/>
+                        <group attrs="{'invisible': [('le_approval_log_ids','=',False)]}" >
+                            <field name="le_approval_log_ids" string="Action Logs">
+                                
+                            </field>
+                        </group>
+                    </sheet>
+                    
+                </form>
+            </field>
+        </record>
+
+        <record id="view_late_entries_search" model="ir.ui.view">
+            <field name="name">Employee Late Entry Request Search View</field>
+            <field name="model">kw_daily_employee_attendance</field>
+            <field name="arch" type="xml">
+                <search string="Search Description">
+                    <field name="employee_id" string="Employee" />
+                    <field name="attendance_recorded_date"/>
+                    <field name="branch_id" />
+                    <filter string="Attendance Date" name="filter_attendance_date" date="attendance_recorded_date"/>
+                    <filter string="Today" name="filter_attendance_day" domain="[('attendance_recorded_date', 'like',context_today().strftime('%Y-%m-%d'))]" />
+                    <filter string="This Month" domain="[('attendance_recorded_date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-26')),('attendance_recorded_date','&lt;=',(context_today()).strftime('%Y-%m-25'))]" name="filter_attendance_this_month"/>
+                    <filter string="Last Month" domain="[('attendance_recorded_date','&gt;=',(context_today()-relativedelta(months=2)).strftime('%Y-%m-26')),('attendance_recorded_date','&lt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-25'))]" name="filter_attendance_last_month"/>
+                    <separator/>
+
+                   <!-- <filter string="My Late Entries (This Month)" name="filter_my_late_entries_current_month" domain="[('employee_id.user_id', '=',uid),('attendance_recorded_date','&lt;=',(datetime.date.today()+relativedelta(day=31)).strftime('%Y-%m-%d')),('attendance_recorded_date','&gt;=',(datetime.date.today()-relativedelta(day=1)).strftime('%Y-%m-%d'))]"  />  -->
+
+                   <filter string="My Late Entries" name="filter_my_late_entries" domain="[('employee_id.user_id', '=',uid)]"  />
+                  <!--  -->
+                   <!-- <filter string="Sub-ordinate Entries (This Month)" name="filter_child_late_entries_current_month" domain="[('employee_id.parent_id.user_id', '=',uid),('attendance_recorded_date','&lt;=',(datetime.date.today()+relativedelta(day=31)).strftime('%Y-%m-%d')),('attendance_recorded_date','&gt;=',(datetime.date.today()-relativedelta(day=1)).strftime('%Y-%m-%d'))]"  />   -->
+                   <filter string="Sub-ordinate Late Entries" name="filter_child_late_entries" domain="[('employee_id.parent_id.user_id', '=',uid)]"  />
+                   <filter string="Pending at Me" name="filter_pending_at_me" domain="[('le_state','in',['1','3']),('le_forward_to.user_id','=',uid)]"  /> 
+
+                    <group expand="0" string="Group By">
+						<filter name="group_by_employee_id" string="Employee" context="{'group_by':'employee_id'}"/>
+                        <filter name="group_by_branch_id" string="Branch" context="{'group_by':'branch_id'}"/>
+                        <filter name="group_by_le_state" string="Late Entry Status" context="{'group_by':'le_state'}"/>
+                        <filter name="group_by_le_action_status" string="Paycut Status" context="{'group_by':'le_action_status'}"/>
+					</group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Main window action for "model" -->
+        <record id="action_my_late_entries_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">View Late Entry Status</field>
+            <field name="res_model">kw_daily_employee_attendance</field>
+            <field name="view_mode">tree,form</field>          
+            <field name="search_view_id" ref="view_late_entries_search" />
+            <field name="domain">[('check_in_status','in',['2','3'])]</field>
+            <field name="context">{"search_default_filter_my_late_entries":1,"search_default_filter_attendance_this_month":1,"search_default_group_by_le_action_status":1,'late_entry_report':1,"create": False,"edit": False,"toolbar":False}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No record found
+                </p>
+            </field>
+        </record>
+
+        <record id="action_my_late_entries_act_window_view_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_my_late_entry_tree"/>
+            <field name="act_window_id" ref="action_my_late_entries_window"/>
+        </record>
+
+        <record id="action_my_late_entries_act_window_view_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_my_late_entry_form"/>
+            <field name="act_window_id" ref="action_my_late_entries_window"/>
+        </record>
+
+        <!-- END: My Late entries  -->
+
+        <!-- START: Late entries to Approve -->
+        <record id="view_late_entry_to_approve_tree" model="ir.ui.view">
+            <field name="name">view.late entries approve requests.tree</field>
+            <field name="model">kw_late_entry_take_action</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Late Entry Approval Requests" create="false" edit="false" delete="false" import="false" default_order="attendance_recorded_date desc,employee_id asc">
+                    <field name="employee_id" string="Name" />
+                    <field name="attendance_recorded_date" string="Date" />
+                    <field name="shift_in" string="Office Time" />
+                    <field name="check_in_time" string="In Time" />
+                    <field name="check_out_time" string="Out Time" />
+                    <field name="late_entry_reason" string="Late Reason" />
+                    <button name="%(kw_hr_attendance.late_entry_approval_wizard_window_action)d" type="action" string="Take Action" class="oe_highlight" />
+                </tree>
+            </field>
+        </record>
+
+
+        <!-- Form view for "model" -->
+        <record id="view_late_entry_to_approve_form" model="ir.ui.view">
+            <field name="name">view.late entries approve requests.form</field>
+            <field name="model">kw_late_entry_take_action</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Late Entry Approval Requests">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="employee_id" string="Name"  options='{"no_open": True, "no_create": True}'/>
+                                <field name="attendance_recorded_date" string="Date" />
+                                <field name="shift_in" string="Office Time" />
+                                <field name="check_in_time" string="In Time" />
+                            </group>
+                            <group>
+                                <field name="late_entry_reason" string="Late Reason" />
+                                <!--  <field name="le_authority_remark" string="RA's Remarks" /> -->
+                                <field name="le_state" string="Status" />
+                                <field name="le_action_status" string="Paycut Status" />
+                                <!--<field name="le_action_taken_by" string="Action To Be Taken By" /> -->
+                            </group>
+                        </group>
+                        <group>
+                            <field name="le_approval_log_ids" string="Approval Logs">
+                                <field name="action_taken_by" />
+                                <field name="authority_remark"/>
+                                <field name="state" string="Status" />
+                                <field name="forward_to" />
+                            </field>
+                        </group>
+
+                    </sheet>
+                    
+                </form>
+            </field>
+        </record>
+
+        <record id="search_view_kw_late_entry_take_action" model="ir.ui.view">
+            <field name="name">Employee Daily Attendance Search View</field>
+            <field name="model">kw_late_entry_take_action</field>
+            <field name="arch" type="xml">
+                <search string="Search Attendance">
+                    <field name="employee_id" string="Employee" />
+                    <field name="attendance_recorded_date"/>
+                    <filter string="Attendance Date" name="filter_attendance_date" date="attendance_recorded_date"/>
+                    <!-- <filter string="This Month" domain="[('attendance_recorded_date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-26')),('attendance_recorded_date','&lt;=',(context_today()).strftime('%Y-%m-25'))]" name="filter_late_entry_approval_this_month"/> -->
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter name="employee" string="Employee" context="{'group_by':'employee_id'}"/>
+                        <filter name="attendance_date" string="Attendance Date" context="{'group_by':'attendance_recorded_date'}" />                        
+                        <!-- <filter name="le_state" string="Late Entry Status" context="{'group_by':'le_state'}" /> -->
+                        <!-- <filter name="le_action_status" string="Late Entry Action Status" context="{'group_by':'le_action_status'}" /> -->
+                        <separator/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Main window action for "model" -->
+        <record id="action_late_entry_approve_requests_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Late Entry Approval Requests</field>
+            <field name="res_model">kw_late_entry_take_action</field>
+            <field name="view_mode">tree,form</field>  
+
+            <field name="domain">['&amp;',('attendance_recorded_date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-26')),'|', ('employee_id.parent_id.user_id','=',uid),('le_forward_to.user_id','=',uid)]</field>  
+            <field name="context">{"create": False,"edit": False}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No record found
+                </p>
+            </field>
+        </record>
+
+        <record id="action_late_entry_approve_window_view_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_late_entry_to_approve_tree"/>
+            <field name="act_window_id" ref="action_late_entry_approve_requests_window"/>
+        </record>
+
+        <record id="action_late_entry_approve_window_view_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_late_entry_to_approve_form"/>
+            <field name="act_window_id" ref="action_late_entry_approve_requests_window"/>
+        </record>
+
+        <!-- END:Late entries to Approve -->
+
+        <!-- Late Entry Update Pending At -->
+
+        <record model="ir.ui.view" id="kw_late_entry_ra_change_action_wizard_form">
+            <field name="name">Update Late Entry Pending At</field>
+            <field name="model">kw_late_entry_ra_change_action</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="employee_id" required="1" options='{"no_open": True, "no_create": True}' />
+                            <field name="updated_ra" required="1" options='{"no_open": True, "no_create": True}' />
+                            <field name="update_from_date" required="1"/>
+                        </group>
+                        <footer>
+                            <center>
+                                <button name="update_le_pending_at" type="object" string="Update Pending At"
+                                    class="btn-primary" />
+                            </center>
+                        </footer>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_late_entry_ra_change_action_window" model="ir.actions.act_window">
+            <field name="name">Update Late Entry Pending At</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kw_late_entry_ra_change_action</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                </p>
+            </field>
+        </record>
+        <menuitem name="Update Late Entry Pending At"
+                  id="kw_budget_sync_menu"
+                  parent="disable_debug_mode.menu_technical_developer"
+                  action="kw_late_entry_ra_change_action_window"
+        />
+    </data>
+</odoo>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+        <record id="eos_view_report_2" model="ir.ui.view">
+            <field name="name">view.kw_eos_checklist_report_tree</field>
+            <field name="model">kw_eos_checklist</field>
+            <field name="type">tree</field>
+<!--            <field name="mode">primary</field>-->
+<!--            <field name="priority" eval="19"/>-->
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <tree import="false" create="false" delete='false' edit='false' default_order="create_date desc">
+                    <field name="offboarding_type"/>
+                    <field name="applicant_name" class="font-weight-bold"/>
+                    <field name="applicant_code"/>
+                    <field name="department_id"/>
+                    <field name="division"/>
+                    <field name="section"/>
+                    <field name="practise"/>
+                    <field name="job_id"/>
+                    <field name="create_date" widget='date' string='EOS Applied On'/>
+                    <field name="effective_from" widget="date"/>
+                    <field name="last_working_date" widget="date"/>
+                    <field name="action_to_be_taken_by"/>
+                    <field name="approved_by"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        <record id="eos_view_report_form" model="ir.ui.view">
+            <field name="name">view.kw_eos_checklist_report_form</field>
+            <field name="model">kw_eos_checklist</field>
+            <field name="type">form</field>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <form string="EOS report All" import="false" create="false" delete='false' edit='false'>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="offboarding_type"/>
+                                <field name="applicant_id" string="Applied For"/>
+                                <field name="department_id"/>
+                                <field name="division"/>
+                                <field name="section"/>
+                                <field name="practise"/>
+                                <field name="job_id"/>
+                            </group>
+                            <group>
+                                <field name="create_date" widget='date' string='EOS Applied On'/>
+                                <field name="effective_from" widget="date"/>
+                                <field name="last_working_date" widget="date"/>
+                                <field name="action_to_be_taken_by"/>
+                                <field name="approved_by"/>
+                                <field name="state"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+         <record id="eos_checklist_report_action" model="ir.actions.act_window">
+            <field name="name">EOS Report</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kw_eos_checklist</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="view_ids" eval="[(5, 0, 0),(0, 0, {'view_mode': 'tree', 'view_id': ref('eos_view_report_2')}),(0, 0, {'view_mode': 'form', 'view_id': ref('eos_view_report_form')})]"/>
+            <field name="domain">[]</field>
+            <field name="context">{'eos_report':True}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No records available
+                </p>
+            </field>
+        </record>
+
+        <record id="eos_report_action_window" model="ir.actions.act_window">
+            <field name="name">EOS All Report</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kw_eos_checklist</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="view_ids" eval="[(5, 0, 0),(0, 0, {'view_mode': 'tree', 'view_id': ref('eos_view_report_2')}),(0, 0, {'view_mode': 'form', 'view_id': ref('eos_view_report_form')})]"/>
+            <field name="domain">[]</field>
+            <!-- <field name="context">{'eos_report':True}</field> -->
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No records available
+                </p>
+            </field>
+        </record>
+
+        <record id="kw_eos_server_action" model="ir.actions.server">
+            <field name="name">EOS Report</field>
+            <field name="condition">True</field>
+            <field name="model_id" ref="kw_eos_integrations.model_kw_eos_checklist"/>
+            <field name="state">code</field>
+            <field name="code">
+if env.user.has_group('kw_eos.group_kw_eos_user') \
+    and not env.user.has_group('kw_eos.group_kw_eos_manager') \
+    and not env.user.has_group('kw_employee.group_hr_ra') \
+    and not env.user.has_group('kw_onboarding.group_kw_onboarding_finance') \
+    and not env.user.has_group('kw_onboarding.group_kw_onboarding_admin') \
+    and not env.user.has_group('kw_onboarding.group_kw_onboarding_nsa') \
+    and not env.user.has_group('kw_eos.group_kw_eos_officer') \
+    and not env.user.has_group('kw_eos.group_kw_eos_resource_head') \
+    and not env.user.has_group('kw_wfh.group_hr_hod') \
+    and not env.user.has_group('kw_resource_management.group_sbu_representative') \
+    and not env.user.has_group('kw_eos.group_kw_eos_report_manager'):
+    tree_view_id = env.ref('kw_eos_integrations.eos_view_report_2').id
+    action = {
+            'type': 'ir.actions.act_window',
+            'name' : 'EOS Report',
+            'view_type': 'form',
+            'view_mode': 'tree',
+            'views': [(tree_view_id, 'tree')],
+            'res_model': 'kw_eos_checklist',
+            'domain':[('applicant_id.user_id','=',env.user.employee_ids.user_id.id)],
+            }
+else:
+    form_view_id = env.ref('kw_eos_integrations.kw_eos_report_wizard_view').id
+    action = {
+            'type': 'ir.actions.act_window',
+            'name' : 'EOS Report',
+            'view_mode': 'form',
+            'view_mode': 'form',
+            'res_model': 'kw_eos_report_wizard',
+            'views': [(form_view_id,'form')],
+            'target': 'new',
+    }
+            </field>
+    </record>
+
+        <menuitem name="EOS Report" id="eos_report_menu" parent='kw_eos.eos_reports_menu' sequence="2"
+		        action="kw_eos_server_action"/>
+        <menuitem name="EOS All Report" id="eos_all_report_menu" parent='kw_eos.eos_reports_menu' sequence="96"
+		        action="eos_report_action_window" groups="base.group_no_one"/>
+		
+    </data>
+</odoo>

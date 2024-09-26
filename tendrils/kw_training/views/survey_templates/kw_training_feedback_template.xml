@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data noupdate="0">
+		<template id="kw_training_feedback_form" name="Training Feedback">
+			<t t-call="website.layout">
+				<div class="container mt-4">
+					<div class="card">
+						<div class="card-header ch">
+							<p class="text-center text-capitalize mt-2 mb-0" style="font-size: 1.7rem"> Training Feedback </p>
+						</div>
+						<div class="card-body">
+							<form class="" role="form" id="kw_training_feedback_form" method="post" t-att-name="'%s' % (training.id)" 
+											t-att-action="'/feedback-submit/%s/%s/%s' % (slug(training),slug(employee),slug(survey))">
+								<input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+								<div class="clear-fix">
+								</div>
+								<input type="hidden" name="instructor_type" t-att-value="instructor_type"/>
+								<input type="hidden" name="tid" t-att-value="training.id"/>
+								<input type="hidden" name="eid" t-att-value="employee.id"/>
+								<div class="row px-3">
+									<span class="text-center h6">
+										Training : </span> &amp;emsp;
+									<span class="h6" style="color: #108fbb" t-esc="training.name"/>
+								</div>
+								<div class="row px-3 my-2">
+
+									<label for="instructor h1">
+										<span class="h6" style="color:black;">Select Instructor:</span>
+									</label>
+									<select class="browser-select custom-select" id="instructor" name="instructor_id">
+										<t t-foreach="instructors" t-as="ins">
+											<option t-att-value="ins.id">
+												<t t-if="instructor_type=='external'">
+													External
+												</t>
+												<t t-else="">
+													<t t-esc="ins.name"/>
+												</t>
+											</option>
+										</t>
+									</select>
+									<h1/>
+								</div>
+								<div>
+									<table class="table  table-bordered miltable" id="miltable">
+										<thead class='thead-orange'>
+											<tr>
+												<th scope="col">Category</th>
+												<th scope="col" width="20%">Marks</th>
+												<th scope="col">Remarks</th>
+											</tr>
+										</thead>
+										<tbody>
+											<t t-set="page" t-value="survey.page_ids[0]"/>
+											<tr t-foreach="page.question_ids" t-as="question">
+												<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)"/>
+												<td scope="col">
+													<p class="text-left h6 p-2" t-esc="question.question"/>
+												</td>
+												<td scope="col" width="10%">
+													<t t-if="question.type == 'simple_choice'">
+														<select class="browser-select custom-select" t-att-name="prefix">
+															<t t-foreach="question.labels_ids" t-as="label">
+																<option t-att-value="label.id">
+																	<t t-esc="label.value"/>
+																</option>
+															</t>
+														</select>
+													</t>
+												</td>
+												<td scope="col">
+													<div class="form-group m-0">
+														<input type="text" class="form-control" required="true" t-att-name="'%s_%s' % (prefix, 'comment')"/>
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+									<div class="text-center mt16 mb16">
+										<button type="button" class="btn btn-info badge" onclick='window.history.go(-1);'>
+											Back
+										</button>
+										<button type="submit" id="finish" class="btn btn-success badge" name="submit_feedback" value="finish">
+											Submit
+										</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</t>
+		</template>
+		<template id="kw_training_feedback_form_assets" inherit_id="kw_training.kw_training_feedback_form">
+			<xpath expr="." position="inside">
+				<link href="/kwantify_theme/static/src/mdb/css/mdb.min.css?v=12" rel="stylesheet"/>
+				<script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js?v=12"/>
+				<script type="text/javascript" src="/kw_training/static/src/js/kw_training_feedback.js"/>
+				<script type="text/javascript" src="/kw_training/static/src/lib/sweetalert_new.js"/>
+				<script type="text/javascript" src="/kw_training/static/src/lib/jquery.validate.min.js"/>
+				<script type="text/javascript" src="/kw_training/static/src/lib/additional-methods.js"/>
+				<link rel="stylesheet" href="/kw_training/static/src/css/form_style.css"/>
+			</xpath>
+		</template>
+
+		<template id="error" name="Training Error Page">
+			<t t-call="website.layout">
+				<t t-if="message">
+					<t t-esc="message"/>
+				</t>
+			</t>
+		</template>
+
+
+		<template id="feedback_submitted" name="Survey Finished">
+			<t t-call="website.layout">
+				<t t-set="head">
+					<t t-call-assets="web.assets_common"/>
+				</t>
+				<div class="wrap">
+					<div class="container mt-5">
+						<section class="service-request">
+							<div class="container card border-color">
+								<div class="card-body ">
+									<div class="row">
+										<div class="col-12 mx-auto">
+											<div class="section__content text-center">
+												<span class="fa fa-check-circle fa-5x "></span>
+												<h2 class="display-8 text-center text-capitalize font-weight-bold mt-2 mb-4">Your
+													feedback submitted successfully!
+												</h2>
+												<button class="btn btn-primary btn-lg meeting" type="button" onclick='window.history.go(-2);'>
+													<i class="fa fa-arrow-circle-left "/>&amp;nbsp;
+													Back to Training
+												</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</section>
+					</div>
+				</div>
+			</t>
+		</template>
+
+		<template id="finished" name="Training Feedback Finished">
+			<t t-call="website.layout">
+				<p class="text-center mt-10">
+					You Have Already Submitted Your Feedback
+				</p>
+			</t>
+		</template>
+
+		<template id="kw_feedback_result_view_form" name="Feedback Result View Form">
+			<t t-call="website.layout">
+				<div class="container mt-4">
+					<div class="card">
+						<div class="card-header ch font-weight-bold">
+							<p class="text-center text-capitalize mt-2 mb-0" style="font-size: 1.7rem"> Feedback Result </p>
+						</div>
+						<div class="card-body ">
+							<form class="" role="form" id="kw_training_feedback_form" method="post" t-att-name="'%s' % (training.id)">
+								<input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+								<div class="my-3">
+									<p class="h6">Feedback Given By:<span class="h6 pl-2" style="color: #108fbb;" t-esc="employee.name"/>
+									</p>
+									<p class="h6">Instructor:
+										<span class="h6 pl-2" style="color: #108fbb;">
+											<t t-if="training.instructor_type=='external'">
+												External
+											</t>
+											<t t-else="">
+												<t t-esc="instructors.name"/>
+											</t>
+										</span>
+									</p>
+								</div>
+
+								<div>
+
+									<table class="table  table-bordered miltable " id="miltable">
+										<thead class="thead-orange">
+											<tr>
+												<th scope="col">Category</th>
+												<th scope="col" width="20%">Marks</th>
+												<th scope="col">Remarks</th>
+											</tr>
+										</thead>
+										<tbody>
+											<t t-set="page" t-value="survey.page_ids[0]"/>
+											<tr t-foreach="page.question_ids" t-as="question">
+												<t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)"/>
+												<td scope="col">
+													<p class="text-left h6 p-2 text-justify" t-esc="question.question"/>
+												</td>
+												<t t-foreach="response.user_input_line_ids" t-as="inp">
+													<t t-if="inp.question_id.id==question.id and inp.answer_type=='suggestion'">
+														<td scope="col" width="10%">
+															<select style='background:None;border:None;color:black;' class="browser-select custom-select" t-att-name="prefix" disabled="disabled">
+																<t t-foreach="question.labels_ids" t-as="label">
+																	<option t-att-value="inp.value_suggested.id">
+																		<t t-esc="inp.value_suggested.value"/>
+																	</option>
+																</t>
+															</select>
+														</td>
+													</t>
+													<t t-if="inp.question_id.id==question.id and inp.answer_type=='text'">
+														<td scope="col">
+															<div class="md-form m-0">
+																<input style='background:None;border:None;color:black;' type="text" class="form-control"
+																t-att-name="'%s_%s' % (prefix, 'comment')" disabled="disabled" t-att-value="inp.value_text"/>
+															</div>
+														</td>
+													</t>
+												</t>
+											</tr>
+										</tbody>
+									</table>
+									<div class="text-center mt16 mb16">
+										<button type="button" class="btn btn-info" onclick='window.history.go(-1);'>
+											Back
+										</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</t>
+		</template>
+
+		<template id="kw_feedback_result_view_form_styles" inherit_id="kw_feedback_result_view_form">
+			<xpath expr="." position="inside">
+				<link rel="stylesheet" href="/kw_training/static/src/css/form_style.css"/>
+				<style>
+					table.table.table-bordered tbody tr:hover { background-color: #d1ecf1;}
+				</style>
+			</xpath>
+		</template>
+	</data>
+</odoo>

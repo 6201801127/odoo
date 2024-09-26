@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="kw_feedback_add_feedback_kanban_view" model="ir.ui.view">
+            <field name="name">Add Feedback</field>
+            <field name="model">kw_feedback_final_config</field>
+            <field name="arch" type="xml">
+                <kanban class="o_event_kanban_view" create="false" import='false' delete="false" edit="false" default_order="create_date desc">
+                    <field name="assessor_id"/>
+                    <field name="assessee_id"/>
+                    <field name="period_id"/>
+                    <field name="assessment_tagging_id" />
+                    <field name="assessment_from_date"/>
+                    <field name="assessment_to_date"/>
+                    <field name="check_date" />
+                    <field name="feedback_status"/>
+                    <field name="count_score" invisible='1'/>
+                    <field name="total_score"/>
+                    <field name="color"/>
+                    <field name="rrule_type"/>
+                    <field name="assessment_date"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click" style="width:330px;">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <h4>
+                                            <img t-att-src="kanban_image('hr.employee', 'image_small', record.assessee_id.raw_value)"
+                                                 t-att-title="record.assessee_id.value"
+                                                 t-att-alt="record.assessee_id.value" width="40" height="40"
+                                                 class="rounded-circle"/>
+                                            <b t-esc="record.assessee_id.value">
+                                            </b>
+                                        </h4>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <h1 class="text-uppercase badge text-wrap font-weight-bold p-2"
+                                        style="background-color: #ade4ef; font-size: 1rem;" modifiers="{}">
+                                        <span t-esc="record.assessment_tagging_id.value"/>
+                                    </h1>
+                                    <field name="count_score" invisible='1'/>
+                                </div>
+                                <div class="mb-2">
+                                    <h1 class="text-uppercase badge text-wrap font-weight-bold p-2"
+                                        style="background-color: #ade4ef; font-size: 1rem;" modifiers="{}">
+                                        <span t-esc="record.period_id.value"/>
+                                    </h1>
+                                </div>
+                                <div class="row mt-3 mb-2">
+                                    <div class="col-sm-8">
+                                        <table class="table table-borderless">
+                                            <t t-if="record.rrule_type.raw_value == 'custom'">
+                                                <tr>
+                                                    <td class="p-0"><i class="fa fa-calendar mr-2" />Assessment Date</td>
+                                                    <td class="p-0"> : </td>
+                                                    <td class="p-0">
+                                                        <span t-att-title="'Assessment Date : '+record.assessment_date.value">
+                                                            <t t-esc="record.assessment_date.value"/>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                            <t t-if="record.rrule_type.raw_value != 'custom'">
+                                                <tr>
+                                                    <td class="p-0" width="30%"><i class="fa fa-calendar mr-2" />From</td>
+                                                    <td class="p-0"> : </td>
+                                                    <td class="p-0">
+                                                        <span t-att-title="'From Date : '+record.assessment_from_date.value">
+                                                            <t t-esc="record.assessment_from_date.value"/>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="p-0" width="30%"><i class="fa fa-calendar mr-2" />To</td>
+                                                    <td class="p-0"> : </td>
+                                                    <td class="p-0">
+                                                        <span t-att-title="'To Date : '+record.assessment_to_date.value">
+                                                            <t t-esc="record.assessment_to_date.value"/>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </table>
+                                    </div>
+                                    <div class="col-sm-4 text-center">
+                                        <h3 t-att-title="'Current Status is : '+record.feedback_status.value">
+                                            <field name="feedback_status" widget="label_selection"
+                                                   options="{'classes': {'1': 'completed', '2': 'completed', '3': 'completed','4':'completed'}}"/>
+                                        </h3>
+                                        <h3 class='text-center'
+                                            t-att-title="'Total Score Secured : '+record.total_score.value">
+                                            <field name="total_score"/>
+                                            %
+                                        </h3>
+                                    </div>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <button attrs="{'invisible': ['|',('feedback_status','in',['2','3','4']),('check_date','=',False)]}"
+                                            class="btn btn-primary"
+                                            t-att-title="'Click To Give Feedback for '+record.assessee_id.value"
+                                            type="object" name="give_feedback">Give Feedback
+                                        <i class="fa fa-plus fa-inverse" role="img"></i>
+                                    </button>
+                                    <button attrs="{'invisible': ['|',('feedback_status','in',['1','4']),('check_date','=',False)]}"
+                                            class="btn btn-primary"
+                                            t-att-title="'Click To Edit Feedback for '+record.assessee_id.value"
+                                            type="object" name="give_feedback">Edit Feedback
+                                        <i class="fa fa-edit fa-inverse" role="img"></i>
+                                    </button>
+                                    <button attrs="{'invisible': [('feedback_status','in',['1','2'])]}"
+                                            class="btn btn-primary float-right"
+                                            t-att-title="'Click To View Feedback of '+record.assessee_id.value"
+                                            type="object" name="view_feedback">View Feedback
+                                        <i class="fa fa-eye fa-inverse" role="img"></i>
+                                    </button>
+                                    <button attrs="{'invisible': [('feedback_status','not in',['4'])]}"
+                                            class="btn btn-primary"
+                                            t-att-title="'Click To View Feedback of '+record.assessee_id.value"
+                                            type="object" name="view_final_feedback">View Final Feedback
+                                        <i class="fa fa-eye fa-inverse" role="img"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+        <record id="kw_feedback_add_feedback_tree_view" model="ir.ui.view">
+            <field name="name">Add Feedback</field>
+            <field name="model">kw_feedback_final_config</field>
+            <field name="arch" type="xml">
+                <tree string="Add Feedback" create='false' edit='false' import='false'>
+                    <field name="assessee_id"/>
+                    <field name="assessor_id"/>
+                    <field name="assessment_from_date"/>
+                    <field name="assessment_to_date"/>
+                    <field name="feedback_status" />
+                    <field name="check_date" invisible="1" />
+                    <field name="count_score" invisible='1'/>
+                    <field name="total_score" attrs="{'invisible': [('feedback_status','not in',['3','4'])]}"/>
+                    <button attrs="{'invisible': ['|',('feedback_status','in',['2','3','4']),('check_date','=',False)]}"
+                            confirm='Are you sure want to Give Feedback ?' class="btn btn-sm btn-primary"
+                            aria-label="Click To Give Feedback" title="Click To Give Feedback" type="object"
+                            name="give_feedback" string='Give Feedback '>
+                    </button>
+                    <button attrs="{'invisible': ['|',('feedback_status','in',['1','4']),('check_date','=',False)]}"
+                            confirm='Are you sure want to Edit Feedback ?' class="btn btn-sm btn-primary"
+                            aria-label="Click To Edit Feedback" title="Click To Edit Feedback" type="object"
+                            name="give_feedback" string='Edit Feedback '>
+                    </button>
+                    <button attrs="{'invisible': [('feedback_status','in',['1','2'])]}"
+                            confirm='Are you sure want to View Feedback ?' string=' View Feedback'
+                            class="btn btn-sm btn-success" aria-label="Click To View Feedback"
+                            title="Click To View Feedback" type="object" name="view_feedback">
+                    </button>
+                    <button attrs="{'invisible': [('feedback_status','not in',['4'])]}" class="btn btn-primary btn-sm"
+                            type="object" name="view_final_feedback" string="Assessor Feedback">
+                    </button>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_feedback_add_feedback_search_view" model="ir.ui.view">
+            <field name="name">Add Feedback Search</field>
+            <field name="model">kw_feedback_final_config</field>
+            <field name="arch" type="xml">
+                <search string="Search Feedback">
+                    <field name="assessor_id"/>
+                    <field name="assessee_id"/>
+                    <field name="feedback_status"/>
+                    <field name="feedback_details_id" invisible='1'/>
+                    <!-- <filter string="By Current Year &amp; Month" domain="['&amp;',('feedback_details_id.period_id.period_date', '&gt;=',context_today().strftime('%Y-%m-01')),('feedback_details_id.period_id.period_date', '&lt;',(context_today()+relativedelta(months=1)).strftime('%Y-%m-01')),'&amp;',('feedback_details_id.period_id.period_date', '&gt;=',context_today().strftime('%Y-01-01')),('feedback_details_id.period_id.period_date', '&lt;',(context_today()+relativedelta(years=1)).strftime('%Y-01-01'))]" name="by_current_month_year"/> -->
+
+                    <filter string="Current Period "
+                            domain="[('feedback_details_id.period_id.period_date','&lt;',(context_today()+relativedelta(months=1)).strftime('%Y-%m-01')), ('feedback_details_id.period_id.period_date','&gt;=',time.strftime('%Y-%m-01'))]"
+                            name="by_current_month_year"/>
+
+                    <filter string="Previous Period"
+                            domain="[('feedback_details_id.period_id.period_date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('feedback_details_id.period_id.period_date','&lt;',time.strftime('%Y-%m-01'))]"
+                            name="by_previous_month_year"/>
+
+                </search>
+            </field>
+        </record>
+
+        <record id="kw_feedback_final_config_action" model="ir.actions.act_window">
+            <field name="name">Add Feedback</field>
+            <field name="res_model">kw_feedback_final_config</field>
+            <field name="view_mode">kanban,tree</field>
+            <field name="view_type">form</field>
+            <field name="search_view_id" ref='kw_assessment_feedback.kw_feedback_add_feedback_search_view'/>
+            <field name="domain">[('assessor_id.user_id','=',uid)]</field>
+            <field name="context">{'search_default_by_current_month_year':1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+					You were not assigned with any Assessees Here...
+                </p>
+            </field>
+        </record>
+
+        <record id="kw_feedback_final_config_actions_view_kanban" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">kanban</field>
+            <field name="view_id" ref="kw_feedback_add_feedback_kanban_view"/>
+            <field name="act_window_id" ref="kw_feedback_final_config_action"/>
+        </record>
+
+        <record id="kw_feedback_final_config_actions_view_tree" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kw_feedback_add_feedback_tree_view"/>
+            <field name="act_window_id" ref="kw_feedback_final_config_action"/>
+        </record>
+
+        <record id="kw_assessor_feedback_form" model="ir.ui.view">
+            <field name="name">Assessor Feedback Form View</field>
+            <field name="model">kw_feedback_final_config</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="assessor_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="assessee_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                            </group>
+                            <group>
+                                <field name="period_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="assessment_from_date" />
+                                <field name="assessment_to_date" />
+                            </group>
+                            <group>
+                                <field name="positive_remark" />
+                                <field name="weak_remark" />
+                                <field name="improve_remark" />
+                            </group>
+                            <group>
+                                <field name="feedback_status" />
+                                <field name="total_score" />
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

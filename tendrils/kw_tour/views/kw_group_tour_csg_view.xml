@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="view_kw_group_tour_csg_tree" model="ir.ui.view">
+            <field name="name">view.kw_group_tour_csg.tree</field>
+            <field name="model">kw_group_tour_csg</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <tree import="false" delete="false">
+                    <field name="group_tour_csg_code"/>
+                    <field name="tour_type_new"/>
+                    <field name="tour_type_id"/>
+                    <field name="purpose"/>
+                    <field name="date_travel"/>
+                    <field name="city_id" invisible="1"/>
+                    <field name="to_city_id"/>
+                    <field name="date_return"/>
+                    <field name="budget_head_id"/>
+                    <field name="travel_arrangement"/>
+                    <field name="acc_arrange"/>
+                    <field name="state"/>
+                    <!-- <field name="approver_btn_boolean" invisible="1"/> -->
+                    <field name="department_id" invisible="1"/>
+                    <field name="total_budget_expense" invisible="1"/>
+                    <field name="can_apply_inr" invisible="1"/>
+                    <field name="can_apply_usd" invisible="1"/>
+                    <field name="api_exchange_rate" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_kw_group_tour_csg_form" model="ir.ui.view">
+            <field name="name">view.kw_group_tour_csg.form</field>
+            <field name="model">kw_group_tour_csg</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="action_submit" string="Submit" type="object" class="btn btn-success" attrs="{'invisible':[('state', '!=', 'Draft')]}"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <!-- <field name="approver_btn_boolean" invisible="1"/> -->
+                                <field name="group_tour_csg_code"/>
+                                <field name="city_ids" invisible="1" widget="many2many_tags"/>
+                                <field name="emp_ids" invisible="1" widget="many2many_tags"/>
+                                <field name="tour_type_new" options="{'no_create_edit': True,'no_open':True,'no_create':True}" domain="[('code', 'not in', ['project', 'opportunity'])]" attrs="{'readonly': [('state','not in', ['Draft','Applied'])]}" required="1"/>
+                                <field name="tour_type_id" options="{'no_create':True, 'no_edit':True, 'no_open':True}" domain="[('code', 'in', ['Others','exhibition','seminar','others'])]" attrs="{'readonly':[('state', '!=', 'Draft')]}"/>
+                                <field name="purpose" attrs="{'readonly':[('state', '!=', 'Draft')]}"/>
+                                <field name="date_travel" attrs="{'readonly':[('state', '!=', 'Draft')]}"/>
+                                <field name="to_city_id" options="{'no_create':True, 'no_edit':True, 'no_open':True}" attrs="{'readonly':[('state', '!=', 'Draft')]}" domain="[('id', 'in', city_ids)]"/>
+                                <field name="city_id" options="{'no_create':True, 'no_edit':True, 'no_open':True}" attrs="{'readonly':[('state', '!=', 'Draft')]}" invisible="1"/>
+                                <field name="date_return" attrs="{'readonly':[('state', '!=', 'Draft')]}"/>
+                                <field name="budget_head_id" options="{'no_create':True, 'no_edit':True, 'no_open':True}" attrs="{'readonly':[('state', '!=', 'Draft')]}"/>
+                                <field name="travel_arrangement" attrs="{'readonly':[('state', '!=', 'Draft')]}"/>
+                                <field name="acc_arrange" attrs="{'readonly':[('state', '!=', 'Draft')]}"/>
+                                <field name="department_id" invisible="1"/>
+                                <field name="total_budget_expense" invisible="1"/>
+                                <field name="can_apply_inr" invisible="1"/>
+                                <field name="can_apply_usd" invisible="1"/>
+                                <field name="api_exchange_rate" invisible="1"/>
+                            </group>
+                        </group>
+                        <group string="Add Employees">
+                            <field name="assign_tour_others_csg_emp_ids" attrs="{'readonly':[('state', '!=', 'Draft')]}" nolabel="1">
+                                <tree editable="bottom" nolabel="1">
+                                    <field name="employee_id" options="{'no_create':True, 'no_edit':True, 'no_open':True}" domain="[('id', 'in', parent.emp_ids)]"/>
+                                    <field name="deg_id" readonly="1"/>
+                                    <field name ="dept_id"/>
+                                    <field name="work_email"/>
+                                    <field name="city_id" options="{'no_create':True, 'no_edit':True, 'no_open':True}" domain="[('id', 'in', parent.city_ids)]"/>
+                                    <field name="to_city_class"/>
+                                    <field name="to_city_currency_id"/>
+                                    <field name="ticket_price" force_save="1" invisible="1"/>
+                                    <field name="accomodation_arrangement" invisible="1"/>
+                                    <field name="status" readonly="1"/>
+                                    <!-- <field name="tour_type_boolean" invisible="1"/> -->
+                                </tree>
+                            </field>
+                        </group>
+
+
+                        <group string="Travel Expenses">
+                            <field name="travel_expense_details_ids" nolabel="1">
+                                <tree editable="bottom" create="false">
+                                    <field name="expense_id" style="pointer-events:none;"/>
+                                    <field name="no_of_employee" style="pointer-events:none;"/>
+                                    <field name="no_of_night_inr" style="pointer-events:none;"/>
+                                    <field name="amount_domestic" style="pointer-events:none;" sum="Total(INR)" options="{'currency_field': 'currency_domestic'}" widget="monetary"/>
+                                    <field name="no_of_night_usd" style="pointer-events:none;"/>
+                                    <field name="amount_international" style="pointer-events:none;" sum="Total(USD)" options="{'currency_field': 'currency_international'}" widget="monetary"/>
+                                    <field name="currency_domestic" invisible="1"/>
+                                    <field name="currency_international" invisible="1"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+
+                    <group>
+                        <div class="oe_chatter">
+                            <field name="activity_ids" widget="mail_activity" />
+                            <field name="message_ids" widget="mail_thread" />
+                        </div>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="action_kw_group_tour_csg_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Group Tour CSG</field>
+            <field name="res_model">kw_group_tour_csg</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="domain">[('create_uid', '=', uid)]</field>
+            <field name="target">current</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_tour.view_kw_group_tour_csg_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_tour.view_kw_group_tour_csg_form')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No tour found.
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_kw_group_tour_csg_apply" name="Apply CSG Group Tour" parent="kw_tour_apply_menu"
+                  sequence="4" action="action_kw_group_tour_csg_act_window" groups="kw_tour.group_kw_tour_csg_user"/>
+
+    </data>
+</odoo>

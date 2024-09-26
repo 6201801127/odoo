@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+      <record id="product_attribute_value_tree" model="ir.ui.view">
+        <field name="name">product.attribute.tree</field>
+        <field name="model">product.attribute.value</field>
+        <field name="mode">primary</field>
+        <field name="priority" eval="1"/>
+        <field name="arch" type="xml">
+            <tree string="Values" editable='bottom'>
+                <field name="name" />
+                <field name="attribute_id"  options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                <field name="code" string='Code' readonly='1' force_save='1'/>
+            </tree>
+        </field>
+    </record>
+
+      <record id="product_template_attribute_line_code_form" model="ir.ui.view">
+        <field name="name">product.template.attribute.line.form</field>
+        <field name="model">product.template.attribute.line</field>
+        <field name="mode">primary</field>
+        <field name="priority" eval="1"/>
+        <field name="arch" type="xml">
+            <form string="Product Attribute and Values">
+                <group name="main_field">
+                    <label for="attribute_id" string="Attribute Name"/>
+                    <field name="attribute_id" nolabel="1"/>
+                    <field name="value_ids" widget="one2many_list">
+                        <tree string="Values">
+                            <field name="name"/>
+                            <field name="code"/>
+                        </tree>
+                        <form string="Values">
+                            <field name="name"/>
+                            <field name="code"/>
+                        </form>
+                    </field>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="product_attribute_view_code_form" model="ir.ui.view">
+        <field name="name">product.attribute.form.code</field>
+        <field name="model">product.attribute</field>
+        <field name="priority" eval="1"/>
+        <field name="arch" type="xml">
+            <form string="Product Attribute">
+                <group>
+                    <group name="main_fields">
+                        <label for="name" string="Attribute Name"/>
+                        <field name="name" nolabel="1"/>
+                        <field name="create_variant" widget="radio" readonly='1'/>
+                    </group>
+                </group>
+                <group name="values_ids">
+                    <label for="value_ids" string="Attribute Values"/>
+                    <field name="value_ids" widget="one2many_list" nolabel="1">
+                        <tree string="Values" editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="name"/>
+                            <field name="code"/>
+                        </tree>
+                    </field>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_product_code_tree" model="ir.ui.view">
+        <field name="name">product.product_code.master.tree</field>
+        <field name="model">product.product</field>
+        <field name="arch" type="xml">
+            <tree string="" editable='bottom' create='0' delete='0'>
+                <field name="default_code" readonly='1'/>
+                <field name="type" string='Product Category'  readonly='1'/>
+                <field name="name" invisible='1'/>
+                <field name="product_tmpl_id" readonly='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                <field name="attribute_value_ids" widget="many2many_tags"  readonly='1'/>
+                <field name="salvage_value" string='Residual Percentage(%)' placeholder="1-100%"/>
+                <button string="Generate code" name="generate_code" type="object" class="btn-primary" groups='kw_inventory.group_store_manager'/>
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="varient_code_master_action" model="ir.actions.act_window">
+      <field name="name">Varient Code</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">product.product</field>
+      <field name="view_ids" eval="[(5, 0, 0),
+      (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_inventory.view_product_code_tree')})]"/>
+      <field name="domain">[]</field>
+      <field name="context">{}</field>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+        </p>
+      </field>
+    </record>
+
+    <!-- <menuitem id="codification_parent_menu" name="Codification" parent="stock.menu_stock_config_settings"
+      sequence="199"/> -->
+    <!-- <menuitem id="product_code_master_menu" action="kw_inventory.varient_code_master_action" name="Varient Codification" parent="codification_parent_menu"
+    sequence="3"/> -->
+
+    <record id="view_product_variant_tree" model="ir.ui.view">
+      <field name="name">product.variants.code.master.tree</field>
+      <field name="model">product.template</field>
+      <field name="arch" type="xml">
+          <tree string="" editable='bottom' create='0' delete='0'>
+              <field name="code" readonly='0' string='code (i.e. A1,1A,AA,11)'/>
+              <field name="name" readonly='1'/>
+              <field name="alias_name" readonly='0'/>
+              <!-- <field name="variant_code"/> -->
+          </tree>
+      </field>
+    </record>
+
+
+    <record id="product_code_master_action" model="ir.actions.act_window">
+      <field name="name">Product Code</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">product.template</field>
+      <field name="view_ids" eval="[(5, 0, 0),
+      (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_inventory.view_product_variant_tree')})]"/>
+      <field name="domain">[]</field>
+      <field name="context">{}</field>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+        </p>
+      </field>
+    </record>
+
+    <record id="product_attribute_value_action" model="ir.actions.act_window">
+      <field name="name">Spec code</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">product.attribute.value</field>
+      <field name="view_ids" eval="[(5, 0, 0),
+      (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_inventory.product_attribute_value_tree')})]"/>
+      <field name="domain">[]</field>
+      <field name="context">{}</field>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+        </p>
+      </field>
+    </record>
+  
+    <!-- <menuitem id="product_variants_master_menu" action="kw_inventory.product_code_master_action" name="Product Type Code" parent="codification_parent_menu"
+    sequence="2"/> -->
+
+    <!-- <menuitem id="product_attribute_value_menu" action="kw_inventory.product_attribute_value_action" name="Spec code" parent="codification_parent_menu"
+    sequence="6"/> -->
+
+</odoo>

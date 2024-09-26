@@ -1,0 +1,130 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="kw_wfh_initiative_by_csm_tree">
+            <field name="name">kw_wfh.tree</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <tree import='false' default_order='create_date desc' delete='false'>
+                    <field name="ref_no"/>
+                    <field name="search_by"/>
+                    <field name="department_id" widget="many2many_tags"/>
+                    <field name="division" widget="many2many_tags"/>
+                    <field name="section" widget="many2many_tags"/>
+                    <field name="practise" widget="many2many_tags"/>
+                    <field name="location_type"/>
+                    <field name="location_id" widget="many2many_tags"/>
+                    <field name="searched_user" widget="many2many_tags"/>
+                    <field name="reason_id"/>
+                    <field name="request_from_date"/>
+                    <field name="request_to_date"/>
+                    <field name="state"/>
+                    <button name="%(kw_wfh.kw_wfh_end_process_wizard_act_window)d" string="End WFH" type="action" attrs="{'invisible': ['|',('state','in',['draft','cancel','reject','applied']),('wfh_end_process','=',True)]}" context="{'current_rec_id':id}" help="message" class="btn-danger"/>
+                    <field name="wfh_end_process" invisible='1'/>
+                    <button name="wfh_link_extension" string="Extend WFH" type="object" attrs="{'invisible': ['|',('state','in',['draft','cancel','reject','applied']),('hide_extension_record','=',True)]}" help="message" class="btn-success"/>
+                    <field name="hide_extension_record" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_wfh_initiative_by_csm_form">
+            <field name="name">kw_wfh.form</field>
+            <field name="model">kw_wfh</field>
+            <field name="arch" type="xml">
+                <form create='false'>
+                    <script>
+                        $(document).ready(function(){ state=  $("[aria-pressed=true]").text().trim();
+                           console.log(state);
+                            if (state != 'Draft'){
+                                $('.o_form_button_edit').hide();
+                            }
+                        });
+                    </script>
+                    <header>
+                         <field name="state" widget="statusbar" statusbar_visible="" groups="kw_wfh.group_kw_wfh_manager"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="old_reff_no" attrs="{'invisible': [('old_reff_no','=', False)],'readonly': [('state','=', 'grant')]}" groups="kw_wfh.group_kw_wfh_manager"/>
+                                <field name="search_by" widget="radio" options="{'horizontal': true}" attrs="{'readonly': [('state','=', 'grant')]}" groups="kw_wfh.group_kw_wfh_manager"/>
+                                <field name="department_id" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}" domain="[('dept_type.code', '=', 'department')]" attrs= "{'invisible': [('search_by', 'in', ['user'])],'required': [('search_by', 'in', ['hierarchy'])],'readonly': [('state','=', 'grant')]}" groups="kw_wfh.group_kw_wfh_manager"/>
+                                <field name="division" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}" domain="[('dept_type.code', '=', 'division')]" attrs= "{'invisible': [('search_by', 'in', ['user'])],'readonly': [('state','=', 'grant')]}" groups="kw_wfh.group_kw_wfh_manager"/>
+                                <field name="section" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}" domain="[('dept_type.code', '=', 'section')]" attrs= "{'invisible': [('search_by', 'in', ['user'])],'readonly': [('state','=', 'grant')]}" groups="kw_wfh.group_kw_wfh_manager"/>
+                                <field name="practise" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}" domain="[('dept_type.code', '=', 'practice')]" attrs= "{'invisible': [('search_by', 'in', ['user'])],'readonly': [('state','=', 'grant')]}" groups="kw_wfh.group_kw_wfh_manager"/>
+                                <field name="location_type" widget="radio" options="{'horizontal': true}" attrs="{'readonly': [('state','=', 'grant')]}" groups="kw_wfh.group_kw_wfh_manager"/>
+                                <field name="location_id" options="{'no_open': True,'no_create':True,'no_edit':True}" widget="many2many_tags" attrs= "{'invisible': [('location_type', 'in', ['all'])],'required': [('location_type', 'in', ['location'])],'readonly': [('state','=', 'grant')]}" groups="kw_wfh.group_kw_wfh_manager"/>
+
+                                <field name="reason_id" domain="[('type.type', 'in', ['By CSM'])]" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'readonly': [('state','=', 'grant')]}" groups="kw_wfh.group_kw_wfh_manager"/>
+                                <field name="allowed_days" invisible='1' attrs="{'readonly': [('state','=', 'grant')]}" groups="kw_wfh.group_kw_wfh_manager"/>
+                                <field name="request_from_date" required="1" attrs="{'readonly': [('state','=', 'grant')]}" groups="kw_wfh.group_kw_wfh_manager"/>
+                                <field name="request_to_date" required="1" attrs="{'readonly': [('state','=', 'grant')]}" groups="kw_wfh.group_kw_wfh_manager"/>
+                                <field name="days_count" required="1" readonly="1" groups="kw_wfh.group_kw_wfh_manager"/>
+                                <field name="remark" attrs="{'invisible': [('remark','=', False)],'readonly': [('state','=', 'grant')]}" groups="kw_wfh.group_kw_wfh_manager"/>
+                                <field name="employee_id" invisible="1" groups="kw_wfh.group_kw_wfh_manager"/>
+                                <field name="emp_record_report" invisible="1" groups="kw_wfh.group_kw_wfh_manager"/>
+                            </group>
+
+                            <group>
+                                <field name="searched_user"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs= "{'required': [('search_by', 'in', ['user'])],'readonly': [('state','=', 'grant')]}"
+                                       context="{'tree_view_ref':'kw_wfh.kw_wfh_hr_employee_recruitment_tree'}" widget="many2many_tags" groups="kw_wfh.group_kw_wfh_manager"/>
+                                       
+                                    
+                                <field name="show_btn_cancel" invisible="1"/>
+                                <field name="hide_btn_cancel" invisible="1"/>
+                                <field name="show_apply_btn" invisible="1"/>
+                                <field name="show_grant_button" invisible="1"/>
+                                <field name="show_apply_extension_btn" invisible="1"/>
+                                <field name="hide_extension_grant_btn" invisible="1"/>
+                                <field name="hide_extension_record" invisible="1"/>
+                                <field name="revised_to_date" attrs="{'invisible': [('revised_to_date','=', False)],'readonly': [('state','=', 'grant')]}" groups="kw_wfh.group_kw_wfh_manager"/>
+                                <field name="extension_remark" attrs="{'invisible': [('extension_remark','=', False)],'readonly': [('state','=', 'grant')]}" groups="kw_wfh.group_kw_wfh_manager"/>
+                                <field name="show_apply_extension_btn" invisible="1"/>
+                                <field name="hide_csm_wfh_extended_record" invisible="1"/>
+                                <field name="show_hr_grant_button" invisible="1"/>
+                                <field name="show_hr_extension_button" invisible="1"/>
+                                <field name="show_wfh_record" invisible="1"/>
+                                <field name="hr_created_wfh_active_link" invisible="1"/>
+                                <field name="hide_csm_initiated_record" invisible="1"/>
+                                <field name="filter_hr_record" invisible="1"/>
+                                <field name="act_from_date" invisible="1"/>
+                                <field name="act_to_date" invisible="1"/>
+                                <field name="is_extended" invisible='1'/>
+                                <field name="emp_status_ids" readonly='1' force_save="1" limit='40' style='height:200px; overflow-y:auto' groups="kw_wfh.group_kw_wfh_manager">
+                                    <tree editable="top" style="pointer-events:none;">
+                                        <field name="empl_id" readonly='1' style="pointer-events:none;" force_save="1"/>
+                                        <field name="from_date" readonly='1' style="pointer-events:none;" force_save="1"/>
+                                        <field name="to_date" readonly='1' style="pointer-events:none;" force_save="1"/>
+                                        <field name="status" readonly='1' style="pointer-events:none;" force_save="1" widget="boolean_toggle"/>
+                                    </tree>
+                                </field>
+                            </group>
+
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_wfh_initiative_by_csm_action">
+            <field name="name">WFH by HR</field>
+            <field name="res_model">kw_wfh</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">['&amp;','&amp;','&amp;',('create_uid','=',uid),('hide_emp_request_record','=',False),('hide_expired_record','=',False),('show_wfh_record','=',False)]</field>
+            <field name="context">{'default_show_apply_btn':False,'default_show_hr_grant_button':True,'default_hide_hr_request_record':True,'default_hide_csm_initiated_record':True,'manager_view_loaded':True}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_wfh_initiative_by_csm_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_wfh_initiative_by_csm_form')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+						No records to show...
+                </p>
+            </field>
+        </record>
+
+    </data>
+</odoo>

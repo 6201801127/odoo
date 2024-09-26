@@ -1,0 +1,1058 @@
+<odoo>
+    <data>
+        <!-- explicit list view definition -->
+        <record id="change_request_management_form" model="ir.ui.view">
+            <field name="name">change_request_management form</field>
+            <field name="model">kw_cr_management</field>
+            <field name="arch" type="xml">
+                <form duplicate='false'>
+                    <header>
+                        <button name="btn_apply" string="Apply" type="object" class="btn-primary" stage="Draft"
+                                attrs="{'invisible': [('stage', 'not in', ('Draft'))]}"
+                                confirm="Are you sure, you want to apply?"/>
+                        <button name="btn_upload" string="Uploaded" type="object" class="btn-primary" stage="apply"
+                                attrs="{'invisible': ['|','|',('stage', 'in', ('Uploaded', 'Rollbacked', 'Draft','Cancel','Request','Reject','Hold')), ('is_manager', '=', True),('is_officer_user', '=', True)]}"
+                                groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'/>
+                        <button name="btn_rollback" string="Rollbacked" type="object" class="btn-danger" stage="apply"
+                                attrs="{'invisible': ['|','|',('stage', 'in', ('Rollbacked','Applied', 'Draft','Cancel','Request','Reject','Hold')), ('is_manager', '=', True),('is_officer_user', '=', True)]}"
+                                groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'/>
+                        <button name="btn_cancel" string="Cancel" type="object" class="btn-danger" stage="Cancel"
+                                attrs="{'invisible': ['|','|', ('stage', 'in', ('Draft', 'Uploaded', 'Rollbacked', 'Cancel', 'Request','Reject','Hold','Approve')), ('is_manager', '=', True),('is_officer_user', '=', True)]}"
+                                groups='change_request_management.group_cr_user'/>
+                        <button name="btn_request_rollback" string="Request For Rollback" type="object"
+                                class="btn-danger" stage="request"
+                                attrs="{'invisible': ['|','|',('stage', 'not in', ('Uploaded')),('is_manager', '=', True),('is_officer_user', '=', True)]}"
+                                groups='change_request_management.group_cr_user'/>
+                        <field name="stage" widget="statusbar"
+                               statusbar_visible="Draft,Applied,Test Lead Approved,Approve,Rollbacked,Cancel,Request,Uploaded"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group string="">
+                                <field name="reference_no" readonly='1'
+                                       attrs="{'invisible': ['|',('id', '=', False),('stage','=','Draft')]}"/>
+                                <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       required="1" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="project_code" readonly='1'/>
+                                <field name="cr_type" required="1" widget="radio" options="{'horizontal': true}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}" invisible = "1"/>
+                                   <field name="activity" required="1"
+                                          attrs="{'readonly': [('stage', '!=', 'Draft')]}"
+                                          options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="module_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       required="1" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="environment_id" required="1"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="url_or_service_name" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="description" required="1"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                   <field name="platform_id" required="1"
+                                          options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                          attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="change_type" required="1" widget="radio" options="{'horizontal': true}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="priority" widget="radio" options="{'horizontal': true}" required="1"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="notify_emp_ids" required="0" widget='many2many_tags'
+                                          options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="is_pm_approval_required" invisible="1"/>
+                                <field name="pm_approved_ids" invisible="1" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="is_pm" invisible="1"/>
+
+                            </group>
+                            <group>
+                                <!-- <field name="activity"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/> -->
+                                <field name="audit"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="change_impact"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="attachment_name"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="backup_required" widget="radio" options="{'horizontal': true}"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="is_testing_lead" force_save='1' invisible="1"/>
+                                <field name="is_manager" invisible="1"/>
+                                <field name="is_officer_user" invisible="1"/>
+                                <field name="is_uploaded" invisible="1"/>
+                            </group>
+
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="change_request_management_list" model="ir.ui.view">
+            <field name="name">change_request_management list</field>
+            <field name="model">kw_cr_management</field>
+            <field name="arch" type="xml">
+                <tree default_order='id desc' import='0' decoration-warning="stage=='Applied'" decoration-success="stage == 'Uploaded'" >
+                    <field name="reference_no" readonly='1'/>
+                    <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="project_code"/>
+                    <field name="cr_type" invisible="1"/>
+                    <field name="environment_id"/>
+                    <field name="module_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="change_impact"/>
+                    <field name="priority"/>
+                    <field name="attachment_name"/>
+                    <field name="backup_required"/>
+                    <field name="stage"/>
+                    <field name="cr_raised_by"/>
+                    <field name="cr_raised_on"/>
+                    <field name="pending_at" widget="many2many_tags"/>
+                    <field name="cr_uploaded_on"/>
+                    <field name="cr_rollbacked_on"/>
+                    <field name="uploaded_by"/>
+                    <field name="uploaded_cmt"/>
+                    <field name="rollbacked_by"/>
+                    <field name="rollbacked_cmt"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="change_request_take_action_management_form" model="ir.ui.view">
+            <field name="name">change_request_management_take_action_form</field>
+            <field name="model">kw_cr_management</field>
+            <field name="arch" type="xml">
+                <form duplicate='false'>
+                    <header>
+                       
+                        <button name="btn_upload" string="Uploaded" type="object" class="btn-primary" stage="apply"
+                                attrs="{'invisible': [('stage', 'not in', ('Applied','Approve', 'Hold','In Progress'))]}" context="{'current_proj':project_id}"
+                                groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'/>
+                        <button name="btn_rollback" string="Rollbacked" type="object" class="btn-danger" stage="apply"
+                                attrs="{'invisible': [('stage', 'not in', ('Request'))]}"
+                                groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'/>
+                        <button name="btn_reject" string="Reject" type="object" class="btn-danger" stage="Reject"
+                            attrs="{'invisible': [('stage', 'not in', ('Applied','Approve', 'Hold','In Progress'))]}"
+                            groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'/>
+
+                        <button name="btn_in_progress" string="In Progress" type="object" class="btn-info" 
+                            attrs="{'invisible': [('stage', 'in', ('Uploaded','Reject','Request','Rollbacked','In Progress'))]}"
+                            groups="change_request_management.group_cr_manager,change_request_management.group_cr_officer"/>
+
+
+                        <button name="btn_hold" string="Hold" type="object" class="btn-warning" stage="Hold"
+                            attrs="{'invisible': [('stage', 'not in', ('Applied','Approve','In Progress'))]}"
+                            groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'/>
+
+                        <field name="stage" widget="statusbar"
+                               statusbar_visible="Uploaded,Reject,Rollbacked,Hold"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group string="">
+                                <field name="reference_no" readonly='1'/>
+                                <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       required="1" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="project_code" readonly='1'/>
+                                <field name="cr_type" required="1" widget="radio" options="{'horizontal': true}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}" invisible = "1"/>
+                                <field name="activity" required="1"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="module_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       required="1" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="environment_id" required="1"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="url_or_service_name" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="description" required="1"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="change_type" required="1" widget="radio" options="{'horizontal': true}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="priority" widget="radio" options="{'horizontal': true}" required="1"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="is_pm_approval_required" invisible="1"/>
+
+                            </group>
+                            <group>
+                                <!-- <field name="activity"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/> -->
+                                <field name="audit"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="change_impact"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="attachment_name"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="backup_required" widget="radio" options="{'horizontal': true}"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="is_manager" invisible="1"/>
+                                <field name="is_officer_user" invisible="1"/>
+                                <field name="is_uploaded" invisible="1"/>
+                            </group>
+                            <group string='Action Log'
+                                   groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'
+                                   attrs="{'invisible':[('stage','=','Draft')]}">
+                                <field name="cr_raised_by" readonly='1'
+                                       options="{'no_create': True, 'no_edit':True, 'no_open': True}" force_save="1"
+                                       attrs="{'invisible':[('stage','in',['Uploaded','Draft','Rollbacked','Cancel','Request','Reject','Hold'])]}"/>
+
+                                <field name="uploaded_by" options="{'no_create': True, 'no_edit':True, 'no_open': True}"  readonly="1"
+                                       attrs="{'invisible':[('stage','in',['Applied','Draft','Rollbacked','Cancel','Request','Reject','Hold'])]}"/>
+                                <field name="uploaded_cmt"  readonly="1"
+                                       attrs="{'invisible':[('stage','in',['Applied','Draft','Rollbacked','Cancel','Request','Reject','Hold'])]}"/>
+                                <field name="rollbacked_by" readonly="1"
+                                       options="{'no_create': True, 'no_edit':True, 'no_open': True}"
+                                       attrs="{'invisible':[('stage','in',['Uploaded','Draft','Applied','Cancel','Request','Reject','Hold'])]}"/>
+                                <field name="rollbacked_cmt"  readonly="1"
+                                       attrs="{'invisible':[('stage','in',['Uploaded','Draft','Applied','Cancel','Request','Reject','Hold'])]}"/>
+                                <field name="cr_cancelled_by"
+                                       attrs="{'invisible':[('stage','!=','Cancel')]}"
+                                       options="{'no_create': True, 'no_edit':True, 'no_open': True}"/>
+                                <field name="cancel_cmt" attrs="{'invisible':[('stage','!=','Cancel')]}"/>
+                                <field name="request_for_rollback_id"
+                                       attrs="{'invisible':[('stage','!=','Request')]}"
+                                       options="{'no_create': True, 'no_edit':True, 'no_open': True}" readonly="1" force_save="1"/>
+                                <field name="request_for_rollback_cmt"
+                                       attrs="{'invisible':[('stage','!=','Request')]}" readonly="1" force_save="1"/>
+                                <field name="cr_rejected_by"
+                                       options="{'no_create': True, 'no_edit':True, 'no_open': True}"
+                                       attrs="{'invisible':[('stage','!=','Reject')]}" readonly="1" force_save="1"/>
+                                <field name="reject_cmt"
+                                       attrs="{'invisible':[('stage','!=','Reject')]}" readonly="1" force_save="1"/>
+                                <field name="cr_holded_by"
+                                       options="{'no_create': True, 'no_edit':True, 'no_open': True}"
+                                       attrs="{'invisible':[('stage','!=','Hold')]}" readonly="1" force_save="1"/>
+                                <field name="hold_cmt"
+                                       attrs="{'invisible':[('stage','!=','Hold')]}"/>
+                                <field name="cr_approved_by" readonly="1" force_save="1" options="{'no_create': True, 'no_edit':True, 'no_open': True}"/>
+                                <field name="approved_cmt" readonly="1" force_save="1"/>
+                            </group>
+                            <group string='Timesheet Log'>
+                                   <field name="prject_category_id" options="{'no_create': True, 'no_edit':True, 'no_open': True}" readonly="1" />
+                                   <field name="parent_task_id" options="{'no_create': True, 'no_edit':True, 'no_open': True}" readonly="1"/>
+                                   <field name="task_id" options="{'no_create': True, 'no_edit':True, 'no_open': True}" readonly="1"/>
+                                   <field name="time_spent" widget="float_time" readonly="1"/>
+                                   <field name="date_of" readonly="1"></field>
+                                   <field name="is_testing_lead" force_save='1' invisible="0"/>
+                            </group>
+                            <!-- <group> -->
+                            <group string='Inprogress Log' col="7"
+                                   groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'
+                                   attrs="{'invisible':[('stage','in','Approve')]}">
+                                   <field name="inprogress_log_ids" nolabel="1" readonly="1" >
+                                          <tree>
+                                                 <field name="inprogress_by_id"/>
+                                                 <field name="inprogress_comment"/>
+                                                 <field name="inprogress_date"/>
+                                          </tree>
+                                   </field>
+                            </group>
+                            <!-- </group> -->
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="change_request_take_action_management_list" model="ir.ui.view">
+            <field name="name">change_request_management_take_action_list</field>
+            <field name="model">kw_cr_management</field>
+            <field name="arch" type="xml">
+                <tree default_order='id desc' import='0'>
+                    <field name="reference_no" readonly='1'/>
+                    <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="project_code"/>
+                    <field name="cr_type"/>
+                    <field name="activity" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="module_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="environment_id"/>
+                    <field name="platform_id"/>
+                    <field name="url_or_service_name"/>
+                    <field name="description"/>
+                    <field name="change_type"/>
+                    <field name="audit"/>
+                    <field name="change_impact"/>
+                    <field name="priority"/>
+                    <field name="attachment_name"/>
+                    <field name="backup_required"/>
+                    <field name="stage"/>
+                    <field name="cr_raised_by"/>
+                    <field name="cr_raised_on"/>
+                    <field name="cr_uploaded_on"/>
+                    <field name="cr_rollbacked_on"/>
+                    <field name="cr_cancelled_on"/>
+                    <field name="requesr_rollbacked_on"/>
+                    <field name="cr_rejected_on"/>
+                    <field name="cr_holded_on"/>
+                    <field name="cr_approved_on"/>
+                    <field name="uploaded_by"/>
+                    <field name="uploaded_cmt"/>
+                    <field name="rollbacked_by"/>
+                    <field name="rollbacked_cmt"/>
+                    <field name="cr_cancelled_by"/>
+                    <field name="cancel_cmt"/>
+                    <field name="request_for_rollback_id"/>
+                    <field name="request_for_rollback_cmt"/>
+                    <field name="cr_rejected_by"/>
+                    <field name="reject_cmt"/>
+                    <field name="cr_holded_by"/>
+                    <field name="hold_cmt"/>
+                    <field name="cr_approved_by"/>
+                    <field name="approved_cmt"/>
+                    <!-- <field name="cr_in_progress_by"/> -->
+                    <!-- <field name="cr_in_progress_on"/> -->
+                    <!-- <field name="in_progress_comment"/> -->
+
+                </tree>
+            </field>
+        </record>
+        <record id="cr_management_take_action_search_view" model="ir.ui.view">
+            <field name="name">cr_management_search_view</field>
+            <field name="model">kw_cr_management</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="project_id"/>
+                    <field name="project_code"/>
+                    <field name="cr_type"/>
+                    <field name="module_id"/>
+                    <field name="url_or_service_name"/>
+                    <field name="cr_raised_by"/>
+                    <field name="uploaded_by"/>
+                    <field name="rollbacked_by"/>
+                    <field name="cr_cancelled_by"/>
+                    <field name="request_for_rollback_id"/>
+                    <field name="cr_rejected_by"/>
+                    <field name="cr_holded_by"/>
+                    <field name="cr_approved_by"/>
+                    <field name="stage" invisible="1"/>
+                    <filter string="Date" name="filter_raise_date" date="cr_raised_on"/>
+                     <separator/>
+                    <filter string="Applied" name="state_applied" domain="[('stage','=','Applied')]"/>
+                    <filter string="Uploaded" name="state_uploaded" domain="[('stage','=','Uploaded')]"/>
+                    <filter string="Rollback" name="state_rollbacked" domain="[('stage','=','Rollbacked')]"/>
+                    <filter string="Test Lead Approved" name="state_test_lead_approved" domain="[('stage','=','Test Lead Approved')]"/>
+
+                </search>
+            </field>
+        </record>
+
+        <record id="in_progress_wizard_view" model="ir.ui.view">
+            <field name="name">In progress Wizard</field>
+            <field name="model">in_progress_wizard_model</field>
+            <field name="arch" type="xml">
+                <form string="In Progress Wizard">
+                    <group>
+                        <field name="in_progress_comment"/>
+                    </group>
+                    <footer>
+                        <button name="action_move_to_in_progress" string="Confirm" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="cr_pm_uploaded_wizard_view">
+            <field name="name">CR Upload</field>
+            <field name="model">cr_pm_approved_wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <!-- <field name="approved_cr_ids" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}"></field> -->
+                            <field name="remarks" required='1'/>
+                        </group>
+                        <footer>
+                            <center>
+                                <button name="pm_approver_btn" type="object" string="Approve" class="btn-primary"/>
+                            </center>
+                        </footer>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="cr_pm_uploaded_wizard_reject_view">
+            <field name="name">CR Upload Reject</field>
+            <field name="model">cr_pm_approved_wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <!-- <field name="approved_cr_ids" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}"></field> -->
+                            <field name="remarks" required='1'/>
+                        </group>
+                        <footer>
+                            <center>
+                                <button string="Reject" class="btn-danger" type="object" name="pm_reject_btn" style="margin-left: 5px;"/>
+                            </center>
+                        </footer>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="change_request_test_lead_take_action_form" model="ir.ui.view">
+              <field name="name">change_request_test_lead_take_action_form</field>
+              <field name="model">kw_cr_management</field>
+              <field name="arch" type="xml">
+                  <form duplicate='false'>
+                      <header>
+                            <button name="btn_tl_approved" string="Approve" type="object" class="btn-primary" stage="Approve"
+                              attrs="{'invisible': [('stage', '!=','Applied')]}"
+                            />
+                            <button name="btn_test_lead_reject" string="Reject" type="object" class="btn-danger" stage="Reject"
+                              attrs="{'invisible': [('stage', '!=','Applied')]}"
+                            />
+  
+                          <field name="stage" widget="statusbar"
+                                 statusbar_visible="Draft,Applied,Test Lead Approved,Uploaded,Rollbacked,Cancel,Request For Rollback,Reject,Hold"/>
+                      </header>
+                      <sheet>
+                          <group>
+                              <group string="">
+                                  <field name="reference_no" readonly='1'/>
+                                  <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                         required="1" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="project_code" readonly='1'/>
+                                  <field name="cr_type" required="1" widget="radio" options="{'horizontal': true}"
+                                         attrs="{'readonly': [('stage', '!=', 'Draft')]}" invisible = "1"/>
+                                  <field name="activity" required="1"
+                                         attrs="{'readonly': [('stage', '!=', 'Draft')]}"
+                                         options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                  <field name="module_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                         required="1" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="environment_id" required="1"
+                                         options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                         attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="url_or_service_name" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="description" required="1"
+                                         attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="change_type" required="1" widget="radio" options="{'horizontal': true}"
+                                         attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="priority" widget="radio" options="{'horizontal': true}" required="1"
+                                         attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                              </group>
+                              <group>
+                                 
+                                  <field name="audit"
+                                         attrs="{'invisible': [('cr_type', '=', 'Service')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="change_impact"
+                                         attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="attachment_name"
+                                         attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="backup_required" widget="radio" options="{'horizontal': true}"
+                                         attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="is_manager" invisible="1"/>
+                                  <field name="is_officer_user" invisible="1"/>
+                                  <field name="is_uploaded" invisible="1"/>
+                                  <field name="is_pm" invisible="1"/>
+
+                              </group>
+                              <group string='Action Log'
+                                     groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'
+                                     attrs="{'invisible':[('stage','=','Draft')]}">
+                                  <field name="cr_raised_by" readonly='1'
+                                         options="{'no_create': True, 'no_edit':True, 'no_open': True}" force_save="1"
+                                         attrs="{'invisible':[('stage','in',['Uploaded','Draft','Rollbacked','Cancel','Request','Reject','Hold'])]}"/>
+                              </group>
+                          </group>
+                      </sheet>
+                  </form>
+              </field>
+          </record>
+          <record id="change_request_test_lead_take_action_list" model="ir.ui.view">
+              <field name="name">change_request_test_lead_take_action_list</field>
+              <field name="model">kw_cr_management</field>
+              <field name="arch" type="xml">
+                  <tree default_order='id desc' import='0'>
+                      <field name="reference_no" readonly='1'/>
+                      <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                      <!-- <field name="project_code"/> -->
+                      <field name="cr_type"/>
+                      <!-- <field name="activity" options="{'no_open': True,'no_create':True,'no_edit':True}"/> -->
+                      <field name="module_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                      <field name="stage" invisible="0"/>
+                      <field name="cr_raised_by"/>
+                      <field name="cr_approved_by"/>
+                      <field name="cr_rejected_by"/>
+                      <field name="cr_raised_on"/>
+                      <button name="btn_tl_approved" string="Approve" type="object" class="btn-primary" 
+                              attrs = "{'invisible':[('stage','!=','Applied')]}"/>
+                      <button name="btn_test_lead_reject" string="Reject" type="object" class="btn-danger" 
+                              attrs = "{'invisible':[('stage','!=','Applied')]}"/>
+                  </tree>
+              </field>
+          </record>
+
+        <record id="change_request_pm_take_action_management_form" model="ir.ui.view">
+              <field name="name">change_request_management_take_action_form</field>
+              <field name="model">kw_cr_management</field>
+              <field name="arch" type="xml">
+                  <form duplicate='false'>
+                      <header>
+                            <button name="btn_approved" string="Approve" type="object" class="btn-primary" stage="Approve"
+                              attrs="{'invisible': [('stage', 'not in', ['Applied', 'Test Lead Approved'])]}"
+                            />
+                            <button name="btn_pm_reject" string="Reject" type="object" class="btn-danger" stage="Reject"
+                              attrs="{'invisible': [('stage', 'not in', ['Applied', 'Test Lead Approved'])]}"
+                            />
+                          <!-- <button name="btn_reject" string="Reject" type="object" class="btn-danger" stage="Reject"
+                            attrs="{'invisible': [('stage', '!=','Applied')]}"
+                            groups='change_request_management.group_cr_manager'/> -->
+  
+                          <field name="stage" widget="statusbar"
+                                 statusbar_visible="Draft,Applied,Test Lead Approved,Approved,Uploaded,Rollbacked,Cancel,Request For Rollback,Reject,Hold"/>
+                      </header>
+                      <sheet>
+                          <group>
+                              <group string="">
+                                  <field name="reference_no" readonly='1'/>
+                                  <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                         required="1" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="project_code" readonly='1'/>
+                                  <field name="cr_type" required="1" widget="radio" options="{'horizontal': true}"
+                                         attrs="{'readonly': [('stage', '!=', 'Draft')]}" invisible = "1"/>
+                                  <field name="activity" required="1"
+                                         attrs="{'readonly': [('stage', '!=', 'Draft')]}"
+                                         options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                  <field name="module_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                         required="1" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="environment_id" required="1"
+                                         options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                         attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="url_or_service_name" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="description" required="1"
+                                         attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="change_type" required="1" widget="radio" options="{'horizontal': true}"
+                                         attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="priority" widget="radio" options="{'horizontal': true}" required="1"
+                                         attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                              </group>
+                              <group>
+                                 
+                                  <field name="audit"
+                                         attrs="{'invisible': [('cr_type', '=', 'Service')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="change_impact"
+                                         attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="attachment_name"
+                                         attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="backup_required" widget="radio" options="{'horizontal': true}"
+                                         attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                  <field name="is_manager" invisible="1"/>
+                                  <field name="is_officer_user" invisible="1"/>
+                                  <field name="is_uploaded" invisible="1"/>
+                                  <field name="is_pm" invisible="1"/>
+
+                              </group>
+                              <group string='Action Log'
+                                     groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'
+                                     attrs="{'invisible':[('stage','=','Draft')]}">
+                                  <field name="cr_raised_by" readonly='1'
+                                         options="{'no_create': True, 'no_edit':True, 'no_open': True}" force_save="1"
+                                         attrs="{'invisible':[('stage','in',['Uploaded','Draft','Rollbacked','Cancel','Request','Reject','Hold'])]}"/>
+                              </group>
+                          </group>
+                      </sheet>
+                  </form>
+              </field>
+          </record>
+
+        <record id="change_request_pm_take_action_management_list" model="ir.ui.view">
+            <field name="name">change_request_management_take_action_list</field>
+            <field name="model">kw_cr_management</field>
+            <field name="arch" type="xml">
+                <tree default_order='id desc' import='0'>
+                    <field name="reference_no" readonly='1'/>
+                    <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <!-- <field name="project_code"/> -->
+                    <field name="cr_type"/>
+                    <!-- <field name="activity" options="{'no_open': True,'no_create':True,'no_edit':True}"/> -->
+                    <field name="module_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <!-- <field name="environment_id"/>
+                    <field name="url_or_service_name"/>
+                    <field name="description"/>
+                    <field name="change_type"/>
+                    <field name="audit"/>
+                    <field name="change_impact"/>
+                    <field name="priority"/>
+                    <field name="attachment_name"/>
+                    <field name="backup_required"/> -->
+                    <field name="stage" invisible="0"/>
+                    <field name="cr_raised_by"/>
+                    <field name="cr_approved_by"/>
+                    <field name="cr_rejected_by"/>
+                    <field name="cr_raised_on"/>
+                    <button name="btn_approved" string="Approve" type="object" class="btn-primary" 
+                     attrs="{'invisible': [('stage', 'not in', ['Applied', 'Test Lead Approved'])]}"/>
+                    <button name="btn_pm_reject" string="Reject" type="object" class="btn-danger" 
+                     attrs="{'invisible': [('stage', 'not in', ['Applied', 'Test Lead Approved'])]}"/>
+                    <!-- <field name="cr_uploaded_on"/>
+                    <field name="cr_rollbacked_on"/>
+                    <field name="cr_cancelled_on"/>
+                    <field name="requesr_rollbacked_on"/>
+                    <field name="cr_rejected_on"/>
+                    <field name="cr_holded_on"/>
+                    <field name="cr_approved_on"/>
+                    <field name="uploaded_by"/>
+                    <field name="uploaded_cmt"/>
+                    <field name="rollbacked_by"/>
+                    <field name="rollbacked_cmt"/>
+                    <field name="cr_cancelled_by"/>
+                    <field name="cancel_cmt"/>
+                    <field name="request_for_rollback_id"/>
+                    <field name="request_for_rollback_cmt"/>
+                    <field name="cr_rejected_by"/>
+                    <field name="reject_cmt"/>
+                    <field name="cr_holded_by"/>
+                    <field name="hold_cmt"/>
+                    <field name="cr_approved_by"/>
+                    <field name="approved_cmt"/> -->
+                </tree>
+            </field>
+        </record>
+        <act_window id="approved_pm_data"
+                        name="PM Approval"
+                        src_model="kw_cr_management"
+                        res_model="cr_pm_approved_wizard"
+                        view_type="form" view_mode="form" view_id="cr_pm_uploaded_wizard_view"
+                        groups="change_request_management.group_cr_user"
+                        key2="client_action_multi" target="new" 
+            />
+
+        <act_window id="rejected_pm_data"
+                        name="PM Rejection"
+                        src_model="kw_cr_management"
+                        res_model="cr_pm_approved_wizard"
+                        view_type="form" view_mode="form" view_id="cr_pm_uploaded_wizard_reject_view"
+                        groups="change_request_management.group_cr_user"
+                        key2="client_action_multi" target="new" 
+            />
+
+        <record id="service_request_management_form_view" model="ir.ui.view">
+            <field name="name">service_request_management_form</field>
+            <field name="model">kw_cr_management</field>
+            <field name="arch" type="xml">
+                <form duplicate='false'>
+                    <header>
+                        <button name="btn_apply" string="Apply" type="object" class="btn-primary" stage="Draft"
+                                attrs="{'invisible': [('stage', 'in', ('Applied','Approve','Uploaded','Rollbacked','Cancel','Request','Reject','Hold'))]}"
+                                confirm="Are you sure, you want to apply?"/>
+                        <button name="btn_upload" string="Uploaded" type="object" class="btn-primary" stage="apply"
+                                attrs="{'invisible': [('stage', 'in', ('Uploaded', 'Rollbacked', 'Draft','Cancel','Request','Reject','Hold'))]}"
+                                groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'/>
+                        <button name="btn_rollback" string="Rollbacked" type="object" class="btn-danger" stage="apply"
+                                attrs="{'invisible': ['|',('stage', 'in', ('Rollbacked','Applied', 'Draft','Cancel','Request','Reject','Hold','In Progress'),('is_uploaded','=',True))]}"
+                                groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'/>
+                        <button name="btn_cancel" string="Cancel" type="object" class="btn-danger" stage="Cancel"
+                                attrs="{'invisible': ['|','|', ('stage', 'in', ('Draft', 'Uploaded', 'Rollbacked', 'Cancel', 'Request','Reject','Hold')), ('is_manager', '=', True),('is_officer_user', '=', True)]}"
+                                groups='change_request_management.group_cr_user'/>
+                        <button name="btn_request_rollback" string="Request For Rollback" type="object"
+                                class="btn-danger" stage="request"
+                                attrs="{'invisible': ['|','|',('stage', 'in', ('Draft','Applied','Approve','Rollbacked','Cancel','Request','Reject','Hold')),('is_manager', '=', True),('is_officer_user', '=', True)]}"
+                                groups='change_request_management.group_cr_user'/>
+                        <field name="stage" widget="statusbar"
+                               statusbar_visible="Draft,Applied,Approve,Uploaded,Rollbacked,Cancel,Request"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group string="">
+                                <field name="reference_no" readonly='1'
+                                       attrs="{'invisible': ['|',('id', '=', False),('stage','=','Draft')]}"/>
+                                <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       required="1" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="project_code" readonly='1'/>
+                                <field name="cr_type" required="1" widget="radio" options="{'horizontal': true}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}" invisible="1"/>
+                                <field name="activity" required="1"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="sub_activity" required="1"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="module_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       required="0" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="environment_id" required="1"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="url_or_service_name" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="description" required="1"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="change_type" required="1" widget="radio" options="{'horizontal': true}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="priority" widget="radio" options="{'horizontal': true}" required="1"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="notify_emp_ids" required="0" widget='many2many_tags'
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                            </group>
+                            <group>
+                                <field name="audit"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="change_impact"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="attachment_name"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="backup_required" widget="radio" options="{'horizontal': true}"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="is_manager" invisible="1"/>
+                                <field name="is_officer_user" invisible="1"/>
+                                <field name="is_uploaded" invisible="1"/>
+                            </group>
+
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="service_request_management_list_view" model="ir.ui.view">
+            <field name="name">service_request_management_list</field>
+            <field name="model">kw_cr_management</field>
+            <field name="arch" type="xml">
+                <tree default_order='id desc' import='0' decoration-warning="stage=='Applied'"
+                      decoration-success="stage == 'Uploaded'">
+                    <field name="reference_no" readonly='1'/>
+                    <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="project_code"/>
+                    <field name="cr_type" invisible="1"/>
+                    <field name="environment_id"/>
+                    <field name="module_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="change_impact"/>
+                    <field name="priority"/>
+                    <field name="attachment_name"/>
+                    <field name="backup_required"/>
+                    <field name="stage"/>
+                    <field name="cr_raised_by"/>
+                    <field name="cr_raised_on"/>
+                    <field name="pending_at" widget="many2many_tags"/>
+                    <field name="cr_uploaded_on"/>
+                    <field name="cr_rollbacked_on"/>
+                    <field name="uploaded_by"/>
+                    <field name="uploaded_cmt"/>
+                    <field name="rollbacked_by"/>
+                    <field name="rollbacked_cmt"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="service_request_take_action_management_form" model="ir.ui.view">
+            <field name="name">change_request_management_take_action_form</field>
+            <field name="model">kw_cr_management</field>
+            <field name="arch" type="xml">
+                <form duplicate='false'>
+                    <header>
+                        <button name="btn_apply" string="Apply" type="object" class="btn-primary" stage="Draft"
+                                attrs="{'invisible': [('stage', 'in', ('Applied','Uploaded','Rollbacked','Cancel','Request','Reject','Hold','Approve','In Progress'))]}"
+                                confirm="Are you sure, you want to apply?"/>
+                        <button name="btn_upload" string="Uploaded" type="object" class="btn-primary" stage="apply" context="{'current_proj':project_id}"
+                                attrs="{'invisible': [('stage', 'in', ('Uploaded', 'Rollbacked', 'Draft','Cancel','Request','Reject'))]}"
+                                groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'/>
+                        <button name="btn_rollback" string="Rollbacked" type="object" class="btn-danger" stage="apply"
+                                attrs="{'invisible': ['|',('stage', 'not in', ('Request'),('is_uploaded','=',False))]}"
+                                groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'/>
+
+                        <button name="btn_in_progress" string="In Progress" type="object" class="btn-info" 
+                            attrs="{'invisible': [('stage', 'in', ('Uploaded','Reject','Request','Rollbacked','In Progress'))]}"
+                            groups="change_request_management.group_cr_manager,change_request_management.group_cr_officer"/>
+
+
+                        <button name="btn_reject" string="Reject" type="object" class="btn-danger" stage="Reject"
+                                attrs="{'invisible': [('stage', 'in', ('Uploaded', 'Rollbacked', 'Draft','Cancel','Request','Reject'))]}"
+                                groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'/>
+                        <button name="btn_hold" string="Hold" type="object" class="btn-warning" stage="Hold"
+                                attrs="{'invisible': [('stage', 'in', ('Uploaded', 'Rollbacked', 'Draft','Cancel','Request','Reject','Hold'))]}"
+                                groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'/>
+
+                        <field name="stage" widget="statusbar"
+                               statusbar_visible="Draft,Applied,Uploaded,Rollbacked,Cancel,Request For Rollback,Reject,Hold"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group string="">
+                                <field name="reference_no" readonly='1'/>
+                                <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       required="1" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="project_code" readonly='1'/>
+                                <field name="cr_type" required="1" widget="radio" options="{'horizontal': true}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}" invisible="1"/>
+                                <field name="activity" required="1"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                               <field name="sub_activity" required="1"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="module_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       required="0" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="environment_id" required="1"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="url_or_service_name" attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="description" required="1"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="change_type" required="1" widget="radio" options="{'horizontal': true}"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="priority" widget="radio" options="{'horizontal': true}" required="1"
+                                       attrs="{'readonly': [('stage', '!=', 'Draft')]}"/>
+                            </group>
+                            <group>
+                                <!-- <field name="activity"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/> -->
+                                <field name="audit"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="change_impact"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="attachment_name"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="backup_required" widget="radio" options="{'horizontal': true}"
+                                       attrs="{'invisible': [('cr_type', '=', 'Service')],'required':[('cr_type','=','CR')],'readonly': [('stage', '!=', 'Draft')]}"/>
+                                <field name="is_manager" invisible="1"/>
+                                <field name="is_officer_user" invisible="1"/>
+                                <field name="is_uploaded" invisible="1"/>
+                            </group>
+                            <group string='Action Log'
+                                   groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'
+                                   attrs="{'invisible':[('stage','=','Draft')]}">
+                                <field name="cr_raised_by" readonly='1'
+                                       options="{'no_create': True, 'no_edit':True, 'no_open': True}" force_save="1"
+                                       attrs="{'invisible':[('stage','in',['Uploaded','Draft','Rollbacked','Cancel','Request','Reject','Hold'])]}"/>
+
+                                <field name="uploaded_by" options="{'no_create': True, 'no_edit':True, 'no_open': True}"
+                                       attrs="{'invisible':[('stage','in',['Applied','Draft','Rollbacked','Cancel','Request','Reject','Hold'])]}"/>
+                                <field name="uploaded_cmt"
+                                       attrs="{'invisible':[('stage','in',['Applied','Draft','Rollbacked','Cancel','Request','Reject','Hold'])]}"/>
+                                <field name="rollbacked_by"
+                                       options="{'no_create': True, 'no_edit':True, 'no_open': True}"
+                                       attrs="{'invisible':[('stage','in',['Uploaded','Draft','Applied','Cancel','Request','Reject','Hold'])]}"/>
+                                <field name="rollbacked_cmt"
+                                       attrs="{'invisible':[('stage','in',['Uploaded','Draft','Applied','Cancel','Request','Reject','Hold'])]}"/>
+                                <field name="cr_cancelled_by"
+                                       attrs="{'invisible':[('stage','!=','Cancel')]}"
+                                       options="{'no_create': True, 'no_edit':True, 'no_open': True}"/>
+                                <field name="cancel_cmt" attrs="{'invisible':[('stage','!=','Cancel')]}"/>
+                                <field name="request_for_rollback_id"
+                                       attrs="{'invisible':[('stage','!=','Request')]}"
+                                       options="{'no_create': True, 'no_edit':True, 'no_open': True}"/>
+                                <field name="request_for_rollback_cmt"
+                                       attrs="{'invisible':[('stage','!=','Request')]}"/>
+                                <field name="cr_rejected_by"
+                                       options="{'no_create': True, 'no_edit':True, 'no_open': True}"
+                                       attrs="{'invisible':[('stage','!=','Reject')]}"/>
+                                <field name="reject_cmt"
+                                       attrs="{'invisible':[('stage','!=','Reject')]}"/>
+                                <field name="cr_holded_by"
+                                       options="{'no_create': True, 'no_edit':True, 'no_open': True}"
+                                       attrs="{'invisible':[('stage','!=','Hold')]}"/>
+                                <field name="hold_cmt"
+                                       attrs="{'invisible':[('stage','!=','Hold')]}"/>
+                            </group>
+                            <group string='Timesheet Log'>
+                                   <field name="prject_category_id" options="{'no_create': True, 'no_edit':True, 'no_open': True}" readonly="1" />
+                                   <field name="parent_task_id" options="{'no_create': True, 'no_edit':True, 'no_open': True}" readonly="1"/>
+                                   <field name="task_id" options="{'no_create': True, 'no_edit':True, 'no_open': True}" readonly="1"/>
+                                   <field name="time_spent" widget="float_time" readonly="1"/>
+                                   <field name="date_of" readonly="1"/>
+                                   <field name="is_testing_lead" force_save='1' invisible="0"/>
+                            </group>
+                            <!-- <group> -->
+                                   <group string='Inprogress Log'  col="7" groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'
+                                          attrs="{'invisible':[('stage','not in','In Progress')]}">
+                                          <field name="inprogress_log_ids" nolabel="1" readonly="1" >
+                                                 <tree>
+                                                        <field name="inprogress_by_id"/>
+                                                        <field name="inprogress_comment"/>
+                                                        <field name="inprogress_date"/>
+                                                 </tree>
+                                          </field>
+                                   </group>
+                            <!-- </group> -->
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="service_request_take_action_management_list" model="ir.ui.view">
+            <field name="name">change_request_management_take_action_list</field>
+            <field name="model">kw_cr_management</field>
+            <field name="arch" type="xml">
+                <tree default_order='id desc' import='0'>
+                    <field name="reference_no" readonly='1'/>
+                    <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="project_code"/>
+                    <field name="cr_type"/>
+                    <field name="activity" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="sub_activity" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="module_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="environment_id"/>
+                    <field name="url_or_service_name"/>
+                    <field name="description"/>
+                    <field name="change_type"/>
+                    <field name="audit"/>
+                    <field name="change_impact"/>
+                    <field name="priority"/>
+                    <field name="attachment_name"/>
+                    <field name="backup_required"/>
+                    <field name="stage"/>
+                    <field name="cr_raised_by"/>
+                    <field name="cr_raised_on"/>
+                    <field name="cr_uploaded_on"/>
+                    <field name="cr_rollbacked_on"/>
+                    <field name="cr_cancelled_on"/>
+                    <field name="requesr_rollbacked_on"/>
+                    <field name="cr_rejected_on"/>
+                    <field name="cr_holded_on"/>
+                    <field name="cr_approved_on"/>
+                    <field name="uploaded_by"/>
+                    <field name="uploaded_cmt"/>
+                    <field name="rollbacked_by"/>
+                    <field name="rollbacked_cmt"/>
+                    <field name="cr_cancelled_by"/>
+                    <field name="cancel_cmt"/>
+                    <field name="request_for_rollback_id"/>
+                    <field name="request_for_rollback_cmt"/>
+                    <field name="cr_rejected_by"/>
+                    <field name="reject_cmt"/>
+                    <field name="cr_holded_by"/>
+                    <field name="hold_cmt"/>
+                    <field name="cr_approved_by"/>
+                    <field name="approved_cmt"/>
+                    <!-- <field name="cr_in_progress_by"/> -->
+                    <!-- <field name="cr_in_progress_on"/> -->
+                    <!-- <field name="in_progress_comment"/> -->
+                </tree>
+            </field>
+        </record>
+
+        <record id="change_request_management_action" model="ir.actions.server">
+            <field name="name">Apply CR</field>
+            <field name="model_id" ref="model_kw_cr_management"/>
+            <field name="state">code</field>
+            <field name="code">
+action = model.check_project_tagged_employees()
+            </field>
+        </record>
+        <!--CR Management Apply menu-->
+        <menuitem name="Apply"
+                  id="change_request_management_apply_menu"
+                  parent='change_request_management_parent_menu'
+                  action="change_request_management_action"
+                  groups='change_request_management.group_cr_user,change_request_management.group_cr_manager,change_request_management.group_cr_officer'
+                  sequence="1"/>
+
+       <!-- <record id="change_request_management_take_action" model="ir.actions.server">
+            <field name="name">Take Action</field>
+            <field name="model_id" ref="model_kw_cr_management"/>
+            <field name="state">code</field>
+            <field name="code">
+action = model.check_take_action_project_employees()
+            </field>
+       </record> -->
+        <record id="change_request_management_take_action" model="ir.actions.act_window">
+            <field name="name">Take Action</field>
+            <field name="res_model">kw_cr_management</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('cr_type','=','CR'),
+            '|',('stage','in',['Request','Hold']),
+             '|',
+             '&amp;',('stage','in',['Approve','In Progress']),('is_pm_approval_required','=',True),
+            '&amp;',('stage','in',['Applied','In Progress']),('is_pm_approval_required','=',False),]</field>
+            <field name="search_view_id" ref="cr_management_take_action_search_view"/>
+            <field name="context">{'create':False,'edit':True}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                     (0, 0, {'view_mode': 'tree', 'view_id': ref('change_request_take_action_management_list')}),
+                     (0, 0, {'view_mode': 'form', 'view_id': ref('change_request_take_action_management_form')})]"/>
+        </record>
+
+        <!--CR Management Take Action menu-->
+        <menuitem name="Take Action"
+                  id="change_request_management_take_action_menu"
+                  parent='change_request_management_parent_menu'
+                  action="change_request_management_take_action"
+                  groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'
+                  sequence="2"/>
+
+        <record id="change_request_management_pm_take_action" model="ir.actions.server">
+              <field name="name">Take Action</field>
+              <field name="model_id" ref="model_kw_cr_management" />
+              <field name="search_view_id" ref="cr_management_take_action_search_view"/>
+
+              <field name="context">{'search_default_state_test_lead_approved':1,'search_default_state_applied': 1, 'create': False, 'edit': True}</field>
+
+              <field name="state">code</field>
+              <field name="code">
+action = model.pm_take_action()
+              </field>
+        </record>
+        <!--PM Take action menu-->
+        <menuitem name="Take Action"
+                  id="change_request_management_pm_take_action_menu"
+                  parent='change_request_pm_parent_menu'
+                  action="change_request_management_pm_take_action"
+                  sequence="3"/>
+
+              <record id="change_request_management_test_lead_take_action" model="ir.actions.server">
+                     <field name="name">Take Action</field>
+                     <field name="model_id" ref="model_kw_cr_management" />
+                     <field name="search_view_id" ref="cr_management_take_action_search_view"/>
+
+                     <field name="context">{'search_default_state_applied':1, 'create': False, 'edit': True}</field>
+
+                     <field name="state">code</field>
+                     <field name="code">
+       action = model.test_lead_take_action()
+                     </field>
+              </record>
+               <!--PM Take action menu-->
+               <menuitem name="Take Action"
+                         id="change_request_management_test_lead_take_action_menu"
+                         parent='change_request_test_lead_parent_menu'
+                         action="change_request_management_test_lead_take_action"
+                         sequence="1"/>
+
+        <record id="service_request_management_apply_action" model="ir.actions.server">
+              <field name="name">Apply SR</field>
+              <field name="model_id" ref="model_kw_cr_management" />
+              <field name="state">code</field>
+              <field name="code">
+action = model.project_tagged_employees_sr()
+              </field>
+        </record>
+        <!--SR Management Apply Menu-->
+        <menuitem name="Apply"
+                  id="service_request_management_apply_menu"
+                  parent='service_request_management_parent_menu'
+                  action="service_request_management_apply_action"
+                  groups='change_request_management.group_cr_user,change_request_management.group_cr_manager,change_request_management.group_cr_officer'
+                  sequence="2"/>
+        <!--SR Management Take Action-->
+
+       <!-- <record id="service_request_management_take_action" model="ir.actions.server">
+            <field name="name">Take Action</field>
+            <field name="model_id" ref="model_kw_cr_management"/>
+            <field name="state">code</field>
+            <field name="code">
+action = model.check_take_action_sr_project_employees()
+            </field>
+       </record> -->
+       <record id="service_request_management_take_action" model="ir.actions.act_window">
+              <field name="name">Take Action</field>
+              <field name="res_model">kw_cr_management</field>
+              <field name="view_mode">tree,form</field>
+              <field name="domain">[('cr_type','=','Service'),
+              '|',('stage','in',['Request','Hold']),
+              '|',
+              '&amp;',('stage','in',['Approve','In Progress']),('is_pm_approval_required','=',True),
+              '&amp;',('stage','in',['Applied','In Progress']),('is_pm_approval_required','=',False),]</field>
+              <!-- <field name="domain">[('cr_type','=','Service'), ('stage','in',['In Progress','Request','Hold','Approve'])]</field> -->
+              <field name="context">{'create':False,'edit':False, 'default_cr_type': 'Service'}</field>
+              <field name="view_ids" eval="[(5, 0, 0),
+                     (0, 0, {'view_mode': 'tree', 'view_id': ref('service_request_take_action_management_list')}),
+                     (0, 0, {'view_mode': 'form', 'view_id': ref('service_request_take_action_management_form')})]"/>
+       </record>
+        <!--SR Management Take Action Menu-->
+        <menuitem name="Take Action"
+                  id="service_request_management_take_action_menu"
+                  parent='service_request_management_parent_menu'
+                  action="service_request_management_take_action"
+                  groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'
+                  sequence="3"/>
+    </data>
+</odoo>

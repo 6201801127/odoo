@@ -1,0 +1,566 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="view_kw_tour_tree" model="ir.ui.view">
+            <field name="name">view.kw_tour.tree</field>
+            <field name="model">kw_tour</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <tree import="false" delete="false">
+                    <field name="cancellation_id" invisible="1"/>
+                    <field name="cancellation_status" invisible="1"/>
+                    <field name="child_id" invisible="1"/>
+                    <field name="settlement_applied" invisible="1"/>
+                    <field name="end_date_over" invisible="1"/>
+                    <field name="tour_at_end_date_or_greater" invisible="1"/>
+                    <field name="code"/>
+                    <field name="tour_type_id"/>
+                    <field name="date_travel"/>
+                    <field name="date_return"/>
+                    <field name="city_id"/>
+                    <field name="actual_state"/>
+                    <field name="state" invisible="1"/>
+                    <field name="tour_others_applied_by"/>
+                    <field name="employee_id" string='Apply For'/>
+                    <field name="pending_at"/>
+                    <!--                    <field name="department_id" invisible="1"/>-->
+
+                    <button name="action_confirm_reschedule" string="Reschedule" class="oe_highlight"
+                            attrs="{'invisible': ['|','|',('settlement_applied','=',True),
+                            ('state','in',['Draft','Cancelled','Applied','Rejected']),('cancellation_status','=',True)]}"
+                            type="object"/>
+
+                    <button name="action_advance_request_tour" string="Advance Request" class="oe_highlight"
+                            attrs="{'invisible': ['|','|','|',('tour_at_end_date_or_greater','=',True),
+                            ('settlement_applied','=',True),('state','!=','Finance Approved'),
+                            ('cancellation_status','=',True)]}" type="object"/>
+
+                    <button name="action_cancel_tour" string="Cancel Tour" class="oe_highlight"
+                            attrs="{'invisible': ['|','|',('settlement_applied','=',True),
+                            ('state','in',['Cancelled','Rejected']),('cancellation_status','=',True)]}"
+                            type="object"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_tour_reschedule_confirmation_view" model="ir.ui.view">
+            <field name="name">Reschedule</field>
+            <field name="model">kw_tour</field>
+            <field name="priority" eval="99"/>
+            <field name="arch" type="xml">
+                <form create='false' edit='false'>
+                    <script>
+                        $(document).ready(function(){
+                        $(".modal-title").show();
+                        $(".modal-footer").hide();
+                        $(".o_form_statusbar").hide();
+                        });
+                    </script>
+
+                    <field name="to_disbursed_inr" invisible="1"/>
+                    <field name="to_disbursed_usd" invisible="1"/>
+                    <field name="end_date_over" invisible="1"/>
+                    <field name="finance_access" invisible="1"/>
+                    <field name="travel_desk_access" invisible="1"/>
+                    <field name="own_record" invisible="1"/>
+                    <field name="is_valid_authority" invisible="1"/>
+                    <div class="row">
+                        <div class="text-center col-sm-8 col-sm-offset-4 mx-auto">
+                            <p class="h6 font-weight-light text-center text-justify">Are You Sure You Want To Reschdule Tour ? </p><br/>
+                            <button type="object" name="action_reschedule_tour" class="text-center btn btn-primary" style="margin-right:10px; width:70px;">Ok</button>
+                            <button string="Cancel" class="btn-danger" special="cancel"/>
+                        </div>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_kw_tour_form" model="ir.ui.view">
+            <field name="name">view.kw_tour.form</field>
+            <field name="model">kw_tour</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <form delete="false" duplicate="false">
+                    <script>
+                        $(document).ready(function(){
+                        $(".modal-title").show();
+
+                        var span_texts = ["5-8", "8-10","10-15","15-30","More Than 30"];
+                        var select_texts = ["1","2","3","4","5"];
+
+                        span_value = $('span[name ="baggage_details"]').text()
+                        select_value = $('select[name ="baggage_details"]').val()
+
+                        if (jQuery.type(span_value) === "string" &amp;&amp; span_texts.includes(span_value)){
+                        $('span[name ="baggage_details"]').parent().css('background-color','#f98888');
+                        }
+                        if (jQuery.type(select_value) === "string" &amp;&amp; select_texts.includes(select_value.replace(/"/g,""))){
+                        $('select[name ="baggage_details"]').css('background-color','#f98888');
+                        }
+
+                        $('select[name ="baggage_details"]').on('change', function() {
+
+                        if (jQuery.type(this.value) === "string" &amp;&amp; select_texts.includes(this.value.replace(/"/g,""))){
+                        $(this).css('background-color','#f98888');
+                        //alert("You are applying more than 5kgs of extra baggage.")
+                        }
+                        else{
+                        $(this).css('background-color','');
+                        }
+
+                        });
+                        });
+                    </script>
+
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box" position="inside">
+
+                            <!-- <button style="color: #d81717;background-color: #ffffff;" attrs="{'invisible': ['|',('state','in',['Draft','Cancelled']),('cancellation_id','!=',False)]}" icon="fa-times-circle" type="object" name="action_cancel_tour">
+                                <span class="o_stat_text font-weight-bold" style="font-size:1.3rem;">
+                                    Cancel Tour
+                                </span>
+                            </button>
+
+                            <button style="background-color: #ffffff;" attrs="{'invisible': ['|',('state','in',['Draft','Cancelled']),('cancellation_id','!=',False)]}" icon="fa-refresh" type="object" name="action_reschedule_tour">
+                                <span class="o_stat_text font-weight-bold" style="font-size:1.3rem;">
+                                    Reschedule
+                                </span>
+                            </button> -->
+
+                            <!-- <button style="background-color: #ffffff;"  icon="fa-book" type="object" name="">
+                                <span class="o_stat_text font-weight-bold"  widget="statinfo" style="font-size:1.3rem;">
+                                    User Guide
+                                </span>
+                            </button> -->
+                        </div>
+                        <group>
+
+                            <group >
+                                <field name="city_ids" widget="many2many_tags" invisible="1"/>
+                                <field name="id" invisible="1"/>
+                                <field name="bool_obj" invisible="1"/>
+                                <field name="employee_id" invisible="1"/>
+                                <field name="blocked_department_id" readonly="1" invisible="1"/>
+                                <!-- <field name="apply_for" required="1" widget="radio" options="{'horizontal': true}"  attrs="{'invisible': [('bool_obj','=', False)],'readonly':[('state','!=','Draft')]}"/>
+                                <field name="employee_id" attrs="{'invisible':[('apply_for','=','1')],'readonly':[('state','!=','Draft')]}" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="create_uid" string="Created by" readonly="1" attrs="{'invisible':[('apply_for','=','1'),('bool_obj','=', False)]}" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/> -->
+                                <field name="end_date_over" invisible="1"/>
+                                <field name="code" invisible="1"/>
+                                <field name="csg_group_tour_code" attrs="{'invisible': [('csg_group_tour_boolean', '=', False)]}" />
+                                <field name="own_record" invisible="1"/>
+                                <field name="is_valid_authority" invisible="1"/>
+                                <field name="cancellation_id" invisible="1"/>
+                                <field name="cancellation_status" invisible="1"/>
+                                <field name="ra_access" invisible="1"/>
+                                <field name="admin_access" invisible="1"/>
+                                <field name="forward" invisible="1"/>
+                                <field name="travel_desk_access" invisible="1"/>
+                                <field name="finance_access" invisible="1"/>
+                                <field name="tour_city_list_ids" invisible="1" widget="many2many_tags"/>
+                                <field name="can_apply_inr" invisible="1"/>
+                                <field name="can_apply_usd" invisible="1"/>
+                                <field name="have_public_access" invisible="1"/>
+                                <!--                                <field name="department_id" invisible="1"/>-->
+                                <field name="pr_boolean" invisible="1"/>
+                                <field name="tour_type_new" options="{'no_create_edit': True,'no_open':True,'no_create':True}" attrs="{'readonly': [('state','not in', ['Draft','Applied'])]}" required="1"/>
+                                <field name="tour_type_id"  attrs="{'readonly': ['|', ('pr_boolean','=', True), ('state','not in', ['Draft','Applied'])]}"
+                                       options="{'no_create_edit': True,'no_open':True,'no_create':True}" domain="[('code', 'not in', ['project', 'events', 'training', 'relocation', 'interviews'])]" force_save='1'/>
+                                <field name="project" invisible="1"/>
+                                <field name="parent_id" attrs="{'invisible': [('parent_id','=', False)]}" readonly="1"/>
+                                <field name="status" string="Type" attrs="{'invisible': [('status','=', 'Tour')]}" readonly="1"/>
+                                <field name="project_type" attrs="{'required': [('project','=', True)],'invisible': [('project','=', False)],'readonly': ['|', ('state','not in', ['Draft','Applied']), ('pr_boolean','=', True)]}" force_save="1"/>
+
+                                <field name="project_id" domain="[('id','=',0)]"
+                                       options="{'no_create_edit': True,'no_open':True,'no_create':True}"
+                                       attrs="{'required': [('project','=', True)],'invisible': [('project','=', False)],'readonly': [('state','not in', ['Draft','Applied'])]}"/>
+                                <field name="purpose" attrs="{'readonly': [('state','not in', ['Draft','Applied'])]}" required="1"/>
+                                <field name="date_travel" autocomplete="off"
+                                       attrs="{'readonly': [('state','not in', ['Draft','Applied'])]}"/>
+                                <field name="city_id" attrs="{'readonly': [('state','not in', ['Draft','Applied'])]}" required="1"
+                                       options="{'no_create_edit': True,'no_open':True,'no_create':True}" domain="[('id', 'in', city_ids)]"/>
+                                <field name="csg_group_tour_boolean" invisible="1"/>
+
+                                <field name="date_return" autocomplete="off" force_save="1"
+                                       attrs="{'readonly': [('state','not in', ['Draft','Applied'])]}"/>
+                                <field name="budget_head"
+                                       attrs="{'readonly': [('state','not in', ['Draft','Applied'])], 'invisible': [('budget_head', '=', False)], 'required': [('budget_head_id', '=', False)]}"/>
+                                <field name="budget_head_id"
+                                       attrs="{'readonly': [('state','not in', ['Draft','Applied'])], 'invisible': [('budget_head', '!=', False)], 'required': [('budget_head', '=', False)]}"
+                                       options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                <field name="travel_arrangement" attrs="{'readonly': [('state','not in', ['Draft','Applied'])]}"/>
+                            </group>
+
+                            <field name="last_city_id" invisible="1"/>
+                            <field name="last_travel_date" invisible="1"/>
+                            <field name="last_travel_time" invisible="1"/>
+                            <group>
+                                <field name="total_budget_expense" invisible="1"/>
+                            </group>
+                        </group>
+
+                        <group string="Tour Details">
+                            <field name="tour_detail_ids" nolabel="1"
+                                   context="{'default_state':state,'default_last_city':last_city_id,'default_last_travel_date':last_travel_date,'default_last_travel_time':last_travel_time, 'default_from_city':city_id}"
+                                   attrs="{'readonly': [('state','not in', ['Draft','Applied'])]}">
+                                <tree>
+                                    <field name="from_date"/>
+                                    <field name="from_time" />
+                                    <field name="from_city_id"/>
+                                    <field name="to_date" />
+                                    <field name="to_time" />
+                                    <field name="to_city_id"/>
+                                    <field name="to_city_class"/>
+                                    <field name="accomodation_arrangement"/>
+                                </tree>
+                                <form>
+                                    <script>
+                                        $(document).ready(function(){
+                                        $(".modal-title").show();
+                                        });
+                                    </script>
+                                    <style>
+                                        .btn-primary:not([class*="o_select_file_button"]):nth-child(2){
+                                        display:none !important;
+                                        }
+                                    </style>
+                                    <sheet>
+                                        <group>
+                                            <field name="state" invisible="1"/>
+                                            <field name="from_city_currency_id" invisible="1"/>
+                                            <field name="to_city_currency_id" invisible="1"/>
+                                            <group string="From">
+                                                <field name="from_date" autocomplete='off'/>
+                                                <field name="from_time" attrs="{'required':['|','|',('parent.travel_arrangement','=','Self'),('to_time','!=',False),('state','=','Approved')]}"/>
+                                                <field name="from_city_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" domain="[('id', 'in', parent.city_ids)]"/>
+                                                <field name="from_country_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                            </group>
+                                            <group string="To">
+                                                <field name="to_date" autocomplete='off' />
+                                                <field name="to_time" attrs="{'required':['|','|',('parent.travel_arrangement','=','Self'),('from_time','!=',False),('state','=','Approved')]}"/>
+
+                                                <field name="to_city_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" domain="[('id', 'in', parent.city_ids)]"/>
+                                                <field name="to_country_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                            </group>
+                                        </group>
+                                        <group>
+                                            <group string="Accomodation Arrangement">
+                                                <field name="accomodation_arrangement"/>
+                                            </group>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </group>
+
+                        <group string="Ticket Details" attrs="{'invisible':[('travel_arrangement','=','Company'),('state','in',['Draft','Applied','Forwarded'])]}">
+                            <field name="travel_ticket_ids" nolabel="1" attrs="{'readonly': [('state','not in', ['Draft','Applied'])]}">
+                                <tree>
+                                    <field name="booking_date"/>
+                                    <field name="travel_mode_id"/>
+                                    <field name="currency_id" domain="['|', ('id', '=', parent.currency_id), ('name', '=', 'USD')]"/>
+                                    <field name="cost" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                    <field name="service_charges" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                    <field name="document" filename="document_name" widget="binary"/>
+                                    <field name="document_name" invisible="1"/>
+                                </tree>
+                                <form>
+                                    <script>
+                                        $(document).ready(function(){
+                                        $(".modal-title").show();
+                                        });
+                                    </script>
+                                    <style>
+                                        .btn-primary:not([class*="o_select_file_button"]):nth-child(2){
+                                        display:none !important;
+                                        }
+                                    </style>
+                                    <sheet>
+                                        <group>
+                                            <field name="booking_date"/>
+                                            <field name="travel_mode_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                            <field name="currency_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" domain="['|', ('id', '=', parent.currency_id), ('name', '=', 'USD')]"/>
+                                            <field name="cost" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                            <field name="service_charges" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                            <!-- <field name="ticket_status" /> -->
+                                            <field name="document" filename="document_name" widget="binary"/>
+                                            <field name="document_name" invisible="1"/>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </group>
+
+                        <group>
+                            <group invisible='1'>
+                                <field name="city_days_spend_ids" attrs="{'invisible': [('city_days_spend_ids','=', [])]}">
+                                    <tree editable="bottom" delete="false" create="false">
+                                        <field name="city_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" style="pointer-events:none;"/>
+                                        <field name="actual_no" invisible="1"/>
+                                        <field name="no_of_nights"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Accomodation Details">
+                                <field name="accomodation_ids" context="{'default_tour_id':id,'form_view_ref': 'kw_tour.view_kw_tour_accomodation_details_form_user'}" nolabel="1"
+                                       attrs="{'readonly': [('state','not in', ['Draft','Applied'])]}">
+                                    <form>
+                                        <script>
+                                            $(document).ready(function(){
+                                            $(".modal-title").show();
+                                            });
+                                        </script>
+                                        <style>
+                                            .btn-primary:not([class*="o_select_file_button"]):nth-child(2){
+                                            display:none !important;
+                                            }
+                                        </style>
+                                        <sheet>
+                                            <group col="3">
+                                                <field name="acc_arrange"/>
+                                                <field name="hotel_display_name" invisible="1"/>
+                                                <field name="city_id" autocomplete="off"
+                                                       attrs="{'invisible': [('acc_arrange','=', 'Self')],'required': [('acc_arrange','=', 'Company')]}"
+                                                       options="{'no_edit': True,'no_open':True,'no_create':True}" domain="[('id','in',parent.tour_city_list_ids)]"/>
+
+                                                <field name="arrangement" attrs="{'invisible': [('acc_arrange','=', 'Self')],'required': [('acc_arrange','=', 'Company')]}"/>
+                                                <field name="guest_house_id" domain="[('city_id','=',city_id)]" options="{'no_edit': True,'no_open':True,'no_create':True}"
+                                                       attrs="{'invisible': ['|',('acc_arrange','=','Self'),('arrangement','in', ['Hotel',False])],'required': [('arrangement','=', 'Guest House')]}"/>
+
+                                                <field name="name" autocomplete="off" attrs="{'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','in',[False, 'Guest House'])]}"/>
+                                                <field name="contact_person" autocomplete="off" attrs="{'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','in',[False, 'Guest House'])]}"/>
+                                                <field name="contact_no" autocomplete="off" attrs="{'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','in',[False, 'Guest House'])]}"/>
+                                                <field name="hotel_name" autocomplete="off" attrs="{'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','in',[False, 'Guest House'])]}"/>
+                                                <field name="telephone_no" autocomplete="off" attrs="{'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','in',[False, 'Guest House'])]}"/>
+
+                                                <field name="check_in_time" autocomplete="off"  attrs="{'required': [('arrangement','in', ['Hotel','Guest House'])],'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','=', False)]}"/>
+                                                <field name="check_out_time" autocomplete="off"  attrs="{'required': [('arrangement','in', ['Hotel','Guest House'])],'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','=', False)]}"/>
+                                                <field name="no_of_night" autocomplete="off"  style="pointer-events:none"
+                                                       attrs="{'required': [('arrangement','in', ['Hotel','Guest House'])],'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','=', False)]}"/>
+
+                                                <field name="advance_paid" autocomplete="off" attrs="{'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','in',[False, 'Guest House'])]}" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                                <field name="currency_id" attrs="{'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','in',[False, 'Guest House'])]}" options="{'no_edit': True,'no_open':True,'no_create':True}" domain="['|', ('id', '=', parent.currency_id), ('name', '=', 'USD')]"/>
+                                                <field name="document" autocomplete="off" attrs="{'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','=', False)]}"/>
+                                            </group>
+                                        </sheet>
+                                    </form>
+                                </field>
+                            </group>
+                        </group>
+
+                        <group>
+                            <group string="Travel Expenses">
+                                <field name="travel_expense_details_ids" nolabel="1" attrs="{'readonly': [('state','not in', ['Draft','Applied'])]}">
+                                    <tree editable="bottom" delete="false" create="false">
+                                        <field name="expense_id" style="pointer-events:none;"/>
+                                        <field name="no_of_night_inr" style="pointer-events:none;"/>
+                                        <field name="amount_domestic" style="pointer-events:none;" sum="Total(INR)" options="{'currency_field': 'currency_domestic'}" widget="monetary"/>
+                                        <field name="no_of_night_usd" style="pointer-events:none;"/>
+                                        <field name="amount_international" style="pointer-events:none;" sum="Total(USD)" options="{'currency_field': 'currency_international'}" widget="monetary"/>
+                                        <field name="currency_domestic" invisible="1"/>
+                                        <field name="currency_international" invisible="1"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Blocked Budget Expenses">
+                                <field name="currency_id" invisible="1"/>
+                                <field name="total_budget_expense" style="pointer-events:none;" widget="monetary" options="{'currency_field':'currency_id'}"/>
+                            </group>
+                        </group>
+                        <span style='text-align:right;color:blue;font-weight:bold; font-size:15px; margin-bottom:0'><i>Amount Blocked towards the total tour expenses(Travel Expenses as above + Travel Ticket Cost).</i></span>
+                        <group>
+                            <group>
+                                <group>
+                                    <field name="emp_budget_amount"  attrs="{'readonly':[('state','not in', ['Draft'])]}"/>
+                                    <field name="user_budget_boolean" invisible="1"/>
+                                </group>
+                                <group>
+                                    <button type="object" class="btn btn-primary mt-2" name="re_calculate_old_value" attrs="{'invisible':[('state','not in', ['Draft','Applied'])]}">
+                                        Re-Calculate Blocked Amount
+                                    </button>
+                                </group>
+                            </group>
+                        </group>
+                        <span style='text-align:right;color:red;font-weight:bold; font-size:18px; margin-bottom:0'><i>**If you want to change the total Blocked Amount please fill new amount in the above box.**</i></span>
+
+
+                        <group>
+                            <group string="Travel Prerequisites">
+                                <field name="travel_prerequisite_ids" nolabel="1"
+                                       attrs="{'readonly': [('state','not in', ['Draft','Applied'])]}">
+                                    <tree editable="bottom">
+                                        <field name="travel_prerequisite_id"
+                                               options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                        <field name="amount" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="currency_id"
+                                               options="{'no_create_edit': True,'no_open':True,'no_create':True}" domain="['|', ('id', '=', parent.currency_id), ('name', '=', 'USD')]"/>
+                                        <field name="document" filename="document_name" widget="binary"/>
+                                        <field name="document_name" invisible="1"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Ancillary Expenses">
+                                <field name="ancillary_expense_ids" nolabel="1" context="{'can_apply_inr':can_apply_inr,'can_apply_usd':can_apply_usd}"
+                                       attrs="{'readonly': [('state','not in', ['Draft','Applied'])]}">
+                                    <tree editable="bottom">
+                                        <field name="ancillary_expense_id"
+                                               options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                                        <field name="amount" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                        <field name="currency_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" domain="['|', ('id', '=', parent.currency_id), ('name', '=', 'USD')]"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                        <group>
+
+                            <group>
+                                <field name="baggage_details"
+                                       attrs="{'readonly': [('state','not in', ['Draft','Applied'])]}"/>
+
+                                <field name="advance" autocomplete="off"
+                                       attrs="{'invisible':[('can_apply_inr','=',False)],'readonly': [('state','not in', ['Draft','Applied'])]}" options="{'currency_field':'currency_id'}" widget="monetary"/>
+                                <field name="advance_usd" autocomplete="off"
+                                       attrs="{'invisible':[('can_apply_usd','=',False)],'readonly': [('state','not in', ['Draft','Applied'])]}"/>
+
+                                <field name="disbursed_inr" autocomplete="off" readonly="1"
+                                       attrs="{'invisible':['|',('can_apply_inr','=',False),'&amp;',('status','!=','Rescheduled'),'&amp;',('status','=','Tour'),('state','not in',['Finance Approved','Cancelled'])]}" options="{'currency_field':'currency_id'}" widget="monetary"/>
+
+                                <field name="disbursed_usd" autocomplete="off" readonly="1"
+                                       attrs="{'invisible':['|',('can_apply_usd','=',False),'&amp;',('status','!=','Rescheduled'),'&amp;',('status','=','Tour'),('state','not in',['Finance Approved','Cancelled'])]}" />
+
+                                <field name="to_disbursed_inr" invisible="1"/>
+                                <field name="to_disbursed_usd" invisible="1"/>
+
+                                <field name="exchange_rate" autocomplete="off" readonly="1"
+                                       attrs="{'invisible':['|',('can_apply_usd','=',False),'&amp;',('status','!=','Rescheduled'),'&amp;',('status','=','Tour'),('state','not in',['Finance Approved','Cancelled'])]}"/>
+
+                                <field name="public_view" attrs="{'readonly': [('state','not in', ['Draft','Applied'])],'invisible':[('have_public_access','=',False)]}"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Advance Disbursed Log" attrs="{'invisible': [('status','=','Tour'),('state','not in',['Finance Approved','Cancelled'])]}">
+                                <field name="advance_ids" readonly="1" nolabel="1"/>
+                            </group>
+
+                            <group string="Travel Ticket Cost Log"  attrs="{'invisible':[('state','in',['Draft','Applied','Approved'])]}">
+                                <field name="travel_ticket_cost_ids" readonly="1" nolabel="1">
+                                    <tree>
+                                        <field name="booking_date"/>
+                                        <field name="travel_mode_id"/>
+                                        <!-- <field name="ticket_status"/> -->
+                                        <field name="currency_id"/>
+                                        <field name="cost" options="{'currency_field': 'currency_id'}"/>
+                                        <!-- <field name="service_charges"/> -->
+                                    </tree>
+                                </field>
+                            </group>
+
+                            <group  string="Action Logs" attrs="{'invisible':[('state','in',['Draft','Applied'])]}">
+                                <field name="action_log_ids" readonly="1" nolabel="1">
+                                    <tree>
+                                        <field name="date"/>
+                                        <field name="employee_id"/>
+                                        <field name="state"/>
+                                        <field name="remark"/>
+                                    </tree>
+                                </field>
+                            </group>
+
+                        </group>
+
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_kw_tour_accomodation_details_form_user" model="ir.ui.view">
+            <field name="name">view.kw_tour_accomodation.form</field>
+            <field name="model">kw_tour_accomodation</field>
+            <field name="type">form</field>
+            <!-- <field name="mode">primary</field> -->
+            <field name="priority" eval="16"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                        $(document).ready(function(){
+                        $(".modal-title").show();
+                        });
+                    </script>
+                    <style>
+                        .btn-primary:not([class*="o_select_file_button"]):nth-child(2){
+                        display:none !important;
+                        }
+                    </style>
+                    <sheet>
+                        <group col="3">
+                            <field name="acc_arrange"/>
+                            <field name="hotel_display_name" invisible="1"/>
+                            <field name="city_id" autocomplete="off"
+                                   attrs="{'invisible': [('acc_arrange','=', 'Self')],'required': [('acc_arrange','=', 'Company')]}"
+                                   options="{'no_edit': True,'no_open':True,'no_create':True}"/>
+
+                            <field name="arrangement" attrs="{'invisible': [('acc_arrange','=', 'Self')]}"/>
+                            <field name="guest_house_id" domain="[('city_id','=',city_id)]" options="{'no_edit': True,'no_open':True,'no_create':True}"
+                                   attrs="{'invisible': ['|',('acc_arrange','=','Self'),('arrangement','in', ['Hotel',False])]}"/>
+
+                            <field name="name" autocomplete="off" attrs="{'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','in',[False, 'Guest House'])]}"/>
+                            <field name="contact_person" autocomplete="off" attrs="{'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','in',[False, 'Guest House'])]}"/>
+                            <field name="contact_no" autocomplete="off" attrs="{'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','in',[False, 'Guest House'])]}"/>
+                            <field name="hotel_name" autocomplete="off" attrs="{'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','in',[False, 'Guest House'])]}"/>
+                            <field name="telephone_no" autocomplete="off" attrs="{'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','in',[False, 'Guest House'])]}"/>
+
+                            <field name="check_in_time" autocomplete="off"  attrs="{'required': [('arrangement','in', ['Hotel','Guest House'])],'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','=', False)]}"/>
+                            <field name="check_out_time" autocomplete="off"  attrs="{'required': [('arrangement','in', ['Hotel','Guest House'])],'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','=', False)]}"/>
+                            <field name="no_of_night" autocomplete="off"  style="pointer-events:none"
+                                   attrs="{'required': [('arrangement','in', ['Hotel','Guest House'])],'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','=', False)]}"/>
+
+                            <field name="advance_paid" autocomplete="off" attrs="{'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','in',[False, 'Guest House'])]}" />
+                            <field name="currency_id" attrs="{'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','in',[False, 'Guest House'])]}" options="{'no_edit': True,'no_open':True,'no_create':True}"/>
+                            <field name="document" autocomplete="off" attrs="{'invisible': ['|',('acc_arrange','=', 'Self'),('arrangement','=', False)]}"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="action_kw_tour_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Apply Tour</field>
+            <field name="res_model">kw_tour</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>
+            <field name="domain">['|',('create_uid','=',uid),('employee_id.user_id','=',uid)]</field>
+            <field name="context">{}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_tour.view_kw_tour_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_tour.view_kw_tour_form')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No tour found.
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_kw_tour_apply" name="Apply Tour" parent="kw_tour_apply_menu"
+                  sequence="1" action="action_kw_tour_act_window"/>
+
+    </data>
+</odoo>

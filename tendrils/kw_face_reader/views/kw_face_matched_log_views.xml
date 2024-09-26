@@ -1,0 +1,134 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+    
+    <record model="ir.ui.view" id="view_kw_face_matched_log_list">
+      <field name="name">kw_face_matched_log list</field>
+      <field name="model">kw_face_matched_log</field>
+      <field name="arch" type="xml">
+        <tree default_order="match_date_time desc">
+          <field name="employee_id"/>
+          <field name="job_id"/>
+          <field name="department_id"/>
+          <field name="employee_code" />
+          <field name="match_date_time" />
+        </tree>
+      </field>
+    </record>
+
+
+   <!-- <record model="ir.ui.view" id="view_kw_face_training_data_form">
+        <field name="name">kw_face_training_data form</field>
+        <field name="model">kw_face_training_data</field>       
+        <field name="arch" type="xml">
+            <form string="Training Data">
+                <group >
+                    <field name="image_name" 
+                    readonly="1"
+                    />
+                    
+                </group>
+                <group >
+                    <field name="image_binary" widget="image" />
+
+                </group>
+            </form>
+        </field>
+    </record> -->
+
+
+    <record id="search_kw_face_matched_log_view" model="ir.ui.view">
+      <field name="name">kw_face_matched_log.search</field>
+      <field name="model">kw_face_matched_log</field>
+      <field name="arch" type="xml">
+        <search>
+          <field name="employee_id" string="Employees"/>
+          <field name="department_id"/>
+          <field name="job_id" />
+          <field name="employee_code" />
+          <!-- 
+          <filter string="My Files" name="filter_user" domain="[('create_uid', '=', uid)]"/>
+          <separator/>
+           -->
+          <filter string="Matched Log Date" name="filter_match_date" date="match_date_time"/>
+        
+          <group expand="0" string="Group By">
+            <filter name="group_employee" string="Employee" domain="[]" context="{'group_by':'employee_id'}" />          
+          </group> 
+
+        </search>
+      </field>
+    </record>
+  
+
+    <!-- actions opening views on models -->
+    
+    <record model="ir.actions.act_window" id="kw_face_matched_log_action_window">
+      <field name="name">Reader Log</field>
+      <field name="res_model">kw_face_matched_log</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+
+
+    <record model="ir.ui.view" id="kw_face_training_employee_attendance_data_list">
+      <field name="name">kw_face_training_employee_attendance_data list</field>
+      <field name="model">hr.employee</field>
+      <field name="arch" type="xml">
+        <tree>
+           <field name="name"/>
+           <field name="job_id"/>
+           <field name="department_id"/>
+           <field name="emp_code" />
+          <field name="latest_employee_matched_time"/>
+        </tree>
+      </field>
+    </record>
+
+    
+
+     <record model="ir.ui.view" id="kw_face_training_employee_attendance_data_form_view">
+            <field name="name">kw_face_training_employee_attendance_data form</field>
+            <field name="model">hr.employee</field>
+         
+            <field name="arch" type="xml">
+                <form string="Attendance Log Form">
+                    <group >
+                        <field name="name" 
+                        readonly="1"
+                        />
+                         <field name="job_id"  readonly="1"/>
+                          <field name="department_id"  readonly="1"/>
+                          <field name="emp_code" readonly="1"/>
+                    </group>
+                    <group >
+                        <field name="face_matched_log_ids"  widget="one2many" context="{'default_employee_id': active_id}" />
+                    </group>
+                </form>
+            </field>
+        </record>
+   
+
+  
+    <!-- actions opening views on models -->
+
+      
+    <record model="ir.actions.act_window" id="action_window_kw_face_employee_attendance_data">
+      <field name="name">Reader Log</field>
+      <field name="res_model">hr.employee</field>
+      <field name="view_mode">tree,form</field> 
+      <field name="domain">
+		[
+      ("latest_employee_matched_time", "!=",False),'&amp;',
+		
+      ('latest_employee_matched_time', '&gt;',  (context_today()-datetime.timedelta(days=1)).strftime('%Y-%m-%d ')),('latest_employee_matched_time', '&lt;',  (context_today()+datetime.timedelta(days=1)).strftime('%Y-%m-%d'))	
+		]
+	</field>
+      
+      <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_face_training_employee_attendance_data_list')}), (0, 0, {'view_mode': 'form', 'view_id': ref('kw_face_training_employee_attendance_data_form_view')})]"/>
+    </record>
+   
+
+    
+  </data>
+</odoo>

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="view_resource_calendar_tree" model="ir.ui.view">
+            <field name="name">view.resource.calendar.tree</field>
+            <field name="model">resource.calendar</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="resource_calendar_tree" create="true" delete="true" edit="true" import='false'>
+                    <field name="employee_id"   />
+                    <field name="name" invisible="1" />
+                   <!--  <field name="hours_per_day" /> -->
+                    <field name="branch_id" />
+                    <field name="start_date" />
+                    <field name="end_date" />
+                    <field name="first_half_hour_from" string="Work From"/>
+                    <field name="second_half_hour_to" string="Work To"/>
+                    <field name="btn_visibility_status" invisible="1" />  
+                    <field name="state" string="Status"/>
+                    <button name="request_take_action" type="object" string="Take Action" class="oe_highlight" invisible="not context.get('show_btn', True)" attrs="{'invisible':['|',('btn_visibility_status','=',False),('state','in',('approved','reject'))]}" />   
+                </tree>
+            </field>
+        </record>
+        <record id="view_resource_user_calendar_form" model="ir.ui.view">
+            <field name="name">view.resource.calendar.form</field>
+            <field name="model">resource.calendar</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="resource_calendar_form" create="true" delete="false" import='false'>
+                    <header>
+                        <field name="state" widget='statusbar'/>
+                        <button name="apply_flexi_time" type="object" string="Apply" class="oe_highlight" states='draft'/>
+                        <button name="approve_resource_flexi_shift" type="object" string="Approve" class="oe_highlight" invisible="not context.get('show_btn', True)" attrs="{'invisible':['|',('btn_visibility_status','=',False),('state','not in',['apply'])]}" />   
+                        <button name="reject_resource_flexi_shift" type="object" string="Reject" class="btn-danger" invisible="not context.get('show_btn', True)" attrs="{'invisible':['|',('btn_visibility_status','=',False),('state','not in',['apply'])]}" />     
+                    </header>
+                    <sheet>
+                    <group>
+                        <group>
+                            <field name="employee_id" required="1" readonly="1" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" />
+                            <field name="select_flexi_hrs" widget='radio' options="{'horizontal': true}" attrs="{'readonly':[('state','in',['approved','reject'])]}"/>
+                            <field name="start_date" string="Start Date" autocomplete="off" required="1" attrs="{'readonly':[('state','in',['approved','reject'])]}"/>
+                            <field name="end_date" string="End Date" autocomplete="off" required="1" attrs="{'readonly':[('state','in',['approved','reject'])]}"/>
+                            <field name="btn_visibility_status" invisible="1" /> 
+                            <field name="flexi_reason" attrs="{'readonly':['|',('state','in',['apply','approved','reject']),('btn_visibility_status','=',True)]}"  required='1'/>
+                            <field name="ra_remark" attrs="{'required':[('btn_visibility_status','=',True)],'invisible':[('btn_visibility_status','=',False)],'readonly':[('state','in',['approved','reject'])]}"/>
+                        </group>
+                        <group>
+                            <field name="rest_hour" widget="float_time"  invisible="1"/>                                       
+                            <field name="first_half_hour_from" widget="float_time" required="1" invisible="1"/>
+                            <field name="first_half_hour_to" widget="float_time" required="1" invisible="1"/>
+                            <field name="second_half_hour_from" widget="float_time" required="1" invisible="1"/>
+                            <field name="second_half_hour_to" widget="float_time" required="1" invisible="1"/>                                        
+                        </group>
+                    </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="view_resource_calendar_form" model="ir.ui.view">
+            <field name="name">view.resource.calendar.form</field>
+            <field name="model">resource.calendar</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="resource_calendar_form" create="true" delete="true" edit="true">
+                    <header>
+                        <field name="state" widget='statusbar'/>
+                    </header>
+                    <sheet>
+                    <group>
+                        <group>
+                            <field name="employee_id" required="1" readonly="1" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" />
+                            <field name="name" invisible="1" />
+                            <!-- <field name="hours_per_day" /> -->
+                            <field name="branch_id" invisible="1" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" />
+                            <field name="tz" invisible='1'/>
+                            <field name="cross_shift" invisible="1"/>
+                            <field name="grace_time" widget="float_time" invisible="1"/>
+                            <field name="select_flexi_hrs" widget='radio' options="{'horizontal': true}"/>
+                        </group>
+
+                        <group>
+                            <field name="extra_early_entry_time" widget="float_time" invisible="1" />
+                            <field name="early_entry_time" widget="float_time" invisible="1" />
+                            <field name="late_entry_time" widget="float_time" invisible="1" />
+                            <field name="late_entry_half_leave_time" widget="float_time" invisible="1" />
+                            <field name="late_entry_full_leave_time" widget="float_time" invisible="1" />
+                            <separator/>
+                            <field name="late_exit_time" widget="float_time" invisible="1" />
+                            <field name="extra_late_exit_time" widget="float_time" invisible="1" />                           
+                            <field name="early_exit_half_leave_time" widget="float_time" invisible="1" />
+                        </group>
+                    </group>
+                        <notebook>
+                            <page string="Working Hours">
+                                <group >
+                                    <group>
+                                        <field name="start_date" string="Start Date" autocomplete="off" required="1"/>
+                                        <field name="end_date" string="End Date" autocomplete="off" required="1"/>
+                                        <field name="rest_hour" widget="float_time" force_save="1"/>
+                                        <button name="action_assign_flexi" type="object" class="btn btn-primary" string="Assign" />
+                                    </group>
+                                    <group>
+                                        <field name="first_half_hour_from" widget="float_time" required="1" invisible="1"/>
+                                        <field name="first_half_hour_to" widget="float_time" required="1" invisible="1"/>
+                                        <field name="second_half_hour_from" widget="float_time" required="1" invisible="1"/>
+                                        <field name="second_half_hour_to" widget="float_time" required="1" invisible="1"/>                                        
+                                    </group>
+                                </group>
+                                <field name="attendance_ids" readonly="1">
+                                    <tree editable="bottom" >
+                                        <!-- <field name="date_from" autocomplete="off" /> -->
+                                        <!-- <field name="date_to" autocomplete="off" /> -->
+                                        <field name="name" />
+                                        <field name="dayofweek" />
+                                        <field name="hour_from" widget="float_time" />
+                                        <field name="hour_to" widget="float_time"/>
+                                        <field name="rest_time" widget="float_time"/>                                        
+                                        <field name="day_period" />
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        
+        <record id="view_resource_calendar_search" model="ir.ui.view">
+            <field name="name">view.resource.calendar.form</field>
+            <field name="model">resource.calendar</field>
+            <field name="arch" type="xml">
+                <search string="">
+                    <field name="employee_id" />
+                </search>
+            </field>
+        </record>
+        <!-- Main window action for "model" -->
+        <record id="action_resource_calendar_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Employee Flexi Timing Manage</field>
+            <field name="res_model">resource.calendar</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="domain">[('employee_id','!=',False)]</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('view_resource_calendar_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('view_resource_calendar_form')})]"/>
+            <field name="search_view_id" ref="view_resource_calendar_search" />
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No record found
+                </p>
+            </field>
+        </record>
+        <record id="action_user_flexi_shift_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Flexi Timing</field>
+            <field name="res_model">resource.calendar</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="domain">[('employee_id', '!=', False),'|','|',('employee_id.user_id', '=', uid),('employee_id.department_id.manager_id.user_id', '=', uid),'|',    ('employee_id.parent_id.user_id', '=', uid),'|',('employee_id.division.manager_id.user_id', '=', uid),('employee_id.sbu_master_id.representative_id.user_id', '=', uid), ]</field>
+            <field name='context'>{'create':0,'delete':0,'import':0}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('view_resource_calendar_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('view_resource_user_calendar_form')})]"/>
+            <field name='context'>{'create':1,'delete':0,'edit':0,'show_btn':False,'hide_emp':True}</field>
+            <field name="search_view_id" ref="view_resource_calendar_search" />
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No record found
+                </p>
+            </field>
+        </record>
+        <record id="action_ra_flexi_shift_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Flexi Timing</field>
+            <field name="res_model">resource.calendar</field>
+            <field name="view_mode">tree</field>
+            <field name="view_type">form</field>
+            <field name="domain">[('employee_id.parent_id.user_id','=',uid),('employee_id','!=',False),('state','=','apply')]</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('view_resource_calendar_tree')})]"/>
+            <field name='context'>{'create':0,'delete':0}</field>
+            <field name="search_view_id" ref="view_resource_calendar_search" />
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No record found
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

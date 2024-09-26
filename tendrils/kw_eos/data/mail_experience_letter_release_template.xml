@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="experience_letter_to_employee_email_template" model="mail.template">
+            <field name="name">Offboarding: Experience Letter</field>
+            <field name="email_from">${ctx['email_from']}</field>
+<!--            <field name="email_from">${object.create_uid.email or ''}</field>-->
+            <field name="subject">Experience Letter | CSM Technologies</field>
+            <field name="email_to">${object.employee_personal_email|safe}</field>
+            <field name="email_cc">${ctx['extra_params']}</field>
+            <field name="model_id" ref="kw_eos.model_kw_resignation_experience_letter"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                <table border="0" cellspacing="0" cellpadding="0" width="100%" >
+                    <tr>
+                        <td>
+                            <div style="margin-left: 1.2rem;">
+                                <h5 style="font-weight: 400;font-size: 18px;color:#676767;">
+                                    <small style="color:rgb(22, 123, 158);font-size: 18px;margin-right: 2px;font-weight: 600;">Dear </small>
+                                    <strong>${object.salutation.name} ${object.employee_id.name},</strong>
+                                </h5>
+
+                                <p style="color: #676767;line-height: 145%;font-size: 17px;">Please find below the URL, your Experience Letter for the tenure you have worked at ${object.company_id.name}</p>
+                                <a href="/download-employee-experience-letter/${'token' in ctx and ctx['token'] or ''}"
+                                   target="_blank"
+                                   style="padding: .5rem 3rem;border-radius: .2em;border: none;color: #fff;background-color: #30a20f;font-size: 16px;margin-top: 1.5rem;display:inline-block;white-space: nowrap;text-decoration: none;">
+                                   Download Experience Letter
+                                </a>
+                                <p style="color: #676767;line-height: 145%;font-size: 17px;">We wish you all the best in your future endeavours.</p>
+
+                                <p style="color: #676767;line-height: 145%;font-size: 17px;">
+                                    % if object.create_uid and object.create_uid.signature:
+                                        ${object.create_uid.signature | safe}
+                                    % else:
+                                        ${object.create_uid.name | safe}
+                                    % endif
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                ]]>
+
+            </field>
+        </record>
+        <record id="experience_letter_downloar_verify_otp_mail_template" model="mail.template">
+            <field name="name">EOS: OTP Verification And Experience Letter Download</field>
+            <field name="email_from">tendrils@csm.tech</field>
+            <field name="subject">Experience Letter | OTP | CSM Technologies</field>
+            <field name="email_to">${ctx['mailto']}</field>
+            <field name="model_id" ref="kw_eos.model_hr_employee"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                <table border="0" cellspacing="0" cellpadding="0" width="100%" >
+                    <tr>
+                        <td>
+                            <div style="margin-left: 1.2rem;">
+                                <h5 style="font-weight: 400;font-size: 18px;color:#676767;">
+                                    <small style="color:rgb(22, 123, 158);font-size: 18px;margin-right: 2px;font-weight: 600;">Dear </small>
+                                    <strong>${ctx['name']},</strong>
+                                </h5>
+                                <p style="color: #676767;line-height: 145%;font-size: 17px;">Welcome to ${object.company_id.name}.</p>
+                                <p style="color: #676767;line-height: 145%;font-size: 17px;"><b>${ctx['otp']}</b> is the One Time Password (OTP) for Experience Letter Download.</p>
+                                <p style="color: #676767;line-height: 145%;font-size: 17px;">This OTP is usable only once and is valid for 30 mins.</p>
+                                <p style="color: #676767;line-height: 145%;font-size: 17px;">Please do not share the OTP with anyone for security reasons.</p>
+                                <p style="color: #676767;line-height: 145%;font-size: 17px;">Thanks & regards,  <br/> CSM Technologies Pvt. Ltd.</p>
+                                <p style="color: #676767;font-size: 14px;">This is a system generated mail. Please Do not reply to this mail.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    </table>
+                ]]>
+            </field>
+        </record>
+        <template id="kw_eos_experience_download_button_redirect" name="Experience Letter Download">
+			<t t-call="website.layout">
+				<div class="wrap">
+					<div class="container">
+						<section class="service-request mt32">
+
+                            <div class="container card">
+                                <div class="card-body">
+									<div class="row">
+										<div class="col-12 mx-auto">
+											<div class="section_content">
+                                                    <div class="modal-header d-flex justify-content-between text-center align-items-center">
+                                                        <div class="">
+                                                            <img src="/kw_recruitment/static/src/img/offerletterlogo.png" />
+                                                            <span class="h1 ml-5">
+                                                                Experience Letter
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <br/>
+                                                    <div class="">
+                                                        <h2 class="ml-4">
+                                                            <strong>
+                                                                Hello
+                                                                <span style="color:red" id='partner_name'
+                                                                      t-field="employee.name"/>,
+                                                            </strong>
+
+                                                            <input type="hidden" readonly="readonly" t-att-value="token" id="experienceApplicantToken" />
+                                                        </h2>
+                                                        <br/>
+                                                        <h4 class="ml-4">
+                                                            Please click the button below to download your experience letter.
+                                                        </h4>
+                                                    </div>
+
+
+                                                    <div class="modal-footer d-flex justify-content-between">
+
+                                                        <div class="text-left mx-5 ml-4">
+                                                            <span class='text-center text-danger' id="desc"/>
+                                                        </div>
+                                                         <a class="btn btn-secondary" t-att-href="'/download-experience-letter/'+token+'?download=1'"
+                                                            style="background-color: #f7941d !important;cursor:pointer;">
+                                                            <i class="fa fa-download"/>
+                                                            Download
+                                                        </a>
+                                                    </div>
+												
+											</div>
+										</div>
+									</div>
+								</div>
+                            </div>
+						</section>
+					</div>
+				</div>
+			</t>
+		</template>
+        <template id="kw_eos_experience_download_button_redirect_assets" inherit_id="kw_eos.kw_eos_experience_download_button_redirect">
+			<xpath expr="." position="inside">
+				<link href="/kwantify_theme/static/src/mdb/css/mdb.min.css?v=12" rel="stylesheet"/>
+                <link href="/kw_eos/static/src/css/experience.css" rel="stylesheet"/>
+				<script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js?v=12"/>
+            	<script type="text/javascript" src="/kw_eos/static/src/js/experience_verify_otp.js"/>
+			</xpath>
+		</template>
+
+
+    </data>
+</odoo>

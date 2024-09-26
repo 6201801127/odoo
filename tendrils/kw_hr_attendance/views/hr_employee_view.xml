@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="view_employee_form_inherit_kw_hr_attendance" model="ir.ui.view">
+            <field name="name">hr.employee attendance options</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr_attendance.view_employee_form_inherit_hr_attendance"/>
+            <field name="groups_id" eval="[(4,ref('hr_attendance.group_hr_attendance_user'))]"/>
+            <field name="arch" type="xml">
+                 <field name="manual_attendance" position="replace" >                    
+                    <field name="no_attendance" attrs="{'invisible': [('user_id', '=', False)]}"/>    
+                    <field name="attendance_mode_ids" widget="many2many_tags" attrs="{'invisible': ['|',('user_id', '=', False),('no_attendance', '=', True)],}" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" />
+                    <field name="effective_from"/>
+                 </field>
+
+                <field name="resource_calendar_id" position="replace" >
+                  <field name="resource_calendar_id" required="1" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"  domain="[('employee_id','=',False)]" />
+                </field>
+
+                <button name="%(hr_attendance.hr_attendance_action_employee)d" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </button>
+
+                <button name="%(hr_attendance.hr_attendance_action_employee)d" position="after">
+                <field name="today_attendance_status" invisible="1"/>
+                    <button name="view_attendance_report" class="oe_stat_button" type="object">
+
+                        <div role="img" id="oe_hr_attendance_status" class="fa fa-fw fa-circle o_button_icon" style="color:#53a02e"
+                        attrs="{'invisible': [('today_attendance_status', '!=', 'present')]}" aria-label="Present" title="Present"/>
+
+                        <div role="img" id="oe_hr_attendance_status" class="fa fa-fw fa-circle o_button_icon" style="color:#fb6948"
+                        attrs="{'invisible': [('today_attendance_status', '!=', 'absent')]}" aria-label="Absent" title="Absent"/>
+
+                        <div role="img" id="oe_hr_attendance_status" class="fa fa-fw fa-circle o_button_icon" style="color:#48acdd"
+                        attrs="{'invisible': [('today_attendance_status', '!=', 'leave')]}" aria-label="On Leave" title="On Leave"/>
+
+                        <div role="img" id="oe_hr_attendance_status" class="fa fa-fw fa-circle o_button_icon" style="color:#0000FF"
+                        attrs="{'invisible': [('today_attendance_status', '!=', 'tour')]}" aria-label="On Tour" title="On Tour"/>
+
+                        <div role="img" id="oe_hr_attendance_status" class="fa fa-fw fa-circle o_button_icon" style="color:#FFA500"
+                        attrs="{'invisible': [('today_attendance_status', '!=', 'wfh')]}" aria-label="WFH" title="WFH"/>
+
+
+                        <div role="img" id="oe_hr_attendance_status" class="fa fa-fw fa-circle o_button_icon" style="color:#FFFF00"
+                        attrs="{'invisible': [('today_attendance_status', '!=', 'local_visit')]}" aria-label="Local vist" title="Local vist"/>
+
+
+                        <div class="o_stat_info">
+                            <span class="o_stat_text">Attendance</span>
+                        </div>
+
+                    </button>
+                </button>
+                
+            </field>
+        </record>
+        
+        <!-- replaced the architecture by adding class to div to resolve the issue in employee upgrade 18 March 2021 (Gouranga) -->
+        <record id="hr_attendance.view_employee_kanban_inherit_hr_attendance" model="ir.ui.view">            
+            <field name="priority">99</field>
+            <field name="arch" type="xml">
+                <templates position="before">
+                    <field name="attendance_state"/>
+                </templates>
+                <field name="name" position="replace">
+                    <div class="hr_attendance_state_div">
+                        <div class="float-right" t-if="record.attendance_state.raw_value == 'checked_in'">
+                            <span id="oe_hr_attendance_status" class="fa fa-circle oe_hr_attendance_status_green" role="img" aria-label="Available" title="Available"></span>
+                        </div>
+                        <div class="float-right" t-if="record.attendance_state.raw_value == 'checked_out'">
+                            <span id="oe_hr_attendance_status" class="fa fa-circle oe_hr_attendance_status_red" role="img" aria-label="Not available" title="Not available"></span>
+                        </div>
+                        <strong>
+                            <field name="name" placeholder="Employee's Name"/>
+                        </strong>
+                    </div>
+                </field>
+            </field>
+        </record>
+
+        <!--  present='#53a02e',absent='#fb6948',leave='#48acdd',tour='#e39b08' css color code from kwantify(.net) -->
+         <record id="view_employee_kanban_inherit_hr_attendance_new" model="ir.ui.view">
+            <field name="name">hr.employee kw attendance</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr_attendance.view_employee_kanban_inherit_hr_attendance"/>
+            <field name="priority">1</field>
+            <field name="arch" type="xml">
+            
+                <templates position="before">
+                    <field name="today_attendance_status"/>
+                </templates>
+
+                 <xpath expr="//div[hasclass('hr_attendance_state_div')]" position="replace">
+                    <div> 
+                        <!-- <div class="float-right" t-if="record.today_attendance_status.raw_value == 'present'">
+                            <span id="oe_hr_attendance_status" class="fa fa-circle" style="color:#53a02e" role="img" aria-label="Present" title="Present"></span>
+                        </div>
+
+                        <div class="float-right" t-if="record.today_attendance_status.raw_value == 'absent'">
+                            <span id="oe_hr_attendance_status" class="fa fa-circle" style="color:#fb6948" role="img" aria-label="Absent" title="Absent"></span>
+                        </div>
+
+                        <div class="float-right" t-if="record.today_attendance_status.raw_value == 'leave'">
+                            <span id="oe_hr_attendance_status" class="fa fa-circle" style="color:#48acdd" role="img" aria-label="On Leave" title="On Leave"></span>
+                        </div>
+
+                        <div class="float-right" t-if="record.today_attendance_status.raw_value == 'tour'">
+                            <span id="oe_hr_attendance_status" class="fa fa-circle" style="color:#0000FF" role="img" aria-label="On Tour" title="On Tour"></span>
+                        </div>
+                       
+                        <div class="float-right" t-if="record.today_attendance_status.raw_value == 'wfh'">
+                            <span id="oe_hr_attendance_status" class="fa fa-circle" style="color:#FFFF00" role="img" aria-label="WFH" title="WFH"></span>
+                        </div>
+                        <div class="float-right" t-if="record.today_attendance_status.raw_value == 'local_visit'">
+                            <span id="oe_hr_attendance_status" class="fa fa-circle" style="color:#FFA500" role="img" aria-label="Local visit" title="Local visit"></span>
+                        </div> -->
+                         <strong>
+                            <field name="name" placeholder="Employee's Name"/>
+                        </strong>
+                    </div> 
+                 </xpath>
+                
+            </field>
+        </record>
+
+    </data>
+</odoo>

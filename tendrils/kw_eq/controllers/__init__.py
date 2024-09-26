@@ -1,0 +1,1 @@
+from . import kw_eq_audit_trail_details

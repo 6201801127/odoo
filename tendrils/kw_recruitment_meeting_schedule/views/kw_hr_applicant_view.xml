@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+       
+        <record id="hr_applicant_schedule_meeting_form" model="ir.ui.view">
+            <field name="name">hr.applicant.form.inherit.meeting</field>
+            <field name="model">hr.applicant</field>
+            <field name="inherit_id" ref="hr_recruitment.crm_case_form_view_job"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_makeMeeting']" position="replace">
+                    <button name="action_makeMeeting_schedule" class="oe_stat_button" icon="fa-calendar" type="object"
+                        help="Schedule interview with this applicant">
+                        <field name="schedule_meeting_count" widget="statinfo" string="Meetings"/>
+                    </button>
+                </xpath>
+            </field>
+        </record>
+
+         <record model="ir.ui.view" id="recruitment_kanban_add_meeting">
+            <field name="name">hr_kanban</field>
+            <field name="model">hr.applicant</field>
+            <field name="inherit_id" ref="hr_recruitment.hr_kanban_view_applicant"/>
+            <field name="arch" type="xml">
+                <xpath expr="//kanban/field[@name='color']" position="after">
+                    <field name="schedule_meeting_count"/>
+                </xpath>
+                <!-- <xpath expr="//a[@name='action_get_attachment_tree_view']" position="before">      
+                    <a name="action_get_meetings_tree_view" type="object" style="margin-right:5px;">
+                        <span title="Meetings"><i class="fa fa-calendar" role="img" aria-label="Meetings"/>
+                            <t t-esc="record.schedule_meeting_count.raw_value"/>
+                        </span>
+                    </a>
+                </xpath> -->
+
+                <xpath expr="//div[@class='oe_kanban_bottom_right']" position="before">
+                    <a name="action_get_meetings_tree_view" type="object" style="margin-right:5px;" class="pt-1">
+                        <span title="Meetings"><i class="fa fa-calendar" role="img" aria-label="Meetings"/>
+                            <t t-esc="record.schedule_meeting_count.raw_value" class='oe_read_only'/>
+                        </span>
+                    </a>
+                </xpath>
+            </field>
+        </record>
+        <record id="applicant_summary_report_list_view" model="ir.ui.view">
+            <field name="model">hr.applicant</field>
+            <field name="arch" type="xml">
+                <tree string="Applicants" decoration-bf="message_needaction==True" edit="false" create="false">
+                    <field name="message_needaction" invisible="1"/>
+                    <field name="create_date" invisible="1"/>
+                    <field name="job_position" string="Job Position"/>
+                    <field name="partner_name" string="Name"/>
+                    <field name="qualification_ids" string="Qualification" widget="many2many_tags"/>
+                    <field name="exp_year" string="Exp(Yrs)"/>
+                    <field name="stage_id" string="Status"/>
+                    <field name="first_round_date"/>
+                    <field name="first_round_panel"/>
+                    <field name="first_round_feedback"/>
+                    <field name="second_round_date"/>
+                    <field name="second_round_panel"/>
+                    <field name="second_round_feedback"/>
+                    <field name="third_round_date"/>
+                    <field name="third_round_panel"/>
+                    <field name="third_round_feedback"/>
+                    <field name="forth_round_date"/>
+                    <field name="fouth_round_panel"/>
+                    <field name="forth_round_feedback"/>
+                    <field name="fifth_round_date"/>
+                    <field name="fifth_round_panel"/>
+                    <field name="fifth_round_feedback"/>
+                </tree>
+            </field>
+        </record> 
+        <record id="interview_summary_report_view_filter" model="ir.ui.view">
+        <field name="name">hr.applicant.view.search</field>
+        <field name="model">hr.applicant</field>
+        <field name="arch" type="xml">
+            <search string="Search Applicants">
+                <field name="stage_id" domain="[]"/>
+                <separator/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Stage" name="stage" domain="[]" context="{'group_by':'stage_id'}"/>
+                </group>
+           </search>
+        </field>
+    </record> 
+        <record model="ir.actions.act_window" id="interview_summary_report_action">
+            <field name="name">Interview Summary Report</field>
+            <field name="res_model">hr.applicant</field>
+            <field name="view_mode">kanban,tree,form,pivot,graph,calendar,activity</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+ (0, 0, {'view_mode': 'tree', 'view_id': ref('summary_report_list_view')}), 
+]"/>
+            <field name="search_view_id" ref="interview_summary_report_view_filter"/>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_empty_folder">
+                No applications yet
+              </p><p>
+                Odoo helps you track applicants in the recruitment
+                process and follow up all operations: meetings, interviews, etc.
+              </p><p>
+                Applicants and their attached CV are created automatically when an email is sent.
+                If you install the document management modules, all resumes are indexed automatically,
+                so that you can easily search through their content.
+              </p>
+            </field>
+        </record>     
+    </data>
+    
+</odoo>

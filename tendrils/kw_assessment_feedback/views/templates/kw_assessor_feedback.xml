@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <template id="kw_final_feedback_view_form" name="Feedback Form">
+            <t t-call="website.layout">
+                <div class="container mt16">
+                    <div class="card">
+                        <div class="csm card-header">
+                            <div class="d-flex justify-content-between  mt-2">
+                                <div>
+                                    <div class=" logedin-user">
+                                        <span class="h5 white-text" style="font-size:12px;"> Assessee:</span>
+                                    </div>
+                                    <div class="clearfix"/>
+                                    <div class="mb-1 logedin-user">
+                                        <img t-attf-src="data:image_small/*;base64,{{feedback.assessee_id.image_small}}"/>
+                                        <div class="info">
+                                            <p class="m-0 font-weight-bold h4 white-text">
+                                                <span t-esc='feedback.assessee_id.name'/>
+                                            </p>
+                                            <p class="m-0 badge badge-pill badge-warning p-2" style="background-color: #f7941d !important;">
+                                                <span t-esc='feedback.assessee_id.job_id.name' />
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="logedin-user mb-4">
+                                    </div>
+                                    <div class="clearfix"/>
+                                    <div class="mb-1 logedin-user">
+                                        <div class="info">
+                                            <p class="m-0 font-weight-bold h4 white-text">
+                                                <span t-esc="feedback.assessment_tagging_id.name" />
+                                            </p>
+                                            <p class="m-0 badge badge-pill badge-warning p-2 float-right" style="background-color: #f7941d !important;">
+                                                <span t-esc="feedback.period_id.name" />
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"/>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <!-- <table class="table table-sm table-borderless">
+                                <tr>
+                                    <td class="font-weight-bold" width="20%">Assessee</td> <td class="font-weight-bold">:</td>
+                                    <td>
+                                        <span class="font-weight-bold" t-esc='feedback.assessee_id.name'/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold" width="20%">Designation</td> <td class="font-weight-bold">:</td>
+                                    <td>
+                                        <span class="font-weight-bold" t-esc='feedback.assessee_id.job_id.name'/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold" width="20%">Total Score (in percentage)</td> <td class="font-weight-bold">:</td>
+                                    <td>
+                                        <span class="font-weight-bold"><t t-esc="feedback.total_score"/>% </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold" width="20%">Total Score</td> <td class="font-weight-bold">:</td>
+                                    <td>
+                                        <span class="font-weight-bold" t-esc="feedback.weightage_id.name"/>
+                                        (<span class="font-weight-bold" t-esc="feedback.weightage_id.value" />)
+                                    </td>
+                                </tr>
+                            </table>
+                             -->
+                            <form role="form" id='kw_assessment_final_feedback_form' method="post" t-att-name="'%s_%s' % (feedback.id, feedback.assessee_id.id)" action="#" t-att-data-prefill="'/kw/feedback/final_feedback_prefill/%s' % (slug(feedback))">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="hidden" name="assessee_id" t-att-value="feedback.assessee_id.id" />
+                                <input type="hidden" name="token" t-att-value="token" />
+                                <div class='clearfix mb-3'>
+                                </div>
+                                <div t-foreach="feedback.survey_id.page_ids" t-as="page" class="table-responsive">
+                                    <p t-esc="page.title" class="font-weight-bold h3" />
+                                    <table class="table table-hover  table-bordered miltable table-sm" id="miltable">
+                                        <thead class="thead-csm">
+                                            <tr>
+                                                <th scope="col" class="font-weight-bold text-left">Competencies</th>
+                                                <th scope="col" width="10%" class="font-weight-bold text-center">Total Score</th>
+                                                <th scope="col" width="10%" class="font-weight-bold text-center">Your Score</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-set="i" t-value="0"/>
+                                            <tr t-foreach='page.question_ids' t-as='question'>
+                                                <t t-set="prefix" t-value="'%s_%s_%s' % (feedback.survey_id.id, page.id, question.id)" />
+
+                                                <td scope="col" class="text-left align-middle" style="font-weight: 400;">
+                                                    <span t-field='question.question' />
+                                                </td>
+                                                <td scope="col" class="text-center align-middle" style="font-weight:400;">
+                                                    <span t-field='question.validation_max_float_value' />
+                                                </td>
+                                                <td scope="col" class="text-center align-middle" style="font-weight:400;">
+                                                    <span t-att-id="prefix" t-att-name="prefix"></span>
+                                                </td>
+                                                <t t-set="i" t-value="i+(question.validation_max_float_value)"/>
+                                            </tr>
+                                            <tr>
+                                                <td scope="col" class="text-right align-middle" style="font-weight: 400;">
+                                                    <span>Benchmark (<span t-options='{"widget": "integer"}' t-esc='(i * feedback.assessment_tagging_id.benchmark)/100'/>)</span>
+                                                </td>
+                                                <td scope="col" class="text-center align-middle" style="font-weight: 400;">
+                                                    <span t-esc="i"/>
+                                                </td>
+                                                <td scope="col" class="text-center align-middle" style="font-weight: 400;">
+                                                    <span t-att-name="'%s' % (page.id)"/>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <h4 class="alert alert-info text-dark mb-4 feedback-border">Feedback </h4>
+                                <blockquote class="blockquote">
+                                    <p class="h6 py-1" style="font-size: 0.9rem;">Positive :</p>
+                                    <div style="font-size:0.9rem;">
+                                        <textarea style="resize: none;border:None;width: 100%;" readonly='1' rows='3' id='positive' t-att-name="'%s_%s' % (feedback.id, 'positive_remark')"></textarea>
+                                    </div>
+                                </blockquote>
+                                <blockquote class="blockquote">
+                                    <p class="h6 py-1" style="font-size: 0.9rem;">Weak Areas :</p>
+                                    <div style="font-size:0.9rem;">
+                                        <textarea style="resize: none;border:None;width: 100%;" readonly='1' rows='3' id='weak_areas' t-att-name="'%s_%s' % (feedback.id, 'weakareas_remark')"></textarea>
+                                    </div>
+                                </blockquote>
+                                <blockquote class="blockquote">
+                                    <p class="h6 py-1" style="font-size: 0.9rem;">Suggestions to improve the weaknesses :</p>
+                                    <div style="font-size:0.9rem;">
+                                        <textarea style="resize: none;border:None;width: 100%;" readonly='1' rows='3' id='suggestions' t-att-name="'%s_%s' % (feedback.id, 'suggestions_remark')"></textarea>
+                                    </div>
+                                </blockquote>
+
+                                
+                                
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td class="font-weight-bold py-2 px-0" width="20%"> Total Score (in %) </td>
+                                        <td class="py-2 px-0"> : </td>
+                                        <td class="font-weight-bold py-2 px-0"> <t t-esc="feedback.total_score"/>% </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-weight-bold py-2 px-0" width="20%"> Performance Grade </td>
+                                        <td class="py-2 px-0"> : </td>
+                                        <td class="py-2 px-0"> 
+                                            <span class="font-weight-bold" t-esc="feedback.weightage_id.display_name"/>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <div t-if='feedback.goal_id'>
+                                    <h4 class="alert alert-info text-dark mb-4 feedback-border">Goal and Milestones : </h4>
+                                    <blockquote class="blockquote">
+                                        <p class="h6 py-1" style="font-size: 0.9rem;">Goal :</p>
+                                        <div style="font-size:0.9rem;">
+                                            <span t-esc="feedback.goal_id.goal_name"></span>
+                                        </div>
+                                    </blockquote>
+
+                                    <blockquote class="blockquote">
+                                        <p class="h6 py-1" style="font-size: 0.9rem;">Milestones :</p>
+                                        <div style="font-size:0.9rem;" class="table-responsive">
+                                            <table class="table table-hover table-bordered table-sm">
+                                                <thead class="thead-csm">
+                                                    <tr>
+                                                        <th scope="col" class="font-weight-bold text-left">Milestones</th>
+                                                        <th scope="col" width="10%" class="font-weight-bold text-center">Progress (in %)</th>
+                                                        <th scope="col" class="font-weight-bold text-left">Performance Grade</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr t-foreach="feedback.goal_id.milestones" t-as="milestones">
+                                                        <td scope="col" class="text-left align-middle" style="font-weight: 400;">
+                                                            <span t-field='milestones.milestone_name' />
+                                                        </td>
+                                                        <td scope="col" class="text-center align-middle" style="font-weight:400;">
+                                                            <span t-field='milestones.score' />
+                                                        </td>
+                                                        <td scope="col" class="text-left align-middle" style="font-weight:400;">
+                                                            <span t-field='milestones.weightage_id.display_name' />
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </blockquote>
+                                </div>
+                                <div class="text-center mt16 mb16">
+                                    <button type="button" onclick='window.history.go(-1);' class="btn btn-warning badge" style="background-color: #f7941d !important;">Go to Feedback Page <i class="fa fa-arrow-right" />
+                                    </button>
+                                    <!-- <a class="btn btn-warning badge" style="background-color: #f7941d !important;" t-attf-href="/web#action=#{request.session['parameters'].get('action')}&amp;model=#{request.session['parameters'].get('model')}&amp;view_type=#{request.session['parameters'].get('view_type')}&amp;menu_id=#{request.session['parameters'].get('menu_id')}">Go to Feedback Page <i class="fa fa-arrow-right" />
+                                    </a> -->
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <template id="kw_final_view_feedback_page_assets" inherit_id="kw_assessment_feedback.kw_final_feedback_view_form">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/kw_assessment_feedback/static/src/js/kw_final_feedback.js"/>
+                <link href="/kw_assessment_feedback/static/src/css/front_style.css" rel="stylesheet"/>
+
+
+                <link href="/kwantify_theme/static/src/mdb/css/mdb.min.css?v=12" rel="stylesheet"/>
+                <script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js?v=12"/>
+
+                <script type="text/javascript" src="/kw_assessment_feedback/static/src/lib/sweetalert_new.js?v=12"/>
+                <!-- <script type="text/javascript" src="/kw_assessment_feedback/static/src/lib/additional-methods.js?v=12"/> -->
+                <link rel="stylesheet" href="https://jqueryvalidation.org/files/demo/site-demos.css"/>
+            </xpath>
+        </template>
+    </data>
+</odoo>

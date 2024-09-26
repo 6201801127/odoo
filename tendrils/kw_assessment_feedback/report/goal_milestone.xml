@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Tree view for "model" -->
+        <record id="view_kw_goal_milestone_tree" model="ir.ui.view">
+            <field name="name">view.kw_goal_milestone.tree</field>
+            <field name="model">kw_goal_milestone</field>
+            <field name="arch" type="xml">
+                <tree string="kw_goal_milestone_tree" create="false" delete="false" edit="false" import="false">
+                    <field name="period_name"/>
+                    <field name="emp_name" />
+                    <field name="designation"/>
+                    <field name="department"/>
+                    <field name="ra"/>
+                    <field name="goal_name" />
+                    <field name="milestones" />
+                    <field name="status" />
+                    <button class="btn btn-sm oe_highlight" name="view_goal_details" type="object" string="View Details" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_feedback_goal_and_milestone_form_reference3" model="ir.ui.view">
+            <field name="name">Goal &amp; Milestones</field>
+            <field name="model">kw_feedback_goal_and_milestone</field>
+            <field name="arch" type="xml">
+                <form string="Goal and milestones">
+                    <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                    </script>
+                    <div class="row">
+                        <div class="col-sm-12 col-sm-offset-4 mx-auto">
+                            <group>
+                                <field name="emp_id" readonly='1' options="{'no_create': True,'no_open': True,'no_edit':True}"/>
+                                <field name="designation" readonly='1' options="{'no_edit':True,'no_open':True,'no_create':True}" />
+                                <field name="department" readonly='1' options="{'no_create': True,'no_open': True,'no_edit':True}" />
+                                <field name="goal_name" readonly='1'/>
+                                <field name="milestones">
+                                    <tree editable="bottom" create='false' delete='false'>
+                                        <field name="milestone_name" readonly='1'/>
+                                        <field name="score" required='1'/>
+                                        <field name="weightage_id" readonly='1' force_save='1' options="{'no_create': True,'no_open': True,'no__edit':True}" />
+                                    </tree>
+                                </field>
+                            </group>
+                            <center>
+                                <footer></footer>
+                            </center>
+                        </div>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Search view for "model" -->
+        <record id="view_kw_goal_milestone_search" model="ir.ui.view">
+            <field name="name">view.kw_goal_milestone.search</field>
+            <field name="model">kw_goal_milestone</field>
+            <field name="arch" type="xml">
+                <search string="kw_goal_milestone_search">
+                    <field name="emp_name" />
+
+                    <filter string="Current Period" domain="[('period_date','&lt;',(context_today()+relativedelta(months=1)).strftime('%Y-%m-01')), ('period_date','&gt;=',time.strftime('%Y-%m-01'))]" name="by_current_month_year"/>
+
+                    <separator/>
+
+                    <filter string="Last Period" domain="[('period_date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('period_date','&lt;',time.strftime('%Y-%m-01'))]" name="by_last_month_year"/>
+                    
+                    <group expand="0" string="Group By">
+                        <filter name="group_period_name" context="{'group_by': 'period_name'}" string="Period Name"/>
+                        <filter name="group_status" context="{'group_by': 'status'}" string="Status"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- model.name pivot view -->
+        <record id="view_kw_goal_milestone_pivot" model="ir.ui.view">
+            <field name="name">view.kw_goal_milestone.pivot</field>
+            <field name="model">kw_goal_milestone</field>
+            <field name="arch" type="xml">
+                <pivot string="Pivot Description">
+                    <field name="period_date" type="row"/>
+                </pivot>
+            </field>
+        </record>
+
+        <!-- Main window action for "model" -->
+        <record id="action_kw_goal_milestone_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Goal Milestone Report</field>
+            <field name="res_model">kw_goal_milestone</field>
+            <field name="view_mode">tree,pivot</field>
+            <field name="domain">[('period_date', '&lt;=', time.strftime('%Y-%m-%d 00:00:00'))]</field>
+            <field name="context">{'search_default_by_current_month_year':1,}</field>
+            <field name="search_view_id" ref="view_kw_goal_milestone_search" />
+        </record>
+    </data>
+</odoo>

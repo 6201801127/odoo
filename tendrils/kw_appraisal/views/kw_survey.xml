@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- model.name form view -->
+        <!-- <record id="survey_form_inherit" model="ir.ui.view">
+            <field name="name">Survey form inherit</field>
+            <field name="model">survey.survey</field>
+            <field name="inherit_id" ref="survey.survey_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_test_survey']" position="before">
+                    <button name="action_test_kw_survey" string="Appraisal Survey" type="object" attrs="{'invisible': [('id', '=', False)]}"/>
+                </xpath>
+            </field>
+        </record> -->
+
+        <record id="survey_tree_inherit" model="ir.ui.view">
+            <field name="name">Survey tree inherit</field>
+            <field name="model">survey.user_input</field>
+            <field name="priority">1</field>
+            <field name="inherit_id" ref="survey.survey_user_input_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="emp_code"/>
+                </xpath>
+                <xpath expr="//field[@name='partner_id']" position="attributes">
+                    <attribute name="string">Name</attribute>
+                </xpath>
+                <xpath expr="//field[@name='type']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='quizz_score']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='date_create']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='deadline']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='email']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='state']" position="after">
+                    <field name="write_date" string='Submitted on'/>
+                </xpath>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="kw_survey_user_input_form_inherits">
+            <field name="name">survey_user_input_form inherits</field>
+            <field name="model">survey.user_input</field>
+            <field name="priority">1</field>
+            <field name="arch" type="xml">
+                <form string="Survey User inputs" create="false" edit='true' delete='false'>
+                    <sheet>
+                        <h1>
+                            <field name="partner_id" class="oe_inline pl-2 pr-2 text-info border-left-0 border-right-0 border-top-0 border border-info" options="{ 'no_open': True}"/>
+                        </h1>
+                        <separator colspan="2" />
+                        <group col="2">
+                            <group>
+                                <field name="year"/>
+                                <field name="survey_id" options="{ 'no_open': True}" string='Form Name'/>
+                                <field name="quizz_score" string='Your total score'/>
+                                <field name="appraisal_id"/>
+                            </group>
+                            <group>
+                                <field name="write_date" string='Submitted on'/>
+                                <field name="email" options="{'no_open': True}"/>
+                                <field name="emp_code"/>
+                            </group>
+                        </group>
+                        <separator colspan="2" string='Results'/>
+                        <field name="user_input_line_ids"  attrs="{'readonly': False}">
+                            <tree editable="top">
+                                <field name="page_id" string='Page Name'/>
+                                <field name="question_id" string='Question Name'/>
+                                <field name="answer_type" />
+                                <field name="value_suggested" string='Choice'/>
+                                <field name="value_number" string='Score'/>
+                                <field name="value_text" string='Remark'/>
+                                <field name="quizz_mark" string='Mark given for this Choice'/>
+                            </tree>
+                        </field>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="kw_survey_template_form" model="ir.ui.view">
+            <field name="name">Appraisal Survey</field>
+            <field name="model">survey.survey</field>
+            <field name="priority">50</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="title" placeholder="Title"/>
+                        </group>
+                        <notebook>
+                            <page string="Edit Pages and Questions">
+                                <field name="page_ids" mode="tree" context="{'default_survey_id': active_id}" nolabel="1">
+                                    <tree>
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="title"/>
+                                        <field name="question_ids"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_survey_template_tree" model="ir.ui.view">
+            <field name="name">Survey Template tree</field>
+            <field name="model">survey.survey</field>
+            <field name="priority">50</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="title"/>
+                    <field name="page_ids"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_survey_template_act_window" model="ir.actions.act_window">
+            <field name="name">Template</field>
+            <field name="res_model">survey.survey</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="domain">[('survey_type.code','=','appr')]</field>
+            <field name="context" eval="{'default_survey_type': ref('kw_appraisal.appraisal_form')}"/>
+            <field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_survey_template_tree')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('kw_survey_template_form')})]"/>
+        </record>
+
+        <menuitem name="Templates" id="kwantify_survey_menu_inherit" parent="kwantify_survey_menu" action="kw_survey_template_act_window" sequence="1"/>
+
+    </data>
+</odoo>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+
+        <!-- Accounts -->
+
+        <record id="kw_view_account_form" model="ir.ui.view">
+            <field name="name">account.account.form</field>
+            <field name="model">account.account</field>
+            <field name="arch" type="xml">
+                <form string="Account">
+                   <sheet>
+                       <group>
+                           <group>
+                             <field name="code" placeholder="code"/>
+                             <field name="name"/>
+                             <field name="user_type_id" widget="selection"/>
+                             <field name="tax_ids" widget="many2many_tags" domain="[('company_id','=',company_id)]"/>
+                             <field name="tag_ids" widget="many2many_tags" domain="[('applicability', '!=', 'taxes')]" context="{'default_applicability': 'accounts'}" options="{'no_create_edit': True}"/>
+                             <field name="group_id"/>
+                             <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                             <field name="currency_id" options="{'no_create': True}" groups="base.group_multi_currency"/>
+                             <field name="internal_type" invisible="1" readonly="1"/>
+                             <label for="reconcile" attrs="{'invisible': [('internal_type','=','liquidity')]}"/>
+                             <div attrs="{'invisible': [('internal_type','=','liquidity')]}">
+                                <field name="reconcile"/>
+                                <button name="action_open_reconcile" class="oe_link" type="object" string=" -> Reconcile" attrs="{'invisible': [('reconcile', '=', False)]}"/>
+                             </div>
+                             <field name="deprecated"/>
+                           </group>
+                       </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="kw_view_account_list" model="ir.ui.view">
+            <field name="name">account.account.list</field>
+            <field name="model">account.account</field>
+            <field name="arch" type="xml">
+                <tree string="Chart of accounts">
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="user_type_id"/>
+                    <field name="currency_id" options="{'no_create': True}" groups="base.group_multi_currency"/>
+                    <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_view_account_account_kanban" model="ir.ui.view">
+            <field name="name">account.account.kanban</field>
+            <field name="model">account.account</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_mobile">
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="user_type_id"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_global_click">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <strong><field name="name"/></strong>
+                                    </div>
+                                    <div class="col-6 text-right">
+                                        <span class="badge badge-pill"><t t-esc="record.code.value"/></span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <strong>Type: </strong><t t-esc="record.user_type_id.value"/>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="kw_view_account_search" model="ir.ui.view">
+            <field name="name">account.account.search</field>
+            <field name="model">account.account</field>
+            <field name="arch" type="xml">
+                <search string="Accounts">
+                    <field name="name" filter_domain="['|', ('name','ilike',self), ('code','=like',str(self)+'%')]" string="Account"/>
+                    <filter string="Receivable Accounts" name="receivableacc" domain="[('internal_type','=','receivable')]"/>
+                    <filter string="Payable Accounts" name="payableacc" domain="[('internal_type','=','payable')]"/>
+                    <filter string="Equity" name="equityacc" domain="[('internal_group','=', 'equity')]"/>
+                    <filter string="Assets" name="assetsacc" domain="[('internal_group','=', 'asset')]"/>
+                    <filter string="Liability" name="liabilityacc" domain="[('internal_group','=', 'liability')]"/>
+                    <filter string="Income" name="incomeacc" domain="[('internal_group','=', 'income')]"/>
+                    <filter string="Expenses" name="expensesacc" domain="[('internal_group','=', 'expense')]"/>
+                    <field name="user_type_id"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Account Type" name="accounttype" domain="" context="{'group_by':'user_type_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        <record id="kw_action_account_form" model="ir.actions.act_window">
+            <field name="name">Chart of Accounts</field>
+            <field name="res_model">account.account</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="search_view_id" ref="kw_view_account_search"/>
+            <field name="view_id" ref="kw_view_account_list"/>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Add a new account
+              </p><p>
+                An account is part of a ledger allowing your company
+                to register all kinds of debit and credit transactions.
+                Companies present their annual accounts in two main parts: the
+                balance sheet and the income statement (profit and loss
+                account). The annual accounts of a company are required by law
+                to disclose a certain amount of information.
+              </p>
+            </field>
+        </record>
+            <!-- <menuitem name = "Chart Of Account" action="kw_action_account_form" id="kw_menu_action_account_form" parent="account.account_account_menu"  sequence="99"/> -->
+            <!-- <menuitem action="action_account_fiscal_position_form" id="menu_action_account_fiscal_position_form" parent="account_account_menu" sequence="3"/> -->
+          </data>
+    </odoo>

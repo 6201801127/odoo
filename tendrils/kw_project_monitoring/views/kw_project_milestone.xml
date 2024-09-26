@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Project Milestone Form View -->
+        <record id="kw_project_milestone_form" model="ir.ui.view">
+            <field name="name">Project milestone form</field>
+            <field name="model">kw_project_milestone</field>
+            <field name="arch" type="xml">
+                <form string="Project Milestones" delete='0' duplicate='0'>
+                    <header>
+                        <field name='is_milestone_added' invisible='1'/>         
+                        <field name='is_reviewing' invisible='1'/>         
+                        <field name='is_component_added' invisible='1'/>
+                        <button name="add_milestone_details" string="Add Milestone" type="object" class="btn btn-warning"
+                                confirm="Are you sure, you want to add?" attrs="{'invisible': [('is_milestone_added','=',True)]}"/>
+                        <button name="add_component_details" invisible="not context.get('view_milestone', False)" string="Add Component" type="object" class="btn btn-success"
+                                confirm="Are you sure, you want to add?" attrs="{'invisible': ['|',('is_component_added','=',True),('is_milestone_added','=',False)]}"/>
+                        <button name="submit_review" string="Submit" type="object" class="btn btn-success"
+                                confirm="Are you sure, you want to submit the review?" invisible="not context.get('view_milestone', False)"/>
+                    </header>
+                    <sheet>
+                        <group string='Project Details' style="background: rgb(192,223,157); background: radial-gradient(circle, rgba(192,223,157,0.9738095067128414) 0%, rgba(255,255,255,1) 97%, rgba(253,254,252,1) 100%);" >
+                            <group>
+                                <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}" required='1' attrs="{'readonly': [('is_milestone_added','=',True)]}"/>
+                                <field name="workorder_id" options="{'no_open': True,'no_create':True,'no_edit':True}" required='1' attrs="{'readonly': [('is_milestone_added','=',True)]}"/>
+                            </group>
+                        </group> 
+                        <group string='Milestone Details' style="background: rgb(255,249,134); background: radial-gradient(circle, rgba(255,249,134,0.9682072658164829) 0%, rgba(252,253,250,1) 98%, rgba(252,253,254,1) 98%);" col="2">
+                            <group>
+                                <field name="milestone_code" readonly='1'/>
+                                <field name="artifact_deliverable" widget='radio' options="{'horizontal': true}" attrs="{'readonly': [('is_milestone_added','=',True)]}"/>
+                                <field name="module_deliverable" widget='radio' options="{'horizontal': true}" attrs="{'readonly': [('is_milestone_added','=',True)]}"/>
+                                <field name="tag_to_billing" widget='radio' options="{'horizontal': true}" attrs="{'readonly': [('is_milestone_added','=',True)]}"/>
+                                <field name="milestone_name" attrs="{'readonly': [('is_milestone_added','=',True)]}"/>
+                            </group>
+                            <group>
+                                <field name="milestone_date" attrs="{'readonly': [('is_milestone_added','=',True)]}"/>
+                                <field name="artifact_name" attrs="{'readonly': ['|',('is_milestone_added','=',True),('artifact_deliverable','=','no')],'required':[('artifact_deliverable','=','yes')]}" options="{'no_open': True,'no_create':True,'no_edit':True}" widget="many2many_tags"/>
+                                <field name="module_name" attrs="{'readonly': ['|',('is_milestone_added','=',True),('module_deliverable','=','no')],'required':[('module_deliverable','=','yes')]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="amount" attrs="{'readonly': ['|',('is_milestone_added','=',True),('tag_to_billing','=','no')],'required':[('tag_to_billing','=','yes')]}"/>
+                                <field name="penalty_clause" attrs="{'readonly': [('is_milestone_added','=',True)]}"/>
+                            </group>
+                        </group>
+                        <!-- <group string='Component Details' style="background: rgb(255,249,134); background: radial-gradient(circle, rgba(255,249,134,0.9682072658164829) 0%, rgba(252,253,250,1) 98%, rgba(252,253,254,1) 98%);" attrs="{'invisible': [('is_milestone_added','!=',True)]}">
+                            <group>
+                                <field name="component_name"/>
+                                <field name="component_code"/>
+                                <field name="component_amount"/>
+                            </group>
+                        </group> -->
+                        
+                        <group invisible="not context.get('view_milestone', False)" style="background: rgb(255,249,134); background: radial-gradient(circle, rgba(255,249,134,0.9682072658164829) 0%, rgba(252,253,250,1) 98%, rgba(252,253,254,1) 98%);" attrs="{'invisible': [('is_reviewing','!=',True)]}">
+                            <group>
+                                <field name="review_date" attrs="{'required': [('is_reviewing','=',True)]}"/>
+                                <field name="milestone_status" attrs="{'required': [('is_reviewing','=',True)]}"/>
+                                <field name="ready_to_bill"/>
+                                <field name="remark" attrs="{'required': [('is_reviewing','=',True)]}"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string='Component Details'>
+                                <field name='component_type_id'>
+                                    <tree editable='top' class="customer_tree" delete='false'>
+                                        <field name="component_name" options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                                        <field name="component_code"  />
+                                        <field name="component_amount"  />
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string='Artifact Details' invisible="not context.get('view_milestone', False)">
+                                <field name='artifact_review_ids'>
+                                    <tree editable='top' class="customer_tree" delete='false'>
+                                        <field name="artifact_name" options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                                        <field name="artifact_status"  />
+                                        <field name="artifact_review_remark"  />
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string='Review History' invisible="not context.get('view_milestone', False)">
+                                <field name='review_history_log' readonly='1'>
+                                    <tree edit='false' delete='false' class="customer_tree">
+                                        <field name="last_review_date"  />
+                                        <field name="status"  />
+                                        <field name="review_remarks"  />
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <!-- Project Milestone Tree View -->
+
+        <record model="ir.ui.view" id="kw_project_milestone_list">
+            <field name="name">Project Milestone list</field>
+            <field name="model">kw_project_milestone</field>
+            <field name="arch" type="xml">
+                <tree import='0' class='customer_tree'>
+                    <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="workorder_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_project_milestone_list_view">
+            <field name="name">Project Milestone list</field>
+            <field name="model">kw_project_milestone</field>
+            <field name="arch" type="xml">
+                <tree import='0' class='customer_tree' create='0' delete='0'>
+                    <field name="milestone_code"  invisible="not context.get('view_milestone', False)" class='product'/>
+                    <field name="milestone_name"  invisible="not context.get('view_milestone', False)" class='product'/>
+                    <field name="milestone_date"  invisible="not context.get('view_milestone', False)" class='product'/>
+                    <field name="amount"  invisible="not context.get('view_milestone', False)" class='product'/>
+                    <field name="artifact_deliverable"  invisible="not context.get('view_milestone', False)" class='qty_available'/>
+                    <field name="module_deliverable"  invisible="not context.get('view_milestone', False)" class='qty_available'/>
+                    <field name="tag_to_billing"  invisible="not context.get('view_milestone', False)" class='qty_available'/>
+                    <field name="milestone_status"  invisible="not context.get('view_milestone', False)" class='qty_available'/>
+                    <field name="closing_date"  invisible="not context.get('view_milestone', False)" class='action_date'/>
+                    <field name="currency_id"  invisible="not context.get('view_milestone', False)" class='action_date'/>
+                    <field name="rest_billing_amount"  class='action_date'/>
+                    <field name="create_uid" string='Created By'  class='action_date'/>
+                    <field name="create_date" string='Created On'  class='serial_no'/>
+                    <field name="write_uid" string='Updated By'  class='serial_no'/>
+                    <field name="write_date" string='Updated On'  class='serial_no'/>
+                    <button name="review_milestone" type="object" class="oe_highlight customer_tree" string="Review" invisible="not context.get('view_milestone', False)"/>
+                </tree>
+            </field>
+        </record>
+
+         <!-- Project Milestone Action -->
+
+        <record id="kw_project_milestone_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Project Milestone</field>
+            <field name="res_model">kw_project_milestone</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    No Record found...
+                </p>
+            </field>
+        </record>
+
+        <!-- advance view render -->
+        <record id="project_milestones_list_panel" model="ir.ui.view">
+            <field name="name">kw_project_milestone.list.panel</field>
+            <field name="model">kw_project_milestone</field>
+            <field name="inherit_id" ref="kw_project_monitoring.kw_project_milestone_list_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="attributes">
+                    <attribute name="banner_route">
+                        /milestone/project_milestones_list_panel
+                    </attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <template id="view_milestones_template" name="milestone.panel.template">
+            <div class="row" style="margin: 10px; padding: 15px;">
+                <table class="table table-bordered table-hover" style="width: 90%; margin: auto; background-color: #f9f9f9; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); border-radius: 8px;">
+                    <tbody>
+                        <tr class="text-center">
+                            <td class="text-center" style="width: 25%; padding: 10px; font-weight: bold; background-color: #e0f7fa;">
+                                Workorder Value
+                            </td>
+                            <td class="text-center" style="width: 25%; background-color: #d4edda; padding: 10px; font-weight: bold;">
+                                <t t-esc="values['workorder_value']"/>
+                            </td>
+                            <td class="text-center" style="width: 25%; padding: 10px; font-weight: bold; background-color: #e0f7fa;">
+                                Exchange Rate
+                            </td>
+                            <td class="text-center" style="width: 25%; background-color: #d4edda; padding: 10px; font-weight: bold;">
+                                <t t-esc="values['exchange_rate']"/>
+                            </td>
+                        </tr>
+                        <tr class="text-center">
+                            <td class="text-center" style="width: 25%; padding: 10px; font-weight: bold; background-color: #e0f7fa;">
+                                Rest Amount
+                            </td>
+                            <td class="text-center" style="width: 25%; padding: 10px; background-color: #d4edda; font-weight: bold;">
+                                <t t-esc="values['rest_amount']"/>
+                            </td>
+                            <td class="text-center" style="width: 25%; padding: 10px; font-weight: bold; background-color: #e0f7fa;">
+                                Sum Of Milestone
+                            </td>
+                            <td class="text-center" style="width: 25%; padding: 10px; background-color: #d4edda; font-weight: bold;">
+                                <t t-esc="values['milestone_sum']"/>
+                            </td>
+                        </tr>
+                        <tr class="text-center">
+                            <td class="text-center" style="width: 25%; padding: 10px; font-weight: bold; background-color: #e0f7fa;">
+                                Currency
+                            </td>
+                            <td class="text-center" style="width: 25%; padding: 10px; background-color: #d4edda; font-weight: bold;">
+                                <t t-esc="values['currency']"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+
+    </data>
+</odoo>

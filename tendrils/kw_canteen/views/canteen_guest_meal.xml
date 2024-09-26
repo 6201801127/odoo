@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="view_kw_canteen_guest_meal_tree" model="ir.ui.view">
+            <field name="name">view.kw_canteen_guest_meal.tree</field>
+            <field name="model">kw_canteen_guest_meal</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <tree string="kw_canteen_guest_meal_tree" create="true" delete="true" edit="true">
+                    <field name="employee_id" />
+                    <field name="department_id"/>
+                    <field name="infra_unit_location_id"/>
+                    <field name="desig_id"/>
+                    <!-- <field name="food_type"/> -->
+                    <field name="start_date" />
+                    <field name="end_date" />
+                    <!-- <field name="no_of_guest_meal"/> -->
+                    <field name="remarks" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_kw_canteen_guest_meal_search" model="ir.ui.view">
+            <field name="name">view.kw_canteen_guest_meal.search</field>
+            <field name="model">kw_canteen_guest_meal</field>
+            <field name="type">search</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <search string="kw_canteen_guest_meal_search">
+                    <field name="employee_id" />
+                    <field name="remarks" />
+                    <group expand="1" string="Group By">
+                        <filter string="This Month" domain="[('start_date', 'like',context_today().strftime('%Y-%m'))]" name="this_month_guest_meal"/>
+                        <separator/>
+                        <filter string="Start Date" name="filter_start_date" date="start_date"/>
+                        <separator/>
+                        <filter string="Approved" name="filter_status_approved" domain="[('state','=','approved')]" />
+                        <separator/>
+                        <filter string="Expired" name="filter_status_expired" domain="[('state','=','expired')]" />
+                        <filter string="Start date" name="group_by_start_date" domain="[]" context="{'group_by':'start_date'}" date="start_date"/>
+                        <filter string="Employee Name" name="group_by_employee_id" domain="[]" context="{'group_by':'employee_id'}"/>
+                    </group> 
+                    <filter string="Self" name="filter_self_record" domain="[('employee_id.user_id','=',uid)]"/>
+                    <separator/>
+                </search>
+            </field>
+        </record>
+
+        <record id="view_kw_canteen_guest_meal_form" model="ir.ui.view">
+            <field name="name">view.kw_canteen_guest_meal.form</field>
+            <field name="model">kw_canteen_guest_meal</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <form string="kw_canteen_guest_meal_form" create="true" delete="true" edit="true">
+                    <header>
+                        <button name="action_apply_guest_meal" type="object" string="Apply"  attrs="{'invisible':[('state', '!=', 'draft')]}" class="btn-primary" />
+                        <button name="action_cancel_guest_meal" type="object" string="Cancel" attrs="{'invisible':['|',('is_company_guest', '=', False),('state', 'in', ['draft','expired'])]}" class="btn-primary"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,approved" />
+                    </header>
+
+                    <sheet>
+                        <!-- <div class="oe-tittle">
+                        <h1 style="color:#108fbb">
+                            Guest Meal Details
+                        </h1>
+                    </div> -->
+
+                        <group>
+                            <field name="is_monday_in_range" invisible="1" />
+                            <field name="is_tuesday_in_range" invisible="1" />
+                            <field name="is_wednesday_in_range" invisible="1" />
+                            <field name="is_thursday_in_range" invisible="1" />
+                            <field name="is_friday_in_range" invisible="1" />
+                            <field name="is_saturday_in_range" invisible="1" />
+                            <field name="is_sunday_in_range" invisible="1" />
+
+                            <group string="Guest Meal Details">
+                                <field name="employee_id" options="{'no_create':True,'no_create_edit':True,'no_open':True,'no_edit':True}"/>
+                                <field name="infra_unit_location_id" required="0" options="{'no_create':True,'no_create_edit':True,'no_open':True,'no_edit':True}"/>
+                                <field name="meal_for" widget="radio" options="{'horizontal':True}"/>
+                                <field name="is_company_guest" attrs="{'invisible':[('meal_for','=','self')]}" groups="kw_canteen.canteen_manager_group"/>
+                                <field name="start_date" date='start_date' autocomplete='off' />
+                                <field name="end_date" date='end_date' autocomplete='off' />
+                                <field name="remarks" />
+                            </group>
+
+                            <group string="Meal Choice" attrs="{'invisible':['|',('meal_for','!=','others'),'&amp;','&amp;','&amp;','&amp;','&amp;','&amp;',('is_friday_in_range','=',False),('is_thursday_in_range','=',False),('is_wednesday_in_range','=',False),('is_monday_in_range','=',False),('is_tuesday_in_range','=',False),('is_saturday_in_range','=',False),('is_sunday_in_range','=',False)]}">
+                                
+                                <label for="opt_monday" string="Monday" attrs="{'invisible':[('is_monday_in_range','=',False)]}"/>
+                                <div attrs="{'invisible':[('is_monday_in_range','=',False)]}">
+                                    <field name="opt_monday" class="oe_inline" />
+                                    <span class="fa fa-cutlery mx-1"/>
+
+                                    <field name="monday_vg_count" class="oe_inline" placeholder='No. of Veg Meal'/>
+                                    <span class="fa fa-cutlery mx-1"/>
+                                    <field name="monday_nvg_count" class="oe_inline" placeholder='No. of Non-Veg Meal'/>
+                                </div>
+
+                                <label for="opt_tuesday" string="Tuesday"  attrs="{'invisible':[('is_tuesday_in_range','=',False)]}"/>
+                                <div attrs="{'invisible':[('is_tuesday_in_range','=',False)]}">
+                                    <field name="opt_tuesday" class="oe_inline" />
+                                    <span class="fa fa-cutlery mx-1"/>
+
+                                    <field name="tuesday_vg_count" class="oe_inline" placeholder='No. of Veg Meal'/>
+                                    <span class="fa fa-cutlery mx-1"/>
+                                    <field name="tuesday_nvg_count" class="oe_inline" placeholder='No. of Non-Veg Meal'/>
+                                </div>
+
+                                <label for="opt_wedday" string="Wednesday"  attrs="{'invisible':[('is_wednesday_in_range','=',False)]}"/>
+                                <div attrs="{'invisible':[('is_wednesday_in_range','=',False)]}">
+                                    <field name="opt_wedday" class="oe_inline" />
+                                    <span class="fa fa-cutlery mx-1"/>
+
+                                    <field name="wednesday_vg_count" class="oe_inline" placeholder='No. of Veg Meal'/>
+                                    <span class="fa fa-cutlery mx-1"/>
+                                    <field name="wednesday_nvg_count" class="oe_inline" placeholder='No. of Non-Veg Meal'/>
+                                </div>
+
+                                <label for="opt_thursday" string="Thursday"  attrs="{'invisible':[('is_thursday_in_range','=',False)]}"/>
+                                <div attrs="{'invisible':[('is_thursday_in_range','=',False)]}">
+                                    <field name="opt_thursday" class="oe_inline" />
+                                    <span class="fa fa-cutlery mx-1"/>
+
+                                    <field name="thursday_vg_count" class="oe_inline" placeholder='No. of Veg Meal'/>
+                                    <span class="fa fa-cutlery mx-1"/>
+                                    <field name="thursday_nvg_count" class="oe_inline" placeholder='No. of Non-Veg Meal'/>
+                                </div>
+
+                                <label for="opt_friday" string="Friday"  attrs="{'invisible':[('is_friday_in_range','=',False)]}"/>
+                                <div attrs="{'invisible':[('is_friday_in_range','=',False)]}">
+                                    <field name="opt_friday" class="oe_inline" />
+                                    <span class="fa fa-cutlery mx-1"/>
+
+                                    <field name="friday_vg_count" class="oe_inline" placeholder='No. of Veg Meal'/>
+                                    <span class="fa fa-cutlery mx-1"/>
+                                    <field name="friday_nvg_count" class="oe_inline" placeholder='No. of Non-Veg Meal'/>
+                                </div>
+                                <label for="opt_saturday" string="Saturday"  attrs="{'invisible':[('is_saturday_in_range','=',False)]}"/>
+                                <div attrs="{'invisible':[('is_saturday_in_range','=',False)]}">
+                                    <field name="opt_saturday" class="oe_inline" />
+                                    <span class="fa fa-cutlery mx-1"/>
+
+                                    <field name="saturday_vg_count" class="oe_inline" placeholder='No. of Veg Meal'/>
+                                    <span class="fa fa-cutlery mx-1"/>
+                                    <field name="saturday_nvg_count" class="oe_inline" placeholder='No. of Non-Veg Meal'/>
+                                </div>
+
+                                <label for="opt_sunday" string="Sunday"  attrs="{'invisible':[('is_sunday_in_range','=',False)]}"/>
+                                <div attrs="{'invisible':[('is_sunday_in_range','=',False)]}">
+                                    <field name="opt_sunday" class="oe_inline" />
+                                    <span class="fa fa-cutlery mx-1"/>
+
+                                    <field name="sunday_vg_count" class="oe_inline" placeholder='No. of Veg Meal'/>
+                                    <span class="fa fa-cutlery mx-1"/>
+                                    <field name="sunday_nvg_count" class="oe_inline" placeholder='No. of Non-Veg Meal'/>
+                                </div>
+                            </group>
+                            <group string="Meal Choice" attrs="{'invisible':['|',('meal_for','!=','self'),'&amp;','&amp;','&amp;','&amp;','&amp;','&amp;',('is_monday_in_range','=',False),('is_friday_in_range','=',False),('is_thursday_in_range','=',False),('is_wednesday_in_range','=',False),('is_tuesday_in_range','=',False),('is_saturday_in_range','=',False),('is_sunday_in_range','=',False)]}">
+                                <!-- <group string="Opt For" attrs="{'invisible':[('is_friday_in_range','=',False),('is_thursday_in_range','=',False),('is_wednesday_in_range','=',False),('is_monday_in_range','=',False),('is_tuesday_in_range','=',False)]}">
+                                </group> -->
+                                <label for="opt_monday" string="Monday" attrs="{'invisible':[('is_monday_in_range','=',False)]}"/>
+                                <div attrs="{'invisible':[('is_monday_in_range','=',False)]}">
+                                    <field name="opt_monday" class="oe_inline" />
+                                    <field name="monday_meal_id" attrs="{'invisible':['|',('is_monday_in_range','=',False),('opt_monday','=',False)],'required':[('opt_monday','=',True),('meal_for','=','self')]}" class="oe_inline" options="{'no_create':True,'no_create_edit':True,'no_open':True,'no_edit':True}"/>
+                                </div>
+
+                                <label for="opt_tuesday" string="Tuesday"  attrs="{'invisible':[('is_tuesday_in_range','=',False)]}"/>
+                                <div attrs="{'invisible':[('is_tuesday_in_range','=',False)]}">
+                                    <field name="opt_tuesday" class="oe_inline" />
+                                    <field name="tuesday_meal_id" attrs="{'invisible':['|',('is_tuesday_in_range','=',False),('opt_tuesday','=',False)],'required':[('opt_tuesday','=',True),('meal_for','=','self')]}" class="oe_inline" options="{'no_create':True,'no_create_edit':True,'no_open':True,'no_edit':True}"/>
+                                </div>
+
+                                <label for="opt_wedday" string="Wednesday"  attrs="{'invisible':[('is_wednesday_in_range','=',False)]}"/>
+                                <div attrs="{'invisible':[('is_wednesday_in_range','=',False)]}">
+                                    <field name="opt_wedday" class="oe_inline" />
+                                    <field name="wedday_meal_id" attrs="{'invisible':['|',('is_wednesday_in_range','=',False),('opt_wedday','=',False)],'required':[('opt_wedday','=',True),('meal_for','=','self')]}" class="oe_inline" options="{'no_create':True,'no_create_edit':True,'no_open':True,'no_edit':True}"/>
+                                </div>
+
+                                <label for="opt_thursday" string="Thursday"  attrs="{'invisible':[('is_thursday_in_range','=',False)]}"/>
+                                <div attrs="{'invisible':[('is_thursday_in_range','=',False)]}">
+                                    <field name="opt_thursday" class="oe_inline" />
+                                    <field name="thursday_meal_id" attrs="{'invisible':['|',('is_thursday_in_range','=',False),('opt_thursday','=',False)],'required':[('opt_thursday','=',True),('meal_for','=','self')]}" class="oe_inline" options="{'no_create':True,'no_create_edit':True,'no_open':True,'no_edit':True}"/>
+                                </div>
+
+                                <label for="opt_friday" string="Friday"  attrs="{'invisible':[('is_friday_in_range','=',False)]}"/>
+                                <div attrs="{'invisible':[('is_friday_in_range','=',False)]}">
+                                    <field name="opt_friday" class="oe_inline" />
+                                    <field name="friday_meal_id" attrs="{'invisible':['|',('is_friday_in_range','=',False),('opt_friday','=',False)],'required':[('opt_friday','=',True),('meal_for','=','self')]}" class="oe_inline" options="{'no_create':True,'no_create_edit':True,'no_open':True,'no_edit':True}"/>
+                                </div>
+                                <label for="opt_saturday" string="Saturday"  attrs="{'invisible':[('is_saturday_in_range','=',False)]}"/>
+                                <div attrs="{'invisible':[('is_saturday_in_range','=',False)]}">
+                                    <field name="opt_saturday" class="oe_inline" />
+                                    <field name="saturday_meal_id" attrs="{'invisible':['|',('is_saturday_in_range','=',False),('opt_saturday','=',False)],'required':[('opt_saturday','=',True),('meal_for','=','self')]}" class="oe_inline" options="{'no_create':True,'no_create_edit':True,'no_open':True,'no_edit':True}"/>
+                                </div>
+
+                                <label for="opt_sunday" string="Sunday"  attrs="{'invisible':[('is_sunday_in_range','=',False)]}"/>
+                                <div attrs="{'invisible':[('is_sunday_in_range','=',False)]}">
+                                    <field name="opt_sunday" class="oe_inline" />
+                                    <field name="sunday_meal_id" attrs="{'invisible':['|',('is_sunday_in_range','=',False),('opt_sunday','=',False)],'required':[('opt_sunday','=',True),('meal_for','=','self')]}" class="oe_inline" options="{'no_create':True,'no_create_edit':True,'no_open':True,'no_edit':True}"/>
+                                </div>
+                            </group>
+                            
+                        </group>
+                        
+                    </sheet>
+                    <group >
+                        <div class="oe_chatter">
+                            <field name="message_follower_ids" widget="mail_followers" />
+                            <field name="activity_ids" widget="mail_activity" />
+                            <field name="message_ids" widget="mail_thread" />
+                        </div>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <!-- <record id="action_kw_canteen_guest_meal_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Guest Meal</field>
+            <field name="res_model">kw_canteen_guest_meal</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>
+            <field name="domain">[]</field>
+            <field name="context">{'search_default_filter_self_record':1 , 'search_default_this_month_guest_meal':1}</field>
+            <field name="search_view_id" ref="view_kw_canteen_guest_meal_search" />
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                No records created.
+                </p>
+            </field>
+        </record> -->
+
+        <record id="action_kw_canteen_guest_meal_act_window" model="ir.actions.server">
+			<field name="name">Guest Meal</field>
+			<field name="model_id" ref="model_kw_canteen_guest_meal"/>
+			<field name="state">code</field>
+            <field name="context">{'search_default_filter_self_record':1 , 'search_default_this_month_guest_meal':1}</field>
+            <field name="search_view_id" ref="view_kw_canteen_guest_meal_search" />
+			<field name="code">
+				action = model.view_form()
+			</field>
+		</record>
+
+    </data>
+</odoo>

@@ -1,0 +1,160 @@
+<odoo>
+    <data>
+        <record id="domain_master_registration_config_list" model="ir.ui.view">
+            <field name="name">Registration config list</field>
+            <field name="model">registration_master_config</field>
+            <field name="arch" type="xml">
+                <tree default_order='id desc'>
+                    <field name="registration_name"/>
+                    <field name="registration_code"/>
+                    <field name="reg_contact_person"/>
+                </tree>
+            </field>
+        </record>
+        <record id="domain_registration_config_management_form" model="ir.ui.view">
+            <field name="name">Registration config form</field>
+            <field name="model">registration_master_config</field>
+            <field name="arch" type="xml">
+                <form duplicate='false'>
+                    <sheet>
+                        <group>
+                            <group string="">
+                                <field name="registration_name" required="1"/>
+                                <field name="registration_code"/>
+                                <field name="reg_contact_person"/>
+                                <field name="reg_address"/>
+                                <field name="reg_telephone"/>
+                                <field name="reg_mobile_no"/>
+                                <field name="reg_company"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="domain_registration_masters_action_window" model="ir.actions.act_window">
+            <field name="name">Registration Master</field>
+            <field name="res_model">registration_master_config</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                     (0, 0, {'view_mode': 'tree', 'view_id': ref('domain_master_registration_config_list')}),
+                     (0, 0, {'view_mode': 'form', 'view_id': ref('domain_registration_config_management_form')})]"/>
+        </record>
+
+        <menuitem name="Registration Master"
+                  id="registration_master_config_menu"
+                  parent='cr_master_config_menu'
+                  action="domain_registration_masters_action_window"
+                  groups='change_request_management.group_cr_manager,change_request_management.group_cr_officer'
+                  sequence="4"/>
+
+        <record id="domain_master_config_list" model="ir.ui.view">
+            <field name="name">Domain config list</field>
+            <field name="model">kw_cr_domain_server_configuration</field>
+            <field name="arch" type="xml">
+                <tree default_order='expiry_status asc' decoration-danger="expiry_status in ['a']"
+                      decoration-warning="expiry_status in ['c']" decoration-info="expiry_status in ['b']">
+                    <field name="domain_name"/>
+                    <field name="client_name"/>
+                    <field name="registaration_date"/>
+                    <field name="expiry_date"/>
+                    <field name="expiry_status" invisible="1"/>
+                    <field name="renewal_date"/>
+                    <field name="registration_at"/>
+<!--                    <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>-->
+<!--                    <field name="project_code"/>-->
+<!--                    <field name="mail_server"/>-->
+
+                </tree>
+            </field>
+        </record>
+        <record id="domain_config_management_form" model="ir.ui.view">
+            <field name="name">Domain config form</field>
+            <field name="model">kw_cr_domain_server_configuration</field>
+            <field name="arch" type="xml">
+                <form duplicate='false'>
+                    <header>
+
+                    </header>
+                    <sheet>
+                        <!-- <div name="button_box" class="oe_button_box">
+                            <button class="oe_stat_button" icon="fa-code" type="object" name="check_domain_bill_details">
+                                <span class="o_stat_text font-weight-bold">
+                                    Domain Bill Details
+                                </span>
+                            </button>
+                        </div> -->
+                        <group>
+                            <group string="">
+                                <field name="domain_name"/>
+                                <field name="client_type" required="1" widget="radio" options="{'horizontal': true}"/>
+                                <!-- <field name="project_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="project_code"/> -->
+                                <field name="client_name"/>
+
+                                <field name="registaration_date"/>
+                                <field name="registration_at"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="reg_contact_person" attrs="{'invisible':[('registration_at','=',False)]}"/>
+                                <field name="reg_address" attrs="{'invisible':[('registration_at','=',False)]}"/>
+                                <field name="reg_telephone" attrs="{'invisible':[('registration_at','=',False)]}"/>
+                                <field name="reg_mobile_no" attrs="{'invisible':[('registration_at','=',False)]}"/>
+                                <field name="reg_company" attrs="{'invisible':[('registration_at','=',False)]}"/>
+                                <!-- <field name="contact_type" widget="radio" options="{'horizontal': true}"/>
+                                <field name="contact_person"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/> -->
+
+                            </group>
+                            <group>
+                                <field name="expiry_date"/>
+                                <field name="valid_upto"/>
+                                <field name="renewal_date"/>
+                                <field name="domain_status"/>
+                                <!-- <field name="server_name_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/> -->
+                                <!-- <field name="mail_server"/> -->
+                                <field name="sub_domain">
+                                    <tree editable="bottom">
+                                        <field name="type_id" required="1"
+                                               options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="name" required="1"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="domain_serv_bill_ids">
+                                <tree editable="bottom">
+                                    <field name="account_head_id" required="1"
+                                           options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                    <field name="order_date" required="1"/>
+                                    <field name="bill_no" required="1"/>
+                                    <field name="fy_year" options="{'no_open': True,'no_create':True,'no_edit':True}" invisible="1"/>
+                                    <field name="billed_amount" sum="Total"/>
+                                    <field name="discount" sum="Total"/>
+                                    <field name="approved_amount" sum="Total" force_save="1"/>
+                                </tree>
+                            </field>
+                        </group>
+
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="domain_master_action_window" model="ir.actions.act_window">
+            <field name="name">Web Domain Master</field>
+            <field name="res_model">kw_cr_domain_server_configuration</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                     (0, 0, {'view_mode': 'tree', 'view_id': ref('domain_master_config_list')}),
+                     (0, 0, {'view_mode': 'form', 'view_id': ref('domain_config_management_form')})]"/>
+        </record>
+
+        <!--CR Management Take Action menu-->
+        <menuitem name="Web Domain Master"
+                  id="domain_master_config_menu"
+                  parent='kw_environment_master_root_menu'
+                  action="domain_master_action_window"
+                  groups='change_request_management.group_cr_manager,change_request_management.group_cr_configuration_manager'
+                  sequence="14"/>
+    </data>
+</odoo>

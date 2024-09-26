@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="lunch_expenses_list">
+            <field name="name">Lunch Expenses List</field>
+            <field name="model">lunch_expenses</field>
+            <field name="arch" type="xml">
+                <tree editable="top">
+                    <field name="year" attrs="{'readonly':[('boolean_readonly','=',True)]}"/>
+                    <field name="month" attrs="{'readonly':[('boolean_readonly','=',True)]}"/>
+                    <field name="employee_id" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'readonly':[('boolean_readonly','=',True)]}" context="{'tree_view_ref':'kw_hr_leaves.hr_employee_encashment_tree_view'}"/>
+                    <field name="department_id"/>
+                    <field name="division"/>
+                    <field name="section"/>
+                    <field name="practice"/>
+                    <field name="designation"/>
+                    <field name="company_id" options="{'no_open': True,'no_create':True,'no_edit':True}" required='1'/>
+                    <!-- <field name="guest_meal" attrs="{'readonly':[('boolean_readonly','=',True)]}"/> -->
+                    <!-- <field name="reg_meal" attrs="{'readonly':[('boolean_readonly','=',True)]}"/> -->
+                    <field name="deduction_id" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'readonly':[('boolean_readonly','=',True)]}"/>
+                    <field name="amount" attrs="{'readonly':[('boolean_readonly','=',True)]}" sum='Total' />
+                    <field name="purpose" attrs="{'readonly':[('boolean_readonly','=',True)]}" />
+                    <field name="boolean_readonly" readonly="1"/>
+                </tree>
+            </field>
+        </record>
+        <!-- lunch_expenses search view -->
+        <record id="lunch_expenses_view_search" model="ir.ui.view">
+            <field name="name">lunch_expenses.view.search</field>
+            <field name="model">lunch_expenses</field>
+            <field name="arch" type="xml">
+                <search string="Search Description">
+                    <!-- Add your fields here -->
+                    <field name="month"/>
+                    <field name="employee_id"/>
+                    <field name="department_id"/>
+                    <field name="company_id"/>
+                    <filter string="This Year" domain="[('year', '=',context_today().strftime('%Y'))]" name="current_year_salary"/>
+                    <filter string="Last Year" domain="[('year', '=',(context_today()-relativedelta(years=1)).strftime('%Y'))]" name="last_year_salary"/>
+                    <separator/>
+                    <filter string="This Month" name="by_current_month_year" domain="[('current_month','=',True)]"/>
+                    <filter string="January" domain="[('month','=',1)]" name="january_salary"/>
+                    <filter string="February" domain="[('month','=',2)]" name="february_salary"/>
+                    <filter string="March" domain="[('month','=',3)]" name="march_salary"/>
+                    <filter string="April" domain="[('month','=',4)]" name="april_salary"/>
+                    <filter string="May" domain="[('month','=',5)]" name="may_salary"/>
+                    <filter string="June" domain="[('month','=',6)]" name="june_salary"/>
+                    <filter string="July" domain="[('month','=',7)]" name="july_salary"/>
+                    <filter string="August" domain="[('month','=',8)]" name="august_salary"/>
+                    <filter string="September" domain="[('month','=',9)]" name="september_salary"/>
+                    <filter string="October" domain="[('month','=',10)]" name="october_salary"/>
+                    <filter string="November" domain="[('month','=',11)]" name="november_salary"/>
+                    <filter string="December" domain="[('month','=',12)]" name="december_salary"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Employee" name="employee" context="{'group_by':'employee_id'}"/>
+                        <filter string="Department" name="department_id" context="{'group_by':'department_id'}"/>
+                        <filter string="Deduction Type" name="deduction_type" context="{'group_by':'deduction_id'}"/>
+                        <filter string="Company" name="company" context="{'group_by':'company_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="lunch_expenses_window" model="ir.actions.act_window">
+            <field name="name">Deduction</field>
+            <field name="res_model">lunch_expenses</field>
+            <field name="context">{'search_default_by_current_month_year':1}</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="domain">[]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+					No Records to show...
+                </p>
+            </field>
+        </record>
+        <record id="lunch_expenses_confirm_report" model="ir.actions.act_window">
+            <field name="name">Deduction Report</field>
+            <field name="res_model">lunch_expenses</field>
+            <field name="context">{'search_default_current_year_salary':1,'search_default_by_current_month_year':1,'create':0,'delete':0,'edit':0,'import':0}</field>
+            <field name="domain">[('boolean_readonly','=',True)]</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+					No Records to show...
+                </p>
+            </field>
+        </record>
+        <record id="lunch_expenses_finance_window" model="ir.actions.act_window">
+            <field name="name">Other Advance</field>
+            <field name="res_model">lunch_expenses</field>
+            <field name="context">{'search_default_current_year_salary':1,'search_default_by_current_month_year':1,'other_deduction':1}</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="domain">[('deduction_id.code','=','OD')]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+					No Records to show...
+                </p>
+            </field>
+        </record>
+       
+        <!-- <record id="kw_expenses_server_action" model="ir.actions.server">
+            <field name="name">Payroll expenses Report</field>
+            <field name="condition">True</field>
+            <field name="model_id" ref="payroll_inherit.model_lunch_expenses"/>
+            <field name="state">code</field>
+            <field name="code">
+form_view_id = env.ref('payroll_inherit.view_kw_payroll_report_form').id
+action = {
+		'type': 'ir.actions.act_window',
+		'name' : 'Payroll Expenses Report',
+		'view_mode': 'form',
+		'view_mode': 'form',
+		'res_model': 'kw_payroll_reports',
+		'views': [(form_view_id,'form')],
+		'target': 'new',
+		'context':{'lunch_expenses':True},
+}
+            </field>
+        </record> -->
+		<menuitem name="Payroll Reports" id="payroll_report_root_menu_act" parent="hr.menu_hr_reporting_timesheet" sequence="5"/>
+        <menuitem name="Deductions" id="lunch_list" parent="process_payroll_menu" action="lunch_expenses_window" sequence="13"/>
+        <menuitem id="menu_hr_payroll_deduction_report_menu" name="Deduction Report"
+        parent="payroll_inherit.payroll_report_root_menu_act" 
+        action="lunch_expenses_confirm_report" sequence='4'
+        />
+        
+    </data>
+</odoo>

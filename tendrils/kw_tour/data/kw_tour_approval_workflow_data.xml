@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="kw_tour_approval_workflow" model="odoo.workflow">
+            <field name="name">Tour Approval</field>
+            <field name="activities_add" eval="True"/>
+            <field name="followers_add" eval="False"/>
+            <field name="mail_thread_add" eval="True"/>
+            <field name="remove_default_attrs_mod" eval="False"/>
+            <field name="model_id" ref="kw_tour.model_kw_tour"/>
+        </record>
+
+        <record id="kw_tour_workflow_node_draft" model="odoo.workflow.node">
+            <field name="name">Draft</field>
+            <field name="workflow_id" ref="kw_tour_approval_workflow"/>
+            <field name="node_name">Draft</field>
+            <field name="sequence" eval="1"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_start" eval="True"/>
+        </record>
+
+        <record id="kw_tour_workflow_node_applied" model="odoo.workflow.node">
+            <field name="name">Applied</field>
+            <field name="workflow_id" ref="kw_tour_approval_workflow"/>
+            <field name="node_name">Applied</field>
+            <field name="sequence" eval="2"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_start" eval="False"/>
+        </record>
+
+        <record id="kw_tour_workflow_node_approved" model="odoo.workflow.node">
+            <field name="name">Approved</field>
+            <field name="workflow_id" ref="kw_tour_approval_workflow"/>
+            <field name="node_name">Approved</field>
+            <field name="sequence" eval="3"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="False"/>
+        </record>
+
+        <record id="kw_tour_workflow_node_forwarded" model="odoo.workflow.node">
+            <field name="name">Forwarded</field>
+            <field name="workflow_id" ref="kw_tour_approval_workflow"/>
+            <field name="node_name">Forwarded</field>
+            <field name="sequence" eval="4"/>
+            <field name="is_visible" eval="False"/>
+            <field name="flow_end" eval="False"/>
+        </record>
+
+        <record id="kw_tour_workflow_node_travel_desk" model="odoo.workflow.node">
+            <field name="name">Traveldesk Approved</field>
+            <field name="workflow_id" ref="kw_tour_approval_workflow"/>
+            <field name="node_name">Traveldesk Approved</field>
+            <field name="sequence" eval="5"/>
+            <field name="is_visible" eval="True"/>
+        </record>
+
+        <record id="kw_tour_workflow_node_finance" model="odoo.workflow.node">
+            <field name="name">Finance Approved</field>
+            <field name="workflow_id" ref="kw_tour_approval_workflow"/>
+            <field name="node_name">Finance Approved</field>
+            <field name="sequence" eval="6"/>
+            <field name="is_visible" eval="True"/>
+        </record>  
+
+
+        <record id="kw_tour_workflow_node_rejected" model="odoo.workflow.node">
+            <field name="name">Rejected</field>
+            <field name="workflow_id" ref="kw_tour_approval_workflow"/>
+            <field name="node_name">Rejected</field>
+            <field name="sequence" eval="7"/>
+            <field name="is_visible" eval="False"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+        <record id="kw_tour_workflow_node_cancelled" model="odoo.workflow.node">
+            <field name="name">Cancelled</field>
+            <field name="workflow_id" ref="kw_tour_approval_workflow"/>
+            <field name="node_name">Cancelled</field>
+            <field name="sequence" eval="8"/>
+            <field name="is_visible" eval="False"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+       
+        <record id="kw_tour_dynamic_workflow_button_apply" model="odoo.workflow.node.button">
+            <field name="sequence" eval="1"/>
+            <field name="workflow_id" ref="kw_tour_approval_workflow"/>
+            <field name="name">Apply</field>
+            <field name="node_id" ref="kw_tour_workflow_node_draft"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="[('state', '!=', 'Draft')]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+result = obj.tour_apply_flow()
+            </field>
+        </record>
+       
+
+        <record id="kw_tour_dynamic_workflow_button_approve" model="odoo.workflow.node.button">
+            <field name="sequence" eval="2"/>
+            <field name="workflow_id" ref="kw_tour_approval_workflow"/>
+            <field name="name">Approve</field>
+            <field name="node_id" ref="kw_tour_workflow_node_applied"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|','|',('is_valid_authority','=',False),('state', 'not in', ['Applied','Forwarded']),('own_record','=',True)]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_tour.view_kw_tour_approve_remark_form").id
+name = "Remarks"
+if obj.baggage_details and int(obj.baggage_details) > 0:
+    form_view_id = env.ref("kw_tour.view_kw_tour_extra_baggage_warning_form").id
+    name="Extra Baggage Warning !"
+
+action= {
+    'name':name,
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_tour',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'res_id': obj.id,
+    'view_id': form_view_id,
+    'target': 'new',
+    'domain': [('id', '=', obj.id)],
+    'nodestroy': True,
+}
+            </field>
+        </record>
+
+        <record id="kw_tour_dynamic_workflow_button_forward" model="odoo.workflow.node.button">
+            <field name="sequence" eval="3"/>
+            <field name="workflow_id" ref="kw_tour_approval_workflow"/>
+            <field name="name">Forward</field>
+            <field name="node_id" ref="kw_tour_workflow_node_applied"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|','|',('is_valid_authority','=',False),('state', 'not in', ['Applied','Forwarded']),('own_record','=',True)]"/>
+            <field name="btn_class">btn-warning</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_tour.view_kw_tour_forward_remark_form").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_tour',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'res_id': obj.id,
+    'view_id': form_view_id,
+    'target': 'new',
+    'domain': [('id', '=', obj.id)],
+    'nodestroy': True,
+}
+
+            </field>
+        </record>
+
+        <record id="kw_tour_dynamic_workflow_button_travel_desk" model="odoo.workflow.node.button">
+            <field name="sequence" eval="4"/>
+            <field name="workflow_id" ref="kw_tour_approval_workflow"/>
+            <field name="name">Grant</field>
+            <field name="node_id" ref="kw_tour_workflow_node_approved"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|','|',('is_valid_authority','=',False),('state', '!=', 'Approved'),('travel_desk_access','=',False)]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+from_and_to_time_not_given = obj.tour_detail_ids.filtered(lambda r:r.from_time == False or r.to_time == False)
+if from_and_to_time_not_given:
+    warning("Please fill From and To time in all tour details.")
+obj.validate_accomodation_details()
+#company_travel          = obj.tour_detail_ids.filtered(lambda r: not r.travel_mode_id or not r.currency_id or r.cost &lt; 1)
+ticket_company_travel   = obj.travel_ticket_ids.filtered(lambda r: not r.travel_mode_id or not r.currency_id or r.cost &lt; 1)
+company_accomodation    = obj.tour_detail_ids.filtered(lambda r:r.accomodation_arrangement=="Company")
+#if company_travel and not obj.travel_detail_ids:
+#    warning("Please fill travel details.")
+if ticket_company_travel or not obj.travel_ticket_ids:
+    warning("Please fill all details related to travel arrangement in ticket details.")
+if company_accomodation and not obj.accomodation_ids:
+    warning("Please fill accomodation details.")
+
+form_view_id = env.ref("kw_tour.view_kw_tour_traveldesk_approve_remark_form").id
+
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_tour',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'res_id': obj.id,
+    'view_id': form_view_id,
+    'target': 'new',
+    'domain': [('id', '=', obj.id)],
+    'nodestroy': True,
+}
+            </field>
+        </record>
+        
+        <record id="kw_tour_dynamic_workflow_button_revert_travel_desk" model="odoo.workflow.node.button">
+            <field name="sequence" eval="4"/>
+            <field name="workflow_id" ref="kw_tour_approval_workflow"/>
+            <field name="name">Revert Back</field>
+            <field name="node_id" ref="kw_tour_workflow_node_approved"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|','|',('is_valid_authority','=',False),('state', '!=', 'Approved'),('travel_desk_access','=',False)]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_tour.view_kw_tour_traveldesk_revert_back_remark_form").id
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_tour',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'res_id': obj.id,
+    'view_id': form_view_id,
+    'target': 'new',
+    'domain': [('id', '=', obj.id)],
+    'nodestroy': True,
+}
+            </field>
+        </record>
+        
+        <record id="kw_tour_dynamic_workflow_button_finance" model="odoo.workflow.node.button">
+            <field name="sequence" eval="5"/>
+            <field name="workflow_id" ref="kw_tour_approval_workflow"/>
+            <field name="name">Grant</field>
+            <field name="node_id" ref="kw_tour_workflow_node_travel_desk"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|','|',('is_valid_authority','=',False),('state', '!=', 'Traveldesk Approved'),('finance_access','=',False)]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+#if obj.can_apply_inr and obj.advance and not obj.to_disbursed_inr:
+#    warning("Please add amount to be disbursed(INR)")
+
+#if obj.can_apply_usd and obj.advance_usd and not obj.to_disbursed_usd:
+#    warning("Please add amount to be disbursed(USD)")
+
+form_view_id = env.ref("kw_tour.view_kw_tour_finance_approve_remark_form").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_tour',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'res_id': obj.id,
+    'view_id': form_view_id,
+    'target': 'new',
+    'domain': [('id', '=', obj.id)],
+    'nodestroy': True,
+}
+            </field>
+        </record>
+
+        <record id="kw_tour_dynamic_workflow_button_reject" model="odoo.workflow.node.button">
+            <field name="sequence" eval="6"/>
+            <field name="workflow_id" ref="kw_tour_approval_workflow"/>
+            <field name="name">Reject</field>
+            <field name="node_id" ref="kw_tour_workflow_node_finance"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|','|',('is_valid_authority','=',False),('state', 'not in', ['Applied','Approved','Forwarded','Traveldesk Approved']),('own_record','=',True)]"/>
+            <field name="btn_class">btn-danger</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_tour.view_kw_tour_reject_remark_form").id 
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_tour',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'res_id': obj.id,
+    'view_id': form_view_id,
+    'target': 'new',
+    'domain': [('id', '=', obj.id)],
+    'nodestroy': True,
+}
+            </field>
+        </record>
+
+    </data>
+</odoo>

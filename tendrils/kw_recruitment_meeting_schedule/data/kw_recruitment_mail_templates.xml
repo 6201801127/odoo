@@ -1,0 +1,178 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <record id="template_meeting_invitation_attendees" model="mail.template">
+            <field name="name">Meeting Invitation to Panel Member</field>
+            <field name="model_id" ref="kw_meeting_schedule.model_kw_meeting_events"/>
+            <field name="subject">${ctx['subject']} | ${ctx['jobposition']} | ${format_tz(object.kw_start_meeting_date, format='%d-%b-%Y')}</field>
+            <field name="email_to" >${ctx['mailto']}</field>
+            <field name="email_from">${ctx['emailfrom'] if ctx['emailfrom'] else object.user_id.email if object.user_id.email else ''}</field>
+            <field name="email_cc">${ctx['emailfrom'] if ctx['emailfrom'] else object.user_id.email if object.user_id.email else ''}</field>
+            <field name="reply_to">${ctx['emailfrom'] if ctx['emailfrom'] else object.user_id.email if object.user_id.email else ''}</field>
+            <!-- <field name="partner_to"></field> -->
+            <!-- <field name="lang">${object.partner_id.lang}</field> -->
+            <field name="body_html" >
+                  <![CDATA[
+
+
+                <div style="">
+                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 18px;color:#676767;">
+                        <small style="color:rgb(22, 123, 158);font-size: 18px;margin-right: 2px;font-weight: 600;">Dear</small>  Panel Member,
+                    </h5>
+                    <br/>
+                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 17px;">
+                        Please find the interview schedule for your reference.
+                        After interview, please share your feedback.
+                    </p>
+                </div>
+
+                <div style="margin:0 0px;padding:0px 0 0px 0;">
+                    <h3 style="font-size: 1.6rem;font-weight: unset;color: #444141;padding-left: 20px;margin-bottom:10px;">
+                        Interview Details
+                    </h3>
+                </div>
+                <table border="0" style="border-collapse: collapse;font-size: 16px;">
+                    % if object.location_id:
+                    <tr>
+                        <td style="height: 50px;padding-left: 20px;" width="200px">
+                            Where
+                        </td>
+                        <td style="color:#167b9e;padding-left: 20px;height: 50px;">
+                            % if object.meeting_room_id:
+                                ${object.meeting_room_id.name}
+                                % if object.meeting_room_id.floor_name:
+                                    (${object.meeting_room_id.floor_name})
+                                % endif
+                            % else:
+                                Virtual
+                            % endif
+                        </td>
+                    </tr>
+                    %endif
+                    
+                    <tr>
+                        <td style="height: 50px;padding-left: 20px;" width="200px">
+                            Mode of Interview
+                        </td>
+                        <td style="color:#167b9e;padding-left: 20px;height: 50px;">
+                            ${dict (object.fields_get (allfields = ['mode_of_interview']) ['mode_of_interview'] ['selection']) [object.mode_of_interview]}
+                        </td>
+                    </tr>
+                    % if object.recr_online_meeting:
+                        <tr>
+                            <td style="height: 50px;padding-left: 20px;" width="200px">
+                                Meeting URL
+                            </td>
+                            <td style="color:#167b9e;padding-left: 20px;height: 50px;">
+                                % if object.recr_online_meeting == 'zoom':
+                                     <a href="${object.online_meeting_join_url}">
+                                        ${object.online_meeting_join_url}
+                                    </a>
+                                % else:
+                                    <a href="${object.recr_other_meeting_url}">
+                                        ${object.recr_other_meeting_url}
+                                    </a>
+                                % endif
+                            </td>
+                        </tr>
+                    %endif
+                    % if object.telephone:
+                        <tr>
+                            <td style="height: 50px;padding-left: 20px;" width="200px">
+                                Phone
+                            </td>
+                            <td style="color:#167b9e;padding-left: 20px;height: 50px;">
+                                ${object.telephone}
+                            </td>
+                        </tr>
+                    %endif
+                    <tr>
+                        <td style="height: 50px;padding-left: 20px;" width="200px">
+                            Date
+                        </td>
+                        <td style="color:#167b9e;padding-left: 20px;height: 50px;">
+                            ${format_tz(object.kw_start_meeting_date, format='%d-%b-%Y')}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="height: 50px;padding-left: 20px;" width="200px">
+                            Time
+                        </td>
+                        <td style="color:#167b9e;height: 50px;padding-left: 20px;">
+                            ${datetime.datetime.strptime(object.kw_start_meeting_time,"%H:%M:%S").strftime("%I:%M %p")}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="height: 50px;padding-left: 20px;" width="200px">
+                            Mpin
+                        </td>
+                        <td style="color:#167b9e;height: 50px;padding-left: 20px;">
+                            ${object.mpin}
+                        </td>
+                    </tr>
+                </table>
+                <div style="margin:0 0px;padding:0px 0 0px 0;">
+                    <h3 style="font-size: 1.6rem;font-weight: unset;color: #444141;padding-left: 20px;margin-bottom:10px;">
+                        Applicant Details
+                    </h3>
+                </div>
+                <table border="0" cellspacing="5" cellpadding="5" style="border-collapse:collapse;width:100%;">
+                    <tbody>
+                        % if ctx.get('info'):
+                        % for line in ctx.get('info'):
+                            <tr height="26">
+                                <td  style="font-size:10.5pt;">
+                                   ${line.partnername}
+                                </td>
+                                <td  style="padding:1em;font-size:10.5pt;">
+                                    <a href="/recruitment/meeting/view/cv?db=${'dbname' in ctx and ctx['dbname'] or ''}&amp;token=${'access_token' in ctx and ctx['access_token'] or ''}&amp;action=${'action_id' in ctx and ctx['action_id'] or ''}&amp;id=${object.id}&amp;applicant_id=${line.applicant_id}" target="_blank"
+                                       style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #3e8BFF; border: 1px solid #3e8BFF; border-radius: 3px">
+                                        View CV
+                                    </a>
+                                </td>
+                                <td  style="padding:1em;font-size:10.5pt;">
+                                    <a href="${line.survey_url}" target="_blank"
+                                       style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #3e8BFF; border: 1px solid #3e8BFF; border-radius: 3px">
+                                        Submit Feedback
+                                    </a>
+                                </td>
+                            </tr>
+                        % endfor
+                        %endif
+                    </tbody>
+                </table>
+                <br/>
+                <div style="text-align: left; margin: 26px 0px 26px 1.2rem;">
+                    <a href="/meeting_schedule/meeting/accept?db=${'dbname' in ctx and ctx['dbname'] or ''}&amp;token=${'access_token' in ctx and ctx['access_token'] or ''}&amp;action=${'action_id' in ctx and ctx['action_id'] or ''}&amp;id=${object.id}"
+                        target="_blank"
+                        style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #3e8BFF; border: 1px solid #3e8BFF; border-radius: 3px">
+                        Accept</a>
+                    <a href="/meeting_schedule/meeting/decline?db=${'dbname' in ctx and ctx['dbname'] or '' }&amp;token=${'access_token' in ctx and ctx['access_token'] or ''}&amp;action=${'action_id' in ctx and ctx['action_id'] or ''}&amp;id=${object.id}"
+                        target="_blank"
+                        style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #3e8BFF; border: 1px solid #3e8BFF; border-radius: 3px">
+                        Decline</a>
+                </div>
+
+                <br/>
+                <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 17px;">
+                    With warm regards,
+                </p>
+                <br/>
+                <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 17px;">
+                	% if ctx['is_portal_user']:
+                      Recruitment Division, HR Dept.,<br/>
+					  CSM Technologies Pvt. Ltd.
+                    % elif object.user_id and object.user_id.signature:
+                      ${object.user_id.signature | safe}
+                    % else:
+                       CSM Technologies Pvt. Ltd.
+                    % endif
+                </p>
+
+                ]]>  
+            </field>
+            <field name="auto_delete" eval="False"/>
+            <field name="user_signature" eval="False"/>
+        </record>
+    </data>
+</odoo>

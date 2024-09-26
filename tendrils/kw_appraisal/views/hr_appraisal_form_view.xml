@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+		<record id="hr_appraisal_form_view" model="ir.ui.view">
+			<field name="name">hr.appraisal.form</field>
+			<field name="model">hr.appraisal</field>
+			<field name="priority">1</field>
+			<field name="arch" type="xml">
+				<form create="false" import='false'>
+					<sheet>
+						<div class="oe_button_box" name="button_box">
+							<button name="action_get_answers" type="object" class="oe_stat_button" icon="fa-pencil-square-o">
+								<field string="Answers" name="tot_comp_survey" widget="statinfo"/>
+							</button>
+						</div>
+						<label for="emp_id"/>
+						<h1>
+							<field name="emp_id" class="oe_inline" placeholder="Employee's Name" readonly="1"/>
+						</h1>
+						<group>
+							<group string="Self Appraisal">
+								<field name="survey_state_id" invisible="1"/>
+								<field name="app_period_from"/>
+								<field name="appraisal_deadline"/>
+								<field name="response_id" invisible="1"/>
+								<field name="app_period_from" invisible="1"/>
+								<field name="created_by" invisible="1"/>
+								<field name="ra_id" invisible="1"/>
+							</group>
+							<group string="LM Appraisal">
+								<field name="hr_lm_start_date" string="Start Date"/>
+								<field name="hr_lm_end_date" string="End Date"/>
+							</group>
+							<group string="ULM Appraisal">
+								<field name="hr_ulm_start_date" string="Start Date"/>
+								<field name="hr_ulm_end_date" string="End Date"/>
+							</group>
+							<group>
+								<field name="tot_sent_survey" invisible="1"/>
+							</group>
+						</group>
+						<notebook>
+							<page string="Plan">
+								<group col="4">
+									<field name="hr_emp" readonly="1"/>
+									<seperator/>
+									<field name="emp_survey_id" placeholder="Appraisal Form" nolabel="1" attrs="{'invisible': [('hr_emp','=', False)]}" options="{'no_open': True}" readonly="1"/>
+									<field name="hr_manager" readonly="1"/>
+									<field name="hr_manager_id" widget="many2many_tags" placeholder="Select Appraisal Reviewer" nolabel="1" attrs="{'invisible': [('hr_manager','=', False)]}"/>
+									<field name="manager_survey_id" placeholder="Appraisal Form" nolabel="1" attrs="{'invisible': [('hr_manager','=', False)]}" options="{'no_open': True}" readonly="1"/>
+									<field name="hr_collaborator" readonly="1"/>
+									<field name="hr_collaborator_id" widget="many2many_tags" placeholder="Select Appraisal Reviewer" nolabel="1" attrs="{'invisible': [('hr_collaborator','=', False)]}"/>
+									<field name="collaborator_survey_id" placeholder="Appraisal Form" nolabel="1" attrs="{'invisible': [('hr_collaborator','=', False)]}" options="{'no_open': True}" readonly="1"/>
+								</group>
+							</page>
+						</notebook>
+					</sheet>
+					<div class="oe_chatter">
+						<field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+						<field name="message_ids" widget="mail_thread"/>
+					</div>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="hr_appraisal_tree_view">
+			<field name="name">hr appraisal tree</field>
+			<field name="model">hr.appraisal</field>
+			<field name="arch" type="xml">
+				<tree create='false' edit='false' import='false' decoration-danger="applied_eos == True">
+					<field name="state_compare" invisible="1"/>
+					<field name="state_sequence" invisible="1"/>
+					<field name="emp_id"/>
+					<field name="deg_id"/>
+					<field name="dept_id"/>
+					<field name="date_of_joining" />
+					<field name="emp_survey_id" string="Appraisal Form"/>
+					<field name="self_status"/>
+					<field name="lm_status"/>
+					<field name="ulm_status"/>
+					<field name="ra_id"  string="Current Assessor Name" invisible='1'/> 
+					<!-- attrs="{'invisible': [('state_sequence','in',[2])]}" -->
+					<field name="hr_end_date"/>
+					<field name="state" invisible="1"/>
+					<field name="hr_survey_status" string="Current Status" invisible="1"/>
+					<field name="score_calculation"/>
+					<field name="training_include" invisible='1'/>
+					<field name="training_percentage" invisible='1'/>
+					<field name="kra_score"/>
+					<field name="score"/>
+					<field name="training_score"/>
+					<field name="total_score" string='Final Appraisal Score'/>
+					<field name="increment_percentage"/>
+					<field name="applied_eos" invisible="1" />
+					<button name="action_call_edit_appraisal" type="object" string="Allow Edit" class="btn btn-primary" attrs="{'invisible': ['|',('state_compare','!=',True),'|',('state','=', 1),'|',('state','=',2),('state','=',6)]}"/>
+					<button name="view_results" attrs="{'invisible': [('state_sequence','in',[1,2])]}" type="object" string="View Form" class="btn btn-primary o_select_file_button"/>
+				</tree>
+			</field>
+		</record>
+
+		<!-- Search View for Student Information -->
+		<record id="appraisal_search_view" model="ir.ui.view">
+			<field name="name">appraisal_search_view</field>
+			<field name="model">hr.appraisal</field>
+			<field name="arch" type="xml">
+				<search string="Appraisal Information">
+					<field name="emp_id" string="Employee Name"/>
+					<field name="state" string="Stage"/>
+					<field name="appraisal_year" invisible='1'/>
+					<!-- <field name="hr_survey_status" string="Status"/> -->
+					<field name="emp_survey_id" string="Appraisal Form"/>
+					<filter name="completed" domain="[('state.sequence','=',5)]" string="Completed"/>
+					<group expand="0" string="Group By">
+						<filter name="groupby_year" context="{'group_by': 'appraisal_year'}" string="Year"/>
+						<filter name="groupby_employee" string="Employee" domain="[]" context="{'group_by':'emp_id'}" help="Group Employee Name Wise"/>
+						<filter name="groupby_state" context="{'group_by': 'state'}" string="Stage" help="Group Students by State"/>
+						<filter name="groupby_appraisal_form" context="{'group_by': 'emp_survey_id'}" string="Appraisal Form"/>
+					</group>
+				</search>
+			</field>
+		</record>
+
+		<!-- Wizard tree view -->
+		<record model="ir.ui.view" id="hr_wizard_tree_view">
+			<field name="name">Wizard tree</field>
+			<field name="model">hr.appraisal</field>
+			<field name="arch" type="xml">
+				<tree delete='1' create='false' edit='false' import='false'>
+					<field name="emp_id"/>
+					<field name="deg_id"/>
+					<field name="dept_id"/>
+					<field name="emp_survey_id" string="Appraisal Form"/>
+					<field name="kra_score"/>
+					<field name="score"/>
+					<field name="training_score"/>
+					<field name="total_score"/>
+					<button name="view_results" type="object" string="View Form" class="btn btn-primary o_select_file_button"/>
+				</tree>
+			</field>
+		</record>
+
+		<act_window id="update_score_wizard_actions" groups='kw_appraisal.group_appraisal_manager' name="Update Score" src_model="hr.appraisal" res_model="update_score_wizard" view_type="form" view_mode="form" key2="client_action_multi" target="new"/>
+		<act_window id="update_increment_wizard_action" groups='kw_employee.group_payroll_manager,hr_payroll.group_hr_payroll_manager' name="Update Increment" src_model="hr.appraisal" res_model="update_increment_wizard" view_type="form" view_mode="form" key2="client_action_multi" target="new" />
+		<act_window id="action_publish_appraisal" groups='kw_appraisal.group_appraisal_manager' name="Publish Appraisal" src_model="hr.appraisal" res_model="appraisal_wizard" view_type="form" view_mode="form" key2="client_action_multi" target="new" />
+		<act_window id="action_publish_appraisal_send_mail" groups='kw_appraisal.group_appraisal_manager' name="Send Publish Mail" src_model="shared_increment_promotion" res_model="appraisal_publish_wizard" view_type="form" view_mode="form" key2="client_action_multi" target="new" view_id="appraisal_publish_wizard_mail_wizard_form" />
+		<act_window id="action_publish_appraisal_resend_mail" groups='kw_appraisal.group_appraisal_manager' name="Resend Publish Mail" src_model="shared_increment_promotion" res_model="appraisal_publish_wizard" view_type="form" view_mode="form" key2="client_action_multi" target="new" view_id="resend_appraisal_publish_wizard_mail_wizard_form" />
+
+		
+		<record id="publish_appraisal_action_form" model="ir.actions.act_window">
+			<field name="name">Published Appraisal</field>
+			<field name="res_model">hr.appraisal</field>
+			<field name="domain">[('state.sequence','=', 6)]</field>
+			<field name="context">{'financial_year_check':1}</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('hr_wizard_tree_view')})]"/>
+			<field name='view_mode'>tree,form</field>
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					No Published Appraisal Here...
+				</p>
+			</field>
+		</record>
+
+		<record id="hr_appraisal_action_form" model="ir.actions.act_window">
+			<field name="name">Employee Appraisal</field>
+			<field name="res_model">hr.appraisal</field>
+			<field name="search_view_id" ref='appraisal_search_view'/>
+			<field name="domain">[('state.sequence','!=',6)]</field>
+			<field name="context">{'financial_year_check':1}</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('hr_appraisal_tree_view')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('hr_appraisal_form_view')})]"/>
+			<field name='view_mode'>tree,form</field>
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					Start Appraisal Here...
+				</p>
+			</field>
+		</record>
+
+		<menuitem name="Appraisal" id="menu_hr_appraisal_root"
+		          web_icon="kw_appraisal,static/description/icon.png" sequence="23"/>
+
+		<menuitem name="Appraisal" id="menu_hr_appraisal" parent="menu_hr_appraisal_root" sequence="2"/>
+
+		<menuitem name="Employee Appraisal" groups="kw_appraisal.group_appraisal_manager" id="menu_employee_appraisal" parent="menu_hr_appraisal" action="hr_appraisal_action_form" sequence="2"/>
+
+		<menuitem name="Appraisal Result" id="menu_hr_appraisal_view_status" parent="menu_hr_appraisal" action="publish_appraisal_action_form" groups="kw_appraisal.group_appraisal_manager" sequence="3"/>
+
+		<record id="hr_appraisal_action_edit_appraisal_wizard" model="ir.ui.view">
+			<field name="name">Allow Edit</field>
+			<field name="model">hr.appraisal</field>
+			<field name="arch" type="xml">
+				<form>
+					<script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+					</script>
+					<div class="row">
+						<div class="col-sm-12 mx-auto">
+							<b><h2 class="text-center text-primary mb-3">Are you sure want to allow for edit?</h2></b>
+							<center>
+								<button name="action_edit_appraisal" type="object" class="btn-success mr-2">Allow Edit</button>
+								<button string="Cancel" class="btn-danger" special="cancel"/>
+								<footer></footer>
+							</center>
+						</div>
+					</div> 
+				</form>
+			</field>
+		</record>
+
+	</data>
+</odoo>

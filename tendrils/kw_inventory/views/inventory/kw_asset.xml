@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- model.name tree view -->
+        <record id="kw_asset_report_view_tree" model="ir.ui.view">
+            <field name="name">kw_asset_report.view.tree</field>
+            <field name="model">kw_asset_report</field>
+            <field name="arch" type="xml">
+                <tree create="false" 
+                edit="false" 
+                delete="false"
+                
+                >
+                    <!-- Add your fields here -->
+                    <field name="category_id" attrs="{'invisible': [('boolean_invisible','=',False)]}"/>
+                    <field name="product" attrs="{'invisible': [('boolean_invisible','=',False)]}"/>
+                    <field name="purchase_date" attrs="{'invisible': [('boolean_invisible','=',False)]}"/>
+                    <field name="value" attrs="{'invisible': [('boolean_invisible','=',False)]}"/>
+                    <field name="salvage_value" invisible='1' attrs="{'invisible': [('boolean_invisible','=',False)]}"/>
+                    <field name="value_residual" invisible='1' attrs="{'invisible': [('boolean_invisible','=',False)]}"/>
+                    <field name="depreciation_date"/>
+                    <field name="amount"/>
+                    <field name="current_value"/>
+                    <field name="boolean_invisible" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_asset_report_action_window" model="ir.actions.act_window">
+            <field name="name">Asset Report</field>
+            <field name="res_model">kw_asset_report</field>
+            <field name="view_mode">tree</field>
+            <field name="view_type">form</field>
+        </record>
+
+<!-- modifying account.asset.asset field -->
+        <!-- <record id="account_asset_asset_form_inherit_name" model="ir.ui.view">
+          <field name="name">account.asset.asset.form.inherit</field>
+          <field name="model">account.asset.asset</field>
+          <field name="inherit_id" ref="kw_account_asset.view_account_asset_asset_form"/>
+          <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="replace">
+              <field name="asset_name"/>
+
+            </xpath>
+          </field>
+       </record> -->
+
+      <record model="ir.ui.view" id="view_account_asset_asset_new_form">
+        <field name="name">account.asset.asset.form</field>
+        <field name="model">account.asset.asset</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <form string="Asset" delete='0' duplicate='0'>
+                <header>
+                    <button name="validate" states="draft" string="Confirm" type="object" class="oe_highlight" invisible="context.get('hide_fa_buttons', False)"/>
+                    <button type="object" name="compute_depreciation_board" string="Compute Depreciation" states="draft" invisible="context.get('hide_fa_buttons', False)"/>
+                    <button name="set_to_close" states="open" string="Sell or Dispose" type="object" class="oe_highlight" invisible="context.get('hide_fa_buttons', False)"/>
+                    <button name="set_to_draft" string="Set to Draft" type="object" attrs="{'invisible': ['|', ('entry_count', '!=', 0), ('state', '!=', 'open')]}" invisible="context.get('hide_fa_buttons', False)"/>
+                    <button name="%(kw_account_asset.action_asset_modify)d" states="open" string="Modify Depreciation" type="action" invisible="context.get('hide_fa_buttons', False)"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,open"/>
+                </header>
+                <sheet>
+                    <style>
+                        .table-responsive .o_list_view thead tr:nth-child(1) th{
+                            background-color: #108fbb !important;
+                            color: whitesmoke;
+                        }
+                    </style>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" name="open_entries"  type="object" icon="fa-pencil">
+                            <field string="Items" name="entry_count" widget="statinfo" />
+                        </button>
+                    </div>
+                    <div class="oe_title" style='color: #108fbb !important;font-weight: bold;'>
+                        <h1>
+                            <!-- <field name="asset_name" placeholder="e.g. Laptop iBook" readonly='1'/> -->
+                            <field name="name" placeholder="e.g. Laptop iBook" />
+                        </h1>
+                    </div>
+                    <group>
+                        <group name="asset_info" string="Asset Info">
+                           <field name="serial_no"/>
+                            <!-- <field name="stock_quant_id" string='Item'  options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="template_id" string='Product Type'  options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="asset_id" string='Product Variant'  options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/> -->
+                            <!-- <field name="asset_type" string='Product Category'  options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/> -->
+                            <field name="spec" force_save='1' invisible='1'/>
+                            <field name="fa_code" invisible='1'/>
+                            <field name="category_id"  options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" required='1' string="Asset Category" domain="[('type', '=', 'purchase')]" context="{'default_type': 'purchase'}" help="Category of asset"/>
+                            <field name="type" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" required='1' />
+                           <field name="project_code"/>
+                           <field name="item_name"/>
+
+                           <field name="perticulars"/>
+                           <field name="fiscal_year"/>
+                           <field name="quantity"/>
+
+                        </group>
+                        <group name="other_info" string="Other Information">
+                           <field name="age"/>
+                           <field name="host_name"/>
+                           <field name="os"/>
+                           <field name="ms_office"/>
+                           <field name="liscence"/>
+                           <field name="room"/>
+                           <field name="section"/>
+                           <field name="bag"/>
+                           <field name="brand"/>
+                           <field name="model_no"/>
+                        </group>
+                        <group name="asset_ocation" string="Asset Location">
+                            <field name="company_id" readonly='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" groups="base.group_multi_company"/>
+                            <!-- <field name="asset_owner_id" string='Issued to' readonly='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/> -->
+                            <!-- <field name="asset_owner_branch_id" string='Location' readonly='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/> -->
+                            <field name="expiry_warranty_date" invisible='1' />
+                           <field name="location"/>
+                           <field name="vendor_name"/>
+
+                        </group>
+                        <group name="depreciation" string="Depreciation">
+                            <field name="code" invisible='1'/>
+                            <field name="date" help="Purchase Date of asset"/>
+                            <field name="date_first_depreciation" />
+                            <field name="first_depreciation_manual_date" 
+                                   attrs="{'invisible': [('date_first_depreciation', '!=', 'manual')], 'required': [('date_first_depreciation', '=', 'manual')]}"/>
+                            <field name="type" invisible="1" readonly='1'/>
+                            <field name="account_analytic_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" groups="analytic.group_analytic_accounting"/>
+                            <field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags" />
+                        </group>
+                        <group name="salvage" string="Salvage">
+                            <field name="currency_id" groups="base.group_multi_currency"/>
+                            <field name="value" widget="monetary" options="{'currency_field': 'currency_id'}" help="Gross value of asset" readonly='0'/>
+                            <field name="residual_percentage" string='Residual Percentage(%)' attrs="{'invisible': [('type','=','sale')]}"/>
+                            <field name="residual_value" string='Residual Value' widget="monetary" attrs="{'invisible': [('type','=','sale')]}" readonly='1'/>
+                            <field name="remaining_value" string='Remaining Value' widget="monetary" options="{'currency_field': 'currency_id'}" readonly='1'/>
+                            <!-- <field name="partner_id" string="Vendor" domain="[('supplier', '=', True)]" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" readonly='1'/> -->
+                        </group>
+                        <group name="invoice_info" string="Invoice Info">
+                            <!-- <field name="order_id"  invisible='0' force_save='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/> -->
+                            <field name="invoice_data"  string="Invoice" />
+                            <field name="invoice_date" />
+                            <field name="invoice_doc" filename="file_name" invisible='1'/>
+                            <field name="file_name" invisible='1'/>
+                        </group>
+                    </group>
+                    <notebook colspan="4">
+                        <page string="Depreciation Board">
+                            <field name="depreciation_line_ids" readonly='1' mode="tree" options="{'reload_whole_on_button': true}" style="pointer-events:none;" >
+                                <tree string="Depreciation Lines" decoration-info="(move_check == False)" create="false">
+                                    <field name="depreciation_date"/>
+                                    <field name="amount" widget="monetary" string="Depreciation"/>
+                                    <field name="depreciated_value" readonly="1"/>
+                                    <field name="remaining_value" readonly="1" widget="monetary" string="Residual"/>
+                                    <field name="move_check" invisible='1' widget="deprec_lines_toggler" attrs="{'invisible': [('parent_state', '!=', 'open')]}"/>
+                                    <field name="move_posted_check" invisible="1"/>
+                                    <field name="parent_state" invisible="1"/>
+                                </tree>
+                                <form string="Depreciation Lines" create="false">
+                                    <group>
+                                        <group>
+                                            <field name="parent_state" invisible="1"/>
+                                            <field name="name"/>
+                                            <field name="sequence"/>
+                                            <field name="move_id"/>
+                                            <field name="move_check" invisible='1'/>
+                                            <field name="parent_state" invisible="1"/>
+                                        </group>
+                                        <group>
+                                            <field name="amount" widget="monetary"/>
+                                            <field name="depreciation_date"/>
+                                            <field name="depreciated_value"/>
+                                            <field name="remaining_value"/>
+                                        </group>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Depreciation Information">
+                            <group>
+                                <field name="method" widget="radio" attrs="{'invisible': [('type','=','sale')]}" readonly='1'/>
+                                <field name="method_progress_factor" readonly='1' attrs="{'invisible':[('method','=','linear')], 'required':[('method','=','degressive')]}"/>
+                                <field name="method_time" string="Time Method Based On" widget="radio" attrs="{'invisible': [('type','!=','purchase')]}" readonly='1'/>
+                                <field name="prorata" attrs="{'invisible': [('method_time','=','end')]}" readonly='1'/>
+                            </group>
+                            <group>
+                                <field name="method_number" force_save='1' readonly='0' attrs="{'invisible':[('method_time','=','end')], 'required':[('method_time','=','number')]}"/>
+                                <field name="method_period" force_save='1' readonly='0'/>
+                                <field name="method_end" attrs="{'required': [('method_time','=','end')], 'invisible':[('method_time','=','number')]}"/>
+                            </group>
+                        </page>
+                        <page name="amc_lines" string="AMC" force_save='1' invisible='1'>
+                          <field name="annual_maintenance_line_ids">
+                            <tree string="AMC Lines" create="1"  editable='bottom'>
+                                <field name="asset_id" invisible='1'/>
+                                <field name="name" required='1'/>
+                                <field name="type" required='1'/>
+                                <field name="no_of_service" required='1'/>
+                                <field name="completed_service" required='1'/>
+                                <field name="actual_start_date" required='1'/>
+                                <field name="actual_end_date" required='1'/>
+                                <field name="from_date" required='1'/>
+                                <field name="to_date" required='1'/>
+                                <field name="status" required='1'/>
+                            </tree>
+                          </field>
+                        </page>
+                        <page name="order_ids" string="Purchase History" invisible='1'>
+                            <field name="order_ids" readonly='1' force_save='1' style="pointer-events:none;">
+                                <tree string="Purchase History" create="0">
+                                    <field name="name" string="Reference"/>
+                                    <field name="date_order"/>
+                                    <field name="partner_id"/>
+                                    <field name="company_id"/>
+                                    <field name="date_planned"/>
+                                    <field name="user_id"/>
+                                    <field name="amount_untaxed" sum="Total Untaxed amount" string="Untaxed" widget="monetary"/>
+                                    <field name="amount_total" sum="Total amount" widget="monetary"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page name="requisition_ids" string="Requisition History" invisible='1'>
+                            <field name="requisition_ids" readonly='1' force_save='1' style="pointer-events:none;">
+                                <tree string="Requisition History" create="0">
+                                    <field name="sequence"/>
+                                    <field name="product_type" string="Product Type" />
+                                    <field name="product_template_id" string=" Product" />
+                                    <field name="item_code" string="Item" />
+                                    <field name="alternate_requisition_item" string="Alternate Requisition Item" />
+                                    <field name="item_description" string="Item Description"  />
+                                    <field name="uom" string="Uom"  />
+                                    <field name="order_qty" string="Order Qty" />
+                                    <field name="expected_days" string="Required Date" />
+                                    <field name="status" invisible='0'/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page name="transfer_history" string="Transfer History" invisible='1'>
+                            <field name='transfer_history_ids' readonly='1' string="History" force_save="1" style="pointer-events:none;">
+                              <tree  create="0" decoration-warning="status=='Issued'" decoration-success="status == 'Released'" force_save="1" >
+                                <field name="material_id" string='Stock Item' force_save="1"/>
+                                <field name="products" force_save="1"/>
+                                <field name="quantity" force_save="1"/>
+                                <field name="assigned_to" force_save="1"/>
+                                <field name="asset_id" invisible='1' force_save="1"/>
+                                <field name="assigned_on"  force_save="1"/>
+                                <field name="action_by"  force_save="1"/>
+                                <field name="status" force_save="1"/>
+                              </tree>
+                            </field>
+                        </page>
+                        <page name="repair_history" string="Repair History" invisible='1'>
+                            <field name='repair_history_ids' readonly='1' string="History" force_save="1" style="pointer-events:none;">
+                              <tree  create="0" force_save="1" >
+                                  <field name="repair_id" string='Stock Serial No' force_save="1"/>
+                                <field name="products" string='Stock Item' force_save="1"/>
+                                <field name="send_to_repair" force_save="1"/>
+                                <field name="repaired_on" force_save="1"/>
+                                <field name="action_by"  force_save="1"/>
+                                <field name="asset_id"  invisible='1' force_save="1"/>
+                              </tree>
+                            </field>
+                        </page>
+                        <page name="gatepass_status_page" string="Gate pass Status" invisible='1'>
+                            <group>
+                                <group name="gatepass_status_group" string="Gatepass status">
+                                    <field name="gatepass_status" widget='radio' options="{'horizontal': true}"/>
+                                    <field name="gp_date_from" attrs="{'invisible': [('gatepass_status','=','notallowed')],'required': [('gatepass_status','=','allowed')]}"/>
+                                    <field name="gp_date_to" attrs="{'invisible': [('gatepass_status','=','notallowed')],'required': [('gatepass_status','=','allowed')]}"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page name="asset_tracker_page" string="Asset Tracker" invisible='1'>
+                            <field name="asset_tracker_ids" readonly='1' style="pointer-events:none;">
+                                <tree create="0" delete='0'>
+                                    <field name="asset_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                    <field name="asset_status"/>
+                                    <field name="check_in"/>
+                                    <field name="check_out"/>
+                                    <field name="owner_id"/>
+                                    <field name="action_by" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                    <field name="remark"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+      
+        <record model="ir.actions.act_window" id="kw_account_asset.action_account_asset_asset_form">
+        <field name="name">Assets</field>
+        <field name="res_model">account.asset.asset</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="domain">[('category_id.type', '=', 'purchase')]</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+                     (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_account_asset.view_account_asset_asset_purchase_tree')}),
+                     (0, 0, {'view_mode': 'form', 'view_id': ref('kw_inventory.view_account_asset_asset_new_form')})]"/>
+    </record>
+
+        <!-- <record id="account_asset_asset_form_inherit_category_id" model="ir.ui.view">
+          <field name="name">account.asset.asset.form.inherit</field>
+          <field name="model">account.asset.asset</field>
+          <field name="inherit_id" ref="kw_account_asset.view_account_asset_asset_form"/>
+          <field name="arch" type="xml">
+            <xpath expr="//field[@name='category_id']" position="attributes">
+                 <attribute name="options">{'no_create_edit':True}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='category_id']" position="before">
+              <field name="stock_quant_id"/>
+              <field name="asset_id"/>
+              <field name="asset_type"/>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="replace">
+              <field name="asset_name"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+              <attribute name="options">{'no_create_edit':True}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='company_id']" position="attributes">
+              <attribute name="options">{'no_create_edit':True ,'no_open': True, 'no_quick_create':True}</attribute>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+            <page name="amc_lines" string="AMC">
+              <field name="annual_maintenance_line_ids">
+                    <tree string="AMC Lines" create="1"  editable='bottom'>
+                        <field name="asset_id" invisible='1'/>
+                        <field name="name" required='1'/>
+                        <field name="type" required='1'/>
+                        <field name="no_of_service" required='1'/>
+                        <field name="completed_service" required='1'/>
+                        <field name="actual_start_date" required='1'/>
+                        <field name="actual_end_date" required='1'/>
+                        <field name="from_date" required='1'/>
+                        <field name="to_date" required='1'/>
+                        <field name="status" required='1'/>
+                    </tree>
+                </field>
+            </page>
+            </xpath>
+          </field>
+       </record> -->
+
+        <!-- <record id="account_asset_asset_form_inherit_company_id" model="ir.ui.view">
+          <field name="name">account.asset.asset.form.inherit</field>
+          <field name="model">account.asset.asset</field>
+          <field name="inherit_id" ref="kw_account_asset.view_account_asset_asset_form"/>
+          <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_id']" position="attributes">
+                 <attribute name="options">{'no_create_edit':True ,'no_open': True, 'no_quick_create':True}</attribute>
+            </xpath>
+          </field>
+       </record> -->
+
+        <!-- <record id="account_asset_asset_form_inherit_partner_id" model="ir.ui.view">
+          <field name="name">account.asset.asset.form.inherit</field>
+          <field name="model">account.asset.asset</field>
+          <field name="inherit_id" ref="kw_account_asset.view_account_asset_asset_form"/>
+          <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                 <attribute name="options">{'no_create_edit':True}</attribute>
+            </xpath>
+          </field>
+       </record> -->
+
+            <record id="kw_account_asset.action_account_asset_asset_list_normal_purchase" model="ir.actions.act_window">
+                <field name="name">Asset Category</field>
+            </record>
+            <record model="ir.ui.menu" id="kw_account_asset.menu_action_account_asset_asset_list_normal_purchase">
+                <field name="name">Asset Category</field>          
+            </record>
+
+    </data>
+</odoo>

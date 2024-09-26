@@ -1,0 +1,196 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+    
+    
+
+    <!-- START : Form view for applying comp off -->
+    <record id="view_off_day_entries_apply_form" model="ir.ui.view">
+        <field name="name">Employee Apply Comp Off form</field>
+        <field name="model">hr.leave.allocation</field>
+        <field name="type">form</field>
+        <field name="priority" eval="100"/>
+        <field name="arch" type="xml">
+            <form string="Employee Apply Comp Off" >               
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="state" invisible="1"/>                            
+                            <field name="name" invisible="1"/>
+                            <field name="attendance_id" invisible="1" />
+                            <field name="attendance_date" string="Date" />
+                            <field name="holiday_status_id"  invisible="1"/>
+
+                            <field name="holiday_type" invisible="1"/>
+                            <field name="employee_id" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"  groups="hr_holidays.group_hr_holidays_user" domain="[('user_id', '=',uid)]" invisible="1" />
+
+                            <field name="employee_name" string="Employee" />
+                            <field name="state" invisible="1" />
+
+                            <field name="comp_off_allocation" string="Request For" widget='radio' options="{'horizontal': true}" required="1" />
+                            <field name="project_name" required="1"/>
+                            <field name="number_of_days" invisible="1"/>                            
+                            <field name="notes" string="Reason" required="1" attrs="{'readonly':[('state','not in',['draft','confirm','refuse'])]}"/>
+
+                        </group>
+                        <group name="alloc_right_col" attrs="{'invisible': [('attendance_id', '=',False)]}" >      
+							<field name="check_in_time" attrs="{'invisible': [('attendance_id', '=',False)]}" />     
+							<field name="check_out_time" attrs="{'invisible': [('attendance_id', '=',False)]}"/> 
+							<field name="worked_hours" attrs="{'invisible': [('attendance_id', '=',False)]}" widget="float_time" />                       
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string='Submit' name="apply_comp_off" type="object" class="btn font-weight-bold text-white" style="background-color: #108fbb;"  />
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>                       
+                </footer>
+            </form>
+        </field>
+    </record>
+    <!-- END : Form view for applying comp off -->
+
+    <!--Start: Views / window actions for View Status Manu -->
+    <record model="ir.ui.view" id="view_kw_daily_employee_off_day_entry_view_status_list">
+      <field name="name">View Status Comp Off Status</field>
+      <field name="model">hr.leave.allocation</field>
+      <field name="priority" eval="100"/>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="employee_id"/>
+          <field name="department_id" invisible="1"/>
+          <field name="holiday_status_id"/>
+          <field name="attendance_date" string="Date"/>
+          <field name="project_name"/>
+          <field name="notes"/>          
+          <field name="comp_off_allocation" string="Request For"/>
+          <field name="number_of_days" string="No. of Days"/>
+          <field name="message_needaction" invisible="1"/>
+
+          <field name="state"/>   
+          <field name="applied_on"/>
+          <field name="second_approver_id" string="Action To Be Taken By" attrs="{'invisible': [('state','not in',['confirm','forward','draft'])]}"/>
+          <field name="action_taken_date"/>
+          <field name="authority_remark" string="Remarks"/>         
+          <field name="attendance_id" invisible="1"/>   
+          <button name="action_off_day_entry_refused_apply_window" type="object" string="ReApply" class="btn btn-sm btn-primary" attrs="{'invisible': [('state','!=','refuse')]}"/>
+          <!-- <button name="%(kw_hr_leaves.action_leave_approval_wizard_window)d" attrs="{'invisible': [('state','not in',['confirm','draft'])]}" type="action" string="Cancel" class="oe_highlight" context="{'default_leave_allocation_request_id': active_id,'default_attendance_id': attendance_id,'default_comp_off_allocation':comp_off_allocation,'default_number_of_days':number_of_days,'default_action_type':'cancel'}" /> -->
+                      
+        </tree>
+      </field>
+    </record>   
+
+    <!-- actions opening views on models -->
+    
+    <record model="ir.actions.act_window" id="action_kw_daily_employee_off_day_entry_view_status_window">
+      <field name="name">View Status</field>
+      <field name="res_model">hr.leave.allocation</field>
+      <field name="view_mode">tree,form</field>
+      <field name="domain">[('attendance_id','!=',False),('comp_off_allocation','!=',False),'|',('employee_id.user_id','=',uid),('employee_id.parent_id.user_id','=',uid)]</field>
+      <field name="context">{"create": False,"edit": False,"import": False,"delete": False,"toolbar":False}</field>
+      <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Off Day Entries
+            </p>
+        </field>
+    </record>
+   
+    <record id="action_my_off_day_entries_view_status_tree_view" model="ir.actions.act_window.view">
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="view_kw_daily_employee_off_day_entry_view_status_list"/>
+        <field name="act_window_id" ref="action_kw_daily_employee_off_day_entry_view_status_window"/>
+    </record>
+
+    <record id="action_my_off_day_entries_view_status_form_view" model="ir.actions.act_window.view">
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="hr_holidays.hr_leave_allocation_view_form"/>
+        <field name="act_window_id" ref="action_kw_daily_employee_off_day_entry_view_status_window"/>
+    </record>
+<!--END: Views / window actions for View Status Manu -->
+
+
+
+    <!--Start: Views / window actions for Take Action Manu -->
+
+      <!-- <record id="hr_leave_allocation_approval_form_view" model="ir.ui.view">
+          <field name="name">hr.leave.allocation.approval form view</field>
+          <field name="model">hr.leave.allocation</field>
+          <field name="inherit_id" ref="kw_hr_leaves.view_leave_allocation_approval_form"/>
+       
+          <field name="arch" type="xml">
+              <xpath expr="//group[@name='alloc_right_col']" position="inside">
+                  <field name="attendance_id" invisible="1"/>        
+                  <field name="attendance_date" string="Off Day Entry Date" attrs="{'invisible': [('attendance_id', '=',False)]}"/>   
+                  <field name="check_in_time" attrs="{'invisible': [('attendance_id', '=',False)]}" />     
+                  <field name="check_out_time" attrs="{'invisible': [('attendance_id', '=',False)]}"/>      
+
+              </xpath>
+
+              <field name="number_of_days_display" position="attributes">  
+                 <attribute name="invisible">1</attribute>
+              </field>
+              <xpath expr="//group[@name='alloc_left_col']/div/span[1]" position="attributes">  
+                 <attribute name="invisible">1</attribute>
+              </xpath>
+              <field name="number_of_days_display" position="after">
+                 <field name="comp_off_allocation" widget='radio' options="{'horizontal': true}"/>  
+              </field>
+
+          </field>
+      </record> -->
+
+      <record model="ir.ui.view" id="view_kw_daily_employee_off_day_entry_take_action_list">
+        <field name="name">Take Action Comp Off</field>
+        <field name="model">hr.leave.allocation</field>
+        <field name="priority" eval="99"/>
+        <field name="arch" type="xml">
+          <tree>
+            <field name="employee_id"/>
+            <field name="department_id" invisible="1"/>
+            <field name="holiday_status_id"/>
+            <field name="attendance_date" string="Date"/>
+            <field name="project_name"/>
+            <field name="notes" string="Reason"/>
+            <field name="comp_off_allocation" string="Request For"/>
+            <field name="number_of_days" string="No. of Days"/>
+            <field name="applied_on"/>
+            <field name="message_needaction" invisible="1"/>
+            <field name="state" invisible="1" />   
+             <field name="attendance_id" invisible="1" />   
+            <button name="%(kw_hr_leaves.action_leave_approval_wizard_window)d" type="action" string="Take Action" class="oe_highlight" context="{'default_leave_allocation_request_id': active_id,'default_attendance_id': attendance_id,'default_comp_off_allocation':comp_off_allocation,'default_number_of_days':number_of_days}" />
+                        
+          </tree>
+        </field>
+      </record>   
+
+      <!-- actions opening views on models -->
+      
+      <record model="ir.actions.act_window" id="action_kw_daily_employee_off_day_entry_take_action_window">
+        <field name="name">Take Action</field>
+        <field name="res_model">hr.leave.allocation</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('second_approver_id.user_id','=',uid),('attendance_id','!=',False),('state','in',['confirm','forward'])]</field>
+        <field name="context">{"create": False,"edit": False,"import": False,"delete": False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Pending Actions
+            </p>
+        </field>
+      </record>
+    
+      <record id="action_my_off_day_entries_take_action_tree_view" model="ir.actions.act_window.view">
+          <field name="view_mode">tree</field>
+          <field name="view_id" ref="view_kw_daily_employee_off_day_entry_take_action_list"/>
+          <field name="act_window_id" ref="action_kw_daily_employee_off_day_entry_take_action_window"/>
+      </record>
+
+      <!-- <record id="action_my_off_day_entries_take_action_form_view" model="ir.actions.act_window.view">
+          <field name="view_mode">form</field>
+          <field name="view_id" ref="hr_leave_allocation_approval_form_view"/>
+          <field name="act_window_id" ref="action_kw_daily_employee_off_day_entry_take_action_window"/>
+      </record> -->
+  <!--END: Views / window actions for Take Action Manu -->
+   
+
+  </data>
+</odoo>

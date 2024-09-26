@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Tree view for "model" -->
+        <record id="kw_assessor_wise_report_tree" model="ir.ui.view">
+            <field name="name">view.kw_assessor_wise_report.tree</field>
+            <field name="model">kw_assessor_wise_report</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <tree string="kw_assessor_wise_report_tree" create="false" delete="false" edit="false">
+                    <field name="assessor" />
+                    <field name="assessee" />
+                    <field name="assessment_type" />
+                    <field name="period" />
+                    <field name="from_date" />
+                    <field name="to_date" />
+                    <field name="status" />
+                </tree>
+            </field>
+        </record>
+        
+        <!-- Search view for "model" -->
+        <record id="kw_assessor_wise_report_search" model="ir.ui.view">
+            <field name="name">view.kw_assessor_wise_report.search</field>
+            <field name="model">kw_assessor_wise_report</field>
+            <field name="type">search</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <search string="kw_assessor_wise_report_search">
+                    <field name="assessor" />
+                    <field name="assessee" />
+
+                    <filter string="Current Period" domain="[('period_date','&lt;',(context_today()+relativedelta(months=1)).strftime('%Y-%m-01')), ('period_date','&gt;=',time.strftime('%Y-%m-01'))]" name="by_current_month_year"/>
+
+                    <separator/>
+
+                    <filter string="Last Period" domain="[('period_date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('period_date','&lt;',time.strftime('%Y-%m-01'))]" name="by_last_month_year"/>
+                    
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_assessment" context="{'group_by': 'assessment_type'}" string="Assessment Type" help="Group Feedback by Assessment"/>
+                        <filter name="group_by_assessor" context="{'group_by': 'assessor'}" string="Assessor" help="Group Feedback by Assessor"/>
+                        <filter name="group_by_state" context="{'group_by': 'status'}" string="Status" help="Group Feedback by State"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        
+        <!-- Main window action for "model" -->
+        <record id="action_kw_assessor_wise_report_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Assessor Report</field>
+            <field name="res_model">kw_assessor_wise_report</field>
+            <field name="view_mode">tree</field>
+            <field name="target">current</field>
+            <field name="domain">[]</field>
+            <field name="context">{'search_default_by_current_month_year':1,}</field>
+            <field name="search_view_id" ref="kw_assessor_wise_report_search" />
+        </record>
+    </data>
+</odoo>

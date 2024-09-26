@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <template id="kw_employee_late_entry" name="Late Entry">
+            <t t-call="website.layout">
+                <div class="container py-5">
+                    <div class="bs-example" t-if="link_err_msg or err_msg">
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            <strong>Error!</strong>
+                            <t  t-if="link_err_msg" t-esc="link_err_msg"/>
+                            <t t-if="err_msg">
+                                <t t-esc="err_msg"/>
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <i class="fa fa-times fa-times-circle-o"/>
+                                </button>
+                            </t>
+                        </div>
+                    </div>
+
+                    <div t-if="not link_err_msg" class="card">
+                        <div class="card-body p-2">
+                            <div class="d-flex justify-content-start">
+                                <div class="card col-12 col-7" style="background-color: #108fbb;">
+                                    <div class="card-body px-5">
+                                        <form id="late_entry_form" name="LateEntryReasonForm" t-att-action="'/lateentry_reason/'" method="post" enctype="multipart/form-data" autocomplete="off">
+                                            <div class="md-form mb-0">
+                                                <textarea id="late_entry_reason" class="md-textarea p-2" rows="2" name="late_entry_reason" maxlength="500" style="width: 95%; color: #fff; border-bottom: 2px solid #FFF" onKeyUp="return blockspecialchar_first(this);"></textarea>
+                                                <label for="late_entry_reason" class="font-weight-bold text-warning" style="color: #fff;">Late Entry Reason</label>
+                                            </div>
+                                            <div class="d-flex justify-content-start">
+                                                <span id="error" class="p-2 text-warning font-weight-bold font-italic"></span>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <button class="btn btn-warning badge" type="submit" id="submit_reason"> Submit </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <t t-if="late_entry_records">
+                                <div id="content" class="p-5">
+                                    <p class="h3 mb-3 text-capitalize font-weight-bold"> Last <span style="color:red;">7</span> late entries </p>
+                                    <ul class="p-0">
+                                        <t t-foreach="late_entry_records" t-as="le">                                           
+                                            <div>
+                                                <div class="card mb-2" style="box-shadow:none !important; background: #eaeaea61; border: 1px solid #ddd;">
+                                                    <div class="card-body px-3 py-2">
+                                                        <div class="card-title mb-2 font-weight-bold h6" style="color: #198fbb;">
+                                                            <t t-esc="le['check_in']" />  
+                                                        </div>
+                                                        <div class="card-text black-text h6">
+                                                            <t t-esc="le['late_entry_reason']" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                           
+                                        </t>
+                                    </ul>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+
+            </t>
+        </template>
+
+        <template id="kw_employee_late_entry_style" inherit_id="kw_hr_attendance.kw_employee_late_entry">
+            <xpath expr="." position="inside">
+                <link rel="stylesheet" href="/kw_hr_attendance/static/src/css/late_entry.css" />
+                <link href="/kwantify_theme/static/src/mdb/css/mdb.min.css" rel="stylesheet"/>
+                <script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js"></script>
+                <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js" />
+                <script>
+                   $('#late_entry_form').validate({
+                    submitHandler: function(form)
+                    {
+                        var reason = document.forms["LateEntryReasonForm"]["late_entry_reason"];
+                        if(reason.value == "")
+                        {
+                            $("#error").html("Please submit your reason.")
+                            reason.focus(); 
+                            return false; 
+                        }
+
+                        var expression = /^[ a-zA-Z0-9.,_-\n]+$/;
+                        var regex = new RegExp(expression);
+                        if (!reason.value.match(regex))
+                        {
+                            $("#error").html("Special characters are not allowed.")
+                            reason.focus(); 
+                            return false;
+                        }
+                        else
+                        {
+                            $("#error").hide();
+                            $('form').submiit();   
+                        }
+                    }
+                   });
+
+                   //============ Function to block special character on first place of the field on key press ===============
+                    function blockspecialchar_first(e) 
+                    {
+                        var str;
+                        str = e.value;
+                            //alert(str.charCodeAt(0));
+                        var first_char = str.charCodeAt(0)
+                        if (first_char == 44 || first_char == 47 || first_char == 58 || first_char == 46 || first_char == 39 || first_char == 32 || first_char == 40 || first_char == 41 || first_char == 45 || first_char == 95 || first_char == 59 || first_char == 124 || first_char == 63 || first_char == 64 || first_char == 34 || first_char == 35 || first_char == 36 || first_char == 38 || first_char == 126 || first_char == 96 || first_char == 33 || first_char == 37 || first_char == 94 || first_char == 42 || first_char == 92 || first_char == 43 || first_char == 61 || first_char == 123 || first_char == 125 || first_char == 91 || first_char == 93 || first_char == 60 || first_char == 62){
+                            alert("Only alphanumeric characters are allowed in 1st place.");
+                            e.value = "";
+                            e.focus();
+                            return false;
+                        }
+                   
+                    }   
+                </script>
+            </xpath>
+        </template>
+
+
+        
+
+
+    </data>
+</odoo>

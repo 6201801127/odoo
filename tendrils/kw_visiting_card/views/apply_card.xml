@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="kw_apply_card_tree_view" model="ir.ui.view">
+            <field name="model">kw_visiting_card_apply</field>
+            <field name="arch" type="xml">
+                <tree import="false">
+                    <field name="emp_name"/>
+                    <!-- <field name="emp_code" /> -->
+                    <field name="applied_date"/>
+                    <field name="date_when_required"/>
+                    <field name="no_of_cards_required"/>
+                    <field name="manager_access" invisible="1"/>
+                    <field name="active" invisible="1"/>
+                    <field name="ra_access" invisible="1"/>
+                    <!-- <field name="edit_css" invisible="1"/> -->
+                    <field name="pending_time"/>
+                    <field name="state"/>
+                    <field name="to_be_taken_by"/>
+                    <button name="button_take_action" string="Take Action" class="oe_highlight " type="object"
+                            attrs="{'invisible': [('active','=', False)]}"/>
+                </tree>
+            </field>
+        </record>
+         
+
+        <record id="kw_apply_card_form_view" model="ir.ui.view">
+            <field name="model">kw_visiting_card_apply</field>
+            <field name="arch" type="xml">
+                <form string="" create="false" action="false" delete="false">
+                    <script>
+                        $(document).ready(function(){
+                            $('.o_statusbar_buttons').hide();
+                            status = $("[aria-pressed=true]").text().trim();
+                            console.log(status);
+                            if (status != 'Applied'){
+                                $('.o_form_button_edit').hide();
+                            }
+                        });
+                    </script>
+                    <header>
+                        <field name="state"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="visiting_card_for" widget="radio" options="{'horizontal': true}"/>
+                                <field name="emp_name" attrs="{'invisible': [('visiting_card_for','=','self')]}"
+                                       domain='[("parent_id.user_id","in",[uid])]'
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="manager_access" invisible="1"/>
+                                <field name="ra_access" invisible="1"/>
+                                <!-- <field name="applied_date" /> -->
+                                <field name="date_when_required"/>
+                                <field name="no_of_cards_required"/>
+                                <field name="remark"/>
+                                <field name="admin_remark" groups="kw_visiting_card.group_kw_visiting_card_user"
+                                       attrs="{'invisible': ['&amp;',('state','!=','Approved'),'&amp;',('state','!=','Send for Printing'),'&amp;',('state','!=','Delivered to User'),'&amp;',('state','!=','Hold')]}"/>
+                            </group>
+                            <group>
+                                <field name="card_details" style="pointer-events:none;"/>
+                            </group>
+                            <group>
+                                <field name="action_count" invisible="1"/>
+                                <field name="action_ids" attrs="{'invisible': [('action_count','=', False)]}"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <record model="ir.ui.view" id="kw_visiting_card_kanban">
+            <field name="name">kw visiting card kanban</field>
+            <field name="model">kw_visiting_card_apply</field>
+            <field name="arch" type="xml">
+                <kanban create="false" import ="false">
+                    <field name="emp_name" />
+                    <field name="state"/>
+                    <field name="date_when_required"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_global_click" style="border-left: 5px solid #108fbb">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <div class="font-weight-bold h2 text-center mb-3">
+                                            <field name="emp_name"/>
+                                        </div>
+
+                                        <div class="p-0">
+                                            <span class="h4"> Status: <field name="state"/>
+                                            </span>
+                                        </div>
+                                        <br/>
+                                        <div class="p-0">
+                                            <span class="h4"> Required on: <field name="date_when_required"/>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!-- Approve -->
+        <record id="kw_visiting_card_approve_remark_form_view" model="ir.ui.view">
+            <field name="model">kw_visiting_card_apply</field>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                    </script>
+                    <div class="row">
+                        <div class="text-center col-sm-12 mx-auto">
+                            <p class="h6 font-weight-light text-left text-justify">
+                                <field name="admin_remark" required="1"/>
+                                <field name="manager_access" invisible="1"/>
+                                <field name="ra_access" invisible="1"/>
+                            </p>
+                            <button type="object" name="give_remark" class="text-center btn btn-primary ">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- granted -->
+        <record id="kw_visiting_card_granted_remark_form_view" model="ir.ui.view">
+            <field name="model">kw_visiting_card_apply</field>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                    </script>
+                    <div class="row">
+                        <div class="text-center col-sm-12 mx-auto">
+                            <p class="h6 font-weight-light text-left text-justify">
+                                <field name="admin_remark" required="1"/>
+                                <field name="manager_access" invisible="1"/>
+                                <field name="ra_access" invisible="1"/>
+                            </p>
+                            <button type="object" name="granted_remark" class="text-center btn btn-primary ">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Send For Printing -->
+        <record id="kw_visiting_card_admin_remark_printing_form_view" model="ir.ui.view">
+            <field name="model">kw_visiting_card_apply</field>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                    </script>
+                    <group>
+                        <field name="manager_access" invisible="1"/>
+                        <field name="ra_access" invisible="1"/>
+                        <field name="vendor_name" domain="[('partner_share', '=', True),('is_company', '=', True)]"
+                               context="{'form_view_ref':'kw_visiting_card.view_res_partner_kw_visiting_card_form','default_customer': False,'default_supplier': True, 'default_is_company': True}"
+                               required="1"/>
+                        <field name="vendor_email" required="1"/>
+                        <field name="card_details"/>
+                        <field name="admin_remark" required="1"/>
+                    </group>
+                    <center>
+                        <button type="object" name="printing_remark" class="text-center btn btn-primary ">Submit
+                        </button>
+                    </center>
+                </form>
+            </field>
+        </record>
+
+
+        <!-- Delivery to user -->
+        <record id="kw_visiting_card_deliver_user_remark_printing_form_view" model="ir.ui.view">
+            <field name="model">kw_visiting_card_apply</field>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                    </script>
+                    <div class="row">
+                        <div class="text-center col-sm-12 mx-auto">
+                            <p class="h6 font-weight-light text-left text-justify">
+                                <field name="admin_remark" required="1"/>
+                                <field name="manager_access" invisible="1"/>
+                                <field name="ra_access" invisible="1"/>
+                            </p>
+                            <button type="object" name="deliver_user_remark" class="text-center btn btn-primary ">
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+
+        <!-- reject -->
+        <record id="kw_visiting_reject_remark_printing_form_view" model="ir.ui.view">
+            <field name="model">kw_visiting_card_apply</field>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                    </script>
+                    <div class="row">
+                        <div class="text-center col-sm-12 mx-auto">
+                            <p class="h6 font-weight-light text-left text-justify">
+                                <field name="admin_remark" required="1"/>
+                                <field name="manager_access" invisible="1"/>
+                                <field name="ra_access" invisible="1"/>
+                            </p>
+                            <button type="object" name="reject_remark" class="text-center btn btn-primary ">
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_apply_card_search_view" model="ir.ui.view">
+            <field name="name">view.kw_visiting_card_apply.search</field>
+            <field name="model">kw_visiting_card_apply</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="emp_name"/>
+                    <separator/>
+                    <!-- <filter string="Old Request" name="Old Request" domain="[('active','=',False)]"/>
+                    <filter string="New Request" name="New Request" domain="[('active','=',True)]"/> -->
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter name="state" string="Status" domain="[]" context="{'group_by':'state'}" />
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="kw_apply_card_act_window" model="ir.actions.act_window">
+            <field name="name">Apply Card</field>
+            <field name="res_model">kw_visiting_card_apply</field>
+            <field name="view_mode">form</field>
+            <field name="view_type">form</field>
+            <field name="search_view_id" ref="kw_apply_card_search_view"/>
+            <field name="context">{"filter_data": 1,}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_apply_card_form_view')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+					No visiting card Application...
+                </p>
+            </field>
+        </record>
+
+        <record id="kw_apply_card_tree_view_only" model="ir.ui.view">
+            <field name="model">kw_visiting_card_apply</field>
+            <field name="arch" type="xml">
+                <tree import ="false" default_order='create_date desc'>
+                    <!-- <field name="emp_name" /> -->
+                    <field name="card_for" />
+                    <field name="create_employee_id"/>
+                    <!-- <field name="emp_code" /> -->
+                    <!-- <field name="visiting_card_for" /> -->
+                    <field name="applied_date" />
+                    <field name="date_when_required" />
+                    <field name="no_of_cards_required" />
+                    <field name="manager_access" invisible="1"/>
+                    <field name="active" invisible="1"/>
+                    <field name="ra_access" invisible="1"/>
+                    <!-- <field name="edit_css" invisible="1"/> -->
+                    <!-- <field name="pending_time"/> -->
+                    <field name="state" />
+                    <field name="to_be_taken_by" />
+                    <!-- <button name="button_take_action" string="Take Action" class="oe_highlight " type="object" 
+                    attrs="{'invisible': [('active','=', False)]}" groups="kw_visiting_card.group_kw_visiting_card_manager" /> -->
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_apply_card_form_view_only" model="ir.ui.view">
+            <field name="model">kw_visiting_card_apply</field>
+            <field name="arch" type="xml">
+                <form edit="false" create="false" action="false" delete="false">
+                    <script>
+                        $(document).ready(function(){
+                            $('.o_statusbar_buttons').hide();
+                            status=  $("[aria-pressed=true]").text().trim();
+                            console.log(status);
+                            if (status != 'Applied'){
+                                $('.o_form_button_edit').hide();
+                            }
+                        });
+                    </script>
+                    <header>
+                        <field name="state"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="visiting_card_for" widget="radio" options="{'horizontal': true}"/>
+                                <field name="emp_name" attrs="{'invisible': [('visiting_card_for','=','self')]}"
+                                       domain='[("parent_id.user_id","in",[uid])]'
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="manager_access" invisible="1"/>
+                                <field name="ra_access" invisible="1"/>
+                                <!-- <field name="applied_date" /> -->
+                                <field name="date_when_required"/>
+                                <field name="no_of_cards_required"/>
+                                <field name="remark"/>
+                                <field name="admin_remark" groups="kw_visiting_card.group_kw_visiting_card_user"
+                                       attrs="{'invisible': ['&amp;',('state','!=','Approved'),'&amp;',('state','!=','Send for Printing'),'&amp;',('state','!=','Delivered to User'),'&amp;',('state','!=','Hold')]}"/>
+                            </group>
+                            <group>
+                                <field name="card_details" style="pointer-events:none;"/>
+                            </group>
+                            <group>
+                                <field name="action_count" invisible="1"/>
+                                <field name="action_ids" attrs="{'invisible': [('action_count','=', False)]}"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_apply_card_status_act_window" model="ir.actions.act_window">
+            <field name="name">Apply Card</field>
+            <field name="res_model">kw_visiting_card_apply</field>
+            <!-- <field name="domain">[('state','in',['Rejected','Delivered to User','Approved','Sent For Printing','Applied']),('active','=',False)]</field> -->
+            <field name="view_mode">tree,form,kanban</field>
+            <field name="view_type">form</field>
+            <!-- <field name="context">{'ra_access_check':1}</field> -->
+            <field name="search_view_id" ref="kw_apply_card_search_view"/>
+            <!-- <field name="context">{"filter_data": 1,}</field> -->
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_apply_card_tree_view_only')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_apply_card_form_view')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No visiting card Application...
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="kw_visiting_apply_card_menu"
+                  action="kw_apply_card_status_act_window"
+                  name="Apply Card"
+                  parent="kw_visiting_card_parent_menu"
+                  sequence="1"/>
+
+        <!-- <menuitem id="kw_visiting_apply_status_menu" 
+        action="kw_apply_card_status_act_window" 
+        name="View status" 
+        parent="kw_visiting_card_parent_menu" 
+        sequence="2" /> -->
+
+    </data>
+</odoo>

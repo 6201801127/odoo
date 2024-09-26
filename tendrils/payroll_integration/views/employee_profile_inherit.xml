@@ -1,0 +1,148 @@
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="hr_employee_profile_form_inherit">
+            <field name="name">hr.employee.profile.inherit</field>
+            <field name="model">kw_emp_profile</field>
+            <field name="inherit_id" ref="kw_emp_profile.kw_employee_profile_form_view" />
+            <field name="arch" type="xml">              
+                <xpath expr="//button[@name='button_view_profile']" position="after">
+                    <button name="view_employee_payslip" type="object" string="My Payslip" class="oe_highlight"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="finance_payslip_report_tree" model="ir.ui.view">
+            <field name="name">user_payroll.view.tree</field>
+            <field name="model">kw_monthly_salary_report</field>
+            <field name="arch" type="xml">
+                <tree create='0' edit='0' delete='0' import='0'>
+                    <field name="emp_code"/>
+                    <field name="name" />
+                    <field name="year" />
+                    <field name="month" />
+                    <field name="budget_type"/>
+                    <field name="back_date_entry"/>
+                    <field name="transaction_date"/>
+                    <field name="basic"  sum='Total'/>
+                    <field name="hra"  sum='Total'/>
+                    <field name="conveyance"  sum='Total'/>
+                    <field name="pb" sum='Total'/>
+                    <field name="cb" sum='Total'/>
+                    <field name="ltc" sum='Total'/>
+                    <field name="pp" sum='Total'/>
+                    <!-- <field name="final_gross" sum='Total'/> -->
+                    <field name="incentive_allowances" sum='Total'/>
+                    <field name="variable" sum='Total'/>
+                    <field name="spl_allowance" sum='Total'/>
+                    <field name="equitable_allowance" sum='Total'/>
+                    <field name="leave_encachment" sum='Total'/>
+                    <field name="city_allowances" sum='Total'/>
+                    <field name="traning_incentive" sum='Total'/>
+                    <field name="er_bonus" sum='Total'/>
+                    <field name="arrear" sum='Total'/>
+                    <field name="final_gross" sum='Total'/>
+                    <field name="lwop" sum='Total'/>
+                    <field name="salary_adv" sum='Total'/>
+                    <field name="other_deduction" sum='Total'/>
+                    <field name="eepf" sum='Total'/>
+                    <field name="epf" string="EPF Empr" sum='Total'/>
+                    <field name="esi" sum='Total'/>
+                    <field name="ptd" sum='Total'/>
+                    <field name="gratuity" sum='Total'/>
+                    <field name="health_insurance_self" sum='Total'/>
+                    <field name="health_insurance_dependant" sum='Total'/>
+                    <field name="lunch_expences" sum='Total'/>
+                    <field name="nps" sum='Total'/>
+                    <field name="tds" sum='Total'/>
+                    <field name="net" sum='Total'/>
+                    <field name="ctc" sum='Total'/>
+                </tree>
+            </field>
+        </record>
+        <!-- kw_monthly_salary_report search view -->
+        <record id="kw_monthly_salary_report_view_search" model="ir.ui.view">
+            <field name="name">kw_monthly_salary_report.view.search</field>
+            <field name="model">kw_monthly_salary_report</field>
+            <field name="arch" type="xml">
+                <search string="Search Description">
+                    <!-- Add your fields here -->
+                    <field name="employee_id"/>
+                    <field name="budget_type"/>
+                    <separator/>
+                    <filter string="Treasury Budget" domain="[('budget_type','=','treasury')]" name="treasury_bud"/>
+                    <filter string="Project Budget" domain="[('budget_type','=','project')]" name="project_bud"/>
+                    <separator/>
+                    <filter string="This Year" domain="[('year', '=',context_today().strftime('%Y'))]" name="current_year_salary"/>
+                    <filter string="Last Year" domain="[('year', '=',(context_today()-relativedelta(years=1)).strftime('%Y'))]" name="last_yearsalary"/>
+                    <separator/>
+                    <filter string="This Month" name="current_month_salary" domain="[('month_int', '=',context_today().strftime('%m'))]"/> 
+                    <filter string="Last Month" domain="[('month','&gt;',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('month','&lt;',(context_today()).strftime('%Y-%m-01'))]" name="last_month_salary"/>
+					<separator/>
+                    <filter string="Back Dated Payslips" domain="[('back_date_entry','=',True)]" name="back_dated_payslip"/>
+                    <filter string="Regular Payslips" domain="[('back_date_entry','!=',True)]" name="regular_payslip"/>
+					<separator/>
+                    <filter string="January" domain="[('month','=','1')]" name="january_salary"/>
+                    <filter string="February" domain="[('month','=','2')]" name="february_salary"/>
+                    <filter string="March" domain="[('month','=','3')]" name="march_salary"/>
+                    <filter string="April" domain="[('month','=','4')]" name="april_salary"/>
+                    <filter string="May" domain="[('month','=','5')]" name="may_salary"/>
+                    <filter string="June" domain="[('month','=','6')]" name="june_salary"/>
+                    <filter string="July" domain="[('month','=','7')]" name="july_salary"/>
+                    <filter string="August" domain="[('month','=','8')]" name="august_salary"/>
+                    <filter string="September" domain="[('month','=','9')]" name="september_salary"/>
+                    <filter string="October" domain="[('month','=','10')]" name="october_salary"/>
+                    <filter string="November" domain="[('month','=','11')]" name="november_salary"/>
+                    <filter string="December" domain="[('month','=','12')]" name="december_salary"/>
+                </search>
+            </field>
+        </record>
+        <record id="finance_payslip_report_action" model="ir.actions.act_window">
+            <field name="name">Confirmed Payslips</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">kw_monthly_salary_report</field>
+            <field name="view_mode">tree</field>
+            <field name="view_type">form</field>
+            <field name="domain">[]</field>
+            <!-- <field name="search_view_id" ref="payroll_inherit.hr_payslip_report_search_view"/> -->
+            <field name="view_id" ref="payroll_integration.finance_payslip_report_tree"/>
+            <field name="groups_id" eval="[(6,0,[ref('payroll_inherit.payroll_finance_group')])]"/>
+        </record>
+        <menuitem name="Payslip Report"
+        id="finance_confirmed_payslip_menu"
+        parent="payroll_inherit.finance_payroll_menu"
+        action="finance_payslip_report_action"
+        sequence="2"
+    />
+    </data>
+    <data>
+    <record model="ir.ui.view" id="hr_employee_profile_nps_form_inherit">
+            <field name="name">hr.employee.profile.nps.inherit</field>
+            <field name="model">kw_emp_profile</field>
+            <field name="inherit_id" ref="kw_emp_profile.kw_employee_profile_form_view" />
+            <field name="arch" type="xml">              
+                <xpath expr="//page[@name='education_training']" position="after">
+                    <page string="Corporate NPS">
+                        <div class="inner_blocks">
+                            <group string="NPS Details">
+                                <field name="emp_id" invisible='1'/>
+                                <field name="employee_nps_eligible" invisible='1'/>
+                                <field name="employee_nps_id" attrs="{'readonly': [('employee_nps_eligible','=',False)]}" string='Corporate NPS'>
+                                    <tree delete="0" create="1">
+                                        <field name="employee_id"/>
+                                        <field name="is_nps" string='Corporate NPS'/>
+                                        <field name="contribution" string='NPS contribution'/>
+                                        <field name="existing_pran_no"/>
+                                        <field name="pran_no"/>
+                                        <field name="state"/>
+                                        <field name="remark_of_action"/>
+                                        <field name="action_taken_date"/>
+                                        <button name="request_update_nps_details"  string="Request a change" class="oe_highlight" type="object" attrs="{'invisible': [('state','=','Requested')]}"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </div>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

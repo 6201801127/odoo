@@ -1,0 +1,169 @@
+<odoo>
+    <data>
+
+        <!-- <record id="kw_induction_schedule_meeting_form" model="ir.ui.view">
+            <field name="name">kw_meeting_schedule.event.form</field>
+            <field name="model">kw_meeting_events</field>
+            <field name="inherit_id" ref="kw_meeting_schedule.view_kw_meeting_calendar_event_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='meeting_detail_right']/div/group" position="after">
+                    <group string="Induction Details" attrs="{'invisible': [('meetingtype_code','!=', 'induction')]}" name="induction_detail">
+                        <field name="enrollment_ids" widget="many2many_tags" options="{'no_create': True,'no_open': True}"
+                            attrs="{'invisible': ['|',('meetingtype_code','!=', 'induction'),('meeting_type_id','=', False)],'required': [('meetingtype_code','=', 'induction')],'readonly':['|',('meetingtype_code','!=','induction'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False)]}"/>
+                        <field name="meetingtype_code" 
+                            attrs="{'invisible': ['|',('meetingtype_code','!=', 'induction'),('meeting_type_id','=', False)],'required': [('meetingtype_code','=', 'induction')],'readonly':['|',('meetingtype_code','!=','induction'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False)]}"/>
+                        <field name="send_to_mail_applicant" 
+                            attrs="{'invisible': ['|',('meetingtype_code','!=', 'induction'),('meeting_type_id','=', False)],'required': [('meetingtype_code','=', 'induction')],'readonly':['|',('meetingtype_code','!=','induction'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False)]}"/>
+                    </group>
+                </xpath>
+            </field>
+        </record> -->
+        <!-- list view -->
+
+        <record model="ir.ui.view" id="kw_induction_plan_view_list">
+            <field name="name">induction_plan</field>
+            <field name="model">kw_induction_plan_data</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="applicant_induction_id" />
+                    <field name="applicant_email"/>
+                    <field name="applicant_ph"/>
+                    <field name="applicant_dept_id"/>
+                    <field name="applicant_doj"/>
+                    <field name="status_of_induction"/>
+                </tree>
+            </field>
+        </record>
+        <record id="kw_induction_plan_view_form" model="ir.ui.view">
+            <field name="name">induction_plan_form</field>
+            <field name="model">kw_induction_plan_data</field>
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <form string="" delete="false">
+                    <sheet>
+                        <group>
+                            <group>
+                                <!-- Add your fields here -->
+                                <field name="applicant_induction_id" required='1' options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="applicant_email" force_save='1'/>
+                                <field name="applicant_ph" force_save='1'/>
+                                <field name="applicant_dept_id" force_save='1' options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="applicant_doj" force_save='1'/>
+                                <field name="status_of_induction" readonly="1"/>
+                                <field name="status_update" invisible="1"/>
+                            </group>
+                            
+                        </group>
+                        <group>
+                            <field name="applicant_data_ids" nolabel="1" >
+                                <tree editable="bottom">
+                                    <field name="type_induction_id" required='1' options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                    <field name="induction_type" required='1'/>
+                                    <field name="induction_date" required='1'/>
+                                    <field name="handbook_category_id" force_save="1" attrs="{'readonly':['|',('type_check_bool','=',False),('voice_type_bool','=',True)],'required':[('type_check_bool','=',True),('voice_type_bool','=',False)]}" options="{'no_create': True, 'no_open': True, 'no_edit': True}">
+                                    </field>
+                                    <field name="meeting_status" attrs="{'readonly':[('type_check_bool','=',True)]}"/>
+                                    <field name="hide_meeting_btn" invisible="1"/>
+                                    <field name="type_check_bool" invisible="1"/>
+                                    <field name="voice_type_bool" invisible="1"/>
+                                    
+                                    <field name="inductor_name_id" force_save="1" attrs="{'readonly':['|',('type_check_bool','=',True),('voice_type_bool','=',True)],'required':[('type_check_bool','=',False),('voice_type_bool','=',False)]}" options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                    <!-- <button name="meeting_induction_applicant" attrs="{'invisible':[('hide_meeting_btn','=',True)]}" string="Meeting schedule" type="object" class="btn-success"/> -->
+                                    <button name="meeting_complete_induction" attrs="{'invisible':[('hide_meeting_btn','=',True)]}" string="Completed" type="object" class="btn-warning"/>
+
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="kw_induction_plan_action_window" model="ir.actions.act_window">
+            <field name="name">Induction Plan </field>
+            <field name="res_model">kw_induction_plan_data</field>
+            <!-- <field name="domain">[('skill_type', '=', 'Induction')]</field>
+            <field name="context">{'default_skill_type': 'Induction'}</field> -->
+            <field name="view_mode">tree,form</field>
+             <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_onboarding_induction_feedback.kw_induction_plan_view_list')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_onboarding_induction_feedback.kw_induction_plan_view_form')})]"/>
+            <field name="view_type">form</field>
+        </record>
+
+        <menuitem name="Induction Plan" id="induction_plan_data_menu2"
+                parent="induction_master_menu"
+                action="kw_onboarding_induction_feedback.kw_induction_plan_action_window"
+                groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_manager,kw_onboarding_induction_feedback.group_kw_onboarding_induction_officer,kw_skill_assessment.group_kw_skill_assessment_manager'
+                sequence="3"/>
+
+
+        <record model="ir.ui.view" id="kw_induction_plan_user_view_list">
+            <field name="name">induction_plan</field>
+            <field name="model">kw_induction_plan_user_data</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="empl_id"/>
+                    <field name="applicant_induction_id" invisible="1"/>
+                    <field name="applicant_email"/>
+                    <field name="applicant_ph" invisible="1"/>
+                    <field name="applicant_dept_id"/>
+                    <field name="applicant_doj"/>
+                    <field name="induction_name"/>
+                    <field name="induction_date"/>
+                    <field name="handbook_category_id"/>
+                    <field name="induction_type" invisible="1"/>
+                    <!-- <field name="handbook_type_code_id"/> -->
+                    <button name="handbook_view_policy" string="View Details" type="object" class="oe_highlight" context="{'handbook_type':handbook_category_id}" attrs="{'invisible':[('induction_type','=','Offline')]}"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="kw_induction_plan_user_action_window" model="ir.actions.act_window">
+            <field name="name">Induction Plan</field>
+            <field name="res_model">kw_induction_plan_user_data</field>
+            <field name="domain">[('empl_id.user_id','=',uid)]</field>
+            <field name="view_mode">tree</field>
+             <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_onboarding_induction_feedback.kw_induction_plan_user_view_list')})]"/>
+            <field name="view_type">form</field>
+        </record>
+
+        <menuitem name="Induction Details" id="induction_user_plan_menu"
+                parent="kw_onboarding_induction_feedback.induction_master_menu"
+                action="kw_onboarding_induction_feedback.kw_induction_plan_user_action_window"
+                groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_user'
+                sequence="6"/>
+
+        <record id="kw_induction_plan_wizard_view_form" model="ir.ui.view">
+            <field name="name">induction_plan_wizard_form</field>
+            <field name="model">induction_plan_wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <!-- Add your fields here -->
+                            <field name="applicant_ids" required='1' readonly='1' options="{'no_create': True, 'no_open': True, 'no_edit': True}" widget="many2many_tags"/>
+                            
+                        </group>
+                        <group>
+                            <!-- <field name="induction_type_bool_check" invisible="1"/> -->
+                            <field name="meeting_url" ></field>
+                            <field name="meeting_room" options="{'no_create_edit': True,'no_open':True,'no_create':True}"/>
+                            <field name="note" readonly='0' placeholder="Remarks" string="Remarks"/>
+                            <!-- <field name="type_of_induction" widget="many2many_tags" readonly='0' invisible="1"/>
+                            <field name="induction_config" readonly='0'  invisible="1"/> -->
+                        </group>
+                            
+                    </sheet>
+                    <footer>
+                        <button name="send_mail_applicant" string="Confirm" type="object" class="btn btn-warning" confirm = "Are you sure,you want confirm?"/>
+                        <button string="Close" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+                
+
+        <act_window id="action_induction_plan_wizard" name="Send invitation Mail" src_model="kw_induction_plan_data" res_model="induction_plan_wizard" view_type="form" view_mode="form" view_id="kw_induction_plan_wizard_view_form" key2="client_action_multi" target="new"/>
+    </data>
+</odoo>

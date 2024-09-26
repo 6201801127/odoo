@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+		<record model="ir.ui.view" id="self_appraisal_tree_view">
+			<field name="name">Self appraisal tree</field>
+			<field name="model">hr.appraisal</field>
+			<field name="arch" type="xml">
+				<tree create='false' edit='false' delete="0" import='false'>
+					<field name="compare_self_date" invisible="1"/>
+					<field name="appraisal_year"/>
+					<field name="emp_id" invisible="0"/>
+					<field name="deg_id"/>
+					<field name="dept_id"/>
+					<field name="state_sequence" invisible="1"/>
+					<field name="app_period_from"/>
+					<field name="appraisal_deadline"/>
+					<field name="state" invisible="1"/>
+					<field name="survey_state_id" invisible="1"/>
+					<field name="self_status"/>
+					<field name="lm_status"/>
+					<field name="ulm_status"/>
+					<field name="score" attrs="{'invisible': [('state','not in',[6]),]}"/>
+					<field name="kra_score" attrs="{'invisible': [('state','not in',[6]),]}"/>
+					<field name="total_score" attrs="{'invisible': [('state','not in',[6]),]}"/>
+					<field name="date_time" invisible="1"/>
+					<field name="compare_self_end_date" invisible="1"/>
+					<button name="action_start_appraisal" type="object" string="Appraisal Form" class="btn btn-primary o_select_file_button" attrs="{'invisible': ['|',('compare_self_date','=',True),'|',('compare_self_end_date','=',True),'|',('state','=', 1),'|',('state','=', 5),'|',('state','=',3),'|',('state','=',4),('state','=',6)]}"/>
+					<button name="view_results" attrs="{'invisible': [('state_sequence','in',[1,2])]}" type="object" string="View Form" class="btn btn-primary o_select_file_button"/>
+				</tree>
+			</field>
+		</record>
+
+		<record id="self_appraisal_kanban" model="ir.ui.view">
+			<field name="name">Self appraisal kanban</field>
+			<field name="model">hr.appraisal</field>
+			<field name="arch" type="xml">
+				<kanban edit="false" quick_create="false">
+					<field name="color"/>
+					<field name="state"/>
+					<!-- <field name="e_code"/> -->
+					<field name="date_time" invisible="1"/>
+					<field name="compare_self_date" invisible="1"/>
+					<field name="compare_self_end_date" invisible="1"/>
+					<field name="self_status"/>
+					<field name="lm_status"/>
+					<field name="ulm_status"/>
+					<templates>
+						<t t-name="kanban-box">
+							<div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click mt-3">
+								<div class="oe_kanban_content ">
+									<div class="row">
+										<div class="col-sm-8">
+											<div>
+												<span style='color:blue;font-weight:bold'><strong>
+													<field name="appraisal_year"/>
+												</strong></span>
+											</div>
+											<span style='color:purple;font-weight:bold'>Start Date:</span>
+											<span>
+												<i>
+													<field name="app_period_from"/>
+												</i>
+											</span>
+											<br/>
+											<t t-if="record.appraisal_deadline.raw_value and record.appraisal_deadline.raw_value &lt; (new Date())" t-set="red">oe_kanban_text_red
+											</t>
+											<span style='color:purple;font-weight:bold'>End Date:</span>
+											<span t-attf-class="#{red}">
+												<i>
+													<field name="appraisal_deadline"/>
+												</i>
+											</span>
+											<br/>
+                                            <span style='color:purple;font-weight:bold'>LM Status:</span> 
+											<span>
+												<field name="lm_status"/>
+											</span>
+											<br/>
+                                            <span style='color:purple;font-weight:bold'>ULM Status:</span> 
+											<span>
+												<field name="ulm_status"/>
+											</span>
+										</div>
+										<div class="col-sm-4 text-right">
+											<div class="mb-5">
+												<t t-if="record.self_status.raw_value == 'In Progress'">
+													<span class="h3 text-default">
+														<i>
+															<field name="self_status"/>
+														</i>
+													</span>
+												</t>
+												<t t-elif="record.self_status.raw_value == 'Draft'">
+													<span class="h3 text-info">
+														<i>
+															<field name="self_status"/>
+														</i>
+													</span>
+												</t>
+												<t t-elif="record.self_status.raw_value == 'Completed'">
+													<span class="h3 text-success">
+														<i>
+															<field name="self_status"/>
+														</i>
+													</span>
+												</t>
+												<t t-elif="record.self_status.raw_value == 'Not Started'">
+													<span class="h3 text-danger">
+														<i>
+															<field name="self_status"/>
+														</i>
+													</span>
+												</t>
+											</div>
+										</div>
+									</div>
+									<div class="oe_footer">
+										<button name="action_start_appraisal" type="object" class="btn btn-primary o_select_file_button float-left" attrs="{'invisible': ['|',('compare_self_date','=',True),'|',('compare_self_end_date','=',True),'|',('state','=', 1),'|',('state','=', 5),'|',('state','=',3),'|',('state','=',4),('state','=',6)]}">
+											Appraisal Form
+										</button>
+										<button name="view_results" type="object" class="btn btn-primary o_select_file_button float-right">View Form
+										</button>
+									</div>
+									<div class="oe_clear"/>
+								</div>
+							</div>
+						</t>
+					</templates>
+				</kanban>
+			</field>
+		</record>
+
+		<record id="self_appraisal_search_view" model="ir.ui.view">
+			<field name="name">appraisal_search_view</field>
+			<field name="model">hr.appraisal</field>
+			<field name="arch" type="xml">
+				<search string="Appraisal Information">
+					<field name="emp_id" string="Employee Name" invisible='1'/>
+					<field name="state" string="Stage" invisible='1'/>
+					<field name="appraisal_year" invisible='1'/>
+					<!-- <filter string="Current Period" name="filter_current_period" context="{'filter_current_period':1}" domain="[]"/>
+					<filter string="Previous Period" name="filter_previous_period" context="{'filter_previous_period':1}" domain="[]"/> -->
+					<field name="emp_survey_id" string="Appraisal Form" invisible='1'/>
+				</search>
+			</field>
+		</record>
+
+		<record id="self_actions_window" model="ir.actions.act_window">
+			<field name="name">Self Appraisal</field>
+			<field name="res_model">hr.appraisal</field>
+			<field name="domain">[('emp_id.user_id','=',uid)]</field>
+			<field name="context">{}</field>
+			<field name="search_view_id" ref='kw_appraisal.self_appraisal_search_view'/>
+			<field name="view_ids" eval="[(5, 0, 0),
+		(0, 0, {'view_mode': 'kanban', 'view_id': ref('self_appraisal_kanban')}),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('self_appraisal_tree_view')})
+        ]"/>
+			<field name='view_mode'>kanban,tree</field>
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					You don't have any Appraisal...
+				</p>
+			</field>
+		</record>
+		<menuitem name="My Appraisal" id="menu_kw_self_appraisal" parent="menu_hr_appraisal" action="self_actions_window" groups="kw_appraisal.group_appraisal_employee" sequence="2"/>
+	</data>
+</odoo>

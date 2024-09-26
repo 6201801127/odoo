@@ -1,0 +1,185 @@
+<odoo>
+	<data>
+        <record model="ir.ui.view" id="account_fd_tracker_form_view">
+            <field name="name">Account FD form view</field>
+            <field name="model">fd_tracker</field>
+            <field name="priority" eval="15"/>
+            <field name="arch" type="xml">
+                <form>
+                    <style>
+                        .o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 175px !important;}
+                    </style>
+                    <header>
+                        <button name="make_fd_renewed" string="Renewed" type="object" class="btn-primary"
+                        attrs="{'invisible': ['|',('id', '=', False),('state','in',['closed','renewed'])]}"
+                        />
+                        <button name="make_fd_close" string="Close" type="object" class="btn-danger"
+                                attrs="{'invisible': ['|',('id', '=', False),('state','=','closed')]}"
+                                />
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="bank_id"  required="1"/>
+                                <field name="acc_number" attrs="{'readonly':[('state','=', 'closed')]}" required="1"/>
+                                <field name="start_date" attrs="{'readonly':[('state','=', 'closed')]}"  required="1"/>
+                                <field name="maturity_date" attrs="{'readonly':[('state','=', 'closed')]}"  required="1"/>
+                                <field name="principal_amt" attrs="{'readonly':[('state','=', 'closed')]}" required="1"/>
+                                <field name="rate_of_interest"  attrs="{'readonly':[('state','=', 'closed')]}" required="1"/>
+                                <field name="fd_type" widget="radio" options="{'horizontal': true}" attrs="{'readonly':[('state','=', 'closed')]}" required="1"/>
+                            </group>
+                            <group>
+                                <field name="maturity_amt"  attrs="{'readonly':[('state','=', 'closed')]}" required="1"/>
+                                <field name="recovered_or_renewed_dt"   attrs="{'readonly':[('state','=', 'closed')]}"/>
+                                <field name="recovered_or_renewed_amt"  attrs="{'readonly':[('state','=', 'closed')]}"/>
+                                <field name="maturity_interest_net" attrs="{'readonly':[('state','=', 'closed')]}"/>
+                                <field name="tds"   attrs="{'readonly':[('state','=', 'closed')]}"/>
+                                <field name="maturity_interest_gross"   attrs="{'readonly':[('state','=', 'closed')]}"/>
+                                <field name="is_fd_live" invisible="1"/>
+                                <field name="is_fd_renew" invisible="1"/>
+                                <field name="lien_amount" readonly="0"/>
+                            </group>
+                            <group>
+                                <field name="interest_calculation_log_ids" readonly="1">
+                                    <tree string="Interest Calculation Log">
+                                        <field name="start_date"/>
+                                        <field name="calculation_date"/>
+                                        <field name="calculated_on"/>
+                                        <field name="calculated_interest"/>
+                                        <field name="fd_tracker_id" invisible="1"/>
+                                    </tree>
+                                </field>    
+                            </group>
+                            <group>
+                                <field name="bg_tagged_ids" readonly="1">
+                                    <tree string="BG Tagged">
+                                        <field name="parent_id" invisible="1"/>
+                                        <field name="bg_id" />
+                                        <field name="bg_lien_amount" sum="Total"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="account_fd_tracker_tree_view">
+            <field name="model">fd_tracker</field>
+            <field name="arch" type="xml">
+                <tree decoration-muted="state in ('renewed','closed')" 
+                decoration-bf="state in ('live') and maturity_date &lt;= current_date" 
+                decoration-danger="state in ('live') and maturity_date &lt;= current_date" 
+                 decoration-info="state in ('live') and maturity_date &lt;= ckeck_thirty_days">
+                    <field name="ckeck_thirty_days" invisible="1" />
+                    <field name="serial_no" string="Sl."/>
+                    <field name="bank_id" string="Bank"/>
+                    <field name="acc_number" required="1" string="FD A/C No."/>
+                    <field name="fd_type"/>
+                    <field name="start_date_char" string="FD Op. Dt." class="date_width"/>
+                    <field name="start_date" string="FD Op. Dt." invisible="1"/>
+                    <field name="principal_amt" sum="Total" string="FD Base Amt."/>
+                    <field name="rate_of_interest"/>
+                    <field name="maturity_date_char" string="Planned FD Cl. Dt."/>
+                    <field name="maturity_date" string="Planned FD Cl. Dt." invisible="1"/>
+                    <field name="maturity_amt" sum="Total" string="Planned Mat. Amt."/>
+                    <field name="state" string="Closed/ Live"/>
+                    <field name="current_status" invisible="1"/>
+                    <field name="recovered_or_renewed_dt_char" string="Close/ Renew Dt."/>
+                    <field name="recovered_or_renewed_dt" string="Close/ Renew Dt." invisible="1"/>
+                    <field name="recovered_or_renewed_amt" sum="Total" string="Actual Amt. Recd/ Renewed"/>
+                    <field name="maturity_interest_net" sum="Total" string="Int.(Net) on Close/ Renewal"/>
+                    <field name="tds" sum="Total"/>
+                    <field name="maturity_interest_gross" sum="Total" string="Int.(Gross) on Close/ Renewal"/>
+                    <field name="is_fd_live" invisible="1"/>
+                    <field name="is_fd_renew" invisible="1"/>
+                    <field name="interest_till_date_char" string="Accrued Int. Dt."/>
+                    <field name="interest_till_date" string="Accrued Int. Dt." invisible="1"/>
+                    <field name="interest_till" sum="total" string="Accrued Int. Amt."/>
+                    <field name="lien_amount" sum="Total" string="Lien Amt."/>
+                    <field name="free_amount" sum="Total" string="Free Amt."/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="account_fd_tracker_search_view">
+            <field name="name">account.fd.tracker.search</field>
+            <field name="model">fd_tracker</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="state" string="State" />
+                    <filter string="Live" name="live" domain="[('state', '=', 'live')]"/>
+                    <filter string="Renewed" name="renewed" domain="[('state', '=', 'renewed')]"/>
+                    <filter string="Closed" name="closed" domain="[('state', '=', 'closed')]"/>
+                    <group string="Maturity Date">
+                        <filter string="This Month" name="this_month" domain="[('maturity_date', '&gt;=', (context_today().replace(day=1)).strftime('%Y-%m-%d')), ('maturity_date', '&lt;', (context_today().replace(month=context_today().month + 1, day=1) - datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="fd_tracker_report_tree" model="ir.ui.view">
+            <field name="name">fd_tracker_filtered_tree</field>
+            <field name="model">fd_tracker</field>
+            <field name="arch" type="xml">
+                <tree create='0' edit='0' delete='0' import='0' >
+                    <field name="serial_no"/>
+                    <field name="acc_number" required="1" />
+                    <field name="start_date" />
+                    <field name="maturity_date"/>
+                    <field name="principal_amt" sum="Total"/>
+                    <field name="rate_of_interest"/>
+                    <field name="fd_type"/>
+                    <field name="maturity_amt" sum="Total"/>
+                    <field name="state" string="Current Status"/>
+                    <field name="current_status" string="Current Status"/>
+                    <field name="recovered_or_renewed_dt"/>
+                    <field name="recovered_or_renewed_amt" sum="Total"/>
+                    <field name="maturity_interest_net"/>
+                    <field name="tds"/>
+                    <field name="maturity_interest_gross"/>
+                </tree>
+            </field>
+        </record>
+        
+        <!-- Add an action for the new tree view -->
+        
+        <record model="ir.actions.act_window" id="account_fd_tracker_action_window">
+            <field name="name">Account FD Tracker</field>
+            <field name="res_model">fd_tracker</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="account_fd_tracker_search_view"/>
+            <field name="context">{'search_default_live':1}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                     (0, 0, {'view_mode': 'tree', 'view_id': ref('account_fd_tracker_tree_view')}),
+                     (0, 0, {'view_mode': 'form', 'view_id': ref('account_fd_tracker_form_view')})]"/>
+        </record>
+        
+        <!-- <record id="action_fd_tracker_filtered_action" model="ir.actions.act_window">
+            <field name="name">Filtered FD Tracker</field>
+            <field name="res_model">fd_tracker</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="fd_tracker_report_tree"/>
+        </record> -->
+        <!-- <menuitem id="menu_fd_tracker_report_menu" name="FD Tracker Report" parent="account.menu_finance" action="action_fd_tracker_filtered_action" sequence="104"/> -->
+
+        <record id="interest_calculation_log_tree" model="ir.ui.view">
+            <field name="name">interest_calculation_log</field>
+            <field name="model">interest_calculation_log</field>
+            <field name="arch" type="xml">
+                <tree create='0' edit='0' delete='0' import='0' >
+                    <field name="fd_tracker_id" />
+                    <field name="start_date" />
+                    <field name="calculation_date" />
+                    <field name="calculated_on" />
+                    <field name="calculated_interest" sum="Total" />
+                </tree>
+            </field>
+        </record>
+
+
+        
+
+    </data>
+</odoo>

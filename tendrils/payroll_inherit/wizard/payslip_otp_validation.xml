@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="payslip_otp_view_form" model="ir.ui.view">
+            <field name="name">payslip_otp.view.form</field>
+            <field name="model">payslip_otp</field>
+            <field name="arch" type="xml">
+                <form string="">
+                    <script>
+	        			$(document).ready(function(){
+	                        $(".modal-dialog").addClass('modal-md').removeClass('modal-lg');
+	                    });
+	        		</script>
+                    <div class="d-flex jusitfy-content-center flex-column">
+                        <div class="offset-2 col-8 offset-2 mb-4 text-success font-weight-bold h5 text-center"><p class="mb-1">OTP has been sent to your registered E-mail id and Mobile No.</p> <span class="">Please enter OTP to download your payslips.</span> </div>
+                        <div class="offset-2 col-8 offset-2 ">
+                            <table class="mx-auto">
+                                <tr>
+                                    <td><label class="o_form_label mb-2 font-weight-bold" for="user_otp">OTP:</label></td>
+                                    <td><field name="user_otp" /></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <footer class="d-flex justify-content-center">
+                        <button string='Submit' name="validate_payslip_otp" 
+                        type="object" class="btn font-weight-bold text-white" 
+                        style="background-color: #108fbb;" context="{'otp': True}"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="payslip_otp_validation_wizard_action" model="ir.actions.server">
+            <field name="name">OTP Validation</field>
+            <field name="model_id" ref="model_hr_payslip" />
+            <field name="state">code</field>
+            <field name="code">
+                action = model.send_otp_notification()
+            </field>
+        </record>
+
+        <record id="action_payslip_otp_validation_wizard" model="ir.actions.act_window">
+            <field name="name">OTP Validation</field>
+            <field name="res_model">payslip_otp</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="payslip_otp_view_form"/>
+        </record>
+
+        <record id="payslip_otp_mail_notification" model="mail.template">
+            <field name="name">Payslip | OTP Validation</field>
+            <field name="email_from">tendrils@csm.tech</field>
+            <field name="subject">OTP For Payslip</field>
+            <field name="email_to">${ctx['email_id']}</field>
+			<field name="email_cc"></field>
+            <field name="model_id" ref="payroll_inherit.model_payslip_otp"/>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html">
+                <![CDATA[
+                    <table border="0">
+                        <tr>
+                            <td>
+                                <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                                   
+                                    <h5 style="font-weight: 400;margin-bottom: 0;font-size: 16px;color:#676767;">
+                                        <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">Hello</span>
+                                        ${ctx['name']},
+                                    </h5>
+                                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                        Your one time password is <b>${ctx['otp']}</b>
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                ]]>
+            </field>
+        </record>
+
+
+    </data>
+</odoo>

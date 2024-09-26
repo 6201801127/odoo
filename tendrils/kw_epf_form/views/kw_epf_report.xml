@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+		<!-- model.name tree view -->
+		<record id="kw_epf_view_tree" model="ir.ui.view">
+			<field name="name">kw epf Tree</field>
+			<field name="model">kw_epf</field>
+			<field name="arch" type="xml">
+				<tree>
+					<field name="employee_id"/>
+					<field name="member_name"/>
+					<field name="service_period_year"/>
+					<field name="service_period_month"/>
+					<field name="uan_no"/>
+					<field name="aadhaar_no"/>
+					<field name="date_of_joining"/>
+					<field name="bank"/>
+					<field name="bank_account"/>
+					<field name="grade"/>
+					<field name="band"/>
+					<field name="epf_no"/>
+					<field name="state"/>
+					<field name="upload_doc" invisible="1"/>
+					<field name="file_name" invisible="1"/>
+					<field name="upload_hsc_doc" invisible="1"/>
+					<field name="hsc_file_name" invisible="1"/>
+					<field name="upload_epf_doc" invisible="1"/>
+					<field name="epf_file_name" invisible="1"/>
+				</tree>
+			</field>
+		</record>
+		<!-- model.name form view -->
+		<record id="kw_epf_view_form" model="ir.ui.view">
+			<field name="name">kw epf Form</field>
+			<field name="model">kw_epf</field>
+			<field name="arch" type="xml">
+				<form string="EPF Form" create="true" edit="true" delete="false">
+					<header>
+						<button string="Approve" name="approve_epf" type="object" class="oe_highlight" attrs="{'invisible': [('state','=', 'approved')]}"/>
+						<field name="state" widget="statusbar" statusbar_visible="pending,approved"/>
+					</header>
+					<sheet>
+						<group>
+							<group>
+								<field name="employee_id" options="{'no_open': True,'no_create':True,'no_edit':True}" required='1'/>
+								<field name="member_name" required='1'/>
+								<label for="service_period_year" string="Period of Service"/>
+								<div>
+									<field name="service_period_year" class="oe_inline"/>
+									<span>Year </span>
+									<field name="service_period_month" class="oe_inline"/>
+									<span>Month</span>
+								</div>
+								<field name="upload_hsc_doc" filename="hsc_file_name" widget="FieldBinary" required='1' force_save='1'/>
+								<field name="hsc_file_name" invisible="1" force_save='1'/>
+
+								<field name="uan_no" required='0' attrs="{'required': ['|',('service_period_year','!=','0'),('service_period_month','!=','0')]}"/>
+								<field name="upload_epf_doc" filename="epf_file_name" widget="FieldBinary" required='0' attrs="{'required': ['|',('service_period_year','!=','0'),('service_period_month','!=','0')]}"/>
+								<field name="epf_file_name" invisible="1" required='0'/>
+
+								<field name="aadhaar_no" required='1' force_save='1'/>
+								<field name="upload_doc" filename="file_name" widget="FieldBinary" required='1' force_save='1'/>
+								<field name="file_name" invisible="1" force_save='1'/>
+
+								<field name="pan_no" force_save='1' required='1'/>
+								<field name="upload_pan_doc" filename="pan_file_name" widget="FieldBinary" required='1'/>
+								<field name="pan_file_name" invisible="1" required='0'/>
+
+								<field name="epf_no" required='0'/>
+								<field name="date_of_joining" required='1'/>
+								<field name="bank"/>
+								<field name="bank_account"/>
+								<field name="grade" options="{'no_open': True,'no_create':True,'no_edit':True}" invisible="1"/>
+								<field name="band" options="{'no_open': True,'no_create':True,'no_edit':True}" invisible="1"/>
+								<field name="remarks"/>
+							</group>
+							<group>
+								<field name="nominee_line_ids" force_save='1'>
+									<tree editable="bottom">
+										<field name="kw_epf_id" invisible='1' options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+										<field name="nominee_name" required='1'/>
+										<field name="address" required='1'/>
+										<field name="relation_with_member" required='1' options="{'no_open': True,'no_create':True,'no_edit':True}" style = "width: 20 %%"/>
+										<field name="minor_nominee" required='1'/>
+										<field name="dob" widget="date"/>
+									</tree>
+								</field>
+							</group>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record id="search_kw_epf_report" model="ir.ui.view">
+			<field name="name">kw wfh kw_epf Report Search View</field>
+			<field name="model">kw_epf</field>
+			<field name="arch" type="xml">
+				<search string="Search EPF Record">
+					<field name="employee_id"/>
+					<field name="member_name"/>
+					<!-- <field name="service_period"/> -->
+					<field name="service_period_year"/>
+					<field name="service_period_month"/>
+					<field name="uan_no"/>
+					<field name="aadhaar_no"/>
+					<field name="state"/>
+					<field name="pan_no"/>
+					<field name="date_of_joining"/>
+					<field name="bank"/>
+					<field name="bank_account"/>
+					<field name="grade"/>
+					<field name="band"/>
+					<field name="epf_no"/>
+					<filter string="All" name="filter_all" domain="[('state','in',['pending','approved'])]"/>
+					<filter string="Ex-Employee" name="filter_exemp" domain="[('employee_id.last_working_day','!=',False)]"/>
+					<separator/>
+					<filter string="Pending" name="filter_pending" domain="[('state','=','pending')]"/>
+					<filter string="Approved" name="filter_approved" domain="[('state','=','approved')]"/>
+					<!-- <group expand="0" string="Group By">
+						<filter name="group_by_service_period" string="Service Period" context="{'group_by':'service_period'}" />
+					</group> -->
+				</search>
+			</field>
+		</record>
+		<!-- model action window -->
+		<record id="kw_epf_action" model="ir.actions.act_window">
+			<field name="name">Employee Provident Fund</field>
+			<field name="res_model">kw_epf</field>
+			<field name="view_mode">tree,form</field>
+			<field name="view_type">form</field>
+			<field name="domain">[]</field>
+			<field name='search_view_id' ref='search_kw_epf_report'/>
+			<field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_epf_view_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('kw_epf_view_form')})]"/>
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					No records available
+				</p>
+			</field>
+		</record>
+		<menuitem name="Employee Provident Fund" id="kw_epf_main_menu" action="kw_epf_form.kw_epf_action" parent="hr_payroll.menu_hr_payroll_configuration" sequence="15"/>
+
+	</data>
+</odoo>

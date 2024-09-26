@@ -1,0 +1,709 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="recruitment_button_inherited">
+            <field name="name">kw_recruitment_button</field>
+            <field name="model">hr.applicant</field>
+            <field name="inherit_id" ref="hr_recruitment_survey.crm_case_form_view_job_inherit"/>
+            <field name="arch" type="xml">
+                <!-- <field name="applicant_response_id" invisible="1"/> -->
+                <xpath expr="//field[@name='survey_id']" position="before">
+                    <field name="applicant_response_state" invisible="1"/>
+                </xpath>
+
+                <!-- <xpath expr="//button[@name='action_get_attachment_tree_view']" position="replace">
+                    <button name="action_get_attachment_view"
+                        class="oe_stat_button"
+                        icon="fa-book"
+                        type="object">
+                        <field name="attachment_doc" widget="statinfo" string="Documents"/>
+                    </button>
+                </xpath> -->
+
+                <xpath expr="//button[@name='action_start_survey']" position="replace">
+
+                </xpath>
+
+                <xpath expr="//button[@name='action_print_survey']" position="replace">
+
+                </xpath>
+
+                <xpath expr="//div[@name='button_box']" position="inside">
+
+                </xpath>
+            </field>
+        </record>
+        <record id="inherit_hr_applicant_form_view" model="ir.ui.view">
+            <field name="name">inherit.hr.applicant.form</field>
+            <field name="model">hr.applicant</field>
+            <field name="inherit_id" ref="hr_recruitment.crm_case_form_view_job"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form" position="attributes">
+                    <attribute name="duplicate">0</attribute>
+                    <attribute name="priority">99</attribute>
+                </xpath>
+                <field name="department_id" position="attributes">
+                    <attribute name="domain">[('dept_type.code', '=', 'department')]</attribute>
+                    <attribute name="options">{'no_open': True,'no_create':True,'no_edit':True}</attribute>
+                </field>
+                <field name="user_id" position="attributes">
+                    <attribute name="options">{'no_open': True,'no_create':True,'no_edit':True}</attribute>
+                </field>
+                <field name="department_id" position="after">
+                    <field name="division" required="0" readonly="1" invisible="True"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           domain="[('parent_id','=', department_id)]"/>
+<!--                    attrs="{'invisible': [('department_id', '=', False)],'required' : [('department_id','=',True)]}"-->
+                    <field name="section" required="0" readonly="1" invisible="True"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           attrs="{'invisible': [('division', '=', False)]}"
+                           domain="[('parent_id','=', division)]"/>
+                    <field name="practise" required="0" readonly="1" invisible="True"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           attrs="{'invisible': [('section', '=', False)]}"
+                           domain="[('parent_id','=', section)]"/>
+                </field>
+                <!-- <xpath expr="//button[@name='action_makeMeeting']" position="before"> -->
+                <xpath expr="////div[hasclass('oe_button_box')]" position="inside">
+                    <button name="action_makeoffer" class="oe_stat_button" icon="fa-calendar" type="object"
+                            help="Generate the Offer Letter">
+                        Offer Creation
+                    </button>
+<!--                    <button name="action_makeMeeting" class="oe_stat_button" icon="fa-calendar" type="object"-->
+<!--                            help="Schedule interview with this applicant">-->
+<!--                        <field name="meeting_count" widget="statinfo" string="Meetings"/>-->
+<!--                    </button>-->
+                    <field name="walk_in_meeting_count" invisible='1'/>
+                    <button name="action_walk_in_meeting" class="oe_stat_button" icon="fa-calendar"
+                            type="object" help="Schedule walk in interview with this applicant"
+                            attrs="{'invisible':[('code_ref','!=','09')]}">
+                        <field name="walk_in_meeting_count" widget="statinfo" string="Walk In Meetings"/>
+                    </button>
+                    <button name="export_feedbacks" class="oe_stat_button" icon="fa-book" type="object"
+                            help="Export feedbacks of this applicant">
+                        Feedbacks
+                    </button>
+                    <field name="code_ref" invisible="1"/>
+                </xpath>
+                <!-- <xpath expr="//button[@name='action_makeMeeting']" position="after">
+
+                </xpath> -->
+                <field name="partner_mobile" position="after">
+                    <field name="submit_edu_work" invisible="1"/>
+                    <field name="current_location"/>
+                    <field name="gender" required="0"/>
+                    <field name="date_of_birth" required="0"/>
+                    <field name="job_location_id" required="0"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <!-- <field name="experience" string="Experience"/> -->
+                    <field name="qualification" string="Qualification" groups="base.group_no_one" invisible="1"/>
+                    <field name="qualification_ids" string="Qualification"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}" required="1"
+                           widget="many2many_tags"/>
+                    <field name="other_qualification" string="Other Qualification"
+                           attrs="{'invisible': ['|',('qualification_ids','=',False),('other_qualification','=',False)]}"/>
+                    <field name="certification"/>
+                    <field name="experience_ids" attrs="{'invisible': [('code_ref','!=','walkindrive')]}">
+                        <tree>
+                            <field name="job_role"/>
+                            <field name="from_date"/>
+                            <field name="to_date"/>
+                        </tree>
+                    </field>
+                    <field name="skill_ids" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="cv_skill" widget="many2many_tags" attrs="{'invisible':['|',('cv_skill','=',[])]}"/>
+                    <field name="cv_qualification" attrs="{'invisible':['|',('cv_qualification','=',False)]}"/>
+
+                    <field name="hiring_type" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           invisible="1"/>
+                    <field name="employee_type" invisible="1"/>
+                    <field name="employee_id"
+                           attrs="{'invisible':['|','&amp;',('employee_type','=',False),('employee_id','=',False),('employee_type','=','new')]}"/>
+                    <field name="project_name" invisible="1"/>
+                    <field name="budget_type" invisible="1"/>
+                    <!-- <field name="date_of_requisition"/> -->
+
+                    <label for="budget_from_date" string="Duration" class="oe_inline"
+                           attrs="{'invisible':['|',('budget_type','=',False),('budget_type','=','treasury')]}"/>
+                    <div>
+                        <group>
+                            <field name="budget_from_date"
+                                   attrs="{'invisible':['|',('budget_type','=',False),('budget_type','=','treasury')]}"/>
+                            <field name="budget_to_date"
+                                   attrs="{'invisible':['|',('budget_type','=',False),('budget_type','=','treasury')]}"/>
+                        </group>
+                    </div>
+                    <label for="exp_year" string="Total Experience" class="oe_inline"/>
+                    <div>
+                        <group>
+                            <field name="exp_year" string="Year" attrs="{'invisible':[('exp_year','&gt;',1)]}"
+                                   required="1"/>
+                            <field name="exp_year" string="Years"
+                                   attrs="{'invisible':['|',('exp_year','=',False),('exp_year','&lt;',2)]}"
+                                   required="1"/>
+                            <field name="exp_month" string="Month" attrs="{'invisible':[('exp_month','&gt;',1)]}"
+                                   required="1"/>
+                            <field name="exp_month" string="Months"
+                                   attrs="{'invisible':['|',('exp_month','=',False),('exp_month','&lt;',2)]}"
+                                   required="1"/>
+                        </group>
+                    </div>
+                    <label for="relevant_exp_year" string="Relevant Experience" class="oe_inline"/>
+                    <div>
+                        <group>
+                            <field name="relevant_exp_year" string="Year" attrs="{'invisible':[('relevant_exp_year','&gt;',1)]}"
+                                   required="1"/>
+                            <field name="relevant_exp_year" string="Years"
+                                   attrs="{'invisible':['|',('relevant_exp_year','=',False),('relevant_exp_year','&lt;',2)]}"
+                                   required="1"/>
+                            <field name="relevant_exp_month" string="Month" attrs="{'invisible':[('relevant_exp_month','&gt;',1)]}"
+                                   required="1"/>
+                            <field name="relevant_exp_month" string="Months"
+                                   attrs="{'invisible':['|',('relevant_exp_month','=',False),('relevant_exp_month','&lt;',2)]}"
+                                   required="1"/>
+                        </group>
+                    </div>
+                </field>
+
+<!--                <field name="job_id" position="after">-->
+<!--                    <field name="relevant_job"/>-->
+<!--                </field>-->
+                <xpath expr="//group" position="inside">
+                    <field name="erroll_reference" string="Enrollment Number" readonly="1"/>
+                    <group>
+                        <field name="job_position" invisible="1" required="1"
+                               options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    </group>
+                </xpath>
+                <field name="availability" position="replace">
+                    <field name="availability" string="Date of Joining" invisible="1"/>
+                    <field name="date_of_offer" invisible="1"/>
+                </field>
+
+
+                <field name="user_id" position="attributes">
+                    <attribute name="required">0</attribute>
+                    <attribute name="invisible">1</attribute>
+                    <attribute name="string">HR Responsible</attribute>
+                    <attribute name="options">{"no_open":True,'no_create':True}</attribute>
+                </field>
+                <field name="user_id" position="after">
+                    <field name="is_account" invisible="1"/>
+                    <field name="offer_id" readonly="1" attrs="{'invisible':[('offer_id','=',False)]}"/>
+                    <field name="mrf_id" options="{'no_edit': True, 'no_create':True, 'no_open':True}"
+                           string="MRF"/>
+                    <field name="budget_amount"
+                           force_save='1'
+                           attrs="{'required': [('requisition_type','=','project'),('stage_id','=',4)], 'invisible':[('mrf_id', '=', False)],'readonly':[('is_account','!=',True)]}"/>
+
+
+                    <!-- Additional Field Modified By:Chandrasekhar -->
+                    <field name="requisition_type" force_save="1"
+                           attrs="{'required': [('mrf_id', '=', True), ('is_account','=', True)]}"/>
+                    <field name="project_type" force_save="1"
+                           attrs="{'invisible':['|', ('requisition_type','=','treasury'), ('mrf_id', '=', False)], 'required': [('mrf_id', '=', True), ('is_account','=', True),('requisition_type','=','project')]}"/>
+                    <field name="mrf_project" force_save="1"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           attrs="{'invisible':['|', ('requisition_type','=','treasury'), ('mrf_id', '=', False)], 'required': [('mrf_id', '=', True), ('is_account','=', True),('requisition_type','=','project')]}"/>
+                    <field name="mrf_duration" force_save="1"
+                           attrs="{'invisible':['|', ('requisition_type','=','treasury'), ('mrf_id', '=', False)], 'required': [('mrf_id', '=', True), ('is_account','=', True),('requisition_type','=','project')]}"/>
+                    <field name="mrf_role_id" force_save="1"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           attrs="{'invisible':[('mrf_id', '=', False)], 'required': [('mrf_id', '=', True), ('is_account','=', True)]}"/>
+                    <field name="mrf_categ_id" force_save="1"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           attrs="{'invisible':[('mrf_id', '=', False)], 'required': [('mrf_id', '=', True), ('is_account','=', True)]}"/>
+                    <field name="mrf_type_employment" force_save="1" invisible="1" required="0"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           attrs="{'invisible':[('mrf_id', '=', False)], 'required': [('mrf_id', '=', True), ('is_account','=', True)]}"/>
+
+                    <field name="responsible_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+
+                </field>
+
+                <field name="description" position="after">
+                    <group>
+                        <group string="Educational Details">
+                            <field name="edu_data_ids" />
+                        </group>
+                        <group string="Experience Details">
+                            <field name="experience_sts"/>
+                            <field name="work_experience_ids"
+                                    attrs="{'invisible':[('experience_sts', 'in', ['1',False])]}"/>
+                        </group>
+                        <group>
+                            <field name="applicant_stage_ids" readonly="1">
+                                <tree editable="top">
+                                    <field name="employee_id" string="Stage Changed By"/>
+                                    <field name="from_stage"/>
+                                    <field name="to_stage"/>
+                                    <field name="applicant_id" invisible="1"/>
+                                    <field name="date"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <group string="Offer Declined" attrs="{'invisible':[('stage_id', '!=', 12)]}">
+                            <field name="reason_choose"/>
+                            <field name="special_reason"/>
+                        </group>
+                    </group>
+
+                </field>
+                <!-- Educational Details page : Start-->
+
+
+                <xpath expr="//group/field[@name='partner_id']" position="replace"/>
+                <xpath expr="//group/field[@name='partner_mobile']" position="replace"/>
+                <xpath expr="//group/field[@name='email_from']" position="attributes">
+                    <attribute name="required">1</attribute>
+                </xpath>
+                <xpath expr="//group/field[@name='email_from']" position="before">
+                    <field name="job_position" string="Job Position"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}" required="1"/>
+                    <field name="other_position" string="Job Position"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           attrs="{'invisible': ['|',('job_position','=',False),('other_position','=',False)]}"/>
+                    <field name="partner_name"/>
+                    <!-- <field name="title" /> -->
+                </xpath>
+                <xpath expr="//group/field[@name='partner_phone']" position="attributes">
+                    <attribute name="string">Mobile 2</attribute>
+                </xpath>
+                <xpath expr="//group/field[@name='partner_phone']" position="before">
+                    <field name="partner_mobile" class="o_force_ltr" string="Mobile 1" required="1"/>
+                </xpath>
+                <xpath expr="//sheet/div[@class='oe_title']" position="attributes">
+                    <attribute name="attrs">{'invisible':1}</attribute>
+                </xpath>
+                <xpath expr="//group/group/field[@name='medium_id']" position="replace"/>
+                <xpath expr="//group/group/field[@name='source_id']" position="replace">
+                    <field name="source_id" options="{'no_open': True,'no_create':True,'no_edit':True}" required="1"/>
+                    <field name="reference_walkindrive" attrs="{'invisible':[('code_ref','!=','walkindrive')]}"/>
+                    <field name="reference_print_media" attrs="{'invisible':[('code_ref','!=','printmedia')]}"/>
+                    <field name="reference_job_fair" attrs="{'invisible':[('code_ref','!=','jobfair')]}"/>
+                    <field name="employee_referred" attrs="{'invisible':[('code_ref','!=','employee')]}"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="media_id" attrs="{'invisible':[('code_ref','!=','social')]}"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="institute_id" attrs="{'invisible':[('code_ref','!=','institute')]}"
+                           domain="[('institute','=',True)]"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="registration_number" attrs="{'invisible':[('institute_id','=',False)]}"/>
+                    <field name="consultancy_id" attrs="{'invisible':[('code_ref','!=','consultancy')]}"
+                           domain="[('consultancy','=',True)]"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="jportal_id" attrs="{'invisible':[('code_ref','!=','job')]}"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="service_partner_id" attrs="{'invisible':[('code_ref','!=','partners')]}"
+                           domain="[('service_partner','=',True)]"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <!--  walk-in drive options-->
+                    <field name="info_source_id" attrs="{'invisible': [('code_ref','!=','walkindrive')]}"/>
+                    <field name="other_info" attrs="{'invisible': ['|','|',('info_source_id','=',False),('info_source_id','!=','others'), ('code_ref','!=','walkindrive')],
+                            'required': [('info_source_id','=','others')]}"/>
+                    <field name="walkin_employee_reference"
+                           attrs="{'invisible': ['|','|',('info_source_id','=',False),('info_source_id','!=','csm_employee'), ('code_ref','!=','walkindrive')], 'required':[('info_source_id','=','csm_employee')]}"/>
+
+                    <field name="code_ref" invisible="1"/>
+                </xpath>
+                <xpath expr="//group/group[2]/field[@name='reference']" position="replace">
+                    <field name="reference"
+                           attrs="{'invisible':['|', ('code_ref','in',['job','consultancy','social','employee','institute','partners','website','career','walkindrive','printmedia','jobfair']),('code_ref','=', False)]}"/>
+                    <field name="categ_ids" widget="many2many_tags"
+                           options="{'color_field': 'color', 'no_edit': True,'no_create':True}"/>
+                    <field name="create_date" string="Applied Date" required="0" readonly="1" widget="date" invisible="1"/>
+                    <field name="offer_date" attrs="{'required':[('stage_id', '=', 5)]}"/>
+                    <field name="acceptance_date" required="0" invisible="1"/>
+                    <field name="joining_date" attrs="{'required':[('stage_id', '=', 5)]}"/>
+                    <field name="profile_submit_date" attrs="{'required':[('stage_id', '=', 5)]}"/>
+                    <field name="bond_required" widget="radio" options="{'horizontal': true}"/>
+                    <!-- <field name="hr_discussion_mail" widget="radio" options="{'horizontal': true}" readonly="1"/>
+                    <field name="hr_discussion_status" readonly="1"/> -->
+                    <field name="bond_years"
+                           attrs="{'required': [('bond_required','=', '1')],'invisible': [('bond_required','=', '0')]}"/>
+                    <field name="bond_months"
+                           attrs="{'required': [('bond_required','=', '1')],'invisible': [('bond_required','=', '0')]}"/>
+
+                    <field name="mode_of_interview" attrs="{'invisible': [('code_ref','!=','walkindrive')]}"/>
+
+                </xpath>
+
+                <xpath expr="//group/group[2]/field[@name='priority']" position="attributes">
+                    <attribute name="attrs">{'invisible':1}</attribute>
+                </xpath>
+                <xpath expr="//group[1]" position="before">
+                    <group>
+                        <group string="Rating" col="2" class="oe_title">
+                            <field name="priority" widget="priority" nolabel="1" class="oe_inline" style="font-size: 20px;"/>
+                            <field name="char_priority" nolabel="1" readonly="1" class="oe_inline" style="font-size: 20px;"/>
+                        </group>
+                    </group>
+                </xpath>
+                <xpath expr="//field[@name='job_id']" position="attributes">
+                    <attribute name="options">{'no_open': True,'no_create':True,'no_edit':True}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='type_id']" position="attributes">
+                    <attribute name="attrs">{'invisible':1}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='company_id']" position="attributes">
+                    <attribute name="attrs">{'invisible':1}</attribute>
+                </xpath>
+
+                <xpath expr="//group/group[4]" position="replace">
+                    <group string="">
+                        <field name="company_currency_id" class="oe_inline"  options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                        <field name="monthly_ctc_amount" class="oe_inline"/>
+                        <field name="current_ctc" class="oe_inline"/>
+                        <field name="salary_expected" string="Expected CTC(Annum)" class="oe_inline"/>
+                        <field name="salary_expected_extra" class="oe_inline" placeholder="Extra advantages..."
+                               invisible="1"/>
+                        <field name="salary_proposed" class="oe_inline" invisible="1"/>
+                        <field name="salary_proposed_extra" class="oe_inline" placeholder="Extra advantages..."
+                               invisible="1"/>
+                        <field name="notice_period" string="Notice Period(Days)" class="oe_inline"/>
+
+                        <field name="availability" invisible="1"/>
+                        <field name="emp_id" invisible="1"/>
+                        <field name="is_finance_approved" invisible="1"/>
+                        <field name="is_screening_completed" invisible="1"/>
+                        <field name="is_screening_enabled" invisible="1"/>
+                        <field name="panel_member_id" 
+                                options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                attrs="{'invisible':[('is_screening_enabled', '=', False)]}"/>
+                    </group>
+                </xpath>
+                <xpath expr="//header/button[@name='archive_applicant']" position="replace">
+                    <field name="stage_code" invisible='1'/>
+                    <field name="hr_discuss_bool" invisible='1'/>
+                    <button name="action_open_discussion_details" type="object" string=" HR Discussion" attrs="{'invisible':[('hr_discuss_bool','=',False)]}" class="btn-warning"/>
+
+                    <button string="Refuse" name="archive_applicant" type="object"
+                            confirm="Are you sure you want to archive applicant?"
+                            groups="hr_recruitment.group_hr_recruitment_manager"/>
+                    <button string="Notify to Panel" name="%(kw_recruitment.notify_view_action_window)d" class="btn-success"
+                            type="action" context="{'active_applicant_id': id}"
+                            attrs="{'invisible': ['|',('stage_code','!=','IQ'),('panel_member_id','=',False)]}"
+                            groups="hr_recruitment.group_hr_recruitment_manager"/>
+                    <button string="Submit to HR" name="btn_submit_to_hr" type="object" class="btn-primary"
+                            attrs="{'invisible': ['|', ('mrf_id', '=', False), ('is_finance_approved', '=', False)]}"
+                            groups="kw_recruitment.group_hr_recruitment_accounts"/>
+                    <button string="Notify to Finance" name="btn_mail_to_finance" type="object" class="btn-primary"
+                            attrs="{'invisible':[('mrf_id', '=', False)]}"
+                            groups="hr_recruitment.group_hr_recruitment_manager,kw_recruitment.group_hr_recruitment_consultant,kw_recruitment.group_hr_recruitment_executive"/>
+                    <!-- attrs="{'invisible':['|','|', ('mrf_id', '=', False), ('budget_amount', '>', 0), ('is_finance_approved', '=', True)]}"-->
+<!--                    <button name="button_send_invitation" string="Send Invitation" type="object" -->
+<!--                            class="btn btn-success o_invisible_modifier"-->
+<!--                            groups="hr_recruitment.group_hr_recruitment_manager"-->
+<!--                            attrs="{'invisible':[('submit_edu_work', '=', True)]}"-->
+<!--                            confirm="Are you sure to send invitation to applicant for submitting Educational and Work Experience details?"/>        -->
+                </xpath>
+
+                <xpath expr="//header/button[@name='reset_applicant']" position="replace">
+                    <button string="Reopen Application" name="reset_applicant" type="object"
+                            attrs="{'invisible': [('active', '=', True)]}"
+                            confirm="Are you sure you want to un-archive applicant?"/>
+                </xpath>
+                <xpath expr="//group/group/field[@name='employee_referred']" position="after">
+                    <field name="referred_amount" widget='monetary' invisible="0" attrs="{'invisible':[('code_ref','!=','employee')]}"/>
+                    <field name="candidate_relation" attrs="{'invisible':[('code_ref','!=','employee')]}"/>
+                    <field name="candidate_relation_info" attrs="{'invisible':['|',('code_ref','!=','employee'), ('candidate_relation', '!=', '4')], 'required':[('candidate_relation', '=', '4')]}"/>
+                </xpath>
+                <xpath expr="//header/button[@name='create_employee_from_applicant']" position="replace">
+                    <button name="create_enrollment"
+                            string="Create Enrollment"
+                            type="object" class="oe_highlight"
+                            confirm="Are you sure to enroll the applicant?"/>
+                             <!-- attrs="{'invisible': ['|',('erroll_reference', '!=', False),'|',('active', '=', False),('stage_id', '!=', 5)]}" -->
+                </xpath>
+            </field>
+        </record>
+
+        <record id="crm_case_tree_view_job_kw_inherit" model="ir.ui.view">
+            <field name="model">hr.applicant</field>
+            <field name="inherit_id" ref="hr_recruitment.crm_case_tree_view_job"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="replace">
+                    <tree string="Applicants" decoration-bf="message_needaction==True">
+                        <field name="message_needaction" invisible="1"/>
+                        <field name="last_stage_id" invisible="1"/>
+                        <field name="create_date" string="Applied Date" widget="date"/>
+                        <field name="partner_name" string="Name"/>
+                        <field name="partner_mobile" string="Contact"/>
+                        <field name="email_from" string="Mail Id"/>
+                        <field name="qualification_ids" string="Qualification" widget="many2many_tags"/>
+                        <field name="exp_year" string="Exp(Yrs)"/>
+                        <field name="current_location" string="Current Location"/>
+                        <field name="relevant_job" string="Post Relevant For" invisible="1"/>
+                        <field name="job_position" string="Job Position"/>
+                        <field name="job_id" string="Post Applied For" invisible="1"/>
+                        <field name="source_id" string="Source"/>
+                        <field name="stage_id" string="Status"/>
+                        <field name="date_last_stage_update" invisible="1"/>
+                        <field name="name" invisible="1"/>
+                        <field name="partner_phone" invisible="1"/>
+                        <field name="medium_id" invisible="1"/>
+                        <field name="priority" invisible="1"/>
+                        <field name="type_id" invisible="1"/>
+                        <field name="availability" invisible="1"/>
+                        <field name="department_id" invisible="context.get('invisible_department', True)"/>
+                        <field name="user_id" invisible="1"/>
+                    </tree>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- <record model="ir.actions.act_window" id="hr_recruitment.action_hr_job_applications">
+            <field name="view_mode">tree,kanban,form,graph,calendar,pivot</field>
+        </record> -->
+
+        <record model="ir.ui.view" id="kw_hr_applicant_kanban_inherited_kanban">
+            <field name="name">hr.applicant.kanaban.inherited</field>
+            <field name="model">hr.applicant</field>
+            <field name="inherit_id" ref="hr_recruitment.hr_kanban_view_applicant"/>
+            <field name="arch" type="xml">
+                <xpath expr="//kanban" position="attributes">
+                    <attribute name="default_group_by"/>
+                </xpath>
+                <xpath expr="//kanban/templates/t/div[1]" position="attributes">
+                    <attribute name="t-attf-class">oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_applicant_kanban oe_semantic_html_override</attribute>
+                </xpath>
+                <xpath expr="//div[hasclass('o_kanban_inline_block')]/field[@name='activity_ids']" position="replace">
+                    <field name="activity_ids" widget="kanban_activity"
+                           groups="hr_recruitment.group_hr_recruitment_manager"/>
+                </xpath>
+                <xpath expr="//div[@class='o_kanban_record_subtitle']/field[@name='job_id']" position="replace">
+                    <field name="job_position"/>
+                </xpath>
+                <xpath expr="//div[@class='oe_kanban_bottom_left']" position="before">
+                    <button name="get_applicants" class="float-left mr4 btn btn-primary active" type="object"
+                    help="Edit">Edit
+                    </button>
+                    <field name="char_priority" style="font-size: 19px; padding-right: 4px;"/>
+                </xpath>
+            </field>
+        </record>
+
+        <function model="ir.model.fields" name="formbuilder_whitelist">
+            <value>hr.applicant</value>
+            <value eval="[
+                        'partner_phone',
+                        'partner_mobile', 
+                        'department_id',
+                        'partner_name',
+                        'job_id', 
+                        'email_from',
+                        'description',
+                        'qualification_ids',
+                        'experience',
+                        'job_position',
+                    ]"/>
+        </function>
+
+        <record model="ir.ui.view" id="recruitment_kanban_inherited">
+            <field name="name">hr_kanban</field>
+            <field name="model">hr.applicant</field>
+            <field name="inherit_id" ref="hr_recruitment.hr_kanban_view_applicant"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div/field[@name='activity_ids']" position="replace">
+                </xpath>
+                <xpath expr="//div/field[@name='categ_ids']" position="replace">
+                </xpath>
+            </field>
+        </record>
+
+        <record id="hr_recruitment.mail_activity_type_action_config_hr_applicant" model="ir.actions.act_window">
+            <field name="name">Activity Types</field>
+            <field name="res_model">mail.activity.type</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">['|', ('res_model_id', '=', False), ('res_model_id.model', '=', 'hr.applicant')]
+            </field>
+            <field name="context">{'default_res_model': 'hr.applicant'}</field>
+        </record>
+
+        <record id="kw_view_crm_case_jobs_filter" model="ir.ui.view">
+            <field name="model">hr.applicant</field>
+            <field name="inherit_id" ref="hr_recruitment.view_crm_case_jobs_filter"/>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="job_position"/>
+                    <filter string="Initial Screening" domain="[('stage_id.code', '=', 'sl')]" name="initial_stage"/>
+                    <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
+                </search>
+                <xpath expr="//filter[@name='activities_my']" position="replace"/>
+                <xpath expr="//filter[@name='inactive']" position="replace"/>
+                <xpath expr="//filter[@name='activities_overdue']" position="replace"/>
+                <xpath expr="//filter[@name='activities_today']" position="replace"/>
+                <xpath expr="//filter[@name='activities_upcoming_all']" position="replace"/>
+                <xpath expr="//filter[@name='message_needaction']" position="replace"/>
+                <xpath expr="//filter[@name='job']" position="replace"/>
+                <field name="job_id" position="replace"/>
+                <group expand="0" string="Group By">
+                    <filter string="Applied Date" name="create_date" date="create_date"/>
+                </group>
+            </field>
+        </record>
+
+        <menuitem id="hr_recruitment.hr_recruitment_menu_config_activity_type"
+                  action="hr_recruitment.mail_activity_type_action_config_hr_applicant"
+                  parent="hr_recruitment.menu_hr_recruitment_configuration"
+                  groups="base.group_no_one"/>
+
+        <menuitem name="Applications"
+                  parent="hr_recruitment.menu_hr_recruitment_root"
+                  id="hr_recruitment.menu_crm_case_categ0_act_job"
+                  sequence="2"
+                  groups="hr_recruitment.group_hr_recruitment_manager,kw_recruitment.group_hr_recruitment_consultant,kw_recruitment.group_hr_recruitment_executive,kw_recruitment.group_offer_created_user"/>
+      
+        <record id="action_redirect_to_external_url" model="ir.actions.act_url">
+            <field name="name">Redirect to External URL</field>
+            <field name="type">ir.actions.act_url</field>
+            <field name="url">http://192.168.10.208:8014/</field>
+            <field name="target">new</field>
+        </record>
+            
+        <menuitem id="menu_redirect_to_external_url"
+                    name="Interview Rating"
+                    parent="hr_recruitment.menu_crm_case_categ0_act_job"
+                    action="action_redirect_to_external_url"
+                    sequence="5"/>         
+
+        <record model="ir.actions.act_window" id="action_kw_recruitment_finance_take_action">
+            <field name="name">Budget Validation</field>
+            <field name="res_model">hr.applicant</field>
+            <field name="view_mode">kanban,tree,form,pivot,graph,calendar,activity</field>
+            <field name="view_id" eval="False"/>
+            <field name="context">{}</field>
+            <field name="domain">[('is_finance_approved','=',True)]</field>
+            <field name="view_ids" eval="[(5, 0, 0), 
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('hr_recruitment.crm_case_tree_view_job')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('hr_recruitment.crm_case_form_view_job')}),
+                (0, 0, {'view_mode': 'kanban', 'view_id': ref('hr_recruitment.hr_kanban_view_applicant')}),
+                ]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_empty_folder">
+                    No applications yet
+                </p>
+            </field>
+        </record>
+
+        <record id="kwappli_generate_otp_tree" model="ir.ui.view">
+            <field name="name">OTP Tree</field>
+            <field name="model">kw_applicant_generate_otp</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="mobile_no" string="Mobile Number"/>
+                    <field name="otp" string="OTP"/>
+                    <field name="exp_date_time" string="Expire Date"/>
+                </tree>
+            </field>
+        </record>
+        <!-- excplicit tree view of kw generate otp : Ending -->
+
+        <!-- excplicit form view of kw generate otp : Opening -->
+        <record id="kwapplicant_generate_otp_form" model="ir.ui.view">
+            <field name="name">OTP form</field>
+            <field name="model">kw_applicant_generate_otp</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="mobile_no" string="Enter Mobile No"/>
+                            <field name="exp_date_time" string="Expire Date"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>	
+
+        <record id="kw_applicant_edu_qualification_view_form" model="ir.ui.view">
+            <field name="name">Educational Details Form</field>
+            <field name="model">hr_applicant_edu_qualification</field>
+            <field name="arch" type="xml">
+                <form string="Educational Details">
+                    <sheet>
+                        <group >
+                            <group >
+                                <field name="course_type" options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                                <field name="course_id" options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                                <field name="stream_id" options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                                <field name="university_name" options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                                <field name="passing_details" options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                            </group>
+                            <group >
+                                <field name="passing_year"/>
+                                <field name="division"/>
+                                <field name="marks_obtained" />
+                                <!-- <field name="uploaded_doc"/> -->
+                                <!-- <field name="filename" invisible="1"/>
+                                <field name="uploaded_doc" widget="binary" filename="filename" />
+                                <div class="file-format-note">(Only .jpeg,.png, .pdf format are allowed.Maximum file size is 4 MB) &#x2063;<span style="color:red;">*</span></div> -->
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+       
+        <record id="kw_applicant_edu_qualification_view_tree" model="ir.ui.view">
+            <field name="name">Educational Details Tree</field>
+            <field name="model">hr_applicant_edu_qualification</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="course_type"/>
+                    <field name="course_id"/>
+                    <field name="stream_id"/>
+                    <field name="university_name"/>
+                    <field name="passing_year"/>
+<!--                    <field name="uploaded_doc" invisible="1"/>-->
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_hr_applicant_work_experience_view_form" model="ir.ui.view">
+            <field name="name">Work Experience Form</field>
+            <field name="model">hr_applicant_work_experience</field>
+            <field name="arch" type="xml">
+                <form string="Work Experience">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="country_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="designation_name"/>
+                                <field name="organization_type" options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                            </group>
+                            <group>
+                                <field name="name"/>
+                                <field name="industry_type" options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                                <field name="effective_from" options="{'datepicker':{'maxDate': 'now'}}"/>
+                                <field name="effective_to" options="{'datepicker':{'maxDate': 'now'}}"/>
+                                <!-- <field name="uploaded_doc" widget="binary" filename="filename"/>
+                                <div class="file-format-note">(Only .jpeg,.png, .pdf format are allowed.Maximum file size is 4 MB) &#x2063;<span style="color:red;">*</span></div>
+                                <field name="filename" invisible="1"/> -->
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        
+        <record id="kw_hr_applicant_work_experience_view_tree" model="ir.ui.view">
+            <field name="name">Work Experience Tree</field>
+            <field name="model">hr_applicant_work_experience</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="country_id"/>
+                    <field name="name"/>
+                    <field name="designation_name"/>
+                    <field name="organization_type"/>
+                    <field name="industry_type"/>
+                    <field name="effective_from"/>
+                    <field name="effective_to"/>
+                </tree>
+            </field>
+        </record>
+
+
+    </data>
+
+</odoo>

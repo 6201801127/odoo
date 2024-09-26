@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <template id="kw_feedback_view_form" name="Feedback Form">
+            <t t-call="website.layout">
+                <div class="container mt16">
+                    <div class="card">
+                        <div class="csm card-header">
+                            <div class="d-flex justify-content-between  mt-2">
+                                <div>
+                                    <div class=" logedin-user">
+                                        <span class="h5 white-text font-italic" style="font-size:12px;"> Assessee:</span>
+                                    </div>
+                                    <div class="clearfix"/>
+                                    <div class="mb-1  logedin-user">
+                                        <img t-attf-src="data:image_small/*;base64,{{feedback.assessee_id.image_small}}"/>
+                                        <div class="info">
+                                            <p class="m-0 font-weight-bold h4 white-text">
+                                                <span t-esc='feedback.assessee_id.name'/>
+                                            </p>
+                                            <p class="m-0 badge badge-pill badge-warning p-2" style="background-color: #f7941d !important;">
+                                                <span t-esc='feedback.assessee_id.job_id.name' />
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"/>
+                                </div>
+
+                                <div>
+                                    <div class="logedin-user mb-4">
+                                    </div>
+                                    <div class="clearfix"/>
+                                    <div class="mb-1 logedin-user">
+                                        <div class="info">
+                                            <p class="m-0 font-weight-bold h4 white-text">
+                                                <span t-esc="feedback.feedback_details_id.assessment_tagging_id.name" />
+                                            </p>
+                                            <p class="m-0 badge badge-pill badge-warning p-2 float-right" style="background-color: #f7941d !important;">
+                                                <span t-esc="feedback.period_id.name" />
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"/>
+                                </div>
+                                <!-- <div t-field="page.description"/> -->
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <form role="form" id='kw_assessment_final_feedback_form' method="post" t-att-name="'%s_%s' % (feedback.id, feedback.assessee_id.id)" t-att-action="'/kw/feedback/submit/%s' % (slug(feedback))" t-att-data-prefill="'/kw/feedback/prefill/%s/%s' % (slug(feedback),token)">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="hidden" name="assessee_id" t-att-value="feedback.assessee_id.id" />
+                                <input type="hidden" name="token" t-att-value="token" />
+                                <div class='clearfix mb-3'>
+                                </div>
+                                <div t-foreach="feedback.survey_id.page_ids" t-as="page" class="table-responsive">
+                                    <p t-esc="page.title" class="font-weight-bold h3" />
+                                    <table class="table table-hover  table-bordered miltable table-sm" id="miltable">
+                                        <thead class="thead-csm">
+                                            <tr>
+                                                <th scope="col" class="font-weight-bold text-left">Competencies</th>
+                                                <th scope="col" width="10%" class="font-weight-bold text-center">Total Score</th>
+                                                <th scope="col" width="10%" class="font-weight-bold text-center">Your Score</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr t-foreach='page.question_ids' t-as='question'>
+                                                <t t-set="prefix" t-value="'%s_%s_%s' % (feedback.survey_id.id, page.id, question.id)" />
+                                                <t t-set="remark_prefix" t-value="'%s_%s' % (prefix, 'remark')" />
+                                                <td scope="col" class="text-left align-middle" style="font-weight: 400;">
+                                                    <span t-field='question.question' />
+                                                </td>
+                                                <td scope="col" class="text-center align-middle" style="font-weight:400;">
+                                                    <span t-field='question.validation_max_float_value' />
+                                                </td>
+                                                <td scope="col" class="text-center align-middle" style="font-weight:400;">
+                                                    <span t-att-id="prefix" t-att-name="prefix"></span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <h4 class="alert alert-info text-dark mb-4 feedback-border">Feedback </h4>
+                                <blockquote class="blockquote">
+                                    <p class="h6 py-1" style="font-size: 0.9rem;">Positive :</p>
+                                    <div style="font-size:0.9rem;">
+                                        <textarea style="resize: none;border:None;width: 100%;" readonly='1' rows='3' id='positive' t-att-name="'%s_%s' % (feedback.id, 'positive_remark')"></textarea>
+                                    </div>
+                                </blockquote>
+
+                                <blockquote class="blockquote">
+                                    <p class="h6 py-1" style="font-size: 0.9rem;">Weak Areas :</p>
+                                    <div style="font-size:0.9rem;">
+                                        <textarea style="resize: none;border:None;width: 100%;" readonly='1' rows='3' id='weak_areas' t-att-name="'%s_%s' % (feedback.id, 'weakareas_remark')"></textarea>
+                                    </div>
+                                </blockquote>
+
+                                <blockquote class="blockquote">
+                                    <p class="h6 py-1" style="font-size: 0.9rem;">Suggestions to improve the weaknesses :</p>
+                                    <div style="font-size:0.9rem;">
+                                        <textarea style="resize: none;border:None;width: 100%;" readonly='1' rows='3' id='suggestions' t-att-name="'%s_%s' % (feedback.id, 'suggestions_remark')"></textarea>
+                                    </div>
+                                </blockquote>
+
+                                <div class="text-center mt16 mb16">
+                                    <button class="btn btn-warning badge" style="background-color: #f7941d !important;" type="button" onclick='window.history.go(-1);'>Go to Feedback Page <i class="fa fa-arrow-right" />
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+
+        <template id="kw_assessment_feedback_view_form_assets" inherit_id="kw_assessment_feedback.kw_feedback_view_form">
+            <xpath expr="." position="inside">
+                <script src="/web/static/lib/nvd3/d3.v3.js"/>
+                <script src="/web/static/lib/nvd3/nv.d3.js"/>
+                <script type="text/javascript" src="/web/static/src/js/chrome/public_root_widget.js"/>
+                <script type="text/javascript" src="/web/static/src/js/fields/field_utils.js"/>
+                <script type="text/javascript" src="/kw_assessment_feedback/static/src/js/kw_final_feedback.js"/>
+                <script type="text/javascript" src="/kw_assessment_feedback/static/src/js/save_as_draft.js"/>
+                <link href="/kw_assessment_feedback/static/src/css/front_style.css" rel="stylesheet"/>
+
+                <t t-call="web._assets_frontend_helpers"/>
+                <link href="/web/static/lib/nvd3/nv.d3.css" rel="stylesheet" type="text/css"/>
+                <t t-call="web._assets_bootstrap"/>
+                <link rel="stylesheet" type="text/less" href="/web/static/src/scss/fonts.scss"/>
+
+                <link rel="stylesheet" type="text/less" href="/web_editor/static/src/scss/web_editor.common.scss"/>
+                <link href="/kwantify_theme/static/src/mdb/css/mdb.min.css?v=12" rel="stylesheet"/>
+                <script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js?v=12"/>
+
+                <script type="text/javascript" src="/kw_assessment_feedback/static/src/lib/sweetalert_new.js?v=12"/>
+                <script type="text/javascript" src="/kw_assessment_feedback/static/src/lib/additional-methods.js?v=12"/>
+                <script type="text/javascript" src="/kw_assessment_feedback/static/src/lib/jquery.validate.min.js?v=12"/>
+                <link rel="stylesheet" href="https://jqueryvalidation.org/files/demo/site-demos.css"/>
+
+            </xpath>
+        </template>
+
+    </data>
+</odoo>

@@ -1,0 +1,828 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="kw_feedback_publish_feedback_kanban_view" model="ir.ui.view">
+            <field name="name">Publish Feedback</field>
+            <field name="model">kw_feedback_details</field>
+            <field name="arch" type="xml">
+                <kanban class="o_event_kanban_view" import='false' create="false" delete="false" edit="false" modifiers="{}">
+                    <field name="assessor_id" />
+                    <field name="assessee_id"/>
+                    <field name="period_id"/>
+                    <field name="assessment_from_date"/>
+                    <field name="assessment_to_date"/>
+                    <field name="feedback_status"/>
+                    <field name="assessment_tagging_id" />
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_global_click" style="width:330px">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <h4>
+                                            <img t-att-src="kanban_image('hr.employee', 'image_small', record.assessee_id.raw_value)" t-att-title="record.assessee_id.value" t-att-alt="record.assessee_id.value" width="40" height="40" class="rounded-circle"/>
+                                            <b t-esc="record.assessee_id.value">
+                                            </b>
+                                        </h4>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <h1 class="text-uppercase badge text-wrap font-weight-bold p-2" style="background-color:#ade4ef; font-size: 1rem;" modifiers="{}">
+                                        <span t-esc="record.assessment_tagging_id.value"/>
+                                    </h1>
+                                </div>
+
+                                <div class="row mt-3 mb-2">
+                                    <div class="col-sm-8">
+                                        <div class="mb-4">
+                                            <h1 class="text-uppercase badge text-wrap font-weight-bold p-2" style="background-color:#ade4ef; font-size: 1rem;" modifiers="{}">
+                                                <span t-esc="record.period_id.value"/>
+                                            </h1>
+                                        </div>
+                                        <table class="table table-borderless">
+                                            <tr>
+                                                <td class="p-0" width="30%">
+                                                    <i class="fa fa-calendar  mr-2"/>
+                                                    From
+                                                </td>
+                                                <td class="p-0">:&amp;nbsp;</td>
+                                                <td class="p-0">
+                                                    <span t-att-title="'From Date : '+record.assessment_from_date.value">
+                                                        <t t-esc="record.assessment_from_date.value"/>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="p-0" width="30%">
+                                                    <i class="fa fa-calendar  mr-2"/>
+                                                    To
+                                                </td>
+                                                <td class="p-0">:&amp;nbsp;</td>
+                                                <td class="p-0">
+                                                    <span t-att-title="'To Date : '+record.assessment_to_date.value">
+                                                        <t t-esc="record.assessment_to_date.value"/>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-sm-4 text-center">
+                                        <h3 t-att-title="'Current Status is : '+record.feedback_status.value">
+                                            <field name="feedback_status" widget="label_selection" options="{'classes': {'1': 'notstarted', '2': 'warning', '3': 'completed','4':'publish'}}"/>
+                                        </h3>
+                                        <h3 class='text-center' t-att-title="'Total Score Secured : '+record.total_score.value">
+                                            <field name="total_score"/>
+%
+                                        </h3>
+                                        <button attrs="{'invisible': [('feedback_status','in',['0','1','2'])]}" class="btn btn-success float-right btn-sm mt-1" t-att-title="'Click To View Feedback of '+record.assessee_id.value" type="object" name="view_feedback">View Feedback <i class="fa fa-eye fa-inverse" role="img"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="kw_feedback_publish_feedback_tree_view" model="ir.ui.view">
+            <field name="name">Publish Feedback</field>
+            <field name="model">kw_feedback_details</field>
+            <field name="arch" type="xml">
+                <tree string="Assessment Feedback" create='false' edit='false' import='false' delete="false">
+                    <field name="assessment_tagging_id"/>
+                    <field name="assessee_id"/>
+                    <field name="assessee_job_id" />
+                    <field name="department" />
+                    <field name="ra_id" />
+                    <field name="assessor_id" widget='many2many_tags'/>
+                    <field name="assessment_from_date"/>
+                    <field name="assessment_to_date"/>
+                    <field name="feedback_status" class='font-weight-bold'/>
+                    <field name="goal_state" class='font-weight-bold'/>
+                    <field name="approval_user"/>
+                    <field name="total_score" attrs="{'invisible': [('feedback_status','in',['0','1','2'])]}"/>
+                    <!-- <field name="weightage_id" attrs="{'invisible': [('feedback_status','not in',['3','4'])]}"/> -->
+<!--                    <field name="compute_final_state" invisible='1'/>-->
+<!--                    <field name="count_score" invisible='1'/>-->
+<!--                    <field name="compute_weightage" invisible='1'/>-->
+                    <button attrs="{'invisible': [('feedback_status','in',['0','1','2'])]}"
+                            class="btn btn-sm oe_highlight" aria-label="Click To View Feedback" string='View Feedback '
+                            title="Click To View Feedback" type="object" name="view_feedback"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_feedback_publish_feedback_search_view" model="ir.ui.view">
+            <field name="name">Publish Feedback Search</field>
+            <field name="model">kw_feedback_details</field>
+            <field name="arch" type="xml">
+                <search string="Search Feedback">
+                    <field name="assessee_id"/>
+                    <field name="feedback_status"/>
+                    <field name="assessment_from_date"/>
+                    <field name="assessment_to_date"/>
+                    <field name="period_id" invisible='1'/>
+
+                    <!-- <filter string="By Current Year &amp; Month" domain="['&amp;',('assessment_from_date', '&gt;=',context_today().strftime('%Y-%m-01')),('assessment_from_date', '&lt;',(context_today()+relativedelta(months=1)).strftime('%Y-%m-01')),'&amp;',('assessment_from_date', '&gt;=',context_today().strftime('%Y-01-01')),('assessment_from_date', '&lt;',(context_today()+relativedelta(years=1)).strftime('%Y-01-01'))]" name="by_current_month_year"/> -->
+                    <filter string="Active" domain="[('active', '=',True)]" name="enable_publish_feedback_details"/>
+                    <filter string="Inactive" domain="[('active', '=',False)]" name="disable_publish_feedback_details"/>
+                    <separator/>
+
+                    <filter string="Current Period"
+                            domain="[('period_id.period_date','&lt;',(context_today()+relativedelta(months=1)).strftime('%Y-%m-01')), ('period_id.period_date','&gt;=',time.strftime('%Y-%m-01'))]"
+                            name="by_current_month_year"/>
+                    <separator/>
+
+                    <filter string="Last Period"
+                            domain="[('period_id.period_date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('period_id.period_date','&lt;',time.strftime('%Y-%m-01'))]"
+                            name="by_last_month_year"/>
+
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_state" context="{'group_by': 'feedback_status'}" string="Status"
+                                help="Group Feedback by State"/>
+                        <filter name="group_by_goal_status" string="Goal Status" domain="[]"
+                                context="{'group_by':'goal_state'}" help="Group Goal Status Wise"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="kw_feedback_publish_feedback_form_view" model="ir.ui.view">
+            <field name="name">Publish Feedback</field>
+            <field name="model">kw_feedback_details</field>
+            <field name="arch" type="xml">
+                <form string="Assessment Feedback" create='false' duplicate='false' delete='false'>
+<!--                    <field name="compute_final_state" invisible='1'/>-->
+<!--                    <field name="count_score" invisible='1'/>-->
+<!--                    <field name="compute_weightage" invisible='1'/>-->
+<!--                    <field name="default_goal" invisible="1" />-->
+                    <field name="rrule_type" invisible='1'/>
+                    <field name="assessment_type" invisible='1'/>
+                    <field name="practical_test" invisible='1'/>
+                    <field name="meeting_id" invisible='1'/>
+                    <field name="assessment_feedback_type" invisible="1"/>
+                    <field name="active" invisible="1"/>
+                    <header>
+                        <button name="%(kw_assessment_feedback.kw_assessment_publish_wizard_action)d" type="action"
+                                string="Publish" class="btn-success"
+                                attrs="{'invisible':[('feedback_status','in',['0','1','2','6'])]}"
+                                groups='kw_assessment_feedback.group_assessment_feedback_manager,kw_employee.group_hr_ra'/>
+                        <button name="%(kw_assessment_feedback.kw_assessment_feedback_approval_view_action)d"
+                                type="action" string="Send for Approval" class="btn-success"
+                                attrs="{'invisible':[('feedback_status','in',['0','1','2','6','4'])]}"/>
+                        <button name="%(kw_assessment_feedback.kw_assessment_feedback_update_period_date_action)d"
+                                type="action" string="Update Date"
+                                attrs="{'invisible':[('feedback_status','in',['0','1','2','6'])]}" class="btn-success"
+                                groups='kw_assessment_feedback.group_assessment_feedback_manager'/>
+                        <button name="%(kw_assessment_feedback.send_mail_assessment_action)d" type="action"
+                                string="Send mail" attrs="{'invisible':[('feedback_status','in',['0','1','2','6'])]}"
+                                groups='kw_assessment_feedback.group_assessment_feedback_manager' class="btn-success"/>
+                        <field name="feedback_status" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="toggle_active"
+                                    string="Restore"
+                                    type="object" class="oe_stat_button" icon="fa-archive"
+                                    attrs="{'invisible': [('active', '=', True)]}"/>
+                            <button name="toggle_active"
+                                    string="Archive"
+                                    type="object" class="oe_stat_button" icon="fa-archive"
+                                    attrs="{'invisible': [('active', '=', False)]}"/>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="is_publish_hr" invisible="1"/>
+                                <field name="assessee_id" readonly='1'
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="assessor_id" widget='many2many_tags'
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"
+                                       attrs="{'readonly':['|',('feedback_status','in',['3','4','5','6']),('is_publish_hr','=',False)]}"/>
+                                <field name="survey_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}"
+                                       attrs="{'readonly':['|',('feedback_status','in',['2','3','4','5','6']),('is_publish_hr','=',False)]}"/>
+                            </group>
+                            <group>
+                                <field name="assessment_tagging_id"
+                                       attrs="{'invisible': [('assessment_type','not in',['probationary'])]}"
+                                       readonly='1' options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="period_id"
+                                       attrs="{'invisible': [('assessment_type','in',['probationary'])]}" readonly='1'
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="assessment_from_date" autocomplete='off'
+                                       attrs="{'readonly': [('feedback_status','in',['2','3','4','5','6'])],'required':[('rrule_type','not in',['custom'])],'invisible': [('rrule_type','in',['custom'])]}"/>
+                                <field name="assessment_to_date" autocomplete='off'
+                                       attrs="{'readonly': [('feedback_status','in',['3','4','5','6'])],'required':[('rrule_type','not in',['custom'])],'invisible': [('rrule_type','in',['custom'])]}"/>
+                                <field name="assessment_date" autocomplete='off'
+                                       attrs="{'readonly': ['|',('feedback_status','in',['3','4','5','6']),('is_publish_hr','=',False)],'required': [('rrule_type','in',['custom'])],'invisible': [('rrule_type','not in',['custom'])]}"/>
+                            </group>
+                        </group>
+                        <group attrs="{'invisible': ['|',('meeting_id','=',False),('assessment_type','not in',['probationary'])]}"
+                               string='Meeting Details'>
+                            <group>
+                                <field name="meeting_date"/>
+                                <field name="meeting_room"
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                            </group>
+                            <group>
+                                <field name="meeting_time"/>
+                                <field name="meeting_duration"/>
+                            </group>
+                            <div class="text-left">
+                                <button attrs="{'invisible': ['|',('feedback_status','in',['6']),('assessment_type','not in',['probationary'])]}"
+                                        class="btn btn-sm btn-info" string='Manage Meeting' type="object"
+                                        name="manage_feedback_meeting"/>
+                            </div>
+                        </group>
+                        <group>
+                            <field name="feedback_final_config_id" readonly='1' context="{'form_view_ref':'kw_assessment_feedback.kw_assessor_feedback_form'}">
+                                <tree>
+<!--                                    <field name="count_score" invisible='1'/>-->
+                                    <field name="assessor_id"/>
+                                    <field name="feedback_status"/>
+                                    <field name="positive_remark"/>
+                                    <field name="weak_remark"/>
+                                    <field name="improve_remark"/>
+                                    <field name="total_score" avg="Total Score"/>
+                                    <button attrs="{'invisible': [('feedback_status','in',['1','2'])]}"
+                                            string=' View Feedback' class="btn btn-primary btn-sm"
+                                            aria-label="Click To View Feedback" title="Click To View Feedback"
+                                            type="object" name="view_feedback">
+                                    </button>
+                                </tree>
+                            </field>
+                        </group>
+                        <group attrs="{'invisible': [('goal_id','=',False)]}">
+                            <field name="goal_id" invisible='1' force_save='1'/>
+                            <field name="goal_name"/>
+                            <field name="milestones">
+                                <tree>
+                                    <field name="milestone_name"/>
+                                    <field name="score" string="Progress (in %)"/>
+                                    <field name="weightage_id"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <group>
+                            <field name="positive_area"
+                                   attrs="{'readonly': ['|',('feedback_status','in',['6']),('is_publish_hr','=',False)]}"/>
+                            <field name="weak_area"
+                                   attrs="{'readonly': ['|',('feedback_status','in',['6']),('is_publish_hr','=',False)]}"/>
+                            <field name="suggestion_remark"
+                                   attrs="{'readonly': ['|',('feedback_status','in',['6']),('is_publish_hr','=',False)]}"/>
+                        </group>
+                        <group attrs="{'invisible': [('feedback_status','in',['0','1','2'])]}">
+                            <group>
+                                <field name="total_score" readonly="1"/>
+                                <field name="weightage_id" readonly="1"
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="bench_mark"/>
+                            </group>
+                        </group>
+                        <group attrs="{'invisible': [('practical_test','=',False)]}">
+                            <group>
+                                <field name="is_machine_test_required"
+                                       attrs="{'readonly': ['|',('feedback_status','in',['6']),('is_publish_hr','=',False)]}"/>
+                                <field name="machine_test_result"
+                                       attrs="{'invisible': [('is_machine_test_required','=',False)],'required': [('is_machine_test_required','=',True)],'readonly': ['|',('feedback_status','in',['6']),('is_publish_hr','=',False)]}"/>
+                            </group>
+                        </group>
+                        <group attrs="{'invisible': [('assessment_type','not in',['probationary'])]}">
+                            <group>
+                                <field id='prob_status' name="prob_status"
+                                       attrs="{'required': [('assessment_type','in',['probationary']),('feedback_status','in',['3','4','5'])],'readonly': ['|',('feedback_status','in',['6']),('is_publish_hr','=',False)]}"/>
+                                <field name="job_id" attrs="{'invisible': ['|',('assessment_feedback_type','!=','internship'),('prob_status','in',[False,'extended','failed_prob'])],
+                                'required': [('assessment_feedback_type','=','internship'),('prob_status','=','completed'),('assessment_type','in',['probationary']),('feedback_status','in',['3','4','5'])],'readonly': [('feedback_status','in',['6'])]}"
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="effective_from_date"
+                                       attrs="{'invisible': [('prob_status','in',[False,'extended','failed_prob'])],'required': [('prob_status','=','completed'),('assessment_type','in',['probationary']),('feedback_status','in',['3','4','5'])],'readonly': ['|',('feedback_status','in',['6']),('is_publish_hr','=',False)]}"
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+
+                                <field name="extend_date" autocomplete='off'
+                                       attrs="{'invisible': [('prob_status','in',[False,'completed','failed_prob'])],'required': [('prob_status','=','extended'),('assessment_type','in',['probationary']),('feedback_status','in',['3','4','5'])],'readonly': ['|',('feedback_status','in',['6']),('is_publish_hr','=',False)]}"/>
+                                <field name="next_assessment_date" autocomplete='off'
+                                       attrs="{'invisible': [('prob_status','in',[False,'completed','failed_prob'])],'required': [('prob_status','=','extended'),('assessment_type','in',['probationary']),('feedback_status','in',['3','4','5'])],'readonly': ['|',('feedback_status','in',['6']),('is_publish_hr','=',False)]}"/>
+                            </group>
+                        </group>
+                        <group attrs="{'invisible': [('approval_status','=',False)]}">
+                            <group>
+                                <field name="approval_status" readonly='1'/>
+                                <field name="approval_user" readonly='1'
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="approve_remark" readonly='1'
+                                       groups="kw_assessment_feedback.group_assessment_feedback_manager,kw_assessment_feedback.group_assessment_feedback_report_manager"
+                                       attrs="{'invisible': ['|',('feedback_status','in',['0','1','2']),('approval_status','in',[False,'revert'])]}"/>
+                                <field name="revert_remark" readonly='1'
+                                       groups="kw_assessment_feedback.group_assessment_feedback_manager,kw_assessment_feedback.group_assessment_feedback_report_manager"
+                                       attrs="{'invisible': ['|',('feedback_status','in',['0','1','2']),('approval_status','in',[False,'approved'])]}"/>
+                            </group>
+                        </group>
+                        <div class="text-center">
+                            <button attrs="{'invisible': [('feedback_status','in',['0','1','2'])]}" class="oe_highlight"
+                                    string='Preview Result' type="object" name="view_feedback"/>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- <record id="kw_feedback_publish_feedback_action" model="ir.actions.act_window">
+            <field name="name">Publish Periodic Assessment</field>
+            <field name="res_model">kw_feedback_details</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_type">form</field>
+            <field name="search_view_id" ref='kw_assessment_feedback.kw_feedback_publish_feedback_search_view'/>
+            <field name="context">{'search_default_by_current_month_year':1,'periodic':True}</field>
+            <field name="domain">[('feedback_status','not in',['0']),("assessment_tagging_id.assessment_type","in",["periodic"])]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+					No Periodic Assessment Feedback Here...
+                </p>
+            </field>
+        </record> -->
+        <record id="kw_feedback_publish1_feedback_server_action" model="ir.actions.server">
+            <field name="name">Publish Periodic Assessment</field>
+            <field name="condition">True</field>
+            <field name="model_id" ref="kw_assessment_feedback.model_kw_feedback_details"/>
+            <field name="search_view_id" ref='kw_assessment_feedback.kw_feedback_publish_feedback_search_view'/>
+            <field name="context">{'search_default_by_current_month_year':1,'periodic':True}</field>
+            <field name="state">code</field>
+            <field name="code">
+if env.user.has_group('kw_assessment_feedback.group_assessment_feedback_manager'):
+    tree_view_id = env.ref('kw_assessment_feedback.kw_feedback_publish_feedback_tree_view').id
+    form_view_id = env.ref('kw_assessment_feedback.kw_feedback_publish_feedback_form_view').id
+    kanban_view_id= env.ref('kw_assessment_feedback.kw_feedback_publish_feedback_kanban_view').id
+    action = {
+            'name' : 'Publish Periodic Assessment',
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form,tree,kanban',
+            'res_model': 'kw_feedback_details',
+            'views': [(tree_view_id, 'tree'), (form_view_id,'form'),(kanban_view_id,'kanban')],
+            'domain':[('feedback_status','not in',['0']),("assessment_tagging_id.assessment_type","in",["periodic"])],
+            'context': {'periodic':True}
+            }
+else:
+    tree_view_id = env.ref('kw_assessment_feedback.kw_feedback_publish_feedback_tree_view').id
+    form_view_id = env.ref('kw_assessment_feedback.kw_feedback_publish_feedback_form_view').id
+    kanban_view_id= env.ref('kw_assessment_feedback.kw_feedback_publish_feedback_kanban_view').id
+    action = {
+            'name' : 'Publish Periodic Assessment',
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form,tree,kanban',
+            'res_model': 'kw_feedback_details',
+            'views': [(tree_view_id, 'tree'), (form_view_id,'form'),(kanban_view_id,'kanban')],
+            'domain' : [('feedback_status','not in',['0']),("assessment_tagging_id.assessment_type","in",["periodic"]),('assessor_id.user_id','=',uid)],
+            'context': {'periodic':True}
+            }
+            </field>
+        </record>
+
+        <!-- <record id="kw_feedback_publish_feedback_actions_view_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kw_feedback_publish_feedback_tree_view"/>
+            <field name="act_window_id" ref="kw_feedback_publish_feedback_action"/>
+        </record>
+
+        <record id="kw_feedback_publish_feedback_actions_view_kanban" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">kanban</field>
+            <field name="view_id" ref="kw_feedback_publish_feedback_kanban_view"/>
+            <field name="act_window_id" ref="kw_feedback_publish_feedback_action"/>
+        </record>
+
+        <record id="kw_feedback_publish_feedback_actions_view_form" model="ir.actions.act_window.view">
+            <field eval="3" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="kw_feedback_publish_feedback_form_view"/>
+            <field name="act_window_id" ref="kw_feedback_publish_feedback_action"/>
+        </record> -->
+
+        <!-- ......................................Probationary................................................. -->
+
+        <record id="kw_feedback_publish_probationary_feedback_search_view" model="ir.ui.view">
+            <field name="name">Publish Feedback Search</field>
+            <field name="model">kw_feedback_details</field>
+            <field name="arch" type="xml">
+                <search string="Search Feedback">
+                    <field name="assessee_id"/>
+                    <field name="feedback_status"/>
+                    <field name="assessment_from_date"/>
+                    <field name="assessment_to_date"/>
+                    <field name="period_id" invisible='1'/>
+
+                    <!-- <filter string="By Current Year &amp; Month" domain="['&amp;',('assessment_from_date', '&gt;=',context_today().strftime('%Y-%m-01')),('assessment_from_date', '&lt;',(context_today()+relativedelta(months=1)).strftime('%Y-%m-01')),'&amp;',('assessment_from_date', '&gt;=',context_today().strftime('%Y-01-01')),('assessment_from_date', '&lt;',(context_today()+relativedelta(years=1)).strftime('%Y-01-01'))]" name="by_current_month_year"/> -->
+                    <filter string="Active" domain="[('active', '=',True)]" name="enable_publish_probationary_feedback"/>
+                    <filter string="Inactive" domain="[('active', '=',False)]" name="disable_publish_probationary_feedback"/>
+                    <separator/>
+
+                    <filter string="Current Month"
+                            domain="[('period_id.period_date','&lt;',(context_today()+relativedelta(months=1)).strftime('%Y-%m-01')), ('period_id.period_date','&gt;=',time.strftime('%Y-%m-01'))]"
+                            name="by_current_month_year"/>
+                    <separator/>
+
+                    <filter string="Last Month"
+                            domain="[('period_id.period_date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('period_id.period_date','&lt;',time.strftime('%Y-%m-01'))]"
+                            name="by_last_month_year"/>
+
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_state" context="{'group_by': 'feedback_status'}" string="Status"
+                                help="Group Feedback by State"/>
+                        <filter name="group_by_goal_status" string="Goal Status" domain="[]"
+                                context="{'group_by':'goal_state'}" help="Group Goal Status Wise"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="kw_feedback_probationary_publish_feedback_action" model="ir.actions.act_window">
+            <field name="name">Publish Final Assessment</field>
+            <field name="res_model">kw_feedback_details</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_type">form</field>
+            <field name="search_view_id" ref='kw_assessment_feedback.kw_feedback_publish_probationary_feedback_search_view'/>
+            <field name="context">{'search_default_by_current_month_year':1,'probationary':True,'login':1}</field>
+            <field name="domain">[('feedback_status','not in',['0']),("assessment_tagging_id.assessment_type","in",["probationary"])]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+					No Probationary Assessment Feedback Here...
+                </p>
+            </field>
+        </record>
+
+        <record id="kw_feedback_probationary_publish_feedback_tree_view" model="ir.ui.view">
+            <field name="name">Publish Feedback</field>
+            <field name="model">kw_feedback_details</field>
+            <field name="arch" type="xml">
+                <tree string="Assessment Feedback" create='false' edit='false' import='false' delete="false">
+                    <field name="assessment_tagging_id"/>
+                    <field name="assessee_id"/>
+<!--                    <field name="emp_code" invisible='1'/>-->
+                    <field name="is_publish_hr" invisible='1'/>
+                    <field name="assessee_job_id" />
+                    <field name="department" />
+                    <field name="assessor_id" widget='many2many_tags'/>
+                    <field name="assessment_date"/>
+                    <field name="feedback_status" class='font-weight-bold'/>
+                    <field name="approval_user"/>
+                    <field name="total_score" attrs="{'invisible': [('feedback_status','in',['0','1','2'])]}"/>
+<!--                    <field name="compute_final_state" invisible='1'/>-->
+<!--                    <field name="count_score" invisible='1'/>-->
+<!--                    <field name="compute_weightage" invisible='1'/>-->
+                    <button attrs="{'invisible': [('feedback_status','in',['0','1','2'])]}"
+                            class="btn btn-sm oe_highlight" string='View Feedback' type="object" name="view_feedback"/>
+                    <button attrs="{'invisible': ['|',('feedback_status','in',['6']),('is_publish_hr','=',False)]}"
+                            class="btn btn-sm btn-info" string='Manage Meeting' type="object"
+                            name="manage_feedback_meeting"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_feedback_probationary_publish_feedback_actions_view_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kw_feedback_probationary_publish_feedback_tree_view"/>
+            <field name="act_window_id" ref="kw_feedback_probationary_publish_feedback_action"/>
+        </record>
+
+        <record id="kw_feedback_probationary_publish_feedback_actions_view_kanban" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">kanban</field>
+            <field name="view_id" ref="kw_feedback_publish_feedback_kanban_view"/>
+            <field name="act_window_id" ref="kw_feedback_probationary_publish_feedback_action"/>
+        </record>
+
+        <record id="kw_feedback_probationary_publish_feedback_actions_view_form" model="ir.actions.act_window.view">
+            <field eval="3" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="kw_feedback_publish_feedback_form_view"/>
+            <field name="act_window_id" ref="kw_feedback_probationary_publish_feedback_action"/>
+        </record>
+
+        <!-- ......................................Approval................................................. -->
+
+        <record id="kw_feedback_approval_action" model="ir.actions.act_window">
+            <field name="name">Approve Assessment Feedback</field>
+            <field name="res_model">kw_feedback_details</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="search_view_id" ref='kw_assessment_feedback.kw_feedback_publish_feedback_search_view'/>
+            <field name="context">{}</field>
+            <field name="domain">[('feedback_status','in',['4']),("approval_user.user_id","=",uid)]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+					No Pending Assessment Feedback Here...
+                </p>
+            </field>
+        </record>
+
+        <record id="kw_feedback_approval_tree_view" model="ir.ui.view">
+            <field name="name">Approve Feedback</field>
+            <field name="model">kw_feedback_details</field>
+            <field name="arch" type="xml">
+                <tree string="Assessment Feedback" create='false' edit='false' import='false' delete="false">
+<!--                    <field name="compute_final_state" invisible='1'/>-->
+<!--                    <field name="count_score" invisible='1'/>-->
+<!--                    <field name="compute_weightage" invisible='1'/>-->
+                    <field name="assessment_tagging_id"/>
+                    <field name="assessee_id"/>
+                    <field name="assessee_job_id" />
+                    <field name="department" />
+                    <field name="ra_id" />
+                    <field name="prob_status"/>
+                    <field name="feedback_status" invisible='1'/>
+                    <field name="total_score"/>
+                    <field name="weightage_id"/>
+                    <button attrs="{'invisible': [('feedback_status','not in',['4'])]}" class="btn btn-sm btn-success"
+                            string='Take Action' type="object" name="take_action_feedback"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_feedback_approve_feedback_form_view" model="ir.ui.view">
+            <field name="name">approve Feedback</field>
+            <field name="model">kw_feedback_details</field>
+            <field name="arch" type="xml">
+                <form string="Assessment Feedback" create='false' edit='false' duplicate='false' delete='false'>
+<!--                    <field name="compute_final_state" invisible='1'/>-->
+<!--                    <field name="count_score" invisible='1'/>-->
+<!--                    <field name="compute_weightage" invisible='1'/>-->
+<!--                    <field name="default_goal" invisible="1" />-->
+                    <field name="rrule_type" invisible='1'/>
+                    <field name="assessment_type" invisible='1'/>
+                    <field name="meeting_id" invisible='1'/>
+                    <header>
+                        <button attrs="{'invisible': [('feedback_status','not in',['4'])]}"
+                                class="btn btn-sm btn-success" string='Approve' type="object" name="approve_feedback"/>
+                        <button attrs="{'invisible': [('feedback_status','not in',['4'])]}" class="btn btn-sm btn-info"
+                                string='Revert Back' type="object" name="revert_feedback"/>
+
+                        <field name="feedback_status" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="assessee_id" readonly='1'
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="assessor_id" widget='many2many_tags'
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"
+                                       attrs="{'readonly':[('feedback_status','in',['3','4','5','6'])]}"/>
+                                <field name="survey_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}"
+                                       attrs="{'readonly':[('feedback_status','in',['3','4','5','6'])]}"/>
+                            </group>
+                            <group>
+                                <field name="assessment_tagging_id"
+                                       attrs="{'invisible': [('assessment_type','not in',['probationary'])]}"
+                                       readonly='1' options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="period_id" readonly='1'
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="assessment_from_date" autocomplete='off'
+                                       attrs="{'readonly': [('feedback_status','in',['3','4','5','6'])],'required':[('rrule_type','not in',['custom'])],'invisible': [('rrule_type','in',['custom'])]}"/>
+                                <field name="assessment_to_date" autocomplete='off'
+                                       attrs="{'readonly': [('feedback_status','in',['3','4','5','6'])],'required':[('rrule_type','not in',['custom'])],'invisible': [('rrule_type','in',['custom'])]}"/>
+                                <field name="assessment_date" autocomplete='off'
+                                       attrs="{'readonly': [('feedback_status','in',['3','4','5','6'])],'required': [('rrule_type','in',['custom'])],'invisible': [('rrule_type','not in',['custom'])]}"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="feedback_final_config_id" readonly='1'
+                                   context="{'form_view_ref':'kw_assessment_feedback.kw_assessor_feedback_form'}">
+                                <tree>
+<!--                                    <field name="count_score" invisible='1'/>-->
+                                    <field name="assessor_id"/>
+                                    <field name="feedback_status"/>
+                                    <field name="positive_remark"/>
+                                    <field name="weak_remark"/>
+                                    <field name="improve_remark"/>
+                                    <field name="total_score" avg="Total Score"/>
+                                    <button attrs="{'invisible': [('feedback_status','in',['1','2'])]}"
+                                            string=' View Feedback' class="btn btn-primary btn-sm"
+                                            aria-label="Click To View Feedback" title="Click To View Feedback"
+                                            type="object" name="view_feedback">
+                                    </button>
+                                </tree>
+                            </field>
+                        </group>
+                        <group attrs="{'invisible': [('goal_id','=',False)]}">
+                            <field name="goal_id" invisible='1' force_save='1'/>
+                            <field name="goal_name"/>
+                            <field name="milestones">
+                                <tree>
+                                    <field name="milestone_name"/>
+                                    <field name="score" string="Progress (in %)"/>
+                                    <field name="weightage_id"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <group>
+                            <field name="positive_area" attrs="{'readonly': [('feedback_status','in',['4','5','6'])]}"/>
+                            <field name="weak_area" attrs="{'readonly': [('feedback_status','in',['4','5','6'])]}"/>
+                            <field name="suggestion_remark" attrs="{'readonly': [('feedback_status','in',['4','5','6'])]}"/>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="total_score"
+                                       attrs="{'invisible': [('feedback_status','in',['0','1','2'])]}" readonly="1"/>
+                                <field name="weightage_id"
+                                       attrs="{'invisible': [('feedback_status','in',['0','1','2'])]}" readonly="1"
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="bench_mark"
+                                       attrs="{'invisible': [('feedback_status','in',['0','1','2'])]}"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="prob_status"
+                                       attrs="{'invisible': [('assessment_type','not in',['probationary'])],'required': [('assessment_type','in',['probationary']),('feedback_status','in',['3','4','5'])],'readonly': [('feedback_status','in',['6'])]}"/>
+                                <field name="extend_date" autocomplete='off'
+                                       attrs="{'invisible': ['|',('assessment_type','not in',['probationary']),('prob_status','in',[False,'completed','failed_prob'])],'required': [('prob_status','=','extended'),('assessment_type','in',['probationary']),('feedback_status','in',['3','4','5'])],'readonly': [('feedback_status','in',['6'])]}"/>
+                                <field name="next_assessment_date" autocomplete='off'
+                                       attrs="{'invisible': ['|',('assessment_type','not in',['probationary']),('prob_status','in',[False,'completed','failed_prob'])],'required': [('prob_status','=','extended'),('assessment_type','in',['probationary']),('feedback_status','in',['3','4','5'])],'readonly': [('feedback_status','in',['6'])]}"/>
+                            </group>
+                        </group>
+                        <group attrs="{'invisible': [('approval_status','=',False)]}">
+                            <group>
+                                <field name="approval_status" readonly='1'/>
+                                <field name="approval_user" readonly='1'
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="approve_remark" readonly='1'
+                                       groups="kw_assessment_feedback.group_assessment_feedback_manager,kw_assessment_feedback.group_assessment_feedback_report_manager"
+                                       attrs="{'invisible': ['|',('feedback_status','in',['0','1','2']),('approval_status','in',[False,'revert'])]}"/>
+                                <field name="revert_remark" readonly='1'
+                                       groups="kw_assessment_feedback.group_assessment_feedback_manager,kw_assessment_feedback.group_assessment_feedback_report_manager"
+                                       attrs="{'invisible': ['|',('feedback_status','in',['0','1','2']),('approval_status','in',[False,'approved'])]}"/>
+                            </group>
+                        </group>
+                        <div class="text-center">
+                            <button attrs="{'invisible': [('feedback_status','in',['0','1','2'])]}" class="oe_highlight"
+                                    string='Preview Result' type="object" name="view_feedback"/>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_feedback_approval_actions_view_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kw_feedback_approval_tree_view"/>
+            <field name="act_window_id" ref="kw_feedback_approval_action"/>
+        </record>
+
+        <record id="kw_feedback_approval_actions_view_form" model="ir.actions.act_window.view">
+            <field eval="3" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="kw_feedback_approve_feedback_form_view"/>
+            <field name="act_window_id" ref="kw_feedback_approval_action"/>
+        </record>
+
+        <record id="kw_assessment_feedback_approval_form" model="ir.ui.view">
+            <field name="name">Approval</field>
+            <field name="model">kw_feedback_details</field>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                    </script>
+                    <div class="row">
+                        <div class="col-sm-12 mx-auto">
+                            <group>
+                                <field name="approve_remark" options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                            </group>
+                            <center>
+                                <button name="action_approve_feedback" type="object" class="btn-success mr-2">Approve</button>
+                                <button string="Cancel" class="btn-danger" special="cancel"/>
+                                <footer></footer>
+                            </center>
+                        </div>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_assessment_feedback_revert_form" model="ir.ui.view">
+            <field name="name">Revert</field>
+            <field name="model">kw_feedback_details</field>
+            <field name="arch" type="xml">
+                <form>
+                    <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                    </script>
+                    <div class="row">
+                        <div class="col-sm-12 mx-auto">
+                            <group>
+                                <field name="revert_remark" options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                            </group>
+                            <center>
+                                <button name="action_revert_feedback" type="object" class="btn-info mr-2">Revert</button>
+                                <button string="Cancel" class="btn-danger" special="cancel"/>
+                                <footer></footer>
+                            </center>
+                        </div>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- .................................................Extra .......................................................-->
+        <record id="kw_feedback_publish_feedback_form_view1" model="ir.ui.view">
+            <field name="name">Assessment Feedback</field>
+            <field name="model">kw_feedback_details</field>
+            <field name="arch" type="xml">
+                <form>
+<!--                    <field name="compute_final_state" invisible='1'/>-->
+<!--                    <field name="count_score" invisible='1'/>-->
+<!--                    <field name="compute_weightage" invisible='1'/>-->
+                    <field name="rrule_type" invisible='1'/>
+                    <field name="active" invisible='1'/>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="toggle_active"
+                                    string="Restore"
+                                    type="object" class="oe_stat_button" icon="fa-archive"
+                                    attrs="{'invisible': [('active', '=', True)]}"/>
+                            <button name="toggle_active"
+                                    string="Archive"
+                                    type="object" class="oe_stat_button" icon="fa-archive"
+                                    attrs="{'invisible': [('active', '=', False)]}"/>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="feedback_status" invisible="1"/>
+                                <field name="assessee_id" readonly='1'
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="assessor_id" widget='many2many_tags' options="{'no_open': True}"/>
+                                <field name="survey_id"
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                            </group>
+                            <group>
+                                <field name="period_id" readonly='1'
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="assessment_from_date" autocomplete='off'
+                                       attrs="{'readonly': [('feedback_status','in',['3','4','5','6'])],'required':[('rrule_type','not in',['custom'])],'invisible': [('rrule_type','in',['custom'])]}"/>
+                                <field name="assessment_to_date" autocomplete='off'
+                                       attrs="{'readonly': [('feedback_status','in',['3','4','5','6'])],'required':[('rrule_type','not in',['custom'])],'invisible': [('rrule_type','in',['custom'])]}"/>
+                                <field name="assessment_date" autocomplete='off'
+                                       attrs="{'readonly': [('feedback_status','in',['3','4','5','6'])],'required': [('rrule_type','in',['custom'])],'invisible': [('rrule_type','not in',['custom'])]}"/>
+
+                            </group>
+                        </group>
+                        <group>
+                            <field name="feedback_final_config_id" readonly='1'>
+                                <tree>
+<!--                                    <field name="count_score" invisible='1'/>-->
+                                    <field name="assessor_id"/>
+                                    <field name="positive_remark"/>
+                                    <field name="weak_remark"/>
+                                    <field name="improve_remark"/>
+                                    <field name="feedback_status"/>
+                                    <field name="total_score" avg="Total Score"/>
+                                    <button attrs="{'invisible': [('feedback_status','in',['1','2'])]}"
+                                            string=' View Feedback' class="btn btn-primary btn-sm"
+                                            aria-label="Click To View Feedback" title="Click To View Feedback"
+                                            type="object" name="view_feedback">
+                                    </button>
+                                </tree>
+                            </field>
+                        </group>
+                        <group attrs="{'invisible': [('goal_id','=',False)]}">
+                            <field name="goal_id" invisible="1"/>
+                            <field name="goal_name"/>
+                            <field name="milestones">
+                                <tree>
+                                    <field name="milestone_name"/>
+                                    <field name="score"/>
+                                    <field name="weightage_id"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <group>
+                            <field name="positive_area" />
+                            <field name="weak_area" />
+                            <field name="suggestion_remark" />
+                        </group>
+                        <group>
+                            <group>
+                                <field name="total_score"
+                                       attrs="{'invisible': [('feedback_status','in',['0','1','2'])]}" readonly="1"/>
+                                <field name="weightage_id"
+                                       attrs="{'invisible': [('feedback_status','in',['0','1','2'])]}" readonly="1"
+                                       options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                <field name="bench_mark"
+                                       attrs="{'invisible': [('feedback_status','in',['0','1','2'])]}"/>
+                            </group>
+                        </group>
+                    </sheet>
+                    <footer></footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

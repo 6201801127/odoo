@@ -1,0 +1,135 @@
+<odoo>
+    <data>
+        <record id="view_kw_induction_posh_user_readonly_kanban" model="ir.ui.view">
+            <field name="name">posh_induction_assessment_kanban</field>
+            <field name="model">kw_employee_posh_induction_details</field>
+            <field name="type">kanban</field>
+            <field name="mode">primary</field>
+            <field name="sequence" eval="1"/>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <kanban create="false" edit="false" delete="false" import="false">
+                    <field name="user_is_participant" invisible="1"/>
+                    <field name="user_has_given_assessment" invisible="1"/>
+                    <field name="test_available" invisible="1"/>
+                    <field name="induction_id" />
+                    <field name="assessment_type" />
+                    <field name="test_type" />
+                    <field name="start_date_of"/>
+                    <field name="end_date_of"/>
+                    <templates>
+                      <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_global_click">
+                                <div class="o_kanban_record_top ">
+                                    <div class="container p-0 m-0">
+										<div class="row">
+                                            <div class="col-sm-9">
+                                                <h3 class='text-uppercase text-info'>
+                                                    <field name="induction_id_name"/>
+                                                </h3>
+                                                <h6 class='text-uppercase badge badge-primary text-wrap font-weight-bold mb-2'
+                                                        style="font-size: 1.2rem; background-color:#108fbb">
+                                                    <field name="assessment_type"/>
+                                                </h6>
+                                            </div>
+                                           
+                                            <div class="clearfix"/>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-8">
+                                                <p class="h6">  &amp;nbsp; Duration:
+                                                    <field name="duration" />
+                                                </p>
+                                                <p class="h6" > &amp;nbsp; Start Date:
+                                                    <field name="start_date_of" />
+                                                </p>
+                                            </div>
+                                           
+                                            <div class="col-sm-4">
+                                                <button name="action_posh_assessment_test" string="Take Test"  attrs="{'invisible':[('user_has_given_assessment','=',True)]}"
+                                                    type="object" class="btn btn-primary">Take Test</button>
+                                                <!-- <button name="action_feedback_test" string="Feedback" context = "{'current_record': active_id}" attrs="{'invisible':['|',('user_has_given_assessment','=',False),('feedback_hide_btn','=',True)]}"
+                                                    type="object" class="btn btn-primary">Feedback</button> -->
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="action_posh_induction_user_readonly_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">My POSH Induction</field>
+            <field name="res_model">kw_employee_posh_induction_details</field>
+            <field name="view_mode">kanban</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>
+            <field name="domain">[('emp_id.user_id','=',uid)]</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'kanban', 'view_id': ref('kw_onboarding_induction_feedback.view_kw_induction_posh_user_readonly_kanban')})]"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    No Record found
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_posh_induction_assessment" name="My POSH Induction" 
+            parent="kw_onboarding_induction_feedback.menu_employee_data_model_tree" 
+            groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_user'
+            action="action_posh_induction_user_readonly_act_window" 
+            sequence="3"/>
+
+
+
+        <record model="ir.ui.view" id="kw_posh_induction_details_emp_list">
+            <field name="name">posh_induction_list</field>
+            <field name="model">kw_employee_posh_induction_details</field>
+            <field name="arch" type="xml">
+                <tree import="false" create="false" edit="false">
+                    <field name="emp_id"/>
+                    <field name="induction_id_name"/>
+                    <field name="test_type"></field>
+                    <field name="start_date_of"/>
+                    <field name="percentage_scored" />
+                    <field name="total_mark_obtained" />
+                    <field name="total_mark"/>
+                    <field name="duration"/>
+                    <field name="time_taken_duration"/>
+                    <field name="status_induction"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_posh_induction_details_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">POSH Induction Details</field>
+            <field name="res_model">kw_employee_posh_induction_details</field>
+            <field name="view_mode">tree</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>
+            <!-- <field name="domain">[('emp_id.user_id','=',uid)]</field> -->
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_onboarding_induction_feedback.kw_posh_induction_details_emp_list')})]"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    No Record found
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_posh_induction_details_assessment" name="POSH Induction Employee Details" 
+            parent="kw_onboarding_induction_feedback.menu_employee_data_model_tree" 
+            groups='kw_onboarding_induction_feedback.group_kw_onboarding_induction_manager,kw_skill_assessment.group_kw_skill_assessment_manager,kw_onboarding_induction_feedback.group_kw_onboarding_induction_officer'
+            action="action_posh_induction_details_act_window" 
+            sequence="2"/>
+
+
+    </data>
+</odoo>

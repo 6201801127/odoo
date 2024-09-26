@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_transfer_project_budget_tree" model="ir.ui.view">
+            <field name="name">transfer.project.budget.tree</field>
+            <field name="model">transfer_project_budget_amounts</field>
+            <field name="arch" type="xml">
+                <tree string="Transfer Project Budget" create='0' edit='0' delete='1' import='false' >
+                    <!-- <field name="head_of_expense"/> -->
+                    <field name="sequence_ref"/>
+                    <field name="head_of_expense"/>
+                    <field name="work_order_type"/>
+                    <field name="budget_department_name"/>
+                    <field name="budget_department" invisible='1'/>
+                    <field name="fiscal_year_id"/>
+                    <field name="opportunity_name"/>
+                    <field name="order_code"/>
+                    <field name="project_code"/>
+                    <field name="client"/>
+                    <!-- <field name="order_id"/> -->
+                    <field name="project_id"/>
+                    <field name="order_value"/>
+                    <field name="category_id"/>
+                    <field name="total_original_budget"  sum="Total" class="revenue_month_class_total"/>
+                    <field name="apr_budget_org" sum="Total"  class="actual_budget_class"/>
+                    <field name="apr_budget_rev" sum="Total" options='{"fg_color": "red:apr_budget_rev &lt; 0 ;green:apr_budget_rev >0"}'/>
+                    <field name="may_budget_org" sum="Total" class="actual_budget_class"/>
+                    <field name="may_budget_rev" sum="Total" options='{"fg_color": "red:may_budget_rev &lt; 0 ;green:may_budget_rev >0"}'/>
+                    <field name="jun_budget_org" sum="Total" class="actual_budget_class"/>
+                    <field name="jun_budget_rev" sum="Total" options='{"fg_color": "red:jun_budget_rev &lt; 0 ;green:jun_budget_rev >0"}'/>
+                    <field name="jul_budget_org" sum="Total" class="actual_budget_class"/>
+                    <field name="jul_budget_rev" sum="Total" options='{"fg_color": "red:jul_budget_rev &lt; 0 ;green:jul_budget_rev >0"}'/>
+                    <field name="aug_budget_org" sum="Total" class="actual_budget_class"/>
+                    <field name="aug_budget_rev" sum="Total" options='{"fg_color": "red:aug_budget_rev &lt; 0 ;green:aug_budget_rev >0"}'/>
+                    <field name="sep_budget_org" sum="Total" class="actual_budget_class"/>
+                    <field name="sep_budget_rev" sum="Total" options='{"fg_color": "red:sep_budget_rev &lt; 0 ;green:sep_budget_rev >0"}'/>
+                    <field name="oct_budget_org" sum="Total" class="actual_budget_class" />
+                    <field name="oct_budget_rev" sum="Total" options='{"fg_color": "red:oct_budget_rev &lt; 0 ;green:oct_budget_rev >0"}'/>
+                    <field name="nov_budget_org" sum="Total" class="actual_budget_class"/>
+                    <field name="nov_budget_rev" sum="Total" options='{"fg_color": "red:nov_budget_rev &lt; 0 ;green:nov_budget_rev >0"}'/>
+                    <field name="dec_budget_org" sum="Total" class="actual_budget_class"/>
+                    <field name="dec_budget_rev" sum="Total" options='{"fg_color": "red:dec_budget_rev &lt; 0 ;green:dec_budget_rev >0"}'/>
+                    <field name="jan_budget_org" sum="Total" class="actual_budget_class"/>
+                    <field name="jan_budget_rev" sum="Total" options='{"fg_color": "red:jan_budget_rev &lt; 0 ;green:jan_budget_rev >0"}'/> 
+                    <field name="feb_budget_org" sum="Total" class="actual_budget_class"/>
+                    <field name="feb_budget_rev" sum="Total" options='{"fg_color": "red:feb_budget_rev &lt; 0 ;green:feb_budget_rev >0"}'/>
+                    <field name="mar_budget_org" sum="Total" class="actual_budget_class"/>
+                    <field name="mar_budget_rev" sum="Total" options='{"fg_color": "red:mar_budget_rev &lt; 0 ;green:mar_budget_rev >0"}'/>
+                    <field name="account_code_id"/>
+                    <field name="remarks"/>
+                    <field name="state"/>
+                    <button name="action_open_approve_wizard" string="Take Action"
+                            attrs="{'invisible': [('state','in', ['approved','draft', 'cancel'])]}"
+                            class="btn-success" type="object" groups='kw_budget.group_l2_kw_budget' />
+                </tree>
+            </field>
+        </record>
+
+        <record id="search_transfer_project_budget_amounts" model="ir.ui.view">
+            <field name="name">Search Report</field>
+            <field name="model">transfer_project_budget_amounts</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="fiscal_year_id"/>
+                    <field name="project_id"/>
+                   <!-- <filter name="next_fy_filter" string="Next Financial Year" domain="[('fiscal_year_id.date_start', '&gt;', context_today().strftime('%Y-%m-%d'))]" context="{}" readonly="1"/> -->
+                   <filter name="current_fy_filter" string="Current Financial Year" 
+                        domain="['&amp;',('fiscal_year_id.date_start', '&lt;=',context_today().strftime('%Y-%m-%d')),('fiscal_year_id.date_stop', '&gt;=',context_today().strftime('%Y-%m-%d'))]"
+                        context="{}" readonly="1"/>
+                    <filter name="prev_fiscalyr_filter" string="Previous Financial Year" 
+                            domain="[('fiscal_year_id.date_stop', '&gt;=', (datetime.datetime.now() - relativedelta(years=1)).strftime('%Y-%m-%d')),
+                                    ('fiscal_year_id.date_stop', '&lt;', datetime.datetime.now().strftime('%Y-%m-%d'))]" context="{}" readonly="1"/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_account_fiscal_year" string="Financial Year" context="{'group_by':'fiscal_year_id'}" />
+                    </group>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="kw_project_budget_transfer_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Project Budget/Budget Cash Flow Forecast/Forecast Entry</field>
+            <field name="res_model">transfer_project_budget_amounts</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_transfer_project_budget_tree"/>
+            <field name="context">{'call_transfer_project_budget_amounts': True,'report_action_project_budget_transfer': True,'search_default_current_fy_filter': 1,}</field>
+        </record>
+
+        <record id="action_transfer_project_budget_revised" model="ir.actions.act_window">
+            <field name="name">Project Budget/Budget Cash Flow Forecast/Forecast Approve</field>
+            <field name="res_model">transfer_project_budget_amounts</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('has_revised_amounts', '=', True)]</field>
+            <field name="context">{'report_action_project_budget_transfer': False}</field>
+        </record>
+
+
+        <record id="action_revise_amount_wizard" model="ir.actions.act_window">
+            <field name="name">Revise Amount</field>
+            <field name="res_model">revise_amount_wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_revise_amount_wizard_form"/>
+            <field name="target">new</field>
+            <field name="context">{}</field>
+        </record>
+
+
+        <act_window id="revise_budget_act_window"
+                        name="Revise Amount"
+                        src_model="transfer_project_budget_amounts"
+                        res_model="revise_amount_wizard"
+                        view_type="form" view_mode="form" view_id="view_revise_amount_wizard_form"
+                        key2="client_action_multi" target="new" 
+            />
+
+    <template id="revenue_budget_expense_report_assets" inherit_id="web.assets_backend">
+		<link rel="stylesheet" type="text/scss" href="/web/static/src/scss/webclient.scss" position="after">
+            <link rel="stylesheet" type="text/css" href="/kw_budget/static/src/css/budget_tree.css"/>
+        </link>
+	</template>
+
+    </data>
+    
+</odoo>

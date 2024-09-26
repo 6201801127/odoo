@@ -1,0 +1,115 @@
+<odoo>
+    <data>
+
+        <!-- test_scenario_approval tree view -->
+
+        <record model="ir.ui.view" id="test_scenario_master_take_action_tree">
+            <field name="name">test_scenario_master_take_action_tree</field>
+            <field name="model">test_scenario_master</field>
+            <field name="arch" type="xml">
+                <tree create="false" import="false" delete="false" duplicate="false" class="bug_raise_tree">
+                    <field name="code" readonly="1" string="TS Id"/>
+                    <field name="project_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}" attrs="{'readonly': [('state','!=','Draft')]}"/>
+                    <field name="module_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}" attrs="{'readonly': [('state','!=','Draft')]}"/>
+                    <field name="prepared_on"/>
+                    <field name="expected_no_of_test_case" attrs="{'readonly': [('state','!=','Draft')]}"/>
+                    <field name="scenario_description" attrs="{'readonly': [('state','!=','Draft')]}"/>
+                    <field name="state" invisible="1"/>
+                    <field name="revert_status_boolean" invisible="1"/>
+                    <field name="status_compute"/>
+                    <field name="pm_ba_btn_hide_bool" invisible="1"/>
+                    <field name="pm_ba_approve_btn_hide_bool" invisible="1"/>
+                    <field  name="revert_btn_hide_bool" invisible="1"/>
+                    <field name="is_tester" invisible="1"/>
+                    <field name="is_user_tl" invisible="1"/>
+                    <button string="Send To TL" type="object" class="oe_highlight" name="button_submit_action" context="{'button':'send_to_tl'}"
+                            attrs="{'invisible': [('is_tester','!=',True)]}" confirm="Are you sure you want to proceed?"/>
+
+                    <button string="Send To PM/BA" type="object" class="oe_highlight" name="button_send_pm_ba_action"
+                            attrs="{'invisible': [('is_user_tl','!=',True)]}" confirm="Are you sure you want to proceed?"/>
+
+                    <button name="button_send_pm_ba_action" string="Ok" type="object" class="oe_highlight" attrs="{'invisible': [('pm_ba_btn_hide_bool','=',True)]}"/>
+
+                    <button name="button_pm_ba_approved" string="Ok" type="object" class="oe_highlight" attrs="{'invisible': [('pm_ba_approve_btn_hide_bool','!=',True)]}" />
+
+                    <button name="button_revert_back" string="Not Ok" type="object" class="btn-warning" attrs="{'invisible': [('revert_btn_hide_bool','!=',True)]}"/>
+
+                    <field name='is_view_scenario' invisible="1"/>
+                    <field name="is_user_tl" invisible = '1'/>
+                    <field name="is_user_pm" invisible = '1'/>
+                    <field name="is_user_ba" invisible = '1'/>
+                    <field name="approve_ba" invisible = '1'/>
+                    <field name="approve_pm" invisible = '1'/>
+                    <field name="send_to_pm_ba" invisible = '1'/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- form view -->
+
+        <record model="ir.ui.view" id="test_scenario_master_take_action_form">
+            <field name="name">test_scenario_master_take_action_form</field>
+            <field name="model">test_scenario_master</field>
+            <field name="arch" type="xml">
+                <form class="bug_design_tree">
+                    <group>
+                        <field name="code" readonly="1"/>
+                        <field name="project_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}" readonly="1"/>
+                        <field name="module_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}" readonly="1"/>
+                        <field name="prepared_on"/>
+                        <field name="expected_no_of_test_case" readonly="1"/>
+                        <field name="scenario_description" readonly="1"/>
+                        <field name="tl_remark" readonly="1" invisible="1"/>
+                        <field name="pm_remark" readonly="1" invisible="1"/>
+                        <field name="ba_remark" readonly="1" invisible="1"/>
+                        <field name="state" invisible="1"/>
+                        <field name="is_user_tl" invisible="1"/>
+                        <field name="is_user_pm" invisible="1"/>
+                        <field name="is_user_ba" invisible="1"/>
+                    </group>
+                    <footer>
+                        <button string="Approve" type="object" class="oe_highlight" name="button_approve_action" attrs="{'invisible': [('state','!=','Draft')]}"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- search View -->
+
+        <record id="test_scenario_master_take_action_search_view" model="ir.ui.view">
+            <field name="name">test_scenario_master_take_action_search_view</field>
+            <field name="model">test_scenario_master</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="prepared_by"/>
+                    <field name="project_id"/>
+                    <field name="module_id"/>
+                    <filter string="My Projects" domain="[('prepared_by', '=',uid)]" name="my_projects"/>
+                    <filter string="This Month" domain="[('prepared_on', 'like',context_today().strftime('%Y-%m'))]" name="current_month_test_scenario"/>
+                    <separator/>
+                    <filter string="Draft" domain="[('state', '=','Draft'), ('revert_status_boolean', '!=',True)]" name="draft_records"/>
+                    <filter string="Submitted" domain="[('state', '=','Submitted')]" name="submitted_records"/>
+                    <filter string="TL Approved" domain="[('state', '=','TL Approved')]" name="tl_records"/>
+                    <filter string="PM/BA Approved" domain="[('state', '=','PM/BA Approved')]" name="pm/ba_records"/>
+                    <filter string="Reverted" domain="[('revert_status_boolean', '=',True)]" name="revert_records"/>
+
+                    <filter name="group_by_employee" string="Prepared By" context="{'group_by':'prepared_by'}" />
+                    <filter name="group_by_project" string="Project" context="{'group_by':'project_id'}" />
+                    <filter name="group_by_module" string="Module" context="{'group_by':'module_id'}" />
+                    <filter name="group_by_state" string="State" context="{'group_by':'state'}" />
+                </search>
+            </field>
+        </record>
+
+        <!-- Server Action -->
+
+        <record id="test_scenario_masters_take_action_server" model="ir.actions.server">
+            <field name="name">Take Action</field>
+            <field name="model_id" ref="kw_bug_life_cycle.model_test_scenario_master"/>
+            <field name="state">code</field>
+            <field name="code">action=model.get_reqd_project()
+            </field>
+        </record>
+
+    </data>
+</odoo>

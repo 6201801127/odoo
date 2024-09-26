@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="kw_project_inherits_project_project_form" model="ir.ui.view">
+            <field name="name">Project Project Inherited Form</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.edit_project"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div//div[@name='options_active']" position="after">
+                    <div>
+                        <div>
+                            <label for="code" class="oe_inline" string="Project Code :"/>
+                            <field name="code" class="oe_inline oe_input_align"/>
+                        </div>
+                    </div>
+                </xpath>
+                <!-- <xpath expr="//form/sheet/div[@name='button_box']" position="inside">
+                    <button class="oe_stat_button" type="object" name="cost_account_analytic_line_action" icon="fa-usd"  string="Cost" widget="statinfo"/>
+                </xpath> -->
+
+                <xpath expr="//form/sheet/div[@name='button_box']" position="inside">
+                    <button class="oe_stat_button" type="object" name="module_count_action" icon="fa-gears" >
+                    <field name="module_count" string="Module" widget="statinfo"/>
+                    </button>
+                </xpath>
+
+                <!-- <xpath expr="//button[@name='attachment_tree_view']" position="replace"/> -->
+
+                <xpath expr="//notebook//page//group/field[@name='user_id']" position="before">
+                    <field name="crm_id"/>
+                </xpath>
+                <xpath expr="//notebook//page//group/field[@name='user_id']" position="replace">
+                    <field name="emp_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}" required='1'/>
+                    <field name="sbu_id"  force_save="1"/>
+                    <!-- <field name="reviewers_ids" widget="many2many_tags"/> -->
+                    <field name="reviewer_id" options="{'no_create': True,'no_edit':True,'no_open': True}"/>
+                </xpath>
+                <xpath expr="//notebook//page[@name='settings']" position="after">
+                    <page name="members" string="Members">
+                        <group>
+                            <field name="resource_id">
+                                <tree editable='bottom'>
+                                    <field name="designation_id" invisible='1' />
+                                    <field name="designation"/>
+                                    <field name="emp_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}" required='1'/>
+                                    <field name="reporting_id"/>
+                                    <field name="start_date" string="Involved Start Date"/>
+                                    <field name="end_date"  string="Involved End Date"/>
+                                    <!-- <field name="active"/> -->
+                                </tree>
+                            </field>
+                        </group>
+                        <group>
+                            <field name="resource_inactive_id">
+                                <tree editable='bottom'>
+                                    <field name="designation_id" invisible='1' />
+                                    <field name="designation"/>
+                                    <field name="emp_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}" required='1'/>
+                                    <field name="reporting_id"/>
+                                    <field name="start_date" string="Involved Start Date"/>
+                                    <field name="end_date" string="Involved End Date"/>
+                                    <field name="active"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </page>
+                  
+                    <page name="workorder" string="Work Order">
+                        <field name="workorder_ids">
+                           <tree editable='bottom'>
+                                <field name="crm_id" />
+                                <field name="current_wo" />
+                           </tree>
+                         </field>
+                    </page>
+                   
+                </xpath>
+            </field>
+        </record>
+
+        <record id="kw_project_inherits_project_project_list" model="ir.ui.view">
+            <field name="name">Project Project Inherited Tree</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.view_project"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="code"/>
+                    <field name="stage_id" string="WO/OPP"/>
+                    <field name="crm_id"/>
+                </xpath>
+                <xpath expr="//field[@name='user_id']" position="replace">
+                    <field name="emp_id"/>
+                    <field name="reviewer_id"/>
+                </xpath>
+                <xpath expr="//field[@name='emp_id']" position="before">
+                    <field name="create_date_crm"/>
+                    <field name="sales_person" invisible="1"/>
+                </xpath>
+                <xpath expr="//field[@name='partner_id']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.menu" id="project.menu_projects">
+            <field name="action" eval="False"/>
+        </record>
+        <record model="ir.ui.menu" id="project.menu_projects_config">
+            <field name="action" eval="False"/>
+        </record>
+
+
+        <record id="project.open_view_project_all_config" model="ir.actions.act_window">
+            <field name="name">Projects</field>
+            <field name="res_model">project.project</field>
+            <field name="view_type">form</field>
+            <field name="domain">[]</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('project.view_project')}),
+                (0, 0, {'view_mode': 'kanban', 'view_id': ref('project.view_project_kanban')})]"/>
+            <field name="search_view_id" ref="project.view_project_project_filter"/>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_empty_folder">
+                    Create a new project
+                </p><p>
+                    Organize your activities (plan tasks, track issues, invoice timesheets) for internal, personal or customer projects.
+                </p>
+            </field>
+        </record>
+
+        <record model="ir.ui.menu" id="project.menu_main_pm">
+			<field name="web_icon">kw_project,static/description/icon.png</field>
+		</record>
+        <menuitem id="kw_project_inherit_menu" name="Projects" action="project.open_view_project_all_config" parent="project.menu_main_pm" sequence="1"/>
+
+
+    </data>
+</odoo>

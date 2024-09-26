@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+    
+
+        <record id="reward_andrecognition_view_tree_report" model="ir.ui.view">
+            <field name="name">reward_andrecognition.view.tree</field>
+            <field name="model">reward_and_recognition</field>
+            <field name="arch" type="xml">
+                <tree create='False' decoration-success="state in ['award','finalise']"  decoration-info="state == 'nominate'" decoration-danger="state == 'reject'" decoration-warning="state == 'review'" import='False'>
+                    <field name="employee_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="location"/>
+                    <field name="job_id"/>
+                    <field name="reviewed_by"/>
+                    <field name="create_date" widget="date"/>
+                    <field name="department_id"/>
+                    <field name="division"/>
+                    <field name="section"/>
+                    <field name="practise"/>
+                    <field name="state"/>
+                    <field name="get_offboarding_data" invisible='0'/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="reward_and_recognition_view_report_form" model="ir.ui.view">
+            <field name="name">reward_andrecognition.view.form.report</field>
+            <field name="model">reward_and_recognition</field>
+            <field name="arch" type="xml">
+                <form string="Reward And Recognition" duplicate='0' create='False'>
+                    <header>
+
+                        <field name="state" widget="statusbar" />
+                    </header>
+                    <sheet>
+                        <group>
+                                <group string="Nominee Details">
+                                    <field name="hide_rnr_div" invisible='1'/>
+                                    <field name="get_offboarding_data" invisible='1'/>
+                                    <field name="rnr_division_id" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'readonly':['|',('state','not in',['sbu']),('hide_rnr_div','=',True)]}"/>
+                                    <field name="employee_id" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'readonly':[('state','in',['sbu','award','reject'])]}" required="1"/>
+                                    <!-- <field name="reason" required="1" attrs="{'readonly':[('state','in',['award','reject'])]}"/> -->
+                                    <field name="compute_login" invisible='1'/>
+                                    <field name="reason_justification" readonly="1" style="pointer-events:none;">
+                                        <tree string="reason justification Tree" editable='top' edit='1'>
+                                            <field name="reason_type_id" readonly='1' options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                            <field name="reason" />
+                                        </tree>
+                                    </field>
+                                    <field name="nominated_by" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly='1'/>
+                                    <field name="create_date" string="Nominated On" readonly='1' attrs="{'invisible':[('create_date','=',False)]}" />
+                                    <field name="publish_on" readonly='1' attrs="{'invisible':[('publish_on','=',False)]}"/>
+                                    <field name='month' invisible='1'/>
+                                    <field name='year' invisible='1'/>
+                                    <field name='compute_month' invisible='0'/>
+                                    <field name='compute_year' invisible='0'/>
+                                </group>
+                                
+                                <group string='Department Details'>
+                                    <field name="department_id" domain="[('dept_type.code', '=', 'department')]" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                    <field name="division" domain="[('dept_type.code', '=', 'division')]" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                    <field name="section" domain="[('dept_type.code', '=', 'section')]" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                    <field name="practise" domain="[('dept_type.code', '=', 'practise')]" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                    <field name="job_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                    <field name="location" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                    <field name="total_awards" group="rnr_reviewer" invisible="1"/>
+                                    <field name="awarded" group="rnr_reviewer" invisible="1"/>
+                                    <field name="awards_left" group="rnr_reviewer" invisible="1"/>
+                                </group>
+                                <group string="User Action Details" attrs="{'invisible':[('action_log_ids','=',[])]}">
+                                    <field name="action_log_ids" attrs="{'invisible':[('action_log_ids','=',[])]}"  readonly='1'/>  
+                                </group>
+                                <group string="Feedbacks" attrs="{'invisible':[('sbu_feedback','=',False)]}">
+                                    <field name="sbu_feedback" string="SBU Remark" attrs="{'invisible':[('sbu_feedback','=',False)]}" group="rnr_sbu" readonly="1"/>
+                                    <field name="reviewer_feedback" string="Reviewer Remark" attrs="{'invisible':[('reviewer_feedback','=',False)]}" group="rnr_reviewer" readonly="1"/>
+                                    <field name="final_reviewer_feedback" string=" Final-Reviewer Remark" attrs="{'invisible':[('final_reviewer_feedback','=',False)]}" group="rnr_final_reviewer" readonly="1"/>
+                                </group>
+                            </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="reward_and_recognition_report_view_kanban" model="ir.ui.view">
+			<field name="name">Starlight Report Kanban View</field>
+			<field name="model">reward_and_recognition</field>
+			<field name="arch" type="xml">
+				<kanban class="oe_background_grey o_kanban_dashboard " delete='0' import='0' duplicate='0'>
+					<field name="rnr_division_id"/>
+					<field name="employee_id"/>
+					<field name="nominated_by"/>
+					<field name="state"/>
+					<templates>
+						<t t-name="kanban-box">
+							<div class="o_kanban_card_content oe_kanban_global_click" style="height:200px;">
+								<div class="row">
+                                    <div class="col-12">
+                                        <div class="o_kanban_record_top">
+                                            <div class="o_kanban_record_headings">
+                                                <h4>
+                                                    <img t-att-src="kanban_image('hr.employee', 'image_small', record.employee_id.raw_value)" t-att-title="record.employee_id.value" t-att-alt="record.employee_id.value" width="40" height="40" class="rounded-circle"/>
+                                                    <b t-esc="record.employee_id.value">
+                                                    </b>
+                                                </h4>
+                                            </div>
+                                            <div class="col-2" attrs="{'invisible':[('state','not in',['award','finalise'])]}">
+                                                <img src="/kw_reward_and_recognition/static/description/med2.png" width="50" height="50" alt="Award Badge"/>
+                                            </div>
+                                        </div>
+                                        <table class="table table-borderless">
+                                            <tr style="font-size:9px;height:20px;">
+                                                <td style="width:40%;"><i style="color:rgb(22, 123, 158);" class="fa fa-lg fa-check-square-o"/><b>&amp;nbsp;&amp;nbsp;Department :</b></td>
+                                                
+                                                <td>
+                                                    <field name="rnr_division_id"/>
+                                                </td>
+                                            </tr>
+                                            <tr style="font-size:9px;height:10px;">
+                                                <td><i style="color:rgb(22, 123, 158);" class="fa fa-lg fa-edit"/><b>&amp;nbsp;&amp;nbsp;State :</b></td>
+                                                <td>
+                                                    <field name="state" />
+                                                </td>
+                                            </tr>
+                                            <tr style="font-size:9px;height:10px;">
+                                                <td><i style="color:rgb(22, 123, 158);" class="fa fa-lg fa-user-o"/><b>&amp;nbsp;&amp;nbsp;Nominated By :</b></td>
+                                                <td>
+                                                    <field name="nominated_by"/>
+                                                </td>
+                                            </tr>
+                                            <tr style="font-size:9px;height:10px;">
+                                                <td><i style="color:rgb(22, 123, 158);" class="fa fa-lg fa-calendar"/><b>&amp;nbsp;&amp;nbsp;Nominated On :</b></td>
+                                                <td>
+                                                    <field name="create_date" widget='date'/>
+                                                </td>
+                                            </tr>
+                                            
+                                        </table>
+                                    </div>
+                                   
+                                </div>
+                            </div>
+						</t>
+					</templates>
+				</kanban>
+			</field>
+		</record>
+
+
+        <record id="reward_and_recognition_view_report_search_view" model="ir.ui.view">
+            <field name="name">reward_and_recognition.report.search</field>
+            <field name="model">reward_and_recognition</field>
+            <field name="arch" type="xml">
+                <search string="Fields">
+                        <field name="employee_id"/>
+                        <field name="nominated_by"/>
+                        <field name="rnr_division_id" string='Starlight Department'/>
+                        <field name ='department_id'/>
+                        <field name="job_id"/>
+                        <field name ='location'/>
+                        <field name="division"/>
+                        <field name="section"/>
+                        <field name ='practise'/>
+                        <field name ='create_date'/>
+                        <field name="publish_on"/>
+                        <field name="state"/>
+                        <field name="year"/>
+                        <separator/>
+					    <filter string="This Year" domain="[('create_date', 'like',context_today().strftime('%Y'))]" 
+                                name="nominated_on_date"/>
+                        <separator/>
+                        <filter string="This Month" domain="[('create_date', 'like',context_today().strftime('%Y-%m'))]" name="nominated_on_month"/>
+                        <separator/>
+                            <filter string="January" domain="[('month','=',1)]" name="january_filter"/>
+                            <filter string="February" domain="[('month','=',2)]" name="february_filter"/>
+                            <filter string="March" domain="[('month','=',3)]" name="march_filter"/>
+                            <filter string="April" domain="[('month','=',4)]" name="april_filter"/>
+                            <filter string="May" domain="[('month','=',5)]" name="may_filter"/>
+                            <filter string="June" domain="[('month','=',6)]" name="june_filter"/>
+                            <filter string="July" domain="[('month','=',7)]" name="july_filter"/>
+                            <filter string="August" domain="[('month','=',8)]" name="august_filter"/>
+                            <filter string="September" domain="[('month','=',9)]" name="september_filter"/>
+                            <filter string="October" domain="[('month','=',10)]" name="october_filter"/>
+                            <filter string="November" domain="[('month','=',11)]" name="november_filter"/>
+                            <filter string="December" domain="[('month','=',12)]" name="december_filter"/>
+                        <separator />
+                        <filter string="Nominated On" name="create_date" date="create_date" />
+                        <separator />
+                        <filter string="Publish On" name="publish_on" date="publish_on"/>
+                        <filter string="Unrchive" domain="[('active', '=',True)]" name="archive_starlight" groups="kw_reward_and_recognition.rnr_manager"/>
+                        <filter string="Archive" domain="[('active', '=',False)]" name="unarchive_starlight" groups="kw_reward_and_recognition.rnr_manager"/>
+                        <separator/>
+                    <group expand="1" string="Group By">
+                        <filter string="Nominee" name="group_by_employee_id" domain="[]" context="{'group_by':'employee_id'}"/>
+                        <filter string="Nominated By" name="group_by_nominated_by" domain="[]" context="{'group_by':'nominated_by'}"/>
+                        <filter string="Nominated On" name="group_by_create_date" date="create_date" domain="[]" context="{'group_by':'create_date'}"/>
+                        <!-- <filter string="Department" name="department_id" domain="[]" context="{'group_by':'department_id'}"/>
+                        <filter string="Designation" name="job_id" domain="[]" context="{'group_by':'job_id'}"/> -->
+                        <filter string="Year" name="group_by_year" domain="[]" context="{'group_by':'year'}"/>
+                        <filter string="State" name="group_by_state" domain="[]" context="{'group_by':'state'}"/>
+                    </group> 
+                </search>
+            </field>
+        </record>
+
+        <record id="reward_and_recognition_view_report_pivot_view" model="ir.ui.view">
+            <field name="name">reward_and_recognition.pivot</field>
+            <field name="model">reward_and_recognition</field>
+            <field name="arch" type="xml">
+                <pivot string="Pivot Description">
+                    <field name="compute_year" type="row"/>
+                    <field name="compute_month" type="row"/>
+                    <field name="rnr_division_id" type="row"/>
+                    <field name ="state" type="row"/>
+                    <field name="employee_id" type="row"/>
+                    <field name="nominated_by" type="measure"/>
+                    <!-- <field name="department_id" type="row"/> -->
+                </pivot>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="reward_and_recognition_view_report_graph_view">
+            <field name="name">reward_and_recognition.graph</field>
+            <field name="model">reward_and_recognition</field>
+            <field name="arch" type="xml">
+                <graph string="">
+                    <field name="year" type="row" string="Year"/>
+                    <field name="rnr_division_id" type="row"/>
+                    <field name="state" type="row" string="State"/>
+                    <field name="month"  type="row" string="Month"/>
+                </graph>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="rnr_report_action">
+            <field name="name">Star Light Report</field>
+            <field name="res_model">reward_and_recognition</field>
+            <field name="view_mode">kanban,tree,form,pivot,graph</field>
+            <field name="domain">[]</field>
+            <field name="search_view_id" ref="kw_reward_and_recognition.reward_and_recognition_view_report_search_view" />
+            <field name="context">{'search_default_nominated_on_date':1,'search_default_nominated_on_month':1,'create':False,'edit':False,'delete':False,'import':False,'rnr_report_action':True}</field>
+            <field name="view_ids" eval="[(5, 0, 0), 
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_reward_and_recognition.reward_andrecognition_view_tree_report')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_reward_and_recognition.reward_and_recognition_view_report_form')}),
+                (0, 0, {'view_mode': 'kanban','view_id': ref('kw_reward_and_recognition.reward_and_recognition_report_view_kanban')}),
+                (0, 0, {'view_mode': 'pivot','view_id': ref('kw_reward_and_recognition.reward_and_recognition_view_report_pivot_view')}),
+                (0, 0, {'view_mode': 'graph','view_id': ref('kw_reward_and_recognition.reward_and_recognition_view_report_graph_view')})]"/>
+                
+        </record>
+
+        <record id="reward_andrecognition_view_tree_delete_page" model="ir.ui.view">
+            <field name="name">reward_andrecognition.tree.delete</field>
+            <field name="model">reward_and_recognition</field>
+            <field name="arch" type="xml">
+                <tree create='False' decoration-success="state in ['award','finalise']"  decoration-info="state == 'nominate'" decoration-danger="state == 'reject'" decoration-warning="state == 'review'" import='False'>
+                    <field name="employee_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="nominated_by" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="pending_at_status"/>
+                    <field name="reviewed_by"/>
+                    <field name="create_date" string="Nominated on" widget="date"/>
+                    <field name="job_id"/>
+                    <field name="location"/>
+                    <field name="department_id"/>
+                    <field name="division"/>
+                    <field name="section"/>
+                    <field name="practise"/>
+                    <field name="state"/>
+                    <field name="get_offboarding_data" invisible='0'/>
+                    <field name="active" invisible='1'/>
+                    <button name="archive_starlight_record" string="Archive" type="object" context="{'archive_record':True}" groups="kw_reward_and_recognition.rnr_manager" confirm='Are you sure want to Archive?' icon="fa-archive fa-lg" attrs="{'invisible': [('active','=',False)]}" />
+                    <button name="archive_starlight_record" string="Unrchive" type="object" context="{'unarchive_record':True}" groups="kw_reward_and_recognition.rnr_manager" confirm='Are you sure want to Unarchive?' icon="fa-archive fa-lg" attrs="{'invisible': [('active','=',True)]}" />
+                </tree>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="rnr_report_delete_page_action">
+            <field name="name">Starlight Report</field>
+            <field name="res_model">reward_and_recognition</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+            <field name="search_view_id" ref="kw_reward_and_recognition.reward_and_recognition_view_report_search_view" />
+            <field name="context">{'search_default_nominated_on_date':1,'search_default_nominated_on_month':1,'create':False,'edit':False,'import':False,}</field>
+            <field name="view_ids" eval="[(5, 0, 0), 
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_reward_and_recognition.reward_andrecognition_view_tree_delete_page')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_reward_and_recognition.reward_and_recognition_view_report_form')})]"/>
+                
+        </record>
+    </data>
+    </odoo>
+    

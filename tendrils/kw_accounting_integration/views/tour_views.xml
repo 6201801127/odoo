@@ -1,0 +1,256 @@
+<odoo>
+  <data>
+
+    <!-- Tour Take Action Tree View -->
+    <record id="view_kw_tour_takeaction_tree_inherit" model="ir.ui.view">
+        <field name="name">view_kw_tour_takeaction_tree_inherit</field>
+        <field name="model">kw_tour</field>
+        <field name="inherit_id" ref="kw_tour.view_kw_tour_take_action_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree/button[@name='button_take_action']" position="attributes">
+                <attribute name="attrs">{'invisible':[('state','=', 'Posted')]}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Tour Tree View -->
+    <record id="view_kw_tour_tree_inherit" model="ir.ui.view">
+        <field name="name">view_kw_tour_tree_inherit</field>
+        <field name="model">kw_tour</field>
+        <field name="inherit_id" ref="kw_tour.view_kw_tour_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree/button[@name='action_advance_request_tour']" position="attributes">
+                <attribute name="attrs">{'invisible': ['|','|','|',('tour_at_end_date_or_greater','=',True),('settlement_applied','=',True),('state','not in',['Finance Approved', 'Posted']),('cancellation_status','=',True)]}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Tour Status Form View -->
+    <record id="view_kw_tour_view_all_form_inherit" model="ir.ui.view">
+        <field name="name">view_kw_tour_view_all_form_inherit</field>
+        <field name="model">kw_tour</field>
+        <field name="inherit_id" ref="kw_tour.view_kw_tour_view_all_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='exchange_rate']" position="after">
+                <field name="account_move_id" options='{"no_create": True}' attrs="{'invisible': [('state', '!=', 'Posted')]}" groups="kw_tour.group_kw_tour_finance"/>
+            </xpath>
+        </field>
+    </record>  
+
+    <!-- Tour Advance Form View -->
+    <record id="view_kw_tour_advance_takeaction_form_inherit" model="ir.ui.view">
+        <field name="name">view_kw_tour_advance_takeaction_form_inherit</field>
+        <field name="model">kw_tour_advance_request</field>
+        <field name="inherit_id" ref="kw_tour.view_kw_tour_advance_request_take_action_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='to_be_given_inr']" position="after">
+                <field name="account_move_id" options='{"no_create": True}' attrs="{'invisible': [('state', '!=', 'Posted')]}" groups="kw_tour.group_kw_tour_finance"/>
+            </xpath>
+            <xpath expr="//field[@name='request_inr']" position="attributes">
+                <attribute name="attrs">{'readonly':[('state','in',['Approved', 'Posted'])],'invisible':[('can_apply_inr','=',False)],'required':[('can_apply_inr','=',True)]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='to_be_given_inr']" position="attributes">
+                <attribute name="attrs">{'invisible':['|',('state','=','Applied'),('can_apply_inr','=',False)],
+                                'required':[('can_apply_inr','=',True),('state','=','Approved')],'readonly':[('state','=','Posted')]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='request_usd']" position="attributes">
+                <attribute name="attrs">{'readonly':[('state','in',['Approved', 'Grant', 'Posted'])],'invisible':[('can_apply_usd','=',False)],'required':[('can_apply_usd','=',True)]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='to_be_given_usd']" position="attributes">
+                <attribute name="attrs">{'invisible':['|',('state','=','Applied'),('can_apply_usd','=',False)], 
+                                'required':[('can_apply_usd','=',True),('state','=','Approved')], 'readonly': [('state','in',['Grant', 'Posted'])]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='new_exchange_rate']" position="attributes">
+                <attribute name="attrs">{'invisible':['|',('state','=','Applied'),('can_apply_usd','=',False)], 
+                                'required':[('can_apply_usd','=',True),('state','=','Approved')], 'readonly': [('state','in',['Grant', 'Posted'])]}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Tour Advance Request Status Form View -->
+    <record id="view_kw_tour_advance_status_form_inherit" model="ir.ui.view">
+        <field name="name">view_kw_tour_advance_status_form_inherit</field>
+        <field name="model">kw_tour_advance_request</field>
+        <field name="inherit_id" ref="kw_tour.view_kw_tour_advance_request_status_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form/sheet/group/group[6]/field[@name='exchange_rate']" position="after">
+                <field name="account_move_id" options='{"no_create": True}' attrs="{'invisible': [('state', '!=', 'Posted')]}" groups="kw_tour.group_kw_tour_finance"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Tour Settlement Apply Form View -->
+    <record id="view_kw_tour_apply_settlement_form_inherit" model="ir.ui.view">
+        <field name="name">view_kw_tour_settlement_apply_form_inherit</field>
+        <field name="model">kw_tour_settlement</field>
+        <field name="inherit_id" ref="kw_tour.view_kw_tour_settlement_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='tour_id']" position="before">
+                <field name="employee_id" invisible="1"/>
+                <field name="settled_tour_ids" invisible="1" readonly="0"/>
+            </xpath>
+            <xpath expr="//field[@name='tour_id']" position="attributes">
+                <attribute name="domain">[('id','not in',settled_tour_ids),('employee_id','=',employee_id),('state','in',['Approved','Traveldesk Approved','Finance Approved','Posted']),('settlement_id','=',False)]</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Tour Settlement Payment Form View -->
+    <record id="view_kw_tour_settlement_form_inherit" model="ir.ui.view">
+        <field name="name">view_kw_tour_settlement_form_inherit</field>
+        <field name="model">kw_tour_settlement</field>
+        <field name="inherit_id" ref="kw_tour.view_kw_tour_settlement_form_only"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='upload_doc']" position="after">
+                <field name="account_move_id" options='{"no_create": True}' attrs="{'invisible': [('state', '!=', 'Posted')]}" groups="kw_tour.group_kw_tour_finance"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Tour Apply Post Journal Entry Form -->
+  	<record id="view_kw_tour_apply_post_journal_form" model="ir.ui.view">
+        <field name="name">kw_tour_apply_post_journal_form_view</field>
+        <field name="model">kw_tour</field>
+        <field name="type">form</field>
+        <field name="mode">primary</field>
+        <field name="priority" eval="18"/>
+        <field name="arch" type="xml">
+        	<form>
+        		<script>
+        			$(document).ready(function(){
+                        $(".modal-footer").show();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+        		</script>
+        		<sheet>
+        			<group>
+        				<field name="journal_id"/>
+                        <field name="finance_access" invisible="1"/>
+        			</group>
+        			<footer>
+                        <button name="post_journal_entry" type="object" string="Submit" class="btn btn-success"/>
+                        <button string="Cancel" class="btn-default" special="cancel" />
+                    </footer>
+        		</sheet>
+        	</form>
+        </field>
+    </record>
+
+    <!-- Tour Advance Request Journal Entry Form -->
+    <record id="view_kw_tour_advance_request_post_journal_form" model="ir.ui.view">
+        <field name="name">kw_tour_advance_request_post_journal_form_view</field>
+        <field name="model">kw_tour_advance_request</field>
+        <field name="type">form</field>
+        <field name="mode">primary</field>
+        <field name="priority" eval="18"/>
+        <field name="arch" type="xml">
+            <form>
+                <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").show();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                </script>
+                <sheet>
+                    <group>
+                        <field name="journal_id"/>
+                        <field name="finance_access" invisible="1"/>
+                    </group>
+                    <footer>
+                        <button name="post_journal_entry" type="object" string="Submit" class="btn btn-success"/>
+                        <button string="Cancel" class="btn-default" special="cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tour Settlement Post Journal Entry Form -->
+    <record id="view_kw_tour_settlement_post_journal_form" model="ir.ui.view">
+        <field name="name">kw_tour_settlement_post_journal_form_view</field>
+        <field name="model">kw_tour_settlement</field>
+        <field name="type">form</field>
+        <field name="mode">primary</field>
+        <field name="priority" eval="18"/>
+        <field name="arch" type="xml">
+            <form>
+                <script>
+                    $(document).ready(function(){
+                        $(".modal-footer").show();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+                </script>
+                <sheet>
+                    <group>
+                        <field name="journal_id"/>
+                        <field name="own_record" invisible="1"/>
+                        <field name="finance_access" invisible="1"/>
+                    </group>
+                    <footer>
+                        <button name="post_journal_entry" type="object" string="Submit" class="btn btn-success"/>
+                        <button string="Cancel" class="btn-default" special="cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tour Settlement Action -->
+    <record id="kw_tour.action_kw_tour_settlement_payment_act_window" model="ir.actions.act_window">
+        <field name="type">ir.actions.act_window</field>
+        <field name="name">Settlement Payment</field>
+        <field name="res_model">kw_tour_settlement</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_type">form</field>
+        <field name="target">current</field>
+        <field name="domain">['|', ('state','=','Granted'),('state','=','Payment Done')]</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_tour.view_kw_tour_settlement_payment_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('kw_tour.view_kw_tour_settlement_payment_form')})]"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+            No settlement found...
+            </p>
+        </field>
+    </record>
+
+    <!-- Journal Inherited Form View -->
+    <record id="view_move_form_inherit" model="ir.ui.view">
+        <field name="name">view_move_form_inherit</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='auto_reverse']" position="after">
+                <field name="tour_type_id" options='{"no_open": True, "no_create": True}'/>
+                <field name="tour_purpose"/>
+                <field name="project_id" options='{"no_open": True, "no_create": True}'/> <!-- attrs="{'invisible': [('tour_type_id.code', '=', 'project')]}" -->
+            </xpath>
+        </field>
+    </record>
+
+
+    <record id="tour_configuration_view_tree" model="ir.ui.view">
+        <field name="name">tour.accounting.configuration.view.tree</field>
+        <field name="model">kw_tour_accounting_configuration</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree string="Account Configuration" editable="top">
+                <field name="name" required='1'/>
+                <field name="code" required='1'/>
+                <field name="account_id" options='{"no_open": True, "no_create": True}' required='1'/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="tour_accounting_configuration_action_window" model="ir.actions.act_window">
+        <field name="name">Account Configuration</field>
+        <field name="res_model">kw_tour_accounting_configuration</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+  </data>
+</odoo>

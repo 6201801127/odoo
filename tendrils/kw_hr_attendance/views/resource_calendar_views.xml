@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <!--START: Resource calendar form view inheritance -->
+            <record id="view_resource_calendar_office_time_form" model="ir.ui.view">
+                <field name="name">Shift Master Form View Office Time Inherited</field>
+                <field name="model">resource.calendar</field>
+                <field name="inherit_id" ref="resource.resource_calendar_form"/>
+                <field name="arch" type="xml">
+                    <xpath expr="//h1" position="replace"/>
+                    <xpath expr="//group" position="replace">
+                        <group>
+                            <group>
+                                <field name="kw_id" invisible="1" />
+                                <field name="name" string="Shift Name"/>
+                                <field name="branch_id" required="1" string="Branch/SBU" options="{'no_create_edit': True,'no_open': True}"/>    
+                                <field name="tz" />
+                                <separator colspan="2" />
+                                <field name="hours_per_day" widget="float_time" string="Working Hours Per Day"/>
+                                <field name="cross_shift" />
+                                <field name="grace_time" widget="float_time" />
+                                <field name="onsite_shift" />
+                            </group>
+                            <group>
+                            
+                                <field name="extra_early_entry_time" widget="float_time" />
+                                <field name="early_entry_time" widget="float_time" />
+                                <field name="late_entry_time" widget="float_time" />
+                                <field name="late_entry_half_leave_time" widget="float_time" />
+                                <field name="late_entry_full_leave_time" widget="float_time" />
+                                <separator/>
+                                <field name="early_exit_half_leave_time" widget="float_time" />
+                                <field name="late_exit_time" widget="float_time" />
+                                <field name="extra_late_exit_time" widget="float_time" />                           
+                            </group>
+                        </group>
+                    </xpath>
+                    <xpath expr="//div[hasclass('oe_button_box')]/button[@icon='fa-calendar-times-o']" position="replace"/>
+                    <xpath expr="//div[hasclass('oe_button_box')]/button[@icon='fa-cogs']" position="attributes">
+                        <attribute name="groups">base.group_no_one</attribute>
+                    </xpath>
+                    <xpath expr="//notebook/page[2]" position="replace">
+                        <page string="Shift Holidays" >
+                            <group>
+                                <group>
+                                    <field name="start_date" string="Start Date" autocomplete="off"/>
+                                    <field name="end_date" string="End Date" autocomplete="off" />
+                                    <field name="week_off_day"/>
+                                    
+                                    <button name="action_assign_week_offs" type="object" class="btn btn-primary" string="Assign" />
+                                </group>
+                           </group>
+
+                            <field name='global_leave_ids' string="Shift Holidays">
+                                <tree editable="bottom" default_order='start_date'>
+                                    <field name="name"/>
+                                   
+                                    <field name="start_date" string="Date" autocomplete="off" />
+                                    <!-- <field name="end_date" string="End Date" /> -->
+                                    <field name="date_from" invisible="1"/>
+                                    <field name="date_to" invisible="1"/>
+                                     <field name="day"/>
+                                    <field name="holiday_type" string="Type" />
+                                </tree>
+                            </field>
+                        </page>   
+                    </xpath> 
+
+                    <field name="attendance_ids" position="before">
+                        <group >
+                            <group>
+                                <field name="first_half_hour_from" widget="float_time" required="1" />
+                                <field name="first_half_hour_to" widget="float_time" required="1" />
+                                <field name="rest_hour" widget="float_time" />
+                                <button name="action_assign_working_hours" type="object" class="btn btn-primary" string="Assign" />
+                            </group>
+                            <group>                                
+                                <field name="second_half_hour_from" widget="float_time" required="1" />
+                                <field name="second_half_hour_to" widget="float_time" required="1" />                                        
+                            </group>
+                        </group>
+                    </field>
+                    
+                    <xpath expr="//notebook/page[1]" position="after">
+                        <page string="Branch Holidays" >
+                            <field name='public_holidays' options="{'no_create_edit': True, 'no_create': True}">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="date" string="Date" />                                     
+                                </tree>
+                            </field>
+                        </page>   
+                    </xpath>
+                    <xpath expr="//notebook/page[3]" position="after">
+                        <page string="Exclude Branch Holidays" >
+                            <field name='excluded_public_holidays_ids' options="{'no_create_edit': True, 'no_create': True}" domain= "[('branch_ids','in',[branch_id])]" context="{'tree_view_ref': 'kw_hr_holidays_public.view_holidays_public_line_tree1'}">
+                                <tree default_order="date desc">
+                                    <field name="name"/>
+                                    <field name="date" string="Date" />                                    
+                                    
+                                </tree>
+                            </field>
+                        </page>   
+                   </xpath>
+
+
+                   <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                        <button name="%(kw_hr_attendance_holiday_client)d" context="{'branch_id':branch_id,'shift_id':active_id}" type="action" string="Holidays" icon="fa-calendar-o" class="oe_stat_button" groups="base.group_user"/>
+                   </xpath>
+                   
+                </field>
+            </record>
+
+            <record id="view_resource_calendar_shift_info_tree" model="ir.ui.view">
+                <field name="name">resource.calendar.tree shift info</field>
+                <field name="model">resource.calendar</field>
+                <field name="inherit_id" ref="resource.view_resource_calendar_tree"/>
+                <field name="arch" type="xml">
+                    <field name="name" position="attributes">
+                        <attribute name="string">Shift Name</attribute>
+                    </field>
+                    <field name="name" position="after">   
+                        <field name="branch_id" />
+                        <field name="first_half_hour_from" string="Shift Start Time"/>
+                        <field name="second_half_hour_to" string="Shift End Time"/>
+                        <field name="cross_shift"/>
+                        <field name="onsite_shift" />
+                        <field name="hours_per_day" widget="float_time"/>
+                    </field>
+                </field>
+            </record>
+            
+            <record id="view_resource_calendar_shift_info_search" model="ir.ui.view">
+                <field name="name">resource.calendar filter </field>
+                <field name="model">resource.calendar</field>
+                <field name="arch" type="xml">
+                    <search string="Shift Search">
+                        <field name="name"/>
+                        <field name="branch_id"/>
+                        <field name="cross_shift"/>
+
+                        <filter string="Cross Shift" name="filter_cross_shift" domain="[('cross_shift', '=', True)]" />
+                        <separator/>
+                       
+                        <group expand="0" string="Group By">
+                            <filter name="group_branch" string="Branch/SBU" context="{'group_by':'branch_id'}"/>                           
+                        </group>
+                    </search>
+                </field>
+            </record>
+
+            
+
+        <!--END: Resource calendar form view inheritance -->
+
+        <!--START: Resource calendar Attendance form view inheritance -->
+            <!-- <record model="ir.ui.view" id="resource_calendar_attendance_tree_view">
+                <field name="name">resource.calendar.attendance.tree (in cb_shift_start_end_and_week_off)</field>
+                <field name="model">resource.calendar.attendance</field>
+                <field name="inherit_id" ref="resource.view_resource_calendar_attendance_tree"/>
+                <field name="arch" type="xml">
+                    <field name="day_period" position="after">
+                      
+                        <field name="week_off" />
+                    </field>
+                </field>
+            </record> -->
+        <!--END: Resource calendar form view inheritance -->
+
+        <record id="kw_hr_attendance.action_resource_calendar_form" model="ir.actions.act_window">
+            <field name="name">Shift Master</field>
+            <field name="res_model">resource.calendar</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('employee_id','=',False)]</field>   
+            <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('resource.view_resource_calendar_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('resource.resource_calendar_form')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No record found
+                </p>
+            </field>         
+        </record>
+    </data>
+</odoo>    
+
+    

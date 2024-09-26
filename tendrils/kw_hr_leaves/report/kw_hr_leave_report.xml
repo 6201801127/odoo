@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record id="kw_hr_leave_report_search_view" model="ir.ui.view">
+        <field name="name">kw_hr_leave_report.filter</field>
+        <field name="model">kw_hr_leave_report</field>
+        <field name="arch" type="xml">
+            <search string="Search Leave">
+                <field name="employee_id"/>
+                <field name="holiday_status_id"/>
+                <field name="name"/>
+                <filter string="Current Financial Year" name="current_financial_year" domain="[('current_financial_year','=',True)]"/>
+                <filter string="Previous Financial Year" name="previous_financial_year" domain="[('previous_financial_year','=',True)]"/>
+                <separator/>
+                <filter name="my_team_leaves" string="My Subordinates Requests" domain="[('employee_id.parent_id.user_id', '=', uid)]" groups="hr_holidays.group_hr_holidays_manager" help="Leaves of Your Subordinates Member"/>
+                <filter string="My Requests" name="my_leaves" domain="[('employee_id.user_id', '=', uid)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="group_employee" string="Employee" context="{'group_by':'employee_id'}"/>
+                    <filter name="group_type" string="Leave Type" context="{'group_by':'holiday_status_id'}"/>
+                    <filter name="group_request_type" string="Request Type" context="{'group_by':'type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="kw_hr_leave_report_tree" model="ir.ui.view">
+        <field name="name">kw_hr_leave_report.tree</field>
+        <field name="model">kw_hr_leave_report</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="cycle_period" invisible='1'/>
+                <field name="employee_id"/>
+                <field name="designation" />
+                <field name="department" />
+                <field name="date_of_joining" />
+                <field name="holiday_status_id"/>
+                <field name="number_of_days" string="Leave Days" sum="Remaining Days"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="state" invisible='1'/>
+                <field name="type"/>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="kw_hr_leave_report_actions" model="ir.actions.act_window">
+        <field name="name">Leave Summary</field>
+        <field name="res_model">kw_hr_leave_report</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" eval="kw_hr_leave_report_tree"/>
+        <field name="context">{
+            'search_default_current_financial_year': 1 ,
+            'search_default_group_type': 1,
+            'search_default_my_leaves': 1,'create':False,'edit':False,'delete':False,'import':False,
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new leave request
+            </p>
+        </field>
+        <field name="domain">[('holiday_type','=','employee')]</field>
+        <field name="search_view_id" ref="kw_hr_leave_report_search_view"/>
+    </record>
+
+    <menuitem id="kw_hr_leave_report_menu" name="Leave Summary" parent="hr_holidays.menu_hr_holidays_my_leaves" action="kw_hr_leave_report_actions" sequence="10"/>
+
+</odoo>

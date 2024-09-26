@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <template id="kw_feedback_goal_template" name="Goal">
+            <t t-call="website.layout">
+                <div class="wrap">
+                    <div class="container mb-3">
+                        <div class="row ">
+                            <div class="col-sm-12 mx-auto">
+                                <div class="card mt-3">
+                                    <div class="card-header text-uppercase font-weight-bold text-center white-text ">
+                                    goal and milestones
+                                    </div>
+                                    <div class="card-body ">
+                                        <div class="col-sm-12">
+                                            <div class=''>
+                                                <div class="mb-3 float-left logedin-user">
+                                                    <img t-attf-src="data:image_small/*;base64,{{feedback.assessee_id.image_small}}"/>
+                                                    <div class="info">
+                                                        <p class="m-0 font-weight-bold h4">
+                                                            <span t-esc="feedback.assessee_id.display_name"/>
+                                                        </p>
+                                                        <p t-if='feedback.assessee_id.job_id' class="m-0 badge badge-pill badge-primary">
+                                                            <span t-esc='feedback.assessee_id.job_id.name' />
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <span class="col-sm-4 p-0 text-danger font-weight-bold font-italic small pull-right text-right"> * indicate mandatory fields </span>
+                                            </div>
+                                            <div class="clearfix"/>
+                                            <form id="assessment_goal_form" name="assessment_goal_form" t-att-action="'/kw/feedback/goal/submit/'" method="post">
+                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                <input type="hidden" name="feedback" id="feedback" t-att-value="feedback"/>
+                                                <input type="hidden" name="feedback_id" id="feedback_id" t-att-value="feedback_id"/>
+                                                <input type="hidden" name="token" id="token" t-att-value="token"/>
+                                                <input type="hidden" name="c_goal" id="c_goal" t-att-value="goal"/>
+                                                <input type="hidden" name="n_period" id="n_period" t-att-value="next_period"/>
+
+                                                <!-- If goal exist for current period : Start  -->
+                                                <div t-if="goal">
+                                                    <h6 class="alert alert-info al text-dark">Goal Accomplishment : Please update the score of current goals set by giving appropriate milestones.</h6>
+                                                    <t t-foreach="goal" t-as="current_year_goal">
+                                                        <div class="md-form">
+                                                            <input t-att-value="current_year_goal.goal_name" class="form-control col-md-12 goal_name" type="text" id="goal_name" name="goal_name" required="true"/>
+                                                            <label for="goal_name" class="font-weight-bold text-uppercase">Goal <span class="text-danger">*</span>
+                                                            </label>
+                                                        </div>
+                                                        <div class="md-form row ml-0">
+                                                            <div class="col-lg-6 col-md-6 col-sm-12 pl-0 pr-4">
+                                                                <input class="form-control" type="text" id="milestone_name" name="milestone_name"/>
+                                                                <label for="milestone_name" class="font-weight-bold text-uppercase">Milestones <span class="text-danger">*</span>
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-lg-1 col-md-1 col-sm-12 pl-0">
+                                                                <input class="form-control score" type="number" max="100" id="score" name="score" placeholder="Score"/>
+                                                            </div>
+                                                            <div class="col-lg-3 col-md-5 col-sm-12 pl-0">
+                                                                <select class="form-control drp" disabled='1' id='weightage_id' name="weightage_id">
+                                                                    <option selected="1" value="">Select</option>
+                                                                    <t t-foreach="weightage" t-as="weight">
+                                                                        <option t-att-value="weight.id">
+                                                                            <t t-esc="weight.display_name"/>
+                                                                        </option>
+                                                                    </t>
+                                                                </select>
+                                                            </div>
+                                                            <button type="button" id="addRow" class="btn badge btn-primary "> Add </button>
+                                                        </div>
+                                                        <div class='table-responsive'>
+                                                            <table class="table table-hover table-bordered miltable table-sm mt-4 mb-4" id="miltable">
+                                                                <thead class="thead-orange">
+                                                                    <tr>
+                                                                        <th scope="col" class="" width='40%'>Milestone</th>
+                                                                        <th scope="col" class="" width='20%'>Progress (in %)</th>
+                                                                        <th scope="col" class="" width='30%'>Performance Grade</th>
+                                                                        <th class="text-right" width='5%'>
+                                                                            <i class="fa fa-edit" style="font-size: large;" />
+                                                                        </th>
+                                                                        <th class="text-right" width='5%'>
+                                                                            <i class="fa fa-trash" style="font-size: large;" />
+                                                                        </th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr t-foreach="current_year_goal.milestones" t-as="current_milestones">
+                                                                        <td t-esc="current_milestones.milestone_name"/>
+                                                                        <td t-esc="current_milestones.score"/>
+                                                                        <td t-if='current_milestones.weightage_id' t-esc="current_milestones.weightage_id.display_name"/>
+                                                                        <td t-else=''></td>
+                                                                        <input type="hidden" name="wightage" id="wightage" t-att-value="current_milestones.weightage_id.id"/>
+                                                                        <td class="text-right">
+                                                                            <i class="fa fa-edit text-right" style="font-size: large;" id='edit_row' name="edit_record"/>
+                                                                        </td>
+                                                                        <td class="text-right">
+                                                                            <i class="fa fa-trash text-right" style="font-size: large;" id="record" name="record"/>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </t>
+                                                    <hr class='mb-5' style='border: 4px solid #108fbb;padding:0;border-radius: 4px;' />
+                                                </div>
+                                                <!-- If goal exist for current period : End  -->
+                                                <div t-if='next_period'>
+                                                    <h6 class="alert alert-info al text-dark mb-4">Goal Plan : Please set goals for the next assessment period along with the milestones.</h6>
+
+                                                    <!-- For upcoming period : Start  -->
+                                                    <div class="md-form">
+                                                        <input required='1' t-att-value="next_period_goal.goal_name" class="form-control col-md-12 goal_name" type="text" id="next_goal_name" name="next_goal_name"/>
+                                                        <label for="next_goal_name" class="font-weight-bold text-uppercase">Goal <span class="text-danger">*</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="md-form row ml-0">
+                                                        <div class="col-lg-10 col-md-12 col-sm-12 pl-0 pr-4">
+                                                            <input class="form-control" type="text" id="next_milestone_name" name="next_milestone_name"/>
+                                                            <label for="next_milestone_name" class="font-weight-bold text-uppercase">Milestones <span class="text-danger">*</span>
+                                                            </label>
+                                                        </div>
+                                                        <!-- <div class="col-lg-1 col-md-1 col-sm-12 pl-0">
+                                                        <input class="form-control score" max="100" type="number" id="next_score" name="next_score" placeholder="Score"/>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-5 col-sm-12 pl-0">
+                                                        <select class="form-control drp" disabled='1' id='next_weightage_id' name="next_weightage_id">
+                                                            <option disabled='1' selected='1' value=''></option>
+                                                            <t t-foreach="weightage" t-as="nweight">
+                                                                <option t-att-value="nweight.id">
+                                                                    <t t-esc="nweight.display_name"/>
+                                                                </option>
+                                                            </t>
+                                                        </select>
+                                                    </div> -->
+                                                        <button type="button" id="nextaddRow" class="btn badge btn-primary "> Add </button>
+                                                    </div>
+                                                    <div class='table-responsive'>
+                                                        <table class="table table-hover table-bordered next_miltable table-sm mt-4 mb-4" id="next_miltable">
+                                                            <thead class="thead-orange">
+                                                                <tr>
+                                                                    <th scope="col" class="" width='40%'>Milestone</th>
+                                                                    <!-- <th scope="col" class="" width='20%'>Progress (in %)</th>
+                                                                <th scope="col" class="" width='30%'>Performance Grade</th> -->
+                                                                    <th class="text-right" width='5%'>
+                                                                        <i class="fa fa-trash" style="font-size: large;" />
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr t-foreach="next_period_goal.milestones" t-as="upcoming_milestones">
+                                                                    <td t-esc="upcoming_milestones.milestone_name"/>
+                                                                    <!-- <td t-esc="upcoming_milestones.score"/>
+                                                                <td t-if='upcoming_milestones.weightage_id' t-esc="upcoming_milestones.weightage_id.display_name"/>
+                                                                <td t-else=''></td>
+                                                                <input type="hidden" name="next_weightage" id="next_weightage" t-att-value="upcoming_milestones.weightage_id.id"/> -->
+                                                                    <td class="text-right">
+                                                                        <i class="fa fa-trash text-right" style="font-size: large;" id="next_record" name="next_record"/>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <!-- For upcoming period : End  -->
+                                                <div class="text-center">
+                                                    <button type="button" id ='back_home' class="btn btn-warning badge" name="back_home" value="back_home" style="background-color: #f7941d !important;">
+                                                        <i class="fa fa-arrow-left" />
+                                    Back</button>
+                                                    <button type="submit" id="submit_button" class="btn badge btn-info">Next Page</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+        <template id="kw_feedback_goal_assets" inherit_id="kw_assessment_feedback.kw_feedback_goal_template">
+            <xpath expr="." position="inside">
+                <link href="/kwantify_theme/static/src/mdb/css/mdb.min.css?v=12" rel="stylesheet"/>
+                <script type="text/javascript" src="/kw_assessment_feedback/static/src/js/kw_feedback_goal.js?v=12"/>
+                <link href="/kw_assessment_feedback/static/src/css/goal_style.css?v=12" rel="stylesheet"/>
+                <style>
+                    table.table.table-bordered tbody tr:hover { background-color: #d1ecf1;}
+                </style>
+                <script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js?v=12"/>
+                <script type="text/javascript" src="/kw_assessment_feedback/static/src/lib/sweetalert_new.js?v=12"/>
+            </xpath>
+        </template>
+    </data>
+</odoo>

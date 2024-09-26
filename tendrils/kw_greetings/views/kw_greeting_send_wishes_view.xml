@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+
+		<record id="kw_greetings_send_wishes_system_greeetings_form_view" model="ir.ui.view">
+			<field name="name">Send Wishes</field>
+			<field name="model">kw_greetings_send_wishes</field>
+			<field name="priority" eval="100"/>
+			<field name="arch" type="xml">
+				<form string="Log an Activity" create="false">
+					<sheet>
+						<group>
+
+							<field name="wish_for" invisible="1"/>
+							<field name="sender_id" invisible="1"/>
+							<field name="wish_category" invisible="1"/>
+							<group>
+								<field name="send_wish_to" readonly="1" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+								<field name="template_id" domain="[('category_id', '=', 'wish_category')]" required="1" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+							</group>
+							<group>
+								<field name="subject" required="1"/>
+								<field name="wish_message"/>
+							</group>
+							<group>
+								<field name="preview_template" readonly="1" string="Message Preview"/>
+								<field name="template_body" invisible="1" string="Message Preview"/>
+							</group>
+						</group>
+
+						<footer>
+							<button string="Send" name="action_send_wish"
+							        type="object" class="btn-primary"/>
+							<!-- <button attrs="{'invisible': [('force_next', '=', True)]}" string="Mark as Done" name="action_done"
+								type="object" class="btn-secondary"
+								context="{'mail_activity_quick_update': True}"/>
+						  -->
+							<button string="Cancel" class="btn-secondary" special="cancel"/>
+						</footer>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record id="kw_greetings_send_wishes_form_view" model="ir.ui.view">
+			<field name="name">Send Wishes</field>
+			<field name="model">kw_greetings_send_wishes</field>
+			<field name="arch" type="xml">
+				<form duplicate="0">
+					<sheet>
+						<group>
+
+							<field name="wish_category" invisible="1" groups = "kw_greetings.group_kw_greetings_manager"/>
+							<field name="send_wish_to" required="1" groups = "kw_greetings.group_kw_greetings_manager"/>
+							<field name="template_id" string="Wish Template" required="1"
+							       domain="[('category_id', '=', 'wish_category')]" groups = "kw_greetings.group_kw_greetings_manager"/>
+							<field name="subject" required="1" groups = "kw_greetings.group_kw_greetings_manager"/>
+							<field name="wish_message" groups = "kw_greetings.group_kw_greetings_manager"/>
+							<field name="preview_template" readonly="1" string="Message Preview" groups = "kw_greetings.group_kw_greetings_manager"/>
+							<!-- nolabel="1"   attrs="{'invisible':['|',('image_id','=',False),('preview_img','=',False)]}"  -->
+							<field name="template_body" invisible="1" groups = "kw_greetings.group_kw_greetings_manager"/>
+
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+
+		<record model="ir.ui.view" id="kw_wish_list">
+			<field name="name">greetings wishes</field>
+			<field name="model">kw_greetings_send_wishes</field>
+			<field name="arch" type="xml">
+				<tree import="false">
+					<field name="send_wish_to" string="Employee" groups = "kw_greetings.group_kw_greetings_manager"/>
+					<field name="department_id" groups = "kw_greetings.group_kw_greetings_manager"/>
+					<field name="job_id" groups = "kw_greetings.group_kw_greetings_manager"/>
+					<field name="subject" string="subject" groups = "kw_greetings.group_kw_greetings_manager"/>
+					<field name="create_uid" string="Created By" groups = "kw_greetings.group_kw_greetings_manager"/>
+					<field name="create_date" string="Created On" groups = "kw_greetings.group_kw_greetings_manager"/>
+				</tree>
+			</field>
+		</record>
+
+		<record id="kw_greetings_employee_wishes_kanban_view" model="ir.ui.view">
+			<field name="name">Employee Well Wishes</field>
+			<field name="model">kw_greetings_send_wishes</field>
+			<field name="arch" type="xml">
+				<kanban class="o_hr_employee_kanban">
+					<field name="id" groups = "kw_greetings.group_kw_greetings_manager"/>
+					<field name="create_uid" groups = "kw_greetings.group_kw_greetings_manager"/>
+					<field name="send_wish_to" groups = "kw_greetings.group_kw_greetings_manager"/>
+					<field name="wish_message" groups = "kw_greetings.group_kw_greetings_manager"/>
+					<field name="subject" groups = "kw_greetings.group_kw_greetings_manager"/>
+					<field name="employee_id" groups = "kw_greetings.group_kw_greetings_manager"/>
+					<field name="department_id" groups = "kw_greetings.group_kw_greetings_manager"/>
+					<field name="job_id" groups = "kw_greetings.group_kw_greetings_manager"/>
+
+					<templates>
+						<t t-name="kanban-box">
+							<div class="oe_kanban_global_click o_kanban_record_has_image_fill o_hr_kanban_record">
+								<!-- Medium employee's picture -->
+								<div class="o_kanban_image_fill_left d-none d-md-block"
+								     t-attf-style="background-image: url(#{kanban_image('hr.employee', 'image_medium', record.send_wish_to.raw_value)})"
+								     role="img" groups = "kw_greetings.group_kw_greetings_manager"/>
+								<!-- Employee's picture optimized for mobile -->
+								<div class="o_kanban_image d-md-none rounded-circle"
+								     t-attf-style="background-image: url(#{kanban_image('hr.employee', 'image_small', record.send_wish_to.raw_value)})"
+								     role="img" groups = "kw_greetings.group_kw_greetings_manager"/>
+
+								<div class="oe_kanban_details">
+									<div class="o_kanban_record_top">
+										<div class="o_kanban_record_headings">
+											<strong class="o_kanban_record_title">
+												<field name="send_wish_to" groups = "kw_greetings.group_kw_greetings_manager"/>
+											</strong>
+											<span t-if="record.send_wish_to.raw_value &gt; 0"
+											      class="o_kanban_record_subtitle">
+
+												<field name="department_id" groups = "kw_greetings.group_kw_greetings_manager"/>
+
+												<t t-if="record.job_id.raw_value &gt; 0"  groups = "kw_greetings.group_kw_greetings_manager">,
+													<field name="job_id" groups = "kw_greetings.group_kw_greetings_manager"/>
+												</t>
+
+											</span>
+										</div>
+									</div>
+
+									<span class="text-info">
+										<field name="subject" groups = "kw_greetings.group_kw_greetings_manager"/>
+									</span>
+
+									<ul>
+										<li>
+											<field name="created_date_format" groups = "kw_greetings.group_kw_greetings_manager"/>
+										</li>
+										<li  groups = "kw_greetings.group_kw_greetings_manager">By
+											<field name="create_uid" groups = "kw_greetings.group_kw_greetings_manager"/>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</t>
+					</templates>
+				</kanban>
+			</field>
+		</record>
+
+
+		<record id="view_kw_greetings_send_wishes_search_view" model="ir.ui.view">
+			<field name="name">kw_greetings_send_wishes_filter_records</field>
+			<field name="model">kw_greetings_send_wishes</field>
+			<field name="arch" type="xml">
+				<search string="Search wishes">
+
+					<field name="wish_category"/>
+					<field name="created_date_format"/>
+
+					<filter string="Today's Wishes"
+					        domain="[('created_date_format', '=',context_today().strftime('%Y-%m-%d'))]"
+					        name="today_wishes"/>
+
+					<!-- <group expand="0" string="Group By">
+						<filter name="group_wish_category" string="Category" context="{'group_by':'wish_category'}"/>
+					</group>
+ -->
+				</search>
+			</field>
+		</record>
+
+		<record id="kw_greetings_send_wishes_action_window" model="ir.actions.act_window">
+			<field name="name">Send Wishes</field>
+			<field name="res_model">kw_greetings_send_wishes</field>
+			<field name="priority" eval="1"/>
+			<field name="context">{'search_default_today_wishes':1}</field>
+			<field name="domain">[('wish_for','=','4'),('parent_id','=',False)]</field>
+			<field name="view_mode">kanban,tree,form</field>
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					No Wishes....
+				</p>
+			</field>
+		</record>
+	</data>
+</odoo>

@@ -1,0 +1,195 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="kw_recruitment_schedule_meeting_form" model="ir.ui.view">
+        <field name="name">kw_meeting_schedule.event.form</field>
+        <field name="model">kw_meeting_events</field>
+        <field name="inherit_id" ref="kw_meeting_schedule.view_kw_meeting_calendar_event_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[hasclass('oe_button_box')]/button[4]" position="after">
+                <button class="oe_stat_button" type="object" name="open_feedback_wizard" icon="fa-book"
+                attrs="{'invisible': ['|',('is_meeting_responsible', '=', False),'|',('meetingtype_code','!=', 'interview'),('id','=', False)]}">
+                    <span class="o_stat_text font-weight-bold">
+                        Download Feedback
+                    </span>
+                </button>
+            </xpath>
+
+            <xpath expr="//field[@name='meeting_type_id']" position="after">
+                <field name="meetingtype_code" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='email_subject_line']" position="after">
+                <field name="reminder_id"  options="{'no_create': True}" attrs="{'readonly':['|',('is_meeting_responsible', '=', False),'|',('meeting_start_status', '=',True),('id', '!=', False)]}" />
+            </xpath>
+            <xpath expr="//group[@name='meeting_detail_right']/div/group" position="replace">
+                <group string="Interview Details" attrs="{'invisible': [('meetingtype_code','!=', 'interview')]}" name="interview_detail">
+                    <field name="applicant_ids" widget="many2many_tags" options="{'no_create': True,'no_open': True}"
+                        attrs="{'invisible': ['|',('meetingtype_code','!=', 'interview'),('meeting_type_id','=', False)],'required': [('meetingtype_code','=', 'interview')],'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/>
+
+                    <field name="survey_id" options="{'no_create': True,'no_open': True}" attrs="{'invisible': [('meetingtype_code','!=', 'interview')],'required': [('meetingtype_code','=', 'interview')],'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/>
+
+                    <field name="mode_of_interview" attrs="{'invisible': [('meetingtype_code','!=', 'interview')],'required': [('meetingtype_code','=', 'interview')],'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/>
+
+                    <field name="telephone" attrs="{'invisible': [('mode_of_interview','!=', 'telephonic')],'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/>
+
+                    <field name="recr_online_meeting" attrs="{'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}" />
+
+                    <field name="recr_other_meeting_url" attrs="{'required':[('recr_online_meeting','=', 'other')],'invisible': [('recr_online_meeting','!=', 'other')],'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/>
+                    <field name="send_to_panel" attrs="{'invisible': [('id','=', False)],'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/> 
+                    <!-- <field name="send_to_panel" attrs="{'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/>  -->
+                    <field name="send_to_applicant" attrs="{'invisible': [('id','=', False)],'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/> 
+                    <!-- <field name="send_to_applicant" attrs="{'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/> -->
+
+                </group>
+                <group name="recurrency_group">
+                <field name="recurrency"
+                           attrs="{'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),('id', '!=', False)],'invisible': ['&amp;','|',('id', '!=', False),('recurrency', '=',False),('meetingtype_code','=', 'interview')] }" />
+                <field name="recurrent_id" invisible="1" />
+                </group>
+            </xpath>
+            
+            <xpath expr="//group[5]" position="after">
+                <group string="Meeting Feedback" attrs="{'invisible': [('meetingtype_code','!=', 'interview')]}">
+                    <field name="response_ids">
+                        <tree create="false" edit="false" open="false" delete="false">
+                            <field name="id" invisible="1"/>
+                            <field name="applicant_id" invisible="0" string="Applicant"/>
+                            <field name="survey_id" invisible="1"/>
+                            <field name="partner_id" string="Interviewer" style="pointer-events:none;"/>
+                            <field name="create_date" string="Date" style="pointer-events:none;" invisible="1"/>
+                            <field name="score" string="Score" style="pointer-events:none;"/>
+                            <field name="remark" string="Remark" style="pointer-events:none;"/>
+                            <field name="relevant_exp" style="pointer-events:none;"/>
+                            <field name="current_user" invisible="1"/>
+                            <field name="state" invisible="1"/>
+                            <field name="type" invisible="1"/>
+                            <button name="view_cv"
+                                    type="object"
+                                    string="View CV"
+                                    class="oe_highlight"
+                                    invisible="0"/>
+
+                            <button name="view_feedback" 
+                                type="object" 
+                                string="View Feedback"       
+                                class="oe_highlight" 
+                                attrs="{'invisible':[('state','=','new')]}"/>
+                                    
+                            <button name="give_feedback" 
+                                type="object" 
+                                string="Submit Feedback"
+                                class="oe_highlight" 
+                                attrs="{'invisible':[('state','!=','new')]}"/>
+                            <button name="print_feedback" 
+                                type="object" 
+                                string="PDF"
+                                attrs="{'invisible':[('state','=','new')]}"
+                                class="oe_highlight"/>
+                                    
+                        </tree>
+                    </field>
+                </group>
+            </xpath>
+            <xpath expr="//group[5]" position="replace">
+                <group string="Other Details" attrs="{'invisible': [('meetingtype_code','=', 'interview')]}">
+                    <group >
+                        <field name="mom_required" attrs="{'readonly':['|',('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/>
+                      
+                        <field name="mom_controller_id" options="{'no_create': True}" attrs="{'required': [('mom_required', '=', True)],'invisible': [('mom_required','=',False)],'readonly':['|',('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}" domain="[('id','in',employee_ids)]" />
+                        
+                    </group>
+                    <group>
+                        <field name="privacy" invisible="1" attrs="{'readonly':['|',('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/>
+                    </group>
+                </group>
+            </xpath>
+            <xpath expr="//field[@name='employee_ids']" position="attributes">
+                <attribute name="attrs">{'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='kw_start_meeting_date']" position="attributes">
+                <attribute name="attrs">{'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='kw_start_meeting_time']" position="attributes">
+                <attribute name="attrs">{'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='duration']" position="attributes">
+                <attribute name="attrs">{'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='kw_duration']" position="attributes">
+                <attribute name="attrs">{'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='agenda_ids']" position="attributes">
+                <attribute name="attrs">{'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}</attribute>
+            </xpath>
+        </field>
+    </record>
+    <record id="meeting_event_form_view_online_interview" model="ir.ui.view">
+        <field name="name">kw_meeting_schedule.online.interview.form</field>
+        <field name="model">kw_meeting_events</field>
+        <field name="inherit_id" ref="kw_meeting_zoom_integration.meeting_event_form_view_zoom"/>
+        <field name="arch" type="xml">
+            <field name="online_meeting"  position="replace">
+                <field name="online_meeting" attrs="{'readonly': ['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)],'invisible':[('meetingtype_code','=', 'interview')]}" />
+            </field>
+            <field name="other_meeting_url"  position="replace">
+                <field name="other_meeting_url" attrs="{'required':[('online_meeting','=', 'other')],'invisible':['|',('online_meeting','!=', 'other'),('meetingtype_code','=', 'interview')],'readonly': ['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/>
+            </field>
+            <field name="location_id"  position="replace">
+                <field name="location_id" options="{'no_create': True,'no_open': True}" attrs="{'required':[('online_meeting','=', False),('mode_of_interview','=', 'face2face')],'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/>
+            </field>
+            <field name="meeting_room_id"  position="replace">
+                <field name="meeting_room_id" options="{'no_create': True,'no_open': True}" widget="form.kwmeeting_room_onchange" attrs="{'required':[('online_meeting','=', False),('mode_of_interview','=', 'face2face')],'readonly':['|',('meetingtype_code','!=','interview'),('is_meeting_responsible', '=', False),'|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_meeting_schedule_response_popup_form" model="ir.ui.view">
+		  <field name="name">Meeting Schedule Feedback</field>
+		  <field name="model">kw_meeting_events</field>
+		  <field name="arch" type="xml">
+			  <form string="Meetings feedback">
+
+				  <field name="state" invisible="1"/>
+				  <group>
+					  <field name="response_ids" readonly="1" string="Meeting Feedback" domain="[('partner_id', '=', uid)]">
+						  <tree>
+                            <field name="id" invisible="1"/>
+                            <field name="applicant_id" string="Applicant"/>
+                            <field name="survey_id" invisible="1"/>
+                            <field name="partner_id" string="Interviewer" style="pointer-events:none;"/>
+                            <field name="create_date" string="Date" style="pointer-events:none;" invisible="1"/>
+                            <field name="score" string="Score" style="pointer-events:none;"/>
+                            <field name="remark" string="Remark" style="pointer-events:none;"/>
+                            <field name="current_user" invisible="1"/>
+                            <field name="state" invisible="1"/>
+                            <field name="type" invisible="1"/>
+                            <!-- <field name="state"/> -->
+                            <button name="view_cv"
+                                    type="object"
+                                    string="View CV"
+                                    class="oe_highlight"
+                                    invisible="0"/>
+
+                            <button name="view_feedback" 
+                                type="object" 
+                                string="View Feedback"       
+                                class="oe_highlight" 
+                                attrs="{'invisible':[('state','=','new')]}"/>
+                                    
+                            <button name="give_feedback" 
+                                type="object" 
+                                string="Submit Feedback"
+                                class="oe_highlight" 
+                                attrs="{'invisible':[('state','!=','new')]}"/>
+                            <button name="print_feedback" 
+                                type="object" 
+                                string="PDF"
+                                attrs="{'invisible':[('state','=','new')]}"
+                                class="oe_highlight"/>
+						  </tree>
+					  </field>
+				  </group>
+			  </form>
+		  </field>
+	  </record>
+</odoo>

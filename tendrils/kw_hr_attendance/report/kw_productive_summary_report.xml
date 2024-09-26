@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Tree view for "model" -->
+        <record id="view_kw_productive_summary_report_tree" model="ir.ui.view">
+            <field name="name">view.kw_productive_summary_report.tree</field>
+            <field name="model">kw_productive_summary_report</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <tree string="kw_productive_summary_report_tree" create="false" edit="false" delete="false" import="false" default_order="attendance_year desc,month_number desc,employee_id asc">
+                    <!-- <field name="attendance_year" /> -->
+                    <field name="attendance_month" />
+                    <field name="employee_id" />
+                    <field name="department_id" />
+                    <field name="branch_id" string="Branch"/>
+                    <field name="reporting_authority" />
+                    <field name="working_days" />
+                    <field name="required_effort" />
+                    <field name="total_effort" />
+                    <field name="extra_effort" />
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form view for "model" -->
+        <record id="view_kw_productive_summary_report_form" model="ir.ui.view">
+            <field name="name">view.kw_productive_summary_report.form</field>
+            <field name="model">kw_productive_summary_report</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <form string="kw_productive_summary_report_form" create="false" delete="false" edit="false">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="employee_id" options="{'no_create_edit': True, 'no_create': True, 'no_open': True}" />
+                                <field name="reporting_authority" options="{'no_create_edit': True, 'no_create': True, 'no_open': True}" />
+                            </group>
+                            <group>
+                                <field name="attendance_year" string="Year"/>
+                                <field name="attendance_month" string="Month"/>
+                                <field name="working_days" />
+                            </group>
+                        </group>
+                        <group string="Attendance Summary">
+                            <field name="present_child_ids" nolabel='1'>
+                                <tree editable="bottom">
+                                    <field name="attendance_recorded_date" string="Date" />
+                                    <field name="shift_id" />
+                                    <field name="state"/>
+                                    <field name="day_status" string="Day Status" />
+                                    <field name="shift_in" string="Office In Time" />
+                                    <field name="check_in_time" string="Check In" />
+                                    <field name="lunch_in_time" />
+                                    <field name="lunch_out_time" />
+                                    <field name="check_out_time" string="Check Out" />
+                                    <field name="worked_hours" widget="float_time" />
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Search view for "model" -->
+        <record id="view_kw_productive_summary_report_search" model="ir.ui.view">
+            <field name="name">view.kw_productive_summary_report.search</field>
+            <field name="model">kw_productive_summary_report</field>
+            <field name="type">search</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <search string="kw_productive_summary_report_search">
+                    <field name="employee_id" string="Employee" />
+                    <field name="attendance_year" string="Year" />
+                    <field name="branch_id" string="Branch"/>
+                    <field name="department_id" string="Department" />
+
+                    <filter string="This Year" domain="[('attendance_year', '=',context_today().strftime('%Y'))]" name="current_year_attendance"/>
+                    <filter string="Last Year" domain="[('attendance_year', '=',(context_today()-relativedelta(years=1)).strftime('%Y'))]" name="last_year_attendance"/>  
+                    <separator/>
+                    <filter string="This month" domain="[('month_number','=',context_today().strftime('%m')),('attendance_year', '=',context_today().strftime('%Y'))]" name="current_month_total_effort"/>
+                    <filter string="Last Month" domain="[('month_number','=',(context_today()-relativedelta(months=1)).strftime('%%m')),('attendance_year', '=',context_today().strftime('%Y'))]" name="last_month_attendance"/>
+                    <separator/>
+                    <filter string="January" domain="[('month_number','=',1)]" name="january_attendance"/>
+                    <filter string="February" domain="[('month_number','=',2)]" name="february_attendance"/>
+                    <filter string="March" domain="[('month_number','=',3)]" name="march_attendance"/>
+                    <filter string="April" domain="[('month_number','=',4)]" name="april_attendance"/>
+                    <filter string="May" domain="[('month_number','=',5)]" name="may_attendance"/>
+                    <filter string="June" domain="[('month_number','=',6)]" name="june_attendance"/>
+                    <filter string="July" domain="[('month_number','=',7)]" name="july_attendance"/>
+                    <filter string="August" domain="[('month_number','=',8)]" name="august_attendance"/>
+                    <filter string="September" domain="[('month_number','=',9)]" name="september_attendance"/>
+                    <filter string="October" domain="[('month_number','=',10)]" name="october_attendance"/>
+                    <filter string="November" domain="[('month_number','=',11)]" name="november_attendance"/>
+                    <filter string="December" domain="[('month_number','=',12)]" name="december_attendance"/>  
+                    <separator/>
+                    <filter name="my_and_sub_ordinate_productive" string="My &amp; Sub-Ordinates" domain="['|',('employee_id.user_id','=',uid),('employee_id.parent_id.user_id','=',uid)]" />
+                    <group>
+                        <filter name="group_by_employee_id" string="Employee" context="{'group_by':'employee_id'}" /> 
+                        <filter name="group_by_branch_id" string="Branch" context="{'group_by':'branch_id'}" />
+                        <filter name="group_by_department" string="Department" context="{'group_by':'department_id'}" />
+                                               
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Main window action for "model" -->
+        <record id="action_kw_productive_summary_report_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Employee Productive Report</field>
+            <field name="res_model">kw_productive_summary_report</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>
+            <field name="domain">[]</field>
+            <field name="context">{'search_default_current_month_total_effort':1,'search_default_my_and_sub_ordinate_productive':1}</field>
+            <field name="search_view_id" ref="view_kw_productive_summary_report_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No record found
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

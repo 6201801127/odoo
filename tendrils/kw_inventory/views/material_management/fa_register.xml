@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="kw_create_fa_tree" model="ir.ui.view">
+        <field name="name">stock.quant.tree</field>
+        <field name="model">stock.quant</field>
+        <field name="arch" type="xml">
+            <tree string="Lots/Serial Numbers" decoration-info="status=='Issued'" decoration-success="status == 'Released'" create='0' edit='0' delete='0'>
+                <field name="serial_key" invisible='1'/>
+                <field name="fa_code"/> 
+                <field name="lot_id"/>
+                <field name="material_type"/>
+                <field name="product_name" string='Name' invisible='1'/>
+                <field name="product_id" required='1' readonly='0' options="{'no_quick_create':True,'no_create':True,'no_edit':True,'no_open': True,}"/>
+                <field name="quantity"  required='0' invisible='1'/>
+                <field name="reserved_quantity"  required='0' invisible='1'/>
+                <field name="dept_id" string='Store' readonly='1' required='0' options="{'no_quick_create':True,'no_create':True,'no_edit':True,'no_open': True,}"/>
+                <!-- <field name="user_company_id" required='0' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/> -->
+                <field name="branch_id" options="{'no_quick_create':True,'no_create':True,'no_edit':True,'no_open': True,}" readonly='1'/>
+                <field name="department_id" domain="[('dept_type.code', '=', 'department')]" required='0' options="{'no_quick_create':True,'no_create':True,'no_edit':True,'no_open': True,}"/>
+                <field name="employee_id" force_save='1' options="{'no_quick_create':True,'no_create':True,'no_edit':True,'no_open': True,}"/>
+                <field name="is_grn" invisible='1'/>
+                <field name="is_gift" invisible='1'/>
+                <field name="is_asset" invisible='1'/>
+                <!-- <field name="repair_damage" string='Repair' required='0'/> -->
+                <!-- <field name="requirement_type"/> -->
+                <field name="price" string='Unit Price' sum='price'/>
+                <field name="status" invisible='1'/>
+                <field name="sequence" invisible='1'/>
+                <field name="location_id" invisible='1' required='0'/>
+                <field name="asset_id" invisible='1'/>
+                <button type="object" name="create_asset_entry" attrs="{'invisible': [('asset_id', '!=',False)]}" string="Create FA" class="btn-success" /> <!-- '|',('is_asset', '=',False), -->
+                <button type="object" name="view_asset_entry" attrs="{'invisible': [('asset_id', '=',False)]}" string="View Asset" class="btn-info"/>
+            </tree>
+        </field>
+    </record>
+
+  <record id="kw_create_fa_search" model="ir.ui.view">
+    <field name="name">Store Search</field>
+    <field name="model">stock.quant</field>
+    <field name="arch" type="xml">
+        <search string="">
+          <!-- <field name="requirement_type"/> -->
+          <!-- <field name="gatepass_type" string='Gatepass Type'/> -->
+          <field name="employee_id" />
+          <field name="branch_id" />
+          <field name="is_grn" />
+          <field name="is_asset" />
+          <field name="sequence" />
+          <!-- <field name="status"/> -->
+          <field name="dept_id"/>
+          <field name="lot_id" />
+          <field name="product_id" />
+          <field name="product_name" />
+          <field name="material_type" />
+          <!-- <field name="quantity" /> -->    
+          <separator/>
+          <filter string="Treasury" name="filter_treasury" domain="[('requirement_type', '=','treasury')]"/>
+          <filter string="Project" name="filter_project" domain="[('requirement_type', '=','project')]"/>
+          <!-- <filter string="Sent to Repair" name="filter_repair" domain="[('repair_damage', '=','repair')]"/>
+          <filter string="Repaired" name="filter_repaired" domain="[('repair_damage', '=','repaired')]"/> -->
+        <filter string="IT" name="filter_it" domain="[('material_type', '=','it')]"/>
+        <filter string="Non-IT" name="filter_non_it" domain="[('material_type', '=','non-it')]"/>
+        <filter string="Service" name="filter_service" domain="[('material_type', '=','service')]"/>
+        <filter string="Licence" name="filter_licence" domain="[('material_type', '=','licence')]"/>
+
+          <separator/>
+          <filter string="Issued" name="filter_issued" domain="[('status', '=','Issued')]"/>
+          <separator/>
+          <group expand="0" string="Group By">
+              <!-- <filter string="Return Status" name="grp_by_gatepass_type" domain="" context="{'group_by':'gatepass_type'}"/> -->
+              <!-- <filter string="Project Type" name="grp_by_requirement_type" domain="" context="{'group_by':'requirement_type'}"/> -->
+              <!-- <filter string="Status" name="grp_by_status" domain="" context="{'group_by':'status'}"/> -->
+                <filter string="Product" name="grp_by_product_id" domain="" context="{'group_by':'product_id'}"/>
+                <filter string="store" name="grp_by_dept_id" domain="" context="{'group_by':'dept_id'}"/>
+                <filter string="Product Type" name="grp_by_material_type" domain="" context="{'group_by':'material_type'}"/>
+          </group>
+        </search>
+    </field>
+</record>
+
+    <record id="action_create_fa_window" model="ir.actions.act_window">
+        <field name="name">Create FA</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">stock.quant</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_inventory.kw_create_fa_tree')})]"/>
+        <field name="domain">[('active','=', True),('process_location','=','store'),('quantity','&gt;',0),('repair_damage','in',['repaired',False]),('status', '=','Issued')]</field> 
+        <field name="search_view_id" ref="kw_create_fa_search"/>
+        <field name="context">{'search_default_filter_issued': 1}</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Add a lot/serial number
+          </p><p>
+            This is the list of all the production lots you recorded. When
+            you select a lot, you can get the traceability of the products contained in lot.
+          </p>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="all_fa_tree_view">
+        <field name="name">account.asset.asset.purchase.tree</field>
+        <field name="model">account.asset.asset</field>
+        <field name="arch" type="xml">
+            <tree string="FA" decoration-info="(state == 'draft')" decoration-muted="(state == 'close')">
+                <field name="name" string='FA Code'/>
+                <field name="stock_quant_id" string='Store Ref.'/>
+                <field name="template_id" invisible='1'/>
+                <field name="asset_id"/>
+                <field name="asset_type"/>
+                <field name="category_id" string="Asset Category"/>
+                <field name="date"/>
+                <!-- <field name="partner_id" string="Vendor"/> -->
+                <field name="value"/>
+                <!-- <field name="residual_value" widget="monetary"/> -->
+                <field name="currency_id" groups="base.group_multi_currency"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_all_fa_window">
+        <field name="name">All Fixed Asset</field>
+        <field name="res_model">account.asset.asset</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_id" ref="all_fa_tree_view"/>
+        <field name="domain">[('category_id.type', '=', 'purchase')]</field>
+        <field name="context">{'hide_fa_buttons':True}</field>
+    </record>
+
+</odoo>

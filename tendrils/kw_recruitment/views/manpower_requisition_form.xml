@@ -1,0 +1,1415 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+
+
+		<!-- Tree view for "model" -->
+		<record id="view_manpower_requisition_form_tree" model="ir.ui.view">
+			<field name="name">view.manpower_requisition_form.tree</field>
+			<field name="model">kw_recruitment_requisition</field>
+			<field name="type">tree</field>
+			<field name="mode">primary</field>
+			<field name="arch" type="xml">
+				<tree import="false" decoration-success="state=='approve'" create="false"
+					decoration-danger="state=='reject'" default_order='id desc'>
+					<field name="order_sequence" invisible="1" />
+					<field name="code" />
+					<field name="requisition_type" />
+					<field name="type_employment" invisible="1" />
+					<field name="resource" />
+					<field name="employee_id" widget="many2many_tags" string="Replacement For"
+						invisible="1" />
+					<field name="role_id" />
+					<field name="categ_id" />
+					<field name="req_raised_by_id" string="Raised By" invisible="0" />
+					<field name="state" />
+					<field name="pending_at" invisible='1' />
+					<field name="active" widget="boolean_toggle" invisible="1" />
+					<field name="approved_user_id" />
+				</tree>
+			</field>
+		</record>
+
+        <record id="view_manpower_requisition_form_kanban" model="ir.ui.view">
+			<field name="name">manpower_requisition_form.kanban</field>
+			<field name="model">kw_recruitment_requisition</field>
+			<field name="priority">16</field>
+			<field name="arch" type="xml">
+				<kanban import="false" class="oe_background_grey o_kanban_dashboard o_hr_recruitment_kanban">
+					<field name="code"/>
+					<field name="requisition_type"/>
+					<field name="type_employment" invisible="1"/>
+					<field name="resource"/>
+					<field name="employee_id"/>
+					<field name="role_id"/>
+					<field name="categ_id"/>
+					<field name="req_raised_by_id" invisible="1"/>
+					<field name="state"/>
+					<field name="pending_at" invisible='1'/>
+					<field name="active"/>
+					<field name="approved_user_id"/>
+					<templates>
+						<t t-name="kanban-box">
+							<div class="oe_kanban_global_click">
+								<div class="o_kanban_card_content">
+									<p class="badge badge-warning h2 mt-0 p-2 mb-2 font-weight-bold"
+									   style="font-size:16px">
+										<field name="code"/>
+									</p>
+									<br/>
+									<table class="table table-borderless">
+										<tr>
+											<td style="width:50%">Employment Type</td>
+											<td style="width:5%">:</td>
+											<td>
+												<field name="type_employment" invisible="1"/>
+											</td>
+										</tr>
+										<!-- <tr>
+											<td>Raised By</td>
+											<td>:</td>
+											<td>
+												<field name="req_raised_by_id"/>
+											</td>
+										</tr> -->
+										<tr>
+											<td>Raised On</td>
+											<td>:</td>
+											<td>
+												<field name="create_date"/>
+											</td>
+										</tr>
+									</table>
+
+								</div>
+							</div>
+						</t>
+					</templates>
+				</kanban>
+			</field>
+		</record>
+
+		<!-- Form view for "model" -->
+		<record id="view_manpower_requisition_form_form" model="ir.ui.view">
+			<field name="name">view.view_manpower_requisition_form</field>
+			<field name="model">kw_recruitment_requisition</field>
+			<field name="type">form</field>
+			<field name="mode">primary</field>
+			<field name="priority">1</field>
+			<field name="arch" type="xml">
+				<form string="Manpower Requisition" import="false">
+					<style>
+                        .o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width: 200px !important;}
+                    </style>
+					<header>
+						<button name="action_validate" type="object"
+						        string="Approve" class="btn btn-success"
+						        attrs="{'invisible':[('state','in',['approve','reject'])]}"
+								groups="kw_recruitment.group_rcm_head_user"
+								/>
+
+                        <button name="action_reject" type="object" string="Reject"
+								attrs="{'invisible':['|',('state','not in',['hold','draft']),('max_sal','=',0)]}"
+						        class="btn-danger" 
+								groups="kw_recruitment.group_rcm_head_user"
+								/>
+
+                        <button name="mrf_reopen" type="object" string="Reopen"
+                                confirm="Record will be moved to draft. Are you sure to reopen ?"
+								attrs="{'invisible':[('state','=','draft')]}"
+						        class="btn btn-info" 
+								groups="kw_recruitment.group_rcm_head_user"
+								/>
+						<button name="send_to_tag" type="object" 
+								string="Notify TAG for Salary Updation" class="btn btn-success" 
+								groups='kw_resource_management.group_budget_manager' 
+							attrs="{'invisible':['|',('max_sal','!=',0),('from_eq_bool','=',True)]}" />
+						<button name="mrf_send_to_hr" type="object"
+							string="MRF For KSL" class="btn btn-warning"
+							attrs="{'invisible':['|','|',('from_eq_bool','=',True),('notify_hr','=',True),('type_payroll','in',['csm_payroll',False])]}"
+							groups='kw_resource_management.group_budget_manager' />
+
+						<button name="send_to_rcm" type="object" 
+								attrs="{'invisible':[('state','!=','draft')]}"
+								string="Notify To RCM"
+								class="btn btn-success"  
+								groups='kw_recruitment.group_tag_budget_user'/>
+
+						<field name="state" widget="statusbar" statusbar_visible="draft,approve,reject"/>
+					</header>
+					<sheet>
+					<script>
+						const accordionHeaders = document.querySelectorAll('.accordion-header');
+
+						accordionHeaders.forEach(header => {
+						header.addEventListener('click', () => {
+							const content = header.nextElementSibling;
+
+							document.querySelectorAll('.accordion-content').forEach(item => {
+							if (item !== content) {
+								item.style.display = 'none';
+							}
+							});
+
+							content.style.display = content.style.display === 'block' ? 'none' : 'block';
+						});
+						});
+					</script>
+
+					<style>
+						.accordion {
+						width: 100%;
+						max-width: 100%;
+						}
+
+						.accordion-item {
+						border: 1px solid #ddd;
+						margin-bottom: 10px;
+						}
+
+						.accordion-header {
+						background-color: #f7f7f7;
+						cursor: pointer;
+						padding: 0 10px;
+						font-weight: bold;
+						}
+						.accordion-header  i{
+							color: #7C7BAD;
+							margin: 10px 0;
+						}
+
+						.accordion-content {
+						display: none;
+						padding: 0 10px;
+						border-top: 1px solid #ddd;
+						}
+						.oe_margin
+						{
+							margin:0px 0px!important;
+						}
+						.o_form_view .o_horizontal_separator {
+							font-size: 1.225rem;
+						}
+						.accordian-co
+						{
+								display: grid;
+							grid-template-columns: repeat(2,1fr);
+							<!-- grid-template-rows: 100px 500px; -->
+							margin: 0;
+						}
+						.accordian-con
+						{
+								display: grid;
+							grid-template-columns: repeat(1,1fr);
+							<!-- grid-template-rows: 100px 500px; -->
+							margin: 0;
+						}
+						@media(max-width:600px)
+						{
+							.accordian-co
+						{
+							grid-template-columns: repeat(1,1fr);
+						}
+						.accordian-con
+						{
+							grid-template-columns: repeat(1,1fr);
+						}
+						}
+						.o_form_view .o_group.o_inner_group {
+							height: min-content;
+						}
+					</style>
+					<field name="notify_hr" invisible='1' />
+					<field name="from_eq_bool" invisible='1' />
+					<field name="code" invisible='1'/>
+					<!-- <div class="oe_title d-flex">
+						<label for="code" string="Reference ID"
+							style="font-size:16px;color:green;" />:
+						<h5 class="mt-1 px-3">
+							<field name="code" nolabel="1" />
+						</h5>
+					</div> -->
+<!--start accordion-->
+
+				<div class="accordion" attrs="{'invisible':[('from_eq_bool','=',False)]}">
+    				<div class="accordion-item">
+        			<div class="accordion-header d-flex">
+              			<group string='Lead Details' attrs="{'invisible':[('from_eq_bool','=',False)]}" class="oe_margin"></group>
+	        				<i class="fa fa-chevron-down"></i>
+        			</div>
+					<div class="accordion-content" style="display:block">
+		   				<p class="accordian-co">
+							<group>
+								
+								<field name="type_project" invisible="1"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('from_eq_bool','=',True)]}" />
+								
+									<field name="project_code" string="Opportunity Code" readonly="1" />
+								<field name="project" string="Opportunity Name"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('from_eq_bool','=',True)]}" invisible='1'/>
+								<field name="project_name" string='Opportunity Name'/>
+
+
+							</group>
+							<group>
+								<field name="client_name" string='Client Name'
+									attrs="{'readonly':[('from_eq_bool','=',True)]}" />
+							</group>
+						
+		   				</p>
+					</div>
+					</div>
+					<div class="accordion-item">
+					<div class="accordion-header d-flex">
+						<group string="Contact Persons" attrs="{'invisible':[('from_eq_bool','=',False)]}" class="oe_margin"></group>
+						<i class="fa fa-chevron-down"></i>
+					</div>
+					<div class="accordion-content">
+		   				<p class="accordian-co">
+		  
+							<group string="Sales">
+								<field name="acc_manager_id" string="Account Manager"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"
+									options="{'no_open': True, 'no_create': True, 'no_edit': True}" />
+								<field name="csg_head_id" string="CSG Head"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"
+									options="{'no_open': True, 'no_create': True, 'no_edit': True}" />
+							</group>
+							<group string="Presales">
+								<field name="presales_tl_id" string="Presales TL"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"
+									options="{'no_open': True, 'no_create': True, 'no_edit': True}" />
+								<field name="presales_member_id" string="Presales Member"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"
+									options="{'no_open': True, 'no_create': True, 'no_edit': True}" />
+							</group>
+							<group string="Delivery">
+								<field name="pm_id" string="Project Manager"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"
+									options="{'no_open': True, 'no_create': True, 'no_edit': True}" />
+								<field name="sbu_lead_id" string="SBU Lead"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"
+									options="{'no_open': True, 'no_create': True, 'no_edit': True}" />
+								<field name="project_reviewer_id" string="Project Reviewer"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"
+									options="{'no_open': True, 'no_create': True, 'no_edit': True}" />
+							</group>
+						
+						</p>
+					</div>
+    				</div>
+					<div class="accordion-item">
+						<div class="accordion-header d-flex">
+							<group string="Requirements" attrs="{'invisible':[('from_eq_bool','=',False)]}" class="oe_margin" ></group>
+							<i class="fa fa-chevron-down"></i>
+						</div>
+						<div class="accordion-content">
+		   				<p class="accordian-co">
+							<group>
+								<field name="eq_category"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"></field>
+								<field name="skill" attrs="{'readonly':[('from_eq_bool','=',True)]}"></field>
+								<field name="skill_description"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"></field>
+								<field name="position" string="Position (As per RFP)"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"></field>
+								<field name="no_of_resource" string="Number of Resource(s)"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}" />
+								<label for="duration" string="Duration of Engagement"
+									attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|','|',('requisition_type','=', 'project'),('is_type_of_project','=',True),('from_eq_bool','=',False)],'readonly':['|',('state','in',['reject','approve']),('from_eq_bool','=',True)]}" />
+								<div class="address_format"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('from_eq_bool','=',True)]}">
+									<field name="duration"
+										attrs="{'readonly':['|',('state','in',['reject','approve']),('from_eq_bool','=',True)]}"
+										class="oe_inline" /> months - <field name="days"
+										attrs="{'readonly':['|',('state','in',['reject','approve']),('from_eq_bool','=',True)]}"
+										class="oe_inline" /> days </div>
+								<field name="minimum_educational_qualification_id"
+									string="Min. Educational Qualification"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"></field>
+								<field name="qualification" string="Specialization / Certification"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}" />
+								<field name="requisition_type" string="Budget Type" invisible='1'
+									attrs="{'readonly':['|', ('state','in',['hold','reject','forward','approve']),('from_eq_bool','=',True)],'required':[('from_eq_bool','=',False)]}" />
+
+							</group>
+							<group>
+								<field name="min_exp_year" string="Minimum Year of Experience"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}" />
+								<field name="max_exp_year" string="Maximum Year of Experience"/>
+								<field name="detailed_experience" string="Detailed Experience"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"></field>
+								<field name="work_location"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"></field>
+								<field name="work_location_id"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									attrs="{'invisible':[('work_location','in',['client_location',False])],'readonly':[('from_eq_bool','=',True)]}"></field>
+								<field name="location"
+									attrs="{'invisible':[('work_location','in',['csm_office',False])],'readonly':[('from_eq_bool','=',True)]}"></field>
+								<field name="it_infra_provision"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}" />
+								<field name="job_description"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"></field>
+							</group>
+						
+
+						</p>
+						</div>
+					</div>
+					<div class="accordion-item">
+					<div class="accordion-header d-flex">
+						<group string="Budget Settings" attrs="{'invisible':[('from_eq_bool','=',False)]}" class="oe_margin"></group>
+						<i class="fa fa-chevron-down"></i>
+					</div>
+					<div class="accordion-content">
+					<p class="accordian-co">
+						<group string="Budget Settings" attrs="{'invisible':[('from_eq_bool','=',False)]}">
+							<field name="role_id"
+								options="{'no_open': True,'no_create':True,'no_edit':True}"
+								domain="[('budget_type','=',requisition_type)]"
+								attrs="{'readonly':['|','|',('state','in',['reject','approve']),('role_id','=',True),('from_eq_bool','=',True)]}"
+								required="1" />
+
+							<field name="categ_id"
+								options="{'no_open': True,'no_create':True,'no_edit':True}"
+								attrs="{'readonly':['|',('state','in',['reject','approve']),('role_id','=',True)]}"
+								required="1" domain="[('role_ids', '=', role_id)]" />
+
+							<field name="name_of_business"
+								options="{'no_open': True,'no_create':True,'no_edit':True}"
+								attrs="{'invisible':['|',('from_eq_bool','=',True),('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|','&amp;',('from_eq_bool','=',False),('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}"
+							/>
+							<field name="employment_is"
+								attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('type_project','=',False),('requisition_type','=','project')],'required': [('requisition_type','=', 'treasury')],'readonly':['|',('state','in',['reject'])]}"
+								widget="radio" options="{'horizontal':True}" invisible="1" />
+							<field name="max_sal" string="CTC Proposed" force_save='1'
+								attrs="{'readonly':['|',('from_eq_bool','=',True),('state','in',['approve','reject'])],'required':[('rcm_group','!=',True)],}" />
+							<field name="type_payroll" string="Type" widget="radio" options="{'horizontal': true}"/>
+							<field name="special_comment_rcm" string="Special Comments by RCM"></field>
+							<field name="employment_duration" invisible="1" />
+							<field name="is_tag_user" invisible="1" />
+						</group>
+						
+						</p>
+						</div>
+					</div>
+				</div>
+
+<!--end accordion-->
+
+
+<!--start accordian-->
+				<div class="accordion" attrs ="{'invisible':[('from_eq_bool','=',True)]}">
+					<div class="accordion-item">
+						<div class="accordion-header d-flex">
+						<group string="General Requirement" class="oe_margin"></group>
+							<i class="fa fa-chevron-down"></i>
+						</div>
+						<div class="accordion-content" style="display:block">
+						<p class="accordian-co">
+							<group string="General Requirement">
+								<!-- <field name="code" string="Reference No."/> -->
+								<field name="mif_rec_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+								<field name="req_raised_by" readonly="1" invisible="1"/>
+								<field name="req_raised_by_id" invisible="1"/>
+								<field name="approver_field" invisible="1"/>
+
+								<field name="dept_name" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                    attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}"/>
+
+								<field name="approver_id" invisible='1'
+                                    attrs="{'readonly':['|',('state','in',['reject','approve',]),('is_tag_user','=',True)],'required': False}"
+								    options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+
+								<field name="field_edit_post_approval" invisible="1"/>
+
+								<field name="sbu_id" attrs="{'invisible':[('dept_bool','=',False)]}" options="{'no_open': True,'no_edit':True,'no_create':True}"/>
+								<field name="branch_id" options="{'no_open': True,'no_edit':True,'no_create':True}"
+								       widget="many2many_tags"
+                                       attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required':[('from_eq_bool','=',False)]}"/>
+
+								<field name="resource" string="Resource Type"
+                                    attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}"/>
+								<field name="dept_bool" invisible="1"/>
+
+								<field name="employee_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       widget="many2many_tags" string="Replacement for"
+                                       attrs="{'invisible':['|','&amp;',('resource','=',False),('employee_id','=',False),('resource','=','new')],'required':[('resource','!=','new')],'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)]}"/>
+								<field name="is_talent_pool"/>
+								<field name="current_ctc"
+								       force_save="1"
+								       readonly="1"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       string="Current CTC" invisible="1"/>
+
+								<field name="type_employment"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       invisible="1"/>
+							</group>
+						</p>
+						</div>
+					</div>
+					<div class="accordion-item">
+						<div class="accordion-header d-flex">
+							<group string="Budget Settings" class="oe_margin"></group>
+							<i class="fa fa-chevron-down"></i>
+						</div>
+						<div class="accordion-content">
+						<p class="accordian-co">
+						<group string="Budget Settings">
+							<field name="is_type_of_project" invisible='1'/>
+							<field name="is_nicsi"/>
+							<field name="requisition_type" string="Budget Type"
+								attrs="{'readonly':['|', ('state','in',['hold','reject','forward','approve'])],'required': True}"/>
+
+							<field name="role_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+									domain="[('budget_type','=',requisition_type)]"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('role_id','=',True)]}" required='1'/>
+
+							<field name="categ_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+								attrs="{'readonly':['|',('state','in',['reject','approve']),('role_id','=',True)]}" required='1' domain="[('role_ids', '=', role_id)]"/>
+
+							<field name="type_project"
+								attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}"/>
+
+							<field name="project" 
+								options="{'no_open': True,'no_create':True,'no_edit':True}"
+								attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}"/>
+							
+							<label for="duration" string="Months/Days"
+								attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}"/>
+								<div class="address_format">
+									<field name="duration"
+										attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}"
+										class="oe_inline" /> months - 
+									<field name="days"
+										attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}"
+										class="oe_inline" /> days 
+								</div>
+							<field name="name_of_business" options="{'no_open': True,'no_create':True,'no_edit':True}"
+								attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|','&amp;',('from_eq_bool','=',False),('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}"
+									/>
+							<field name="employment_is"
+								attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('type_project','=',False),('requisition_type','=','project')],'required': [('requisition_type','=', 'treasury')],'readonly':['|',('state','in',['reject'])]}"
+								widget="radio" options="{'horizontal':True}" invisible="1"/>
+
+							<field name="employment_duration" invisible="1"/>
+							<field name="is_tag_user" invisible="1"/>
+						</group>
+		
+						</p>
+						</div>
+					</div>
+					<div class="accordion-item">
+						<div class="accordion-header d-flex">
+							<group string="Requisition Details" class="oe_margin"></group>
+							<i class="fa fa-chevron-down"></i>
+						</div>
+						<div class="accordion-content">
+						<p class="accordian-con">
+						<group attrs="{'invisible':[('from_eq_bool','=',True)]}">
+							<group string="Requisition Details">
+								<field name="job_position" string='Position'
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'readonly':['|',('state','in',['hold','reject','forward','approve']),('is_tag_user','=',True)],'required':[('from_eq_bool','=',False)]}"/>
+								<field name="date_requisition" 
+                                    attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}"/>
+								<field name="effective_date_of_deployment"/>
+								<field name="no_of_resource" force_save='1'
+                                    attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}"/>
+								<field name="skill_set"
+                                    attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required':[('from_eq_bool','=',False)]}"/>
+								<field name="minimum_educational_qualification_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                    attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required':[('from_eq_bool','=',False)]}"/>
+								<field name='technology' options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                    attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required':[('from_eq_bool','=',False)]}"/>
+								<field name="job_role_desc" string='Job Description' readonly='0'/>
+							</group>
+							<group string="Experience" attrs="{'invisible':[('from_eq_bool','=',True)]}">
+								<label for="experience" class="oe_inline"/>
+								<div>
+									<group>
+										<field name="min_exp_year"
+											attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}"/>
+										<field name="max_exp_year"
+											attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}"/>
+									</group>
+								</div>
+								<field name="rcm_group" invisible='1'/>
+								<field name="dept_planned_budget"   readonly='1' invisible='1' force_save='1'/>
+								<field name="dept_remaining_budget" string="Dpt. Remaining Budget (TP-TI)" readonly='1' invisible='1' force_save='1'/>
+								<field name="max_sal" string="Salary per Month" force_save='1'
+									attrs="{'readonly':[('state','in',['approve','reject'])],'required':[('rcm_group','!=',True)],}"/>
+								<field name="avg_replacement_sal" readonly='1'  invisible='1' attrs="{'invisible':[('resource','=','new')]}"/>
+								
+								<field name="description" 
+								attrs="{'readonly':['|',('state','in',['approve','reject']),('rcm_group','!=',True)]}"/>
+								<field name="forwared_note" readonly="1" invisible="1"/>
+								<field name="approved_note" readonly="1" invisible="1"/>
+							</group>
+						</group>
+						</p>
+						</div>
+					</div>
+				</div>
+<!--end accordian-->
+
+
+						<!-- <div class="oe_title d-flex">
+							<label for="code" string="Reference ID"
+								style="font-size:16px;color:green;" />:
+							<h5 class="mt-1 px-3">
+								<field name="code" nolabel="1" />
+							</h5>
+						</div>
+						<field name="from_eq_bool" invisible="1" />
+						<group string='Lead Details' attrs="{'invisible':[('from_eq_bool','=',False)]}">
+							<group>
+								<field name="requisition_type" string="Budget Type"
+									attrs="{'readonly':['|', ('state','in',['hold','reject','forward','approve']),('from_eq_bool','=',True)],'required':[('from_eq_bool','=',False)]}" />
+
+								<field name="type_project" invisible="1"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('from_eq_bool','=',True)]}" />
+								
+								<field name="project" string="Opportunity Name"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('from_eq_bool','=',True)]}" />
+								<field name="project_code" string="Opportunity Code" readonly="1" />
+
+							</group>
+							<group>
+								<field name="client_name" string='Client Name'
+									attrs="{'readonly':[('from_eq_bool','=',True)]}" />
+							</group>
+						</group>
+						<group string="Contact Persons" attrs="{'invisible':[('from_eq_bool','=',False)]}">
+							<group string="Sales">
+								<field name="acc_manager_id" string="Account Manager"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"
+									options="{'no_open': True, 'no_create': True, 'no_edit': True}" />
+								<field name="csg_head_id" string="CSG Head"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"
+									options="{'no_open': True, 'no_create': True, 'no_edit': True}" />
+							</group>
+							<group string="Presales">
+								<field name="presales_tl_id" string="Presales TL"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"
+									options="{'no_open': True, 'no_create': True, 'no_edit': True}" />
+								<field name="presales_member_id" string="Presales Member"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"
+									options="{'no_open': True, 'no_create': True, 'no_edit': True}" />
+							</group>
+							<group string="Delivery">
+								<field name="pm_id" string="Project Manager"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"
+									options="{'no_open': True, 'no_create': True, 'no_edit': True}" />
+								<field name="sbu_lead_id" string="SBU Lead"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"
+									options="{'no_open': True, 'no_create': True, 'no_edit': True}" />
+								<field name="project_reviewer_id" string="Project Reviewer"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"
+									options="{'no_open': True, 'no_create': True, 'no_edit': True}" />
+							</group>
+						</group>
+						<group string="Requirements" attrs="{'invisible':[('from_eq_bool','=',False)]}" >
+							<group>
+								<field name="eq_category"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"></field>
+								<field name="skill" attrs="{'readonly':[('from_eq_bool','=',True)]}"></field>
+								<field name="skill_description"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"></field>
+								<field name="position" string="Position (As per RFP)"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"></field>
+								<field name="no_of_resource" string="Number of Resource(s)"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}" />
+								<label for="duration" string="Duration of Engagement"
+									attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|','|',('requisition_type','=', 'project'),('is_type_of_project','=',True),('from_eq_bool','=',False)],'readonly':['|',('state','in',['reject','approve']),('from_eq_bool','=',True)]}" />
+								<div class="address_format"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('from_eq_bool','=',True)]}">
+									<field name="duration"
+										attrs="{'readonly':['|',('state','in',['reject','approve']),('from_eq_bool','=',True)]}"
+										class="oe_inline" /> months - <field name="days"
+										attrs="{'readonly':['|',('state','in',['reject','approve']),('from_eq_bool','=',True)]}"
+										class="oe_inline" /> days </div>
+								<field name="minimum_educational_qualification_id"
+									string="Min. Educational Qualification"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"></field>
+								<field name="qualification" string="Specialization / Certification"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}" />
+							</group>
+							<group>
+								<field name="min_exp_year" string="Minimum Year of Experience"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}" />
+								<field name="max_exp_year" string="Maximum Year of Experience"/>
+								<field name="detailed_experience" string="Detailed Experience"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"></field>
+								<field name="work_location"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"></field>
+								<field name="work_location_id"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									attrs="{'invisible':[('work_location','in',['client_location',False])],'readonly':[('from_eq_bool','=',True)]}"></field>
+								<field name="location"
+									attrs="{'invisible':[('work_location','in',['csm_office',False])],'readonly':[('from_eq_bool','=',True)]}"></field>
+								<field name="it_infra_provision"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}" />
+								<field name="job_description"
+									attrs="{'readonly':[('from_eq_bool','=',True)]}"></field>
+							</group>
+						</group>
+						
+						<group attrs="{'invisible':[('from_eq_bool','=',False)]}">
+							<group string="Budget Settings" attrs="{'invisible':[('from_eq_bool','=',False)]}">
+								<field name="role_id"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									domain="[('budget_type','=',requisition_type)]"
+									attrs="{'readonly':['|','|',('state','in',['reject','approve']),('role_id','=',True),('from_eq_bool','=',True)]}"
+									required="1" />
+
+								<field name="categ_id"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('role_id','=',True)]}"
+									required="1" domain="[('role_ids', '=', role_id)]" />
+
+								<field name="name_of_business"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									attrs="{'invisible':['|',('from_eq_bool','=',True),('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|','&amp;',('from_eq_bool','=',False),('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}"
+								/>
+								<field name="employment_is"
+									attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('type_project','=',False),('requisition_type','=','project')],'required': [('requisition_type','=', 'treasury')],'readonly':['|',('state','in',['reject'])]}"
+									widget="radio" options="{'horizontal':True}" invisible="1" />
+								<field name="max_sal" string="CTC per Month Proposed by PM" force_save='1'
+									attrs="{'readonly':['|',('from_eq_bool','=',True),('state','in',['approve','reject'])],'required':[('rcm_group','!=',True)],}" />
+								<field name="type_payroll" string="Type" widget="radio" options="{'horizontal': true}"/>
+								<field name="special_comment_rcm" string="Special Comments by RCM"></field>
+								<field name="employment_duration" invisible="1" />
+								<field name="is_tag_user" invisible="1" />
+							</group>
+							
+						</group> -->
+						<!-- <group attrs ="{'invisible':[('from_eq_bool','=',True)]}">
+							<group string="General Requirement">
+								<field name="mif_rec_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+								<field name="req_raised_by" readonly="1" invisible="1"/>
+								<field name="req_raised_by_id" invisible="1"/>
+								<field name="approver_field" invisible="1"/>
+
+								<field name="dept_name" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                    attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}"/>
+
+								<field name="approver_id" invisible='1'
+                                    attrs="{'readonly':['|',('state','in',['reject','approve',]),('is_tag_user','=',True)],'required': False}"
+								    options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+
+								<field name="field_edit_post_approval" invisible="1"/>
+
+								<field name="sbu_id" attrs="{'invisible':[('dept_bool','=',False)]}" options="{'no_open': True,'no_edit':True,'no_create':True}"/>
+								<field name="branch_id" options="{'no_open': True,'no_edit':True,'no_create':True}"
+								       widget="many2many_tags"
+                                       attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required':[('from_eq_bool','=',False)]}"/>
+
+								<field name="resource" string="Resource Type"
+                                    attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}"/>
+								<field name="dept_bool" invisible="1"/>
+
+								<field name="employee_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       widget="many2many_tags" string="Replacement for"
+                                       attrs="{'invisible':['|','&amp;',('resource','=',False),('employee_id','=',False),('resource','=','new')],'required':[('resource','!=','new')],'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)]}"/>
+								<field name="is_talent_pool"/>
+								<field name="current_ctc"
+								       force_save="1"
+								       readonly="1"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       string="Current CTC" invisible="1"/>
+
+								<field name="type_employment"
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       invisible="1"/>
+							</group>
+							<group string="Budget Settings">
+                                <field name="is_type_of_project" invisible='1'/>
+								<field name="is_nicsi"/>
+								<field name="requisition_type" string="Budget Type"
+                                    attrs="{'readonly':['|', ('state','in',['hold','reject','forward','approve'])],'required': True}"/>
+
+								<field name="role_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+								       domain="[('budget_type','=',requisition_type)]"
+                                       attrs="{'readonly':['|',('state','in',['reject','approve']),('role_id','=',True)]}" required='1'/>
+
+								<field name="categ_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                    attrs="{'readonly':['|',('state','in',['reject','approve']),('role_id','=',True)]}" required='1' domain="[('role_ids', '=', role_id)]"/>
+
+								<field name="type_project"
+                                    attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}"/>
+
+								<field name="project" 
+                                    options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                    attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}"/>
+                                
+								<label for="duration" string="Months/Days"
+                                    attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}"/>
+                               	<div class="address_format">
+                                   <field name="duration"
+                                         class="mr-2" style="width: 40%;" attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}"/>
+                                  <field name="days"
+                                          class="mr-2" style="width: 40%;" attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}"/>
+                               	</div>
+								<field name="name_of_business" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                    attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|','&amp;',('from_eq_bool','=',False),('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}"
+								       />
+								<field name="employment_is"
+                                    attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('type_project','=',False),('requisition_type','=','project')],'required': [('requisition_type','=', 'treasury')],'readonly':['|',('state','in',['reject'])]}"
+								    widget="radio" options="{'horizontal':True}" invisible="1"/>
+
+								<field name="employment_duration" invisible="1"/>
+								<field name="is_tag_user" invisible="1"/>
+							</group>
+						</group>
+						<group attrs="{'invisible':[('from_eq_bool','=',True)]}">
+							<group string="Requisition Details">
+								<field name="job_position" string='Position'
+								       options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       attrs="{'readonly':['|',('state','in',['hold','reject','forward','approve']),('is_tag_user','=',True)],'required':[('from_eq_bool','=',False)]}"/>
+								<field name="date_requisition" 
+                                    attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}"/>
+								<field name="effective_date_of_deployment"/>
+								<field name="no_of_resource" force_save='1'
+                                    attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}"/>
+								<field name="skill_set"
+                                    attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required':[('from_eq_bool','=',False)]}"/>
+								<field name="minimum_educational_qualification_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                    attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required':[('from_eq_bool','=',False)]}"/>
+								<field name='technology' options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                    attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required':[('from_eq_bool','=',False)]}"/>
+							</group>
+							<group string="Experience" attrs="{'invisible':[('from_eq_bool','=',True)]}">
+								<label for="experience" class="oe_inline"/>
+								<div>
+									<group>
+										<field name="min_exp_year"
+                                            attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}"/>
+										<field name="max_exp_year"
+                                            attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}"/>
+									</group>
+								</div>
+								<field name="rcm_group" invisible='1'/>
+								<field name="dept_planned_budget"   readonly='1' invisible='1' force_save='1'/>
+								<field name="dept_remaining_budget" string="Dpt. Remaining Budget (TP-TI)" readonly='1' invisible='1' force_save='1'/>
+								<field name="max_sal" string="Salary per Month" force_save='1'
+                                    attrs="{'readonly':[('state','in',['approve','reject'])],'required':[('rcm_group','!=',True)],}"/>
+								<field name="avg_replacement_sal" readonly='1'  invisible='1' attrs="{'invisible':[('resource','=','new')]}"/>
+								
+								<field name="description" 
+								attrs="{'readonly':['|',('state','in',['approve','reject']),('rcm_group','!=',True)]}"/>
+								<field name="forwared_note" readonly="1" invisible="1"/>
+								<field name="approved_note" readonly="1" invisible="1"/>
+							</group>
+						</group>
+						<group attrs="{'invisible':[('from_eq_bool','=',True)]}">
+							<field name="job_role_desc" string='Job Description' readonly='0'/>
+						</group> -->
+					</sheet>
+					<group name="hide_chatter_mrf" >
+						<div class="oe_chatter">
+							<field name="message_follower_ids" widget="mail_followers"/>
+							<field name="activity_ids" widget="mail_activity"/>
+							<field name="message_ids" widget="mail_thread"/>
+						</div>
+					</group>
+				</form>
+			</field>
+		</record>
+
+		<record id="view_manpower_requisition_form_search" model="ir.ui.view">
+			<field name="name">view.manpower_requisition_form.search</field>
+			<field name="model">kw_recruitment_requisition</field>
+			<field name="type">search</field>
+			<field name="arch" type="xml">
+				<search>
+					<field name="code"/>
+					<field name="req_raised_by_id" string="Raised By" invisible="0"/>
+					<field name="create_date" string="Applied On"/>
+					<field name="requisition_type"/>
+					<field name="type_employment" invisible="1"/>
+					<field name="resource"/>
+					<field name="role_id"/>
+					<field name="categ_id"/>
+					<field name="state"/>
+					<field name="employee_id" string="Replacement For"/>
+					<separator/>
+					<group expand="0" string="Group By">
+						<filter name="group_state" string="State" context="{'group_by':'state'}"/>
+					</group>
+				</search>
+			</field>
+		</record>
+
+		<!-- Main window action for "model" -->
+		<record id="manpower_requisition_form_act_window" model="ir.actions.act_window">
+			<field name="type">ir.actions.act_window</field>
+			<field name="name">All MRF</field>
+			<field name="res_model">kw_recruitment_requisition</field>
+			<field name="view_mode">tree,form</field>
+			<field name="view_type">form</field>
+			<field name="search_view_id" ref="view_manpower_requisition_form_search"/>
+			<field name="domain">['|',('state','!=','draft'),('state','=','draft')]</field>
+            <field name="context">{'manpower_requisition_context':True}</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+		(0, 0, {'view_mode': 'tree', 'view_id': ref('view_manpower_requisition_form_tree')}),
+		(0, 0, {'view_mode': 'form', 'view_id': ref('view_manpower_requisition_form_form')}),
+		(0, 0, {'view_mode': 'kanban', 'view_id': ref('view_manpower_requisition_form_kanban')})]"/>
+
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					No record found..
+				</p>
+			</field>
+
+		</record>
+
+		<!-- Form view for Approved "model" -->
+
+		<record id="view_manpower_requisition_form_approved_tree" model="ir.ui.view">
+			<field name="name">view.manpower_requisition_form_approved.tree</field>
+			<field name="model">kw_recruitment_requisition</field>
+			<field name="type">tree</field>
+			<field name="mode">primary</field>
+			<field name="arch" type="xml">
+				<tree import="false" decoration-success="state=='approve'"
+					decoration-danger="state=='reject'" default_order='id desc'>
+					<field name="order_sequence" invisible="1" />
+					<field name="code" />
+					<field name="requisition_type" />
+					<field name="type_employment" invisible="1" />
+					<field name="resource" />
+					<field name="employee_id" widget="many2many_tags" string="Replacement For"
+						invisible="1" />
+					<field name="role_id" />
+					<field name="categ_id" />
+					<field name="req_raised_by_id" string="Raised By" invisible="0" />
+					<field name="state" />
+					<field name="pending_at" invisible='1' />
+					<field name="active" widget="boolean_toggle" invisible="1" />
+					<field name="approved_user_id" />
+				</tree>
+			</field>
+		</record>
+
+		<record id="view_manpower_requisition_approved_form" model="ir.ui.view">
+			<field name="name">view.view_manpower_requisition_approved_form</field>
+			<field name="model">kw_recruitment_requisition</field>
+			<field name="type">form</field>
+			<field name="mode">primary</field>
+			<field name="priority">110</field>
+			<field name="arch" type="xml">
+				<form string="Manpower Requisition" import="false">
+					<style>
+						.o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width:
+						200px !important;}
+					</style>
+					<header>
+						<field name="state" widget="statusbar"
+							statusbar_visible="draft,approve,reject" />
+					</header>
+					<sheet>
+						<div class="oe_title">
+							<label for="code" string="Reference ID"
+								style="font-size:25px;color:green;" />
+							<h2>
+								<field name="code" nolabel="1" />
+							</h2>
+						</div>
+						<field name="from_eq_bool" invisible="1" />
+						<group string='Lead Details'>
+							<group>
+								<field name="opp_code" string='OPP Code' readonly="1" />
+								<field name="opp_name" string='Opp Name' readonly="1" />
+							</group>
+							<group>
+								<field name="client_name" string='Client Name' readonly="1" />
+							</group>
+						</group>
+						<group
+							string="Contact Persons">
+							<group>
+								<group string="Sales">
+									<field name="acc_manager_id" string="Account Manager"
+										options="{'no_open': True,'no_create':True,'no_edit':True}"
+										readonly="1"></field>
+									<field name="csg_head_id" string="CSG Head"
+										options="{'no_open': True,'no_create':True,'no_edit':True}"
+										readonly="1"></field>
+								</group>
+								<group string="Presales">
+									<field name="presales_tl_id" string="Presales TL"
+										options="{'no_open': True,'no_create':True,'no_edit':True}"
+										readonly="1"></field>
+									<field name="presales_member_id" string="Presales Member"
+										options="{'no_open': True,'no_create':True,'no_edit':True}"
+										readonly="1"></field>
+								</group>
+							</group>
+							<group>
+								<group string="Delivery">
+									<field name="pm_id" string="PM"
+										options="{'no_open': True,'no_create':True,'no_edit':True}"
+										readonly="1"></field>
+									<field name="sbu_lead_id" string="SBU Lead"
+										options="{'no_open': True,'no_create':True,'no_edit':True}"
+										readonly="1"></field>
+									<field name="project_reviewer_id"
+										options="{'no_open': True,'no_create':True,'no_edit':True}"
+										readonly="1"></field>
+								</group>
+							</group>
+						</group>
+						<group></group>
+						<group string="EQ Details">
+							<group>
+								<field name="eq_category" readonly="1"></field>
+								<field name="skill" readonly="1"></field>
+								<field name="skill_description" readonly="1"></field>
+								<field name="position" readonly="1"></field>
+								<field name="minimum_educational_qualification_id" readonly="1"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"></field>
+								<field name="qualification" readonly="1" />
+							</group>
+							<group>
+								<field name="min_exp_year" readonly="1" />
+								<field name="detailed_experience" readonly="1"></field>
+								<field name="work_location" readonly="1"></field>
+								<field name="branch_id" widget='many2many_tags'
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									attrs="{'invisible':[('work_location','in',['client_location',False])],'readonly':[('from_eq_bool','=',True)]}"></field>
+								<field name="location"
+									attrs="{'invisible':[('work_location','in',['csm_office',False])],'readonly':[('from_eq_bool','=',True)]}"></field>
+								<!-- <field name="it_infra_provision"/> -->
+								<field name="job_description" readonly="1"></field>
+							</group>
+						</group>
+						<group>
+							<group string="General Requirement">
+								<!-- <field name="code" string="Reference No."/> -->
+								<field name="mif_rec_id"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									readonly="1" />
+								<field name="req_raised_by" readonly="1" invisible="1" />
+								<field name="req_raised_by_id" invisible="1" />
+								<field name="approver_field" invisible="1" />
+
+								<field name="dept_name"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									readonly="1" />
+
+								<field name="approver_id" invisible='1'
+									readonly="1"
+									options="{'no_open': True,'no_create':True,'no_edit':True}" />
+
+								<field name="field_edit_post_approval" invisible="1" />
+
+								<field name="sbu_id" readonly="1" />
+								<field name="branch_id"
+									options="{'no_open': True,'no_edit':True,'no_create':True}"
+									widget="many2many_tags"
+									readonly="1" />
+
+								<field name="resource" string="Resource Type"
+									readonly="1" />
+								<field name="dept_bool" invisible="1" />
+
+								<field name="employee_id"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									widget="many2many_tags" string="Replacement for"
+									attrs="{'invisible':['|','&amp;',('resource','=',False),('employee_id','=',False),('resource','=','new')],'required':[('resource','!=','new')]}"
+									readonly="1" />
+								<field name="is_talent_pool" />
+								<field name="current_ctc"
+									force_save="1"
+									readonly="1"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									string="Current CTC" invisible="1" />
+
+								<field name="type_employment"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									invisible="1" />
+								<field name="is_nicsi" readonly="1" />
+
+							</group>
+							<group string="Budget Settings">
+								<field name="is_type_of_project" invisible='1' />
+								<field name="requisition_type" string="Budget Type"
+									attrs="{'readonly':['|', ('state','in',['hold','reject','forward','approve'])],}" />
+
+								<field name="role_id"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									domain="[('budget_type','=',requisition_type)]"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('role_id','=',True)],}" />
+
+								<field name="categ_id"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('role_id','=',True)],}"
+									domain="[('role_ids', '=', role_id)]" />
+
+								<field name="type_project"
+									attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}" />
+
+								<field name="project"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True),],'readonly':[('state','in',['reject','approve'])]}" />
+
+								<label for="duration" string="Months/Days"
+									attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True),],'readonly':[('state','in',['reject','approve'])]}" />
+								<div class="address_format">
+									<field name="duration"
+										class="mr-2" style="width: 40%;"
+										attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True),],'readonly':[('state','in',['reject','approve'])]}" />
+									<field name="days"
+										class="mr-2" style="width: 40%;"
+										attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True),],'readonly':[('state','in',['reject','approve'])]}" />
+								</div>
+								<field name="name_of_business"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True),],'readonly':[('state','in',['reject','approve'])]}"
+								/>
+								<field name="employment_is"
+									attrs="{'invisible':['|','&amp;',('requisition_type','=',False),('type_project','=',False),('requisition_type','=','project')],'required': [('requisition_type','=', 'treasury')],'readonly':['|',('state','in',['reject'])]}"
+									widget="radio" options="{'horizontal':True}" invisible="1" />
+
+								<field name="employment_duration" invisible="1" />
+								<field name="is_tag_user" invisible="1" />
+							</group>
+						</group>
+						<group>
+							<group string="Requisition Details">
+								<field name="job_position" string='Position'
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									attrs="{'readonly':['|',('state','in',['hold','reject','forward','approve']),('is_tag_user','=',True)],'required':[('from_eq_bool','=',False)]}" />
+								<field name="date_requisition"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required':[('from_eq_bool','=',False)]}" />
+								<field name="effective_date_of_deployment" />
+								<field name="no_of_resource" force_save='1'
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required':[('from_eq_bool','=',False)]}" />
+								<field name="skill_set"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required':[('from_eq_bool','=',False)]}" />
+								<field name="qualification"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required':[('from_eq_bool','=',False)]}" />
+								<field name='technology'
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required':[('from_eq_bool','=',False)]}" />
+							</group>
+							<group string="Salary Details">
+								<field name="rcm_group" invisible='1' />
+								<field name="dept_planned_budget" readonly='1' invisible='1'
+									force_save='1' />
+								<field name="dept_remaining_budget"
+									string="Dpt. Remaining Budget (TP-TI)" readonly='1'
+									invisible='1' force_save='1' />
+								<field name="max_sal" string="Salary per Month" force_save='1'
+									attrs="{'readonly':[('state','in',['approve','reject'])],'required':[('rcm_group','!=',True)],}" />
+								<!-- <field name="notify_hr" invisible='1' /> -->
+								<field name="avg_replacement_sal" readonly='1' invisible='1'
+									attrs="{'invisible':[('resource','=','new')]}" />
+
+								<field name="description"
+									attrs="{'readonly':['|',('state','in',['approve','reject']),('rcm_group','!=',True)]}" />
+								<field name="forwared_note" readonly="1" invisible="1" />
+								<field name="approved_note" readonly="1" invisible="1" />
+							</group>
+							<group>
+								<field name="job_role_desc" string='Job Description' readonly='0' />
+							</group>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record id="manpower_requisition_approved_form_act_window" model="ir.actions.act_window">
+			<field name="type">ir.actions.act_window</field>
+			<field name="name">Approved MRF</field>
+			<field name="res_model">kw_recruitment_requisition</field>
+			<field name="view_mode">tree,form</field>
+			<field name="view_type">form</field>
+			<field name="search_view_id" ref="view_manpower_requisition_form_search"/>
+			<field name="domain">[('state','=','approve')]</field>
+			<field name="context">{'create':False,'edit':False}</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+		(0, 0, {'view_mode': 'tree', 'view_id': ref('view_manpower_requisition_form_approved_tree')}),
+		(0, 0, {'view_mode': 'form', 'view_id': ref('view_manpower_requisition_approved_form')})]"/>
+
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					No record found..
+				</p>
+			</field>
+
+		</record>
+
+		<record id="mrf_app_menu_wizard_form_view" model="ir.ui.view">
+			<field name="name">mrf.app.menu.wizard.form.view</field>
+			<field name="model">mrf.app.menu.wizard</field>
+			<field name="arch" type="xml">
+				<form string="">
+					<script>
+						$(document).ready(function(){
+						$(".modal-dialog").addClass('modal-md').removeClass('modal-lg');
+						$(".modal-footer").hide();
+						});
+				</script>
+					<div class="d-flex jusitfy-content-center flex-column">
+						<div>
+							<table class="mx-auto">
+								<tr>
+									<button class="button-33" style="margin-right: 50px;"
+										string="T&amp;M Resource  " name="mrf_action_for_tm_resource"
+										type="object" default_focus="1" />
+									<button class="button-33" string="Others"
+										name="mrf_action_for_other_resource"
+										type="object" />
+								</tr>
+							</table>
+						</div>
+					</div>
+				</form>
+			</field>
+		</record>
+
+		<record id="kw_mrf_pending_act_window" model="ir.actions.act_window">
+			<field name="name"></field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">mrf.app.menu.wizard</field>
+			<field name="view_mode">form</field>
+			<field name="target">new</field>
+			<field name="help" type="html">
+				<p class="oe_view_nocontent_create">
+					<!--Add
+					Text Here -->
+				</p>
+			</field>
+		</record>
+		<template id="assets_backend" name="kw_grievance_new assets" inherit_id="web.assets_backend">
+			<xpath expr="." position="inside">
+				<link rel="stylesheet" type="text/css"
+					href="/kw_grievance_new/static/css/button.css" />
+			</xpath>
+		</template>
+
+		<!-- MRFs parent menu -->
+
+		<menuitem parent="hr_recruitment.menu_hr_recruitment_root"
+        id="menu_manpower_requisition_form_view"
+        name="MRF"
+        sequence="99"
+        groups="kw_recruitment.group_tag_budget_user,kw_recruitment.group_rcm_head_user,kw_recruitment.group_kw_mrf_report_manager,kw_recruitment.group_kw_mrf_user,kw_recruitment.group_hr_recruitment_accounts,hr_recruitment.group_hr_recruitment_manager"/>
+
+        <menuitem id="kw_create_from_eq_manpower_requisition_form_menu"
+			name="Create MRF"
+			sequence="1"
+			parent="menu_manpower_requisition_form_view"
+			action="kw_mrf_pending_act_window"
+			groups="kw_recruitment.group_tag_budget_user,kw_recruitment.group_rcm_head_user,kw_recruitment.group_kw_mrf_report_manager,kw_recruitment.group_kw_mrf_user,kw_recruitment.group_hr_recruitment_accounts,hr_recruitment.group_hr_recruitment_manager" />
+
+		<menuitem id="kw_all_manpower_requisition_form_menu"
+                name="All MRF"
+                sequence="2"
+                parent="menu_manpower_requisition_form_view"
+                action="manpower_requisition_form_act_window"
+                groups="kw_recruitment.group_tag_budget_user,kw_recruitment.group_rcm_head_user,kw_recruitment.group_kw_mrf_report_manager,kw_recruitment.group_kw_mrf_user,kw_recruitment.group_hr_recruitment_accounts,hr_recruitment.group_hr_recruitment_manager" />
+		
+		<menuitem id="kw_all_manpower_requisition_approved_form_menu"
+                name="Approved MRF"
+                sequence="3"
+                parent="menu_manpower_requisition_form_view"
+                action="manpower_requisition_approved_form_act_window"
+                groups="kw_recruitment.group_tag_budget_user,kw_recruitment.group_rcm_head_user,kw_recruitment.group_kw_mrf_report_manager,kw_recruitment.group_hr_recruitment_accounts,hr_recruitment.group_hr_recruitment_manager" />
+
+		<record id="view_manpower_requisition_hr_tree" model="ir.ui.view">
+			<field name="name">view.manpower_requisition_form.tree</field>
+			<field name="model">kw_recruitment_requisition</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree import="false" decoration-success="state=='approve'"
+					decoration-danger="state=='reject'">
+					<field name="code" />
+					<field name="requisition_type" />
+					<field name="resource" />
+					<field name="employee_id" widget="many2many_tags" string="Replacement For"
+						invisible="1" />
+					<field name="role_id" />
+					<field name="categ_id" />
+					<field name="req_raised_by_id" string="Raised By" invisible="0" />
+					<field name="state" />
+				</tree>
+			</field>
+		</record>
+		<record id="view_manpower_requisition_hr_form" model="ir.ui.view">
+			<field name="name">view.view_manpower_requisition_form_hr</field>
+			<field name="model">kw_recruitment_requisition</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Manpower Requisition" import="false">
+					<style>
+						.o_form_view .o_group.o_inner_group > tbody > tr > td.o_td_label{min-width:
+						200px !important;}
+					</style>
+					<header>
+						<field name="state" widget="statusbar"
+							statusbar_visible="draft,approve,reject" />
+					</header>
+					<sheet>
+						<group>
+							<group string="General Requirement">
+								<field name="code" string="Reference No." />
+								<field name="mif_rec_id"
+									options="{'no_open': True,'no_create':True,'no_edit':True}" />
+								<field name="req_raised_by" readonly="1" invisible="1" />
+								<field name="req_raised_by_id" invisible="1" />
+								<field name="approver_field" invisible="1" />
+
+								<field name="dept_name"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}" />
+
+								<field name="approver_id" invisible='1'
+									attrs="{'readonly':['|',('state','in',['reject','approve',]),('is_tag_user','=',True)],'required': False}"
+									options="{'no_open': True,'no_create':True,'no_edit':True}" />
+
+								<field name="field_edit_post_approval" invisible="1" />
+
+								<field name="sbu_id" attrs="{'invisible':[('dept_bool','=',False)]}"
+									options="{'no_open': True,'no_edit':True,'no_create':True}" />
+								<field name="branch_id"
+									options="{'no_open': True,'no_edit':True,'no_create':True}"
+									widget="many2many_tags"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}" />
+
+								<field name="resource" string="Resource Type"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}" />
+								<field name="dept_bool" invisible="1" />
+
+								<field name="employee_id"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									widget="many2many_tags" string="Replacement for"
+									attrs="{'invisible':['|','&amp;',('resource','=',False),('employee_id','=',False),('resource','=','new')],'required':[('resource','!=','new')],'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)]}" />
+								<field name="is_talent_pool" />
+								<field name="current_ctc"
+									force_save="1"
+									readonly="1"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									string="Current CTC" invisible="1" />
+
+								<field name="type_employment"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									invisible="1" />
+							</group>
+							<group string="Budget Settings">
+								<field name="is_type_of_project" invisible='1' />
+								<field name="is_nicsi" />
+								<field name="requisition_type" string="Budget Type"
+									attrs="{'readonly':['|', ('state','in',['hold','reject','forward','approve'])],'required': True}" />
+
+								<field name="role_id"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									domain="[('budget_type','=',requisition_type)]"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('role_id','=',True)]}"
+									required='1' />
+
+								<field name="categ_id"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									attrs="{'readonly':['|',('state','in',['reject','approve']),('role_id','=',True)]}"
+									required='1' domain="[('role_ids', '=', role_id)]" />
+
+								<field name="type_project"
+									attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}" />
+
+								<field name="project"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}" />
+
+								<label for="duration" string="Months/Days"
+									attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}" />
+								<div class="address_format">
+									<field name="duration"
+										class="mr-2" style="width: 40%;"
+										attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}" />
+									<field name="days"
+										class="mr-2" style="width: 40%;"
+										attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}" />
+								</div>
+								<field name="name_of_business"
+									options="{'no_open': True,'no_create':True,'no_edit':True}"
+									attrs="{'invisible':[('requisition_type','=','treasury'),('is_type_of_project','=',False)],'required': ['|',('requisition_type','=', 'project'),('is_type_of_project','=',True)],'readonly':[('state','in',['reject','approve'])]}"
+								/>
+								<!-- <field name="employment_is"
+								attrs="{'invisible':['|','&',('requisition_type','=',False),('type_project','=',False),('requisition_type','=','project')],'required':
+								[('requisition_type','=',
+								'treasury')],'readonly':['|',('state','in',['reject'])]}"
+   widget="radio" options="{'horizontal':True}" invisible="1"/>
+
+<field name="employment_duration" invisible="1"/> -->
+								<field name="is_tag_user" invisible="1" />
+							</group>
+						</group>
+						<group>
+							<group>
+								<group string="Requisition Details">
+									<field name="job_position" string='Position'
+										options="{'no_open': True,'no_create':True,'no_edit':True}"
+										attrs="{'readonly':['|',('state','in',['hold','reject','forward','approve']),('is_tag_user','=',True)],'required': True}" />
+									<field name="date_requisition"
+										attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}" />
+									<field name="effective_date_of_deployment" />
+									<field name="no_of_resource" force_save='1'
+										attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}" />
+									<field name="skill_set"
+										attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}" />
+									<field name="qualification"
+										attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}" />
+									<field name='technology'
+										options="{'no_open': True,'no_create':True,'no_edit':True}"
+										attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}" />
+								</group>
+								<group string="Experience">
+									<label for="experience" class="oe_inline" />
+									<div>
+										<group>
+											<field name="min_exp_year"
+												attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}" />
+											<field name="max_exp_year"
+												attrs="{'readonly':['|',('state','in',['reject','approve']),('is_tag_user','=',True)],'required': True}" />
+										</group>
+									</div>
+									<field name="max_sal" string="Salary per Month" force_save='1' />
+								</group>
+							</group>
+							<group>
+								<field name="job_role_desc" string='Job Description' readonly='1' />
+							</group>
+						</group>
+					</sheet>
+
+				</form>
+			</field>
+		</record>
+
+		<record id="kw_recruitment_mrf_hr_view_server_action" model="ir.actions.server">
+			<field name="name">Core Hr MRF Reports</field>
+			<field name="model_id" ref="model_kw_recruitment_requisition" />
+			<field name="state">code</field>
+			<field name="code">
+				action = model.render_mrf_report_view_actions()
+
+			</field>
+		</record>
+
+		<menuitem name="View HR MRF"
+			id="kw_recruitment_mrf_hr_view"
+			parent="kw_employee_info_system.employee_mis_report_menu"
+			action="kw_recruitment.kw_recruitment_mrf_hr_view_server_action"
+			groups='kw_recruitment.group_core_hr'
+			sequence="108" />
+
+	</data>
+</odoo>

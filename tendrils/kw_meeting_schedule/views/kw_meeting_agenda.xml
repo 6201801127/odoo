@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<odoo>
+  <data>
+   
+    
+    <record id="kw_meeting_agenda_activity_view_form" model="ir.ui.view">
+        <field name="name">kw_meeting_agenda.form</field>
+        <field name="model">kw_meeting_agenda</field>
+        <field name="arch" type="xml">
+            <form string="Add Activity" >
+              <sheet>
+                
+                  <field name="name" string="Agenda"  />
+                  <field name="meeting_status" invisible="1"/>
+                  <field name="proposal_ids" string="Input(s)"  attrs="{'invisible': [('meeting_status','not in',['confirmed','draft'])]}" >
+                      <tree>
+                          <field name="name" string="Input(s)"/>
+                          <field name="create_uid" string="Posted By" readonly="1"/>
+                      </tree>
+                  </field>
+                 
+                  <field name="activity_ids"  attrs="{'invisible': [('meeting_status','not in',['attendance_complete','draft_mom','final_mom'])]}"  > 
+                    <tree create="true" delete="true" editable="bottom" >
+                      <field name="activity_type" />  
+                      <field name="name" />        
+                      <field name="target_date"  attrs="{'required': [('activity_type','=','activity')],'invisible': [('activity_type', '!=', 'activity')]}" />
+                      <field name="assigned_to" options="{'no_create':True,'no_open': True,'no_edit':True}" attrs="{'required': [('activity_type','=','activity')],'invisible': [('activity_type', '!=', 'activity')]}" />
+
+                    </tree>
+                  </field>
+                      
+              </sheet> 
+            </form>
+        </field>
+    </record>
+
+
+     <record model="ir.ui.view" id="kw_meeting_agenda_popup_view_tree">
+      <field name="name">kw_meeting_agenda Popup list</field>
+      <field name="model">kw_meeting_agenda</field>
+      <field name="arch" type="xml">
+        <tree create="false">
+            <field name="name" 
+            readonly="1" string="Agenda"
+            />
+            <field name="proposal_ids" string="Inputs"/>
+
+            <button class="btn btn-primary" type="action"                                          
+                    name="%(action_window_meeting_agenda_proposals)d" string="Add Your Input" />
+        </tree>
+      </field>
+    </record>
+    
+    <record id="action_window_meeting_agenda" model="ir.actions.act_window">
+        <field name="name">Meeting Agenda</field>
+        <field name="res_model">kw_meeting_agenda</field>
+        <field name="view_type">form</field>
+        <field name="target">new</field>
+        <field name="domain">
+          [
+            ("meeting_id", "=",  active_id),
+          ]
+        </field>
+        <field name="context">
+          {
+            'default_meeting_id': active_id,
+          
+          }
+          </field>
+       <field name="view_id" ref="kw_meeting_agenda_popup_view_tree"/> 
+    </record>
+
+
+    </data>
+</odoo>

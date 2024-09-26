@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+		<!-- model.name tree view -->
+		<record id="allowance_allocation_master_view_tree" model="ir.ui.view">
+			<field name="name">Allowance Allocation</field>
+			<field name="model">allowance_allocation_master</field>
+			<field name="arch" type="xml">
+				<tree editable="top">
+					<field name="year" attrs="{'readonly':[('boolean_readonly','=',True)]}" required="1"/>
+					<field name="month"
+					       attrs="{'required':[('year','!=',False)],'readonly':[('boolean_readonly','=',True)]}"/>
+					<field name="employee" options="{'no_open': True,'no_create':True,'no_edit':True}"
+					       attrs="{'required':[('year','!=',False)],'readonly':[('boolean_readonly','=',True)]}" context="{'tree_view_ref':'kw_hr_leaves.hr_employee_encashment_tree_view'}"/>
+					<field name="department"/>
+					<field name="division"/>
+					<field name="section"/>
+					<field name="practice"/>
+					<field name="designation"/>
+					<field name="company_id" options="{'no_open': True,'no_create':True,'no_edit':True}" required='1'/>
+					<field name="allowance" options="{'no_open': True,'no_create':True,'no_edit':True}"
+					       attrs="{'required':[('year','!=',False)],'readonly':[('boolean_readonly','=',True)]}"/>
+					<field name="amount" required="1" attrs="{'readonly':[('boolean_readonly','=',True)]}" sum="Total"/>
+					<field name="boolean_readonly" readonly="1"/>
+				</tree>
+			</field>
+		</record>
+		<!-- allowance_allocation_master search view -->
+		<record id="allowance_allocation_master_view_search" model="ir.ui.view">
+			<field name="name">allowance_allocation_master.view.search</field>
+			<field name="model">allowance_allocation_master</field>
+			<field name="arch" type="xml">
+				<search string="Search Description">
+					<!-- Add your fields here -->
+					<field name="allowance"/>
+					<field name="month"/>
+					<field name="employee"/>
+					<field name="department"/>
+					<field name="company_id"/>
+					<filter string="This Year" domain="[('year', '=',context_today().strftime('%Y'))]"
+					        name="current_year_attendance"/>
+					<filter string="Last Year"
+					        domain="[('year', '=',(context_today()-relativedelta(years=1)).strftime('%Y'))]"
+					        name="last_year_attendance"/>
+					<separator/>
+
+					<filter string="This Month" name="current_month_year" domain="[('current_month','=',True)]"/>
+					<filter string="January" domain="[('month','=',1)]" name="january_attendance"/>
+					<filter string="February" domain="[('month','=',2)]" name="february_attendance"/>
+					<filter string="March" domain="[('month','=',3)]" name="march_attendance"/>
+					<filter string="April" domain="[('month','=',4)]" name="april_attendance"/>
+					<filter string="May" domain="[('month','=',5)]" name="may_attendance"/>
+					<filter string="June" domain="[('month','=',6)]" name="june_attendance"/>
+					<filter string="July" domain="[('month','=',7)]" name="july_attendance"/>
+					<filter string="August" domain="[('month','=',8)]" name="august_attendance"/>
+					<filter string="September" domain="[('month','=',9)]" name="september_attendance"/>
+					<filter string="October" domain="[('month','=',10)]" name="october_attendance"/>
+					<filter string="November" domain="[('month','=',11)]" name="november_attendance"/>
+					<filter string="December" domain="[('month','=',12)]" name="december_attendance"/>
+					<group expand="0" string="Group By">
+						<filter string="Employee" name="employee" context="{'group_by':'employee'}"/>
+						<filter string="Department" name="department_id" context="{'group_by':'department'}"/>
+						<filter string="Allowance Type" name="allowance_type" context="{'group_by':'allowance'}"/>
+						<filter string="Company" name="company" context="{'group_by':'company_id'}"/>
+					</group>
+				</search>
+			</field>
+		</record>
+
+		<!-- model.name action window -->
+		<record id="allowance_allocation_master_action" model="ir.actions.act_window">
+			<field name="name">Allowance Allocation</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">allowance_allocation_master</field>
+			<field name="context">{'search_default_current_year_attendance':1,'search_default_current_month_year':1}</field>
+            <!-- <field name="domain">[('boolean_readonly','=',False)]</field> -->
+			<field name="view_mode">tree</field>
+			<field name="view_type">form</field>
+			<field name="help" type="html">
+				<p class="o_view_nocontent_smiling_face">
+					No Records to show...
+				</p>
+			</field>
+		</record>
+		<!-- model.name action window -->
+		
+		<!-- <record id="kw_allowance_allocation_server_action" model="ir.actions.server">
+            <field name="name">Payroll Allowance Allocation Report</field>
+            <field name="condition">True</field>
+            <field name="model_id" ref="payroll_inherit.model_allowance_allocation_master"/>
+            <field name="state">code</field>
+            <field name="code">
+form_view_id = env.ref('payroll_inherit.view_kw_payroll_report_form').id
+action = {
+		'type': 'ir.actions.act_window',
+		'name' : 'Payroll Allowance Allocation Report',
+		'view_mode': 'form',
+		'view_mode': 'form',
+		'res_model': 'kw_payroll_reports',
+		'views': [(form_view_id,'form')],
+		'target': 'new',
+		'context':{'allowance_allocation_master':True},
+}
+            </field>
+    </record> -->
+
+		<menuitem name="Allowance Allocation" id="allowance_bonus_allocation" parent="process_payroll_menu" action="allowance_allocation_master_action" sequence="13"/>
+
+	</data>
+</odoo>

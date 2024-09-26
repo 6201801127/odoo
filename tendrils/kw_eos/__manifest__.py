@@ -1,0 +1,96 @@
+# -*- coding: utf-8 -*-
+{
+    'name': "OffBoarding",
+    'summary': """OffBoarding""",
+    'description': """ OffBoarding
+        
+    """,
+
+    'author': "CSM Technologies",
+    'website': "https://www.csm.tech",
+
+    'category': 'OffBoarding',
+    'version': '1',
+
+    # any module necessary for this one to work correctly
+    'depends': ['base','hr','mail','kw_dynamic_workflow','kw_employee','kw_branch_master'],#'kw_recruitment'
+
+    # always loaded
+    'data': [
+        'security/security.xml',
+        'security/ir.model.access.csv',
+        'data/system_param_data.xml',
+        'data/kw_resignation_dynamic_workflow.xml',
+        # 'data/kw_resignation_cancellation_dynamic_workflow.xml',
+        # 'data/kw_eos_dynamic_workflow.xml',
+        'data/ir_sequence_data.xml',
+        'data/mail_reminder_end_of_service.xml',
+        'data/mail_reminder_clearance.xml',
+        'data/mail_contract_closure_approval.xml',
+        'data/retirement_reminder_scheduler.xml',
+        'data/exemployee_reminder_scheduler.xml',
+        'data/mail_resignation_approval.xml',
+        'data/mail_resignation_cancellation.xml',
+        'data/mail_termination_submit.xml',
+        'data/mail_demise_submit.xml',
+        'data/mail_end_of_service.xml',
+        'data/mail_retirement_reminder.xml',
+        'data/mail_exemployee_reminder.xml',
+        'data/mail_clearance_response.xml',
+        'data/kw_user_type_data.xml',
+        'data/data_kw_resignation_type_master.xml',
+        'data/data_notice_period_group_master.xml',
+        'data/data_offboarding_type_master.xml',
+        'data/data_reason_master.xml',
+        'data/mail_resignation_remainder.xml',
+        'data/remainder_scheduler.xml',
+        'data/update_offboarding_id_scheduler.xml',
+        'data/experience_letter_sequence.xml',
+        'data/mail_experience_letter_release_template.xml',
+        'data/notice_period_uncheck_scheduler.xml',
+        'wizards/resignation_action_wizard.xml',
+        'wizards/kw_admin_remark_view.xml',
+        'wizards/eos_action_view.xml',
+        'wizards/eos_report_wizard.xml',
+        'wizards/close_employement_type.xml',
+        'views/res_config_setting_views.xml',
+        'views/kw_reason_master.xml',
+        'views/kw_resignation_view.xml',
+        'views/kw_user_type_master.xml',
+        'views/kw_offboarding_type_master.xml',
+        'views/kw_resignation_type_master_view.xml',
+        'views/kw_apply_rl_cancellation.xml',
+        'views/kw_noc_view.xml',
+        'views/kw_notice_period_emp_group_master_view.xml',
+        'views/kw_end_of_service_view.xml',
+        'views/kw_relieving_letter_view.xml',
+        'views/kw_eos_QA_view.xml',
+        'views/kw_eos_log.xml',
+        'views/kw_eos_checklist_view.xml',
+        'views/kw_eos_extend_date_wizard.xml',
+        'views/report_views.xml',
+        'views/hr_employee_view.xml',
+        'views/hr_employee_clearance.xml',
+        'views/employee_exit_interview_view.xml',
+        'views/kw_menu.xml',
+        'views/kw_emp_archieve.xml',
+        'views/experience_letter.xml',
+        'views/kw_resignation_letter.xml',
+        'views/eos_otp_assets.xml',
+        'report/kw_eos_analytic.xml',
+        'report/employement_correction_report.xml',
+        # 'views/kw_eos_user_details.xml',
+        'views/attrition_client_action.xml',
+        
+    ],
+    # only loaded in demonstration mode
+    'demo': [
+        'demo/demo.xml',
+    ],
+    'qweb': [
+        "static/src/xml/*.xml",
+    ],
+    
+    'installable': True,
+    'application': True,
+}

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="view_kw_tour_one_report_view_tree" model="ir.ui.view">
+            <field name="name">view.kw_tour_one_report.tree</field>
+            <field name="model">kw_tour_one_report</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <tree edit="false" create="false" duplicate="false" import="false" decoration-info="state == 'Tour yet to start'" decoration-muted="state in ('Cancelled Tour','Rejected Tour')" decoration-success="state == 'Settled and Paid'" decoration-danger="state == 'With employee for settlement'"> 
+                <!-- <field name="tour_type_new" invisible="1"/> -->
+                    <field name="tour_code" />
+                    <field name="company_id" />
+                    <field name="tour_id" invisible='1'/>
+                    <field name="settlement_id" invisible='1'/>
+                    <field name="domestic_currency_id" invisible='1'/>
+                    <field name="usd_currency_id" invisible='1'/>
+                    <field name="employee_id" />
+                    <field name="department"/>
+                    <field name="division"/>
+                    <field name="section"/>
+                    <field name="tour_type_id"/>
+                    <field name="budget_head_id"/>
+                    <field name="project_id" />
+                    <field name="applied_date" />
+                    <field name="purpose" />
+                    <field name="date_of_travel"/>
+                    <field name="place_of_travel" />
+                    <field name="date_of_return"/>
+                    <field name="advance_domestic" sum="Total" options="{'currency_field':'domestic_currency_id'}" widget="monetary" />
+                    <field name="advance_international" sum="Total" options="{'currency_field':'usd_currency_id'}" widget="monetary" />
+                    <field name="ta_inr" sum="Total" options="{'currency_field':'domestic_currency_id'}" widget="monetary" />
+                    <field name="ta_usd"  sum="Total" options="{'currency_field':'usd_currency_id'}" widget="monetary" />
+                    <field name="da_inr"  sum="Total" options="{'currency_field':'domestic_currency_id'}" widget="monetary" />
+                    <field name="da_usd"  sum="Total" options="{'currency_field':'usd_currency_id'}" widget="monetary" />
+                    <field name="hra_inr" sum="Total" options="{'currency_field':'domestic_currency_id'}" widget="monetary" />
+                    <field name="hra_usd"  sum="Total" options="{'currency_field':'usd_currency_id'}" widget="monetary" />
+                    <field name="ticket_inr"  sum="Total" options="{'currency_field':'domestic_currency_id'}" widget="monetary" />
+                    <field name="ticket_usd" sum="Total" options="{'currency_field':'usd_currency_id'}" widget="monetary" />
+                    <field name="others_total_inr"  sum="Total" options="{'currency_field':'domestic_currency_id'}" widget="monetary" />
+                    <field name="others_total_usd" sum="Total" options="{'currency_field':'usd_currency_id'}" widget="monetary" />
+                    <field name="amount_total_inr" sum="Total"  options="{'currency_field':'domestic_currency_id'}" widget="monetary"/>
+                    <field name="amount_total_usd" sum="Total" options="{'currency_field':'usd_currency_id'}" widget="monetary" />
+                    <field name="fiscal_year_id" invisible="1"/>
+                     <!-- <field name="tour_state"/> -->
+                    <!-- <field name="total_domestic" sum="Total" options="{'currency_field':'domestic_currency_id'}" widget="monetary"/>
+                    <field name="total_international" sum="Total" options="{'currency_field':'usd_currency_id'}" widget="monetary"/> -->
+                    <field name="state"/>
+                    <field name="action_taken_by"/>
+                    <button name="action_settlement_details" string="View Details" class="oe_highlight" type="object"/>
+                    <!-- <button name="print_settlement_feedback" string="PDF" class="oe_highlight" type="object"/> -->
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_kw_tour_one_report_view_pivot" model="ir.ui.view">
+            <field name="name">view.kw_tour_one_report.pivot</field>
+            <field name="model">kw_tour_one_report</field>
+            <field name="arch" type="xml">
+                <pivot string="Tour Settlement Report">
+                    <field name="employee_id" type="row" />
+                    <field name="department"/>
+                    <field name="division"/>
+                    <field name="section"/>
+                    <field name="fiscal_year_id"/>
+                    <field name="date_of_travel"/>
+                    <field name="date_of_return"/>
+                    <!-- <field name="origin_place"/> -->
+                    <field name="purpose"/>
+                    <field name="advance_domestic" type="measure"/>
+                    <field name="advance_international" type="measure"/>
+                    <!-- <field name="total_domestic" type="measure"/>
+                    <field name="total_international" type="measure" /> -->
+                    <field name="date_of_travel" type="col"/>
+
+                </pivot>
+            </field>
+        </record>
+
+        <record id="view_kkw_tour_one_report_report_search" model="ir.ui.view">
+            <field name="name">Apply Tour Settlement Search View</field>
+            <field name="model">kw_tour_one_report</field>
+            <field name="arch" type="xml">
+                <search string="Search Description">
+                    <field name="date_of_travel"/>
+                    <field name="fiscal_year_id"/>
+                    <field name="employee_id"/>
+                    <filter string="Apply Date" name="filter_apply_tour_date" date="date_of_travel"/>
+                    <filter string="This Month" name="filter_current_month" domain="[('date_of_travel', 'like',context_today().strftime('%Y-%m'))]"/>
+                    <separator/>
+                    <filter name="prev_fiscalyr_filter" string="Previous Financial Year" 
+                            domain="[('fiscal_year_id.date_stop', '&gt;=', (datetime.datetime.now() - relativedelta(years=1)).strftime('%Y-%m-%d')),
+                                    ('fiscal_year_id.date_stop', '&lt;', datetime.datetime.now().strftime('%Y-%m-%d'))]" readonly="1"/>
+                    <filter name="fiscalyr_filter" string="Current Fiscal Year"
+                            domain="['&amp;',('fiscal_year_id.date_start', '&lt;=',context_today().strftime('%Y-%m-%d')),('fiscal_year_id.date_stop', '&gt;=',context_today().strftime('%Y-%m-%d'))]"
+                            context="{}" readonly="1"/>
+                    <separator/>
+                    <separator/>
+                    <filter string="January" name="january_filter" domain="[('date_of_return', 'like', '-01-%')]"/>
+                    <filter string="February" name="february_filter" domain="[('date_of_return', 'like', '-02-%')]"/>
+                    <filter string="March" domain="[('date_of_return', 'like', '-03-%')]" name="march_filter"/>
+                    <filter string="April" domain="[('date_of_return', 'like', '-04-%')]" name="april_filter"/>
+                    <filter string="May" domain="[('date_of_return', 'like', '-05-%')]" name="may_filter"/>
+                    <filter string="June" domain="[('date_of_return', 'like', '-06-%')]" name="june_filter"/>
+                    <filter string="July" domain="[('date_of_return', 'like', '-07-%')]" name="july_filter"/>
+                    <filter string="August" domain="[('date_of_return', 'like', '-08-%')]" name="august_filter"/>
+                    <filter string="September" domain="[('date_of_return', 'like', '-09-%')]" name="september_filter"/>
+                    <filter string="October" domain="[('date_of_return', 'like', '-10-%')]" name="october_filter"/>
+                    <filter string="November" domain="[('date_of_return', 'like', '-11-%')]" name="november_filter"/>
+                    <filter string="December" domain="[('date_of_return', 'like', '-12-%')]" name="december_filter"/>
+                    <group expand="0" string="Group By">
+                        <filter name="tour_company_id" string='Company Name' context="{'group_by':'company_id'}"/>
+                        <filter name="employee_id" string='Employee Name' context="{'group_by':'employee_id'}"/>
+                        <filter name="department_id" string='Department' context="{'group_by':'department_id'}"/>
+                        <filter name="tour_type_id" string='Tour Type' context="{'group_by':'tour_type_id'}"/>
+                        <filter name="state" string="Status" context="{'group_by':'state'}"/>
+                        <filter name="budget_head_id" string='Budget Head' context="{'group_by':'budget_head_id'}"/>
+                        <filter name="project_id" string='Project/OPP.' context="{'group_by':'project_id'}"/>
+                         <!-- <filter name="pending_at" string='Action To Be Taken By' context="{'group_by':'action_taken_by'}"/> -->
+                        <!-- <filter name="group_by_tour_type_new" string="Type of Tour" context="{'group_by':'tour_type_new'}"/> -->
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_kw_tour_one_report_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Tour Report</field>
+            <field name="res_model">kw_tour_one_report</field>
+            <field name="view_mode">tree,pivot</field>
+            <field name="view_type">form</field>
+            <field name="context">{'search_default_fiscalyr_filter':1}</field>
+            <field name="target">current</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No tour settlement report found...
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_kw_tour_all_report_menu" name="Tour Report"
+                  parent="kw_tour_report" sequence="4" action="action_kw_tour_one_report_act_window"/>
+
+    </data>
+</odoo>

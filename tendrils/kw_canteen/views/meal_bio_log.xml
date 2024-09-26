@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="view_meal_bio_log_tree" model="ir.ui.view">
+            <field name="name">view.meal_bio_log.tree</field>
+            <field name="model">meal_bio_log</field>
+            <field name="type">tree</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <tree string="meal_bio_log_tree" create="false" edit="false">
+                    <field name="employee_id" invisible="1" />
+                    <field name="emp_code" />
+                    <field name="emp_name" />
+                    <field name="emp_designation_id" />
+                    <field name="infra_unit_location_id"/>
+                    <field name="recorded_date" />
+                    <field name="is_special" widget="boolean_toggle"  groups="kw_canteen.canteen_manager_group" readonly='1'/>
+                    <field name="card_punch"  groups="kw_canteen.canteen_manager_group" readonly='1'/>
+                    <field name="meal_type_id"/>
+                    <field name="company_guest" invisible="1"/>
+                    <field name="month" invisible="1"/>
+                    <field name="no_of_veg"/>
+                    <field name="no_of_non_veg"/>
+                    <field name="total_meal"/>
+                    <field name="unit_price" sum="Total"/>
+                    <field name="total_price" sum="Total"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form view for "model" -->
+        <record id="view_meal_bio_log_form" model="ir.ui.view">
+            <field name="name">view.meal_bio_log.form</field>
+            <field name="model">meal_bio_log</field>
+            <field name="type">form</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <form string="meal_bio_log_form" create="false" delete="false" edit="false">
+                    <header>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="employee_id" options="{'no_open': True}" />
+                                <field name="essl_id" />
+                                <field name="recorded_date" />
+                                <field name="meal_type_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <!-- <field name="month"/> -->
+                                <field name="no_of_veg"/>
+                                <field name="no_of_non_veg"/>
+                                <field name="total_meal" readonly="1" force_save='1'/>
+                                <field name="is_special" widget="boolean_toggle" invisible='1'/>
+                                <field name="total_price"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Search view for "model" -->
+        <record id="view_meal_bio_log_search" model="ir.ui.view">
+            <field name="name">view.meal_bio_log.search</field>
+            <field name="model">meal_bio_log</field>
+            <field name="type">search</field>
+            <field name="mode">primary</field>
+            <field name="priority" eval="16" />
+            <field name="active" eval="True" />
+            <field name="arch" type="xml">
+                <search string="meal_bio_log_search">
+                    <field name="employee_id" />
+                    <field name="month"/>
+                    <field name="emp_designation_id"/>
+                    <field name="infra_unit_location_id"/>
+                    <filter string="This FY Year" name="this_year_meal_report" domain="[('recorded_date', '&gt;=', context_today().strftime('%Y') + '/03/31'),
+                            ('recorded_date', '&lt;=', (context_today()+relativedelta(years=1)).strftime('%Y')+ '/04/01')]"/>
+                    <filter string="Last FY Year" name="last_year_meal_report" domain="[('recorded_date', '&lt;=', context_today().strftime('%Y') + '/03/31'),
+                            ('recorded_date', '&gt;=', (context_today()-relativedelta(years=1)).strftime('%Y')+ '/04/01')]"/>
+                    <filter string="Self" name="filter_self_data" domain="[('employee_id.user_id','=',uid)]"/>
+                    <separator/>
+                    <filter string="Today" name="canteen_today_meal" domain="[('recorded_date','=',context_today().strftime('%Y-%m-%d'))]"/>
+                    <separator/>
+                    <filter string="Last Month" domain="[('recorded_date','&gt;',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('recorded_date','&lt;',(context_today()).strftime('%Y-%m-01'))]" name="last_month_meal_report"/>
+                    <filter string="This Month" domain="[('recorded_date', 'like',context_today().strftime('%Y-%m'))]" name="this_month_meal_report"/>
+                    <filter string="Last Month Bill" domain="[('recorded_date','&gt;=',(context_today()-relativedelta(months=2)).strftime('%Y-%m-26')),('recorded_date','&lt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-25'))]" name="last_month_beverage"/>
+                    <filter string="Current Month Bill" domain="[('recorded_date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-26')),('recorded_date','&lt;=',(context_today()).strftime('%Y-%m-25'))]" name="cureent_month_beverage"/>
+
+                    <separator/>
+                    <filter string="April-June" domain="[('recorded_date','&gt;=',time.strftime('%%Y-04-01')),('recorded_date','&lt;',time.strftime('%%Y-06-30'))]" name="quarte1_meal"/>                   
+                    <filter string="July-Septmber" domain="[('recorded_date','&gt;=',time.strftime('%%Y-07-01')),('recorded_date','&lt;',time.strftime('%%Y-09-30'))]" name="quarte2_meal"/>
+                    <filter string="October-December" domain="[('recorded_date','&gt;=',time.strftime('%%Y-10-01')),('recorded_date','&lt;',time.strftime('%%Y-12-31'))]" name="quarte3_meal"/>
+                    <filter string="January-March" domain="[('recorded_date','&gt;=',time.strftime('%%Y-01-01')),('recorded_date','&lt;',time.strftime('%%Y-03-31'))]" name="quarte3_meal"/>
+                    <separator/>
+
+
+                    <filter string="January" domain="[('recorded_date','&gt;=',time.strftime('%%Y-01-01')),('recorded_date','&lt;',time.strftime('%%Y-02-01'))]" name="january_report"/>
+                    <filter string="February" domain="[('recorded_date','&gt;=',time.strftime('%%Y-02-01')),('recorded_date','&lt;',time.strftime('%%Y-03-01'))]" name="february_report"/>
+                    <filter string="March" domain="[('recorded_date','&gt;=',time.strftime('%%Y-03-01')),('recorded_date','&lt;',time.strftime('%%Y-04-01'))]" name="march_report"/>
+                    <filter string="April" domain="[('recorded_date','&gt;=',time.strftime('%%Y-04-01')),('recorded_date','&lt;',time.strftime('%%Y-05-01'))]" name="april_report"/>
+                    <filter string="May" domain="[('recorded_date','&gt;=',time.strftime('%%Y-05-01')),('recorded_date','&lt;',time.strftime('%%Y-06-01'))]" name="may_report"/>
+                    <filter string="June" domain="[('recorded_date','&gt;=',time.strftime('%%Y-06-01')),('recorded_date','&lt;',time.strftime('%%Y-07-01'))]" name="june_report"/>
+                    <filter string="July" domain="[('recorded_date','&gt;=',time.strftime('%%Y-07-01')),('recorded_date','&lt;',time.strftime('%%Y-08-01'))]" name="july_report"/>
+                    <filter string="August" domain="[('recorded_date','&gt;=',time.strftime('%%Y-08-01')),('recorded_date','&lt;',time.strftime('%%Y-09-01'))]" name="august_report"/>
+                    <filter string="September" domain="[('recorded_date','&gt;=',time.strftime('%%Y-09-01')),('recorded_date','&lt;',time.strftime('%%Y-10-01'))]" name="september_report"/>
+                    <filter string="October" domain="[('recorded_date','&gt;=',time.strftime('%%Y-10-01')),('recorded_date','&lt;',time.strftime('%%Y-11-01'))]" name="october_report"/>
+                    <filter string="November" domain="[('recorded_date','&gt;=',time.strftime('%%Y-11-01')),('recorded_date','&lt;',time.strftime('%%Y-12-01'))]" name="november_report"/>
+                    <filter string="December" domain="[('recorded_date','&gt;=',time.strftime('%%Y-12-01')),('recorded_date','&lt;=',time.strftime('%%Y-12-31'))]" name="december_report"/>
+                    <group expand="1" string="Group By">
+                        <filter string="Employee" name="group_by_employee" domain="[]" context="{'group_by':'employee_id'}"/>
+                        <filter string="Infra Unit Location" name="group_by_loc" domain="[]" context="{'group_by':'infra_unit_location_id'}"/>
+                        <filter string="Designation" name="group_by_desig" domain="[]" context="{'group_by':'emp_designation_id'}"/>
+                        <filter string="Meal Type" name="group_by_meal" domain="[]" context="{'group_by':'meal_type_id'}"/>
+                        <filter string="Card punched" name="group_card_punch" domain="[]" context="{'group_by':'card_punch'}" groups="kw_canteen.canteen_manager_group"/>
+                    </group> 
+                </search>
+            </field>
+        </record>
+
+        <!-- Main window action for "model" -->
+        <record id="action_meal_bio_log_act_window" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Meal Report</field>
+            <field name="res_model">meal_bio_log</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_type">form</field>
+            <field name="target">current</field>
+            <field name="domain">[]</field>
+			<field name="context">{'search_default_canteen_today_meal':1,'search_default_filter_self_data': 1}</field>
+            <field name="search_view_id" ref="view_meal_bio_log_search" />
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    No Meal Bio Log Recorded.
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

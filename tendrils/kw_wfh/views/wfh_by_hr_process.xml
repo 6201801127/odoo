@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="wfh_by_hr_process_view">
+            <field name="name">kw_wfh_hr_process.form</field>
+            <field name="model">kw_wfh_hr_process</field>
+            <field name="arch" type="xml">
+                <form create='false'>
+                    <script>
+                        $(document).ready(function(){ state=  $("[aria-pressed=true]").text().trim();
+                           console.log(state);
+                            if (state != 'Draft'){
+                                $('.o_form_button_edit').hide();
+                            }
+                        });
+                    </script>
+                    <header>
+
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="search_by" widget="radio" options="{'horizontal': true}" />
+                                <field name="department_id" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}" domain="[('dept_type.code', '=', 'department')]" attrs= "{'invisible': [('search_by', 'in', ['user'])],'required': [('search_by', 'in', ['hierarchy'])]}"/>
+                                <field name="division" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}" domain="[('dept_type.code', '=', 'division')]" attrs= "{'invisible': [('search_by', 'in', ['user'])]}"/>
+                                <field name="section" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}" domain="[('dept_type.code', '=', 'section')]" attrs= "{'invisible': [('search_by', 'in', ['user'])]}"/>
+                                <field name="practise" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}" domain="[('dept_type.code', '=', 'practice')]" attrs= "{'invisible': [('search_by', 'in', ['user'])]}"/>
+                                <field name="location_type" widget="radio" options="{'horizontal': true}"/>
+                                <field name="location_id" options="{'no_open': True,'no_create':True,'no_edit':True}" widget="many2many_tags" attrs= "{'invisible': [('location_type', 'in', ['all'])],'required': [('location_type', 'in', ['location'])]}"/>
+
+                                <field name="reason_id" domain="[('type.type', 'in', ['By CSM'])]" options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                                <field name="allowed_days" invisible='1' />
+                                <field name="from_date" required="1" />
+                                <field name="to_date" required="1" />
+                                <field name="days_count" required="1" readonly="1"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page name="employees" string="WFH availed by Employee's">
+                                <div width="100%">
+                                    <button name="grant_all" string="Grant All" type="object" help="message" class="btn-info" width="8%"/>
+                                    <button name="extend_all" string="Extend All" type="object" help="message" class="btn-success" style="width:10%;margin:10px;"/>
+                                    <button name="close_all" string="Close All" type="object" help="message" class="btn-danger" width="8%"/>
+                                </div>
+                                <field name="wfh_ids" readonly='1' force_save="1" limit='40' style='height:400px; overflow-y:auto'>
+                                    <tree editable="top" style="pointer-events:none;">
+                                        <field name="employee_id" readonly='1' style="pointer-events:none;" force_save="1"/>
+                                        <field name="request_from_date" readonly='1' style="pointer-events:none;" force_save="1"/>
+                                        <field name="request_to_date" readonly='1' style="pointer-events:none;" force_save="1"/>
+                                        <button name="extend_single_record" attrs="{'invisible': [('is_extended','=', True)]}" context="{'current_rec_id':id}" string="Extend" type="object" help="message" class="btn-success"/>
+                                        <field name="is_extended" invisible="1"/>
+                                        <field name="state" invisible="1"/>
+                                        <button name="close_single_record" attrs="{'invisible': [('state','=', 'expired')]}" string="Close" type="object" help="message" class="btn-danger"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_wfh_hr_process_action">
+            <field name="name">WFH by HR Process</field>
+            <field name="res_model">kw_wfh_hr_process</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('wfh_by_hr_process_view')})]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+						No records to show...
+                </p>
+            </field>
+        </record>
+        <!-- CSM Initiative menu -->
+<!--		<menuitem id="kw_wfh_initiative_by_hr_menu" action="kw_wfh_hr_process_action" name="WFH by HR Process"-->
+<!--		          parent="kw_wfh_root_menu" groups="kw_wfh.group_kw_wfh_manager" sequence="3"/>-->
+    </data>
+</odoo>

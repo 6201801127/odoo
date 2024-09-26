@@ -1,0 +1,180 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <!-- Product Tagging  Log -->
+        <record id="kw_product_assign_release_log_view_tree" model="ir.ui.view">
+            <field name="name">kw_product_assign_release_log.view.tree</field>
+            <field name="model">kw_product_assign_release_log</field>
+            <field name="arch" type="xml">
+                <tree decoration-success="status == 'Issued'" decoration-danger="status == 'Released'">
+                    <field name="products" />
+                    <field name="quantity" />
+                    <field name="assigned_to" />
+                    <field name="materil_id" />
+                    <field name="assigned_on" />
+                    <field name="action_by" />
+                    <field name="status" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_product_assign_release_log_search" model="ir.ui.view">
+            <field name="name">kw_product_assign_release_log.search</field>
+            <field name="model">kw_product_assign_release_log</field>
+            <field name="arch" type="xml">
+                <search string="Account Report">
+                    <field name="products" />
+                    <field name="quantity" />
+                    <field name="assigned_to" />
+                    <field name="materil_id" />
+                    <field name="assigned_on" />
+                    <field name="action_by" />
+                    <field name="status" />
+                    <filter string="Released" domain="[('status','=','Released')]" name="status_released"/>
+                    <separator/>
+                    <filter string="Issued" domain="[('status','=','Issued')]" name="status_issued"/>
+                    <group expand="0" string="Group By">
+                        <filter name="action_by" string="Action by" domain="" context="{'group_by':'action_by'}"/>
+                        <filter name="status" string="Status" domain="[]" context="{'group_by':'status'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="view_stock_quant_form_inherited" model="ir.ui.view">
+            <field name="name">Stock Quant</field>
+            <field name="model">stock.quant</field>
+            <field name="inherit_id" ref="stock.view_stock_quant_form" />
+            <field name="arch" type="xml">
+                <data>
+                    <!-- <xpath expr="//form/sheet/div[@name='button_box']" position="inside">
+                        <button class="oe_stat_button" icon="fa-tags" type="object"
+                            name="action_view_product_tagging" string="Asset Tagging" />
+                    </xpath> -->
+                    <xpath expr="//form/sheet/group/group/field[@name='lot_id']" position="before">
+                        <!-- <field name="serial_type" invisible='0'/> -->
+                        <field name="fa_code"/>
+                        <field name="branch_id"  options="{'no_quick_create':True,'no_create':True,'no_edit':True,'no_open': True,}"/>
+                    </xpath>
+                    <xpath expr="//form/sheet" position="after">
+                        <div class="oe_chatter">
+                            <field name="message_follower_ids" widget="mail_followers" />
+                            <field name="activity_ids" widget="mail_activity" />
+                            <field name="message_ids" widget="mail_thread" />
+                        </div>
+                    </xpath>
+                </data>
+            </field>
+        </record>
+        
+        <record id="stock_quant_facode_form" model="ir.ui.view">
+            <field name="name">stock.quant.facode.form</field>
+            <field name="model">stock.quant</field>
+            <field name="arch" type="xml">
+                <form string="facode">
+                    <script>
+                        $(document).ready(function(){
+                            $(".modal-footer").hide();
+                        });
+                    </script>
+                    <sheet>
+                        <group name="facode" string="FA code">
+                            <field name="fa_code"/>
+                        </group>
+                        <div class="row">
+                            <div class="text-center col-sm-12 mx-auto">
+                                <button type="object" name="update_facode" class="btn-success mr-2" style="float:left;">Update</button>
+                                <button string="Cancel" class="btn-danger" special="cancel" style="float:left;"/>
+                            </div>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="stock_production_lot_serialno_form" model="ir.ui.view">
+            <field name="name">stock.production.lot.serialno.form</field>
+            <field name="model">stock.production.lot</field>
+            <field name="arch" type="xml">
+                <form string="facode">
+                    <script>
+                        $(document).ready(function(){
+                            $(".modal-footer").hide();
+                        });
+                    </script>
+                    <sheet>
+                        <group name="serialno" string="Serial No">
+                            <field name="name"/>
+                        </group>
+                        <div class="row">
+                            <div class="text-center col-sm-12 mx-auto">
+                                <button type="object" name="update_serailno" class="btn-success mr-2" style="float:left;">Update</button>
+                                <button string="Cancel" class="btn-danger" special="cancel" style="float:left;"/>
+                            </div>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="product_form_view_procurement_button_inherited" model="ir.ui.view">
+            <field name="name">product.product</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="stock.product_form_view_procurement_button" />
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//button[@name='action_open_quants']" position="after">
+                        <button class="oe_stat_button" icon="fa-tags" type="object"
+                            name="action_view_product_tagging" string="Asset Tagging" />
+                    </xpath>
+                </data>
+            </field>
+        </record>
+
+        <record id="kw_product_assign_release_log_action_window" model="ir.actions.act_window">
+            <field name="name">Product Taging Log</field>
+            <field name="res_model">kw_product_assign_release_log</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids"
+                eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_product_assign_release_log_view_tree')})]" />
+            <field name="search_view_id" ref="kw_inventory.kw_product_assign_release_log_search"/> 
+            <field name="context">{}</field>
+            <field name="domain">[]</field>
+        </record>
+        
+        <record id="kw_stock_quant_log_view_tree" model="ir.ui.view">
+            <field name="name">kw_stock_quant_log.view.tree</field>
+            <field name="model">kw_stock_quant_log</field>
+            <field name="arch" type="xml">
+                <tree decoration-success="status == 'Issued'" decoration-danger="status == 'Released'">
+                    <field name="products" />
+                    <field name="quantity" />
+                    <field name="assigned_to" />
+                    <field name="asset_id" />
+                    <field name="assigned_on" />
+                    <field name="action_by" />
+                    <field name="status" />
+                    <field name="material_id" />
+                </tree>
+            </field>
+        </record>
+        <record id="kw_stock_quant_log_action_window" model="ir.actions.act_window">
+            <field name="name">Product Taging Log</field>
+            <field name="res_model">kw_stock_quant_log</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids"
+                eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_stock_quant_log_view_tree')})]" />
+            <field name="context">{}</field>
+            <field name="domain">[]</field>
+        </record>
+        <!-- <menuitem
+        id="menu_materail_request_take_action_log"
+            sequence="5"
+            name="Log"
+            parent="menu_materail_management"
+            action="kw_product_assign_release_log_action_window"/> -->
+
+    </data>
+</odoo>

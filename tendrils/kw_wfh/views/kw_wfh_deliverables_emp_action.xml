@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+        <!-- employee action -->
+        <record model="ir.ui.view" id="kw_wfh_emp_deliverables_tree">
+            <field name="name">kw_wfh_deliverables_emp.tree</field>
+            <field name="model">kw_wfh_deliverables</field>
+            <field name="arch" type="xml">
+                <tree import='false' default_order='id desc' >
+                    <field name="task_title" />
+                    <field name="task_desc" invisible="1"/>
+                    <field name="status" />
+                    <field name="submission_date" />
+                    <field name="start_time" />
+                    <field name="end_time" />
+                    <field name="state" />
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="kw_wfh_emp_deliverables_form">
+            <field name="name">kw_wfh_deliverables_emp.form</field>
+            <field name="model">kw_wfh_deliverables</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                         <button class="btn btn-primary" type="object" name="submit_task" string="Submit "  attrs="{'invisible': [('state','=', 'submitted')]}"/>
+                        <field name="state" widget="statusbar" />
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="task_title" attrs="{'readonly': [('state','=', 'submitted')]}" style="width: 50%"/>
+                                <field name="task_desc" attrs="{'readonly': [('state','=', 'submitted')]}" style="width: 50%"/>
+                                <field name="status" style="width: 50%" attrs="{'readonly': [('state','=', 'submitted')]}"/>
+                                <field name="submission_date" style="width: 50%" string="Reporting Date" attrs="{'readonly': [('state','=', 'submitted')]}"/>
+                                <field name="start_time" style="width: 50%" attrs="{'readonly': [('state','=', 'submitted')]}"/>
+                                <field name="end_time" style="width: 50%;" attrs="{'readonly': [('state','=', 'submitted')]}"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <!-- search view -->
+        <record id="search_view_kw_wfh_emp_deliverables_report" model="ir.ui.view">
+            <field name="name">kw wfh Employee Deliverables Report Search View</field>
+            <field name="model">kw_wfh_deliverables</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="state"/>
+                    <filter string="draft" name="filter_assigned_state" domain="[('state','=','assigned')]"/>
+                    <filter string="Inprogress" name="filter_inprogress_state" domain="[('state','=','inprogress')]"/>
+                    <filter string="Completed" name="filter_completed_state" domain="[('state','=','completed')]"/>
+                    <filter string="Closed" name="filter_closed_state" domain="[('state','=','closed')]"/>
+                     <separator/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_state" string="State" context="{'group_by':'state'}" />
+                        <separator/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="kw_wfh_emp_deliverables_action">
+            <field name="name">Report Task</field>
+            <field name="res_model">kw_wfh_deliverables</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">kanban,form,tree</field>
+            <field name="domain">[('employee_id.user_id','=',uid)]</field>
+            <field name='search_view_id' ref='search_view_kw_wfh_emp_deliverables_report'/>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_wfh_emp_deliverables_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_wfh_emp_deliverables_form')}),]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+						No records to show...
+                </p>
+            </field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <template id="surveys" name="Appraisal">
+            <t t-call="website.layout">
+                <div class="wrap">
+                    <div class="oe_structure" id="oe_structure_survey_survey_1" />
+                    <div class="container">
+                        <t t-call="kw_appraisal.pages" />
+                    </div>
+                    <div class="oe_structure" id="oe_structure_survey_survey_2" />
+                </div>
+            </t>
+        </template>
+
+        <template id="pages" name="Appraisal Pages">
+            <div class="card mt-3">
+                <div class="card-header" style="padding-bottom: 0px;">
+                    <div class="row ">
+                        <div class="col-sm-8 col-sx-12 text-left">
+                            <h3 t-field="page.title" class='text-white h2 text-capitalize font-weight-bold' />
+                        </div>
+                        <div class="col-sm-4  col-sx-12 h2 text-right">
+                            <h5 class="text-white font-weight-bold " style="font-size: 14px;">
+
+                                <ul class="pagination pg-blue pull-right">
+                                    <li class="page-item disabled">
+                                        <a class="page-link text-white">Page:</a>
+                                    </li>
+                                    <li class="page-item active">
+                                        <span class="page-link">
+                                            <t t-raw="page_nr + 1" />
+                                        </span>
+                                    </li>
+                                    <li class="page-item disabled">
+                                        <a class="page-link text-white">/</a>
+                                    </li>
+                                    <li class="page-item active">
+                                        <span class="page-link">
+                                            <t t-raw="len(survey.page_ids)" />
+                                        </span>
+                                    </li>
+
+                                </ul>
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mt-2">
+                        <div t-foreach='user_input' t-as='user_inputs' class="mb-3 float-left logedin-user">
+                            <img t-attf-src="data:image_small/*;base64,{{user_inputs.appraisal_id.emp_id.image_small}}" />
+                            <div class="info">
+                                <p class="m-0 font-weight-bold h4">
+                                    <span t-esc="user_inputs.appraisal_id.emp_id.name+ ' ('+ user_inputs.appraisal_id.emp_id.emp_code +')' " />
+                                </p>
+                                <p class="m-0 badge badge-pill badge-primary p-2">
+                                    <span t-esc='user_inputs.appraisal_id.emp_id.job_id.name' />
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex justify-content-end">
+                        <t t-set="test1" t-value="page.question_ids.mapped('id')" />
+                        <t t-set="test2" t-value="request.env['survey.question'].sudo().search([('id','in',test1)]).mapped('type')" />
+                        <t t-if="'simple_choice' in test2">
+                            <div class='text-right text-bold'>
+                                <style>
+                                    .badge-custom {
+                                        font-size: 1.25rem;
+                                        padding: 0.75rem 1.5rem; 
+                                    }
+                                </style>
+                                <b><a href="#" data-toggle="modal" class="badge badge-primary badge-custom" data-target="#scoreDefinitionModal">Rating Definition</a></b>
+                            </div>
+                        </t>
+                    </div>
+                    <div class="modal fade" id="scoreDefinitionModal" tabindex="-1" role="dialog" aria-labelledby="scoreDefinitionModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document"  >
+                            <div class="modal-content" >
+                                <div class="modal-header" style="background-color:#a6c !important;color:#fff">
+                                    <h3 class="modal-title" id="scoreDefinitionModalLabel">Rating Definition</h3>
+                                </div>
+                                <div style="margin-bottom: 10px;">
+                                    <t t-set="star" t-value="'🌟'"/>
+                                    
+                                    <h3 style="margin-bottom: 5px;padding: 15px;">Outstanding (5): <t t-esc="star"/></h3>
+                                    <ul style="list-style-type: disc; margin-left: 20px;">
+                                        <li>Consistently surpasses expectations, delivering exceptional work.</li>
+                                        <li>Demonstrates remarkable proficiency and goes above and beyond outlined responsibilities.</li>
+                                        <li>Acknowledged for consistently delivering high-quality results.</li>
+                                    </ul>
+                                </div>
+                                
+                                <div style="margin-bottom: 10px;">
+                                    <t t-set="commendable_emoji" t-value="'🏅'"/>
+                                    <h3 style="margin-bottom: 5px;padding: 15px;">Commendable (4): <t t-esc="commendable_emoji"/></h3>
+                                    <ul style="list-style-type: disc; margin-left: 20px;">
+                                        <li>Consistently meets and often exceeds expectations.</li>
+                                        <li>Shows above-average proficiency and achieves notable accomplishments.</li>
+                                        <li>Recognized for consistent, commendable performance.</li>
+                                    </ul>
+                                </div>
+                                
+                                <div style="margin-bottom: 10px;">
+                                    <t t-set="meet_expectations_emoji" t-value="'🤝'"/>
+                                    <h3 style="margin-bottom: 5px;padding: 15px;">Meet Expectations (3):<t t-esc="meet_expectations_emoji"/></h3>
+                                    <ul style="list-style-type: disc; margin-left: 20px;">
+                                        <li>Delivers satisfactory work in line with outlined responsibilities.</li>
+                                        <li>Meets the expected standards consistently.</li>
+                                        <li>Performs tasks as expected and fulfills assigned duties competently.</li>
+                                    </ul>
+                                </div>
+                                
+                                <div style="margin-bottom: 10px;">
+                                    <t t-set="need_improvement_emoji" t-value="'🔍'"/>
+                                    <h3 style="margin-bottom: 5px;padding: 15px;">Need Improvement (2):<t t-esc="need_improvement_emoji"/></h3>
+                                    <ul style="list-style-type: disc; margin-left: 20px;">
+                                        <li>Displays areas that require enhancement or development.</li>
+                                        <li>May benefit from additional support or guidance in specific aspects.</li>
+                                        <li>Shows potential but needs improvement in certain areas to meet expected standards.</li>
+                                    </ul>
+                                </div>
+                                
+                                <div style="margin-bottom: 10px;">
+                                    <t t-set="underperformance_emoji" t-value="'📉'"/>
+                                    <h3 style="margin-bottom: 5px;padding: 15px;">Underperformance (1)::<t t-esc="underperformance_emoji"/></h3>
+                                    <ul style="list-style-type: disc; margin-left: 20px;">
+                                        <li>Performs below the expected standards consistently.</li>
+                                        <li>Requires significant support and development to meet role expectations.</li>
+                                        <li>Needs guidance and improvement across multiple areas to align with organizational standards.</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                                        
+                    
+                    <form role="form" id='kw_survey_form' method="post" class="js_surveyform" t-att-name="'%s_%s' % (survey.id, page.id)" t-att-action="'/kw/survey/fill/%s/%s' % (slug(survey), token)" t-att-data-prefill="'/kw/survey/prefill/%s/%s/%s' % (slug(survey), token, slug(page))" t-att-data-validate="'/survey/validate/%s' % (slug(survey))" t-att-data-submit="'/kw/survey/submit/%s' % (slug(survey))" t-att-data-back="'/kw/survey/back/%s' % (slug(survey))">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                        <input type="hidden" name="page_id" t-att-value="page.id" />
+                        <input type="hidden" name="survey" id='survey' t-att-value="survey" />
+                        <input type="hidden" name="token" t-att-value="token" />
+                        <input type="hidden" name="lm_values" t-att-value="lm_values" />
+                        <input type="hidden" name="values" t-att-value="values" />
+                        <input type="hidden" name="ulm_vals" t-att-value="ulm_vals" />
+                        <input type="hidden" name="self_values" t-att-value="self_values" />
+                        <input type="hidden" name="empl_id" id="empl_id" t-att-value="empl_id" />
+                        <table id="survey_table" class="table auto-index table-bordered">
+                            <thead class="thead-orange">
+
+                                <tr>
+                                    <t t-set="a" t-value="page.question_ids.mapped('id')" />
+                                    <t t-set="b" t-value="request.env['survey.question'].sudo().search([('id','in',a)]).mapped('type')" />
+                                    <t t-set="c" t-value="request.env['survey.question'].sudo().search([('id','in',a)]).mapped('indicator')" />
+
+                                    <t t-if="'numerical_box' in b">
+                                        <th scope="col">KRA</th>
+                                    </t>
+                                    <t t-if="'textbox' in b">
+                                        <th scope="col">Training Planned hours</th>
+                                        <th scope="col">Attended hours</th>
+                                        <th scope="col">Percentage</th>
+                                    </t>
+                                    <t t-if="'numerical_box' in b">
+                                        <th scope="col">
+                                            KPI
+                                            <span class="text-danger">*</span>
+                                        </th>
+                                    </t>
+                                    <t t-else="">
+                                        <t t-if="'numerical_box' not in b and 'textbox' not in b">   
+                                        <th scope="col" width='15%'>
+                                            Competencies  <span class="text-danger">*</span>
+                                        </th>
+                                       
+                                        <th scope="col">
+                                            Behaviour Indicators
+                                            <span class="text-danger">*</span>
+                                        </th>
+                                    </t>
+                                    </t>
+                                    <t t-if="'numerical_box' in b">
+                                        <th scope="col">
+                                            Weightage
+                                            <span class="text-danger">*</span>
+                                        </th>
+                                    </t>
+                                    <t t-if="'textbox' not in b">
+                                        <th t-if="not values and not lm_values and user_input.appraisal_id.emp_id.user_id.partner_id.id == request.env.user.partner_id.id" scope="col">
+                                            Score
+                                            <span class="text-danger">*</span>
+                                        </th>
+                                    </t>
+                                    <th t-if="not values and not lm_values and user_input.appraisal_id.emp_id.user_id.partner_id.id == request.env.user.partner_id.id" scope="col">
+                                        Justify/Quote an Instance
+                                        <span class="text-danger">*</span><br/>
+                                        <span>(500 letters allowed)</span>
+                                    </th>
+                                    
+                                    <th t-if="(values or lm_values) and 'textbox' not in b " scope="col">SA Score</th>
+                                    <th t-if="values or lm_values" scope="col">Justify/Quote an Instance</th>
+                                    <th t-if="(values and not lm_values and user_input.appraisal_id.hr_manager_id.user_id.partner_id.id == request.env.user.partner_id.id and user_input.appraisal_id.hr_manager == True)  and 'textbox' not in b " scope="col">
+                                        LM Score
+                                        <span class="text-danger">*</span>
+                                    </th>
+                                    <th t-if="values and not lm_values and user_input.appraisal_id.hr_manager_id.user_id.partner_id.id == request.env.user.partner_id.id and user_input.appraisal_id.hr_manager == True" scope="col">
+                                        LM Remarks
+                                        <span class="text-danger">*</span>
+                                    </th>
+                                    <th t-if="(values and lm_values) and 'textbox' not in b " scope="col">LM Score</th>
+                                    <th t-if="values and lm_values" scope="col">LM Remarks</th>
+                                    <th t-if="(values and lm_values or user_input.appraisal_id.hr_collaborator_id.user_id.partner_id.id == request.env.user.partner_id.id and user_input.appraisal_id.hr_collaborator == True) and 'textbox' not in b" scope="col">ULM Score</th>
+                                    <th t-if="values and lm_values or user_input.appraisal_id.hr_collaborator_id.user_id.partner_id.id == request.env.user.partner_id.id and user_input.appraisal_id.hr_collaborator == True" scope="col">
+                                        ULM Remarks
+                                        <span class="text-danger">*</span>
+                                    </th>
+                                    <th t-if="ulm_vals" scope="col">ULM Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="question_cnt" t-value="0" />
+                                <t t-set="cnt" t-value="0" />
+                                <t t-set="lm_count" t-value="0" />
+                                <t t-set="ulm_count" t-value="0" />
+
+
+                                    <tr t-foreach="page.question_ids" t-as="question" t-att-valmax="question.validation_max_float_value">
+                                        <t t-set="prefix" t-value="'%s_%s_%s' % (survey.id, page.id, question.id)" />
+                                        <t class="js_question-wrapper" t-att-id="prefix">
+                                            <input type="hidden" name="prefix" t-att-value="prefix" />
+
+                                            <!-- <t t-foreach="page.question_ids" t-as="abc">
+                                                <t t-set="cnt" t-value="0" />
+                                                <t t-set="set_indicator" t-value="111" />
+                                                <t t-if="prev_indicator != question.indicator">
+                                                    <t t-set="prev_indicator" t-value="question.indicator" />
+                                                    <t t-set="set_indicator" t-value="'Yes'" />
+                                                </t>
+
+
+                                                <t t-foreach="page.question_ids" t-as="abc">
+                                                    <t t-if="abc.indicator == question.indicator">
+                                                        <t t-set="cnt" t-value="cnt+1" />
+                                                    </t>
+                                                </t>
+                                                <t t-if="set_indicator == 'Yes'">
+                                                    <t t-if="question.type == 'numerical_box'">
+                                                        <td scope="col" t-att-rowspan='cnt'>
+                                                            <span t-field="question.indicator" />
+                                                        </td>
+                                                    </t>
+                                                </t>
+                                            </t> -->
+                                            <td scope="col">
+                                                <t t-if="question.type != 'textbox'">
+                                                    <t t-set="question_cnt" t-value="question_cnt+1" />
+                                                <span t-field="question.question"  t-att-id="'%s_%s' % ('question_txt',question_cnt)"/>
+                                                </t>
+                                                <t t-if="question.type == 'textbox'">
+                                                    <span t-esc="planned_training_hours" class="col-md-12" />
+                                                </t>
+                                            </td>
+                                            <t t-if="question.indicator">
+                                                <td scope="col" >
+                                                    <span t-field="question.indicator" />
+                                            <input type="hidden" t-att-value="len(page.question_ids)" id="total_questions" />
+                                                </td>
+                                            </t>
+                                            <t t-if="question.type == 'numerical_box'">
+                                                <td>
+                                                    <input type="hidden" t-att-value="question.validation_max_float_value" id="validation_max_float_value" />
+                                                    <t t-esc="question.validation_max_float_value" />
+                                                </td>
+                                            </t>
+                                            <td scope="col" t-if="not values and not lm_values and user_input.appraisal_id.emp_id.user_id.partner_id.id == request.env.user.partner_id.id">
+                                                <t t-if="question.type != 'numerical_box' and question.type != 'textbox'">
+                                                    <select class="form-control drp" id='score' t-att-name="prefix" required="true">
+                                                        <option disabled="1" selected="1" value="">Select</option>
+                                                        <t t-foreach="question.labels_ids" t-as="label">
+                                                            <option t-att-value="label.id">
+                                                                <t t-esc="label.value" />
+                                                            </option>
+                                                        </t>
+                                                    </select>
+                                                </t>
+                                                <t t-if="question.type == 'numerical_box' and question.type != 'textbox'">
+                                                    <t t-set="cnt" t-value="cnt+1" />
+                                                    <input type="number" step="any" class="form-control usr_input_val"  t-att-id="'%s_%s' % ('self_score',cnt)" t-att-name="prefix" required="true" t-att-min="question.validation_min_float_value" t-att-max="question.validation_max_float_value" />
+                                                </t>
+                                                <t t-else="">
+                                                    <t t-if="question.type == 'textbox'">
+                                                        <span t-esc="achieved_duration" class="col-md-12" />
+                                                    </t>
+                                                </t>
+                                            </td>
+                                            <t t-if="question.type == 'textbox'">
+                                            <td scope="col" t-if="not values and not lm_values and user_input.appraisal_id.emp_id.user_id.partner_id.id == request.env.user.partner_id.id">
+                                                    <span t-esc="training_percentage" class="col-md-12" />
+                                                    <span  class="fa fa-percent" />
+                                                </td>
+                                            </t>
+
+                                            <td scope="col" t-if="not values and not lm_values and user_input.appraisal_id.emp_id.user_id.partner_id.id == request.env.user.partner_id.id">
+                                                <div class="md-form textarea-justify">
+                                                    <textarea required="true" maxlength='500' rows="1" id='training_user_text' type="text"  class="md-textarea form-control" t-att-name="'%s_%s' % (prefix, 'comment')" data-oe-survey-othert="1" />
+                                                </div>
+                                            </td>
+                                            <td scope="col" t-if="values or lm_values">
+                                                <span t-foreach="values" t-as="temp_values">
+                                                    <t t-if="temp_values.question_id.id == question.id  and temp_values.question_id.type == 'simple_choice'">
+                                                        <p t-if="temp_values.question_id.id == question.id" t-esc='temp_values.value_suggested.value' />
+                                                    </t>
+                                                    <t t-elif="temp_values.question_id.id == question.id and temp_values.question_id.type == 'numerical_box'">
+                                                        <p t-esc="temp_values.value_number" />
+                                                    </t>
+                                                    <t t-elif="temp_values.question_id.id == question.id and temp_values.question_id.type == 'textbox'">
+                                                        <span t-esc="achieved_duration" class="col-md-12" />
+                                                    </t>
+                                                </span>
+                                            </td>
+                                            <t t-if="question.type == 'textbox'">
+                                                <td scope="col" t-if="values or lm_values">
+                                                        <span t-esc="training_percentage" class="col-md-12" />
+                                                        <span  class="fa fa-percent" />
+                                                    </td>
+                                                </t>
+                                            <td scope="col" t-if="values or lm_values" width='300px'>
+                                                <span t-foreach="values" t-as="temp_values">
+                                                    <p t-if="temp_values.question_id.id == question.id" t-esc='temp_values.value_text' style='word-break: break-word;' />
+                                                </span>
+                                            </td>
+                                            <td scope="col" width='150px' t-if="(values and not lm_values and user_input.appraisal_id.hr_manager_id.user_id.partner_id.id == request.env.user.partner_id.id and user_input.appraisal_id.hr_manager == True) and question.type != 'textbox'">
+                                                <t t-if="question.type != 'numerical_box'">
+                                                    <select class="form-control drp" id='score' t-att-name="prefix" required="true">
+                                                        <option disabled="1" selected="1" value="">Select</option>
+                                                        <t t-foreach="question.labels_ids" t-as="label">
+                                                            <option t-att-value="label.id">
+                                                                <t t-esc="label.value" />
+                                                            </option>
+                                                        </t>
+                                                    </select>
+                                                </t>
+                                                <t t-else="">
+                                                    <t t-set="lm_count" t-value="lm_count+1" />
+                                                    <input type="hidden" t-att-value="len(page.question_ids)" id="total_questions_lm" />
+                                                    <input type="number" step="any" class="form-control usr_input_val" t-att-name="prefix" t-att-min="question.validation_min_float_value" t-att-max="question.validation_max_float_value" t-att-id="'%s_%s' % ('lm_score',lm_count)"/>                                                </t>
+                                            </td>
+                                            <td scope="col" width='300px' t-if="values and not lm_values and user_input.appraisal_id.hr_manager_id.user_id.partner_id.id == request.env.user.partner_id.id and user_input.appraisal_id.hr_manager == True">
+                                                <div class="md-form score">
+                                                    <textarea maxlength='500' required="true" type="text" t-att-id="'%s_%s' % ('justify',lm_count)" class="md-textarea lm_remark form-control" t-att-name="'%s_%s' % (prefix, 'comment')" data-oe-survey-othert="1" />
+                                                </div>
+                                            </td>
+                                            <td scope="col" t-if="values and lm_values">
+                                                <span t-foreach="lm_values" t-as="lm_temp_values">
+                                                    <t t-if="question.type != 'numerical_box' and lm_temp_values.question_id.id == question.id">
+                                                        <p t-esc='lm_temp_values.value_suggested.value' />
+                                                    </t>
+                                                    <t t-if="question.type == 'numerical_box' and lm_temp_values.question_id.id == question.id">
+                                                        <p t-esc='lm_temp_values.value_number' />
+                                                    </t>
+                                                    <t t-if="question.type == 'textbox' and lm_temp_values.question_id.id == question.id">
+                                                        <p t-esc='lm_temp_values.value_text' />
+                                                    </t>
+                                                </span>
+                                            </td>
+                                            <td scope="col" t-if="(values and lm_values) and question.type != 'textbox'" width='300px'>
+                                                <span t-foreach="lm_values" t-as="lm_temp_values">
+                                                    <p t-if="lm_temp_values.question_id.id == question.id" t-esc='lm_temp_values.value_text' style='word-break: break-word;' />
+
+                                                </span>
+                                            </td>
+                                            <td scope="col" t-if="(values and lm_values or user_input.appraisal_id.hr_collaborator_id.user_id.partner_id.id == request.env.user.partner_id.id and user_input.appraisal_id.hr_collaborator == True) and question.type != 'textbox'">
+                                                <t t-if="question.type != 'numerical_box'">
+                                                    <select class="form-control drp" id='score' t-att-name="prefix" required="true">
+                                                        <option disabled="1" selected="1" value="">Select</option>
+                                                        <t t-foreach="question.labels_ids" t-as="label">
+                                                            <option t-att-value="label.id">
+                                                                <t t-esc="label.value" />
+                                                            </option>
+                                                        </t>
+                                                    </select>
+                                                </t>
+                                                <t t-else="">
+                                                    <t t-set="ulm_count" t-value="ulm_count+1" />
+                                                    <input type="hidden" t-att-value="len(page.question_ids)" id="total_num_questions_ulm" />
+                                                    <input type="number" step="any" class="form-control usr_input_val" t-att-name="prefix" t-att-min="question.validation_min_float_value" t-att-max="question.validation_max_float_value" t-att-id="'%s_%s' % ('ulm_score',ulm_count)"/>  
+                                                </t>    
+                                            </td>
+                                           
+                                            <td scope="col" width='300px' t-if="values and lm_values or user_input.appraisal_id.hr_collaborator_id.user_id.partner_id.id == request.env.user.partner_id.id and user_input.appraisal_id.hr_collaborator == True">
+                                                <div class="md-form score">
+                                                    <input type="hidden" t-att-value="len(page.question_ids)" id="total_questions_ulm" />
+
+                                                    <t t-set="ulm_count" t-value="ulm_count+1" />
+                                                    <textarea maxlength='500' required="true" type="text" t-att-id="'%s_%s' % ('justify',ulm_count)" class="md-textarea lm_remark form-control" t-att-name="'%s_%s' % (prefix, 'comment')" data-oe-survey-othert="1" />
+                                                </div>
+                                            </td>
+                                            <td scope="col" t-if="ulm_vals" width='300px'>
+                                                <span t-foreach="ulm_vals" t-as="ulm_temp_values">
+                                                    <p t-if="ulm_temp_values.question_id.id == question.id" t-esc='ulm_temp_values.value_text' style='word-break: break-word;' />
+                                                </span>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                </tbody>
+                        </table>
+                        <!-- <div class="md-form" t-if="not values and not lm_values and user_input.appraisal_id.emp_id.user_id.partner_id.id == request.env.user.partner_id.id and last">
+                            <label class="black-text">Need Training (if any) :</label>
+                            <textarea required="true" maxlength='500' rows="1"  type="text"  class="md-textarea form-control"  data-oe-survey-othert="1"  id ='training_needed'/>
+                        </div> -->
+                        
+                        <div class="text-center mt16 mb16">
+                            <!-- <a role="button" t-attf-href="/web#view_type=kanban&amp;model=hr_appraisal&amp;action=kw_appraisal.hr_appraisal_action_form&amp;menu_id=hr_appraisal.menu_employee_appraisal" class="btn btn-dark">Draft and back</a> -->
+                            <button t-if="page_nr == 0" type='button' id='prevs' class="btn btn-secondary badge">Back to Goal</button>
+                            <button t-if="page_nr > 0" type="submit" class="btn btn-secondary badge hidee" name="button_submit" value="previous">Previous Page</button>
+                            <button type="button" class="btn btn-primary badge hidee" name="button_submit" id='save_and_back' value="save_and_back">Save as Draft</button>
+                            <button t-if="not last" type="submit" class="btn btn-info badge" name="button_submit" value="next">Next Page</button>
+                            <button t-if="last and not lm_values and not ulm_vals" type="submit" id='hides' class="btn btn-success badge" name="button_submit" value="finish">Submit</button>
+                            <button t-if="last and lm_values" type="submit" class="btn btn-success badge" id='hides' name="button_submit" value="approve">Approve</button>
+                            <button t-if="last and ulm_vals" type="submit" class="btn btn-success badge" id='hides' name="button_submit" value="final_approve">Approve and Complete</button>
+                            <!-- <button t-if="last and lm_values" type="submit" id='hides' class="btn btn-primary badge" name="button_submit" value="reassessment">Send for Re-assessment</button> -->
+                        </div>
+                    </form>
+                    <!-- Modal used to display error message, i.c.o. ajax error -->
+                    <div role="dialog" class="modal fade" id="kw_AJAXErrorModal">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <header class="modal-header">
+                                    <h4 class="modal-title">A problem has occurred</h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">&amp;times;</button>
+                                </header>
+                                <main class="modal-body">
+                                    <p>
+                                        Something went wrong while contacting survey server.
+                                        <strong class="text-danger">Your answers have probably not been recorded.</strong>
+                                        Try refreshing.
+                                    </p>
+                                </main>
+                                <footer class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template id="kw_survey_assets_pages" inherit_id="kw_appraisal.surveys">
+            <xpath expr="." position="inside">
+                <script src="/web/static/lib/nvd3/d3.v3.js" />
+                <script src="/web/static/lib/nvd3/nv.d3.js" />
+                <script type="text/javascript" src="/web/static/src/js/services/session.js" />
+
+                <script type="text/javascript" src="/kw_appraisal/static/src/js/survey.js?v=12" />
+                <script type="text/javascript" src="/kw_appraisal/static/src/js/save_back_survey.js" />
+                <!-- <script type="text/javascript" src="/kw_appraisal/static/src/js/score.js" /> -->
+
+                <!-- <script type="text/javascript" src="/kw_appraisal/static/src/js/hide_buttons.js"/> -->
+                <script type="text/javascript" src="/kw_appraisal/static/src/js/text-count.js?v=12" />
+                <script type="text/javascript" src="/web/static/src/js/chrome/public_root_widget.js" />
+                <script type="text/javascript" src="/web/static/src/js/fields/field_utils.js" />
+                <t t-call="web._assets_frontend_helpers" />
+                <link href="/web/static/lib/nvd3/nv.d3.css" rel="stylesheet" type="text/css" />
+                <t t-call="web._assets_bootstrap" />
+                <link rel="stylesheet" type="text/less" href="/web/static/src/scss/fonts.scss" />
+
+                <link rel="stylesheet" type="text/less" href="/web_editor/static/src/scss/web_editor.common.scss" />
+                <link href="/kwantify_theme/static/src/mdb/css/mdb.min.css?v=12" rel="stylesheet" />
+                <link href="/kw_appraisal/static/src/css/front_style.css?v=12" rel="stylesheet" />
+                <script type="text/javascript" src="/kwantify_theme/static/src/mdb/js/mdb.min.js?v=12" />
+
+                <script type="text/javascript" src="/kw_appraisal/static/src/lib/sweetalert_new.js?v=12" />
+            </xpath>
+        </template>
+    </data>
+</odoo>

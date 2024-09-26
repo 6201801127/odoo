@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data noupdate="0">
+		<!-- model.name tree view -->
+		<record id="kw_appraisal_set_goal_form" model="ir.ui.view">
+			<field name="name">Appraisal goal form</field>
+			<field name="model">kw_appraisal_goal</field>
+			<field name="arch" type="xml">
+				<form create='false' delete='false' duplicate='false'>
+					<field name="updated_list_hide" invisible='1'/>
+					<field name="goal_btn" invisible='1'/>
+					<sheet>
+						<label for="appraisal_period" class="oe_edit_only"/>
+						<h1>
+							<field name="appraisal_period" readonly='1' class="oe_inline" placeholder="Appraisal period" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}"/>
+						</h1>
+						<group>
+							<group>
+								<field name="name"/>
+								<field name="updated_goal" attrs="{'invisible': [('updated_goal','=', False)]}" readonly='1' force_save='1'/>
+							</group>
+							<group>
+								<field name="employee_id" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}" readonly='1'/>
+								<field name="emp_deg" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}" readonly="1" attrs="{'invisible': ['|',('employee_id','=', False),('emp_deg','=', False)]}"/>
+							</group>
+						</group>
+						<group string="Milestones">
+							<field name="milestone_id" nolabel='1'>
+								<tree editable='bottom' delete='false'>
+									<field name="make_readonly" invisible='1'/>
+									<field name="name" attrs="{'readonly': [('make_readonly','=', True)]}"/>
+									<field name="milestone_date" required='1' attrs="{'readonly': [('make_readonly','=', True)]}"/>
+									<field name="status"/>
+									<field name="remark"/>
+								</tree>
+							</field>
+						</group>
+						<group string="New Milestones" context="{'form_view_ref':'kw_appraisal.kw_appraisal_updated_milestone_form_ref'}" attrs="{'invisible': [('updated_list_hide','=', True)]}">
+							<field name="updated_milstones" readonly='1' nolabel='1'>
+								<tree edit='false' create='false' delete='false'>
+									<field name="milestone_name"/>
+									<field name="milestone_date"/>
+									<field name="milestone_status"/>
+									<field name="milestone_remark"/>
+								</tree>
+							</field>
+						</group>
+						<group string="Action Log">
+							<field name="log_ids" nolabel='1' readonly='1' options="{'no_create': True, 'no_open': True, 'no_create_edit': True}">
+								<tree create='false' edit='false' delete='false'>
+									<field name="milestone" style="pointer-events:none;"/>
+									<field name="who" style="pointer-events:none;"/>
+									<field name="when" style="pointer-events:none;"/>
+									<field name="what" style="pointer-events:none;"/>
+									<field name="remark" style="pointer-events:none;"/>
+								</tree>
+							</field>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record id="kw_appraisal_set_goal_tree" model="ir.ui.view">
+			<field name="name">Appraisal goal tree</field>
+			<field name="model">kw_appraisal_goal</field>
+			<field name="arch" type="xml">
+				<tree create='false' import='false'>
+					<field name="button_hide" invisible='1'/>
+					<field name="goal_btn" invisible='1'/>
+					<field name="appraisal_period" class='text-info font-weight-bold'/>
+					<field name="employee_id"/>
+					<field name="emp_deg"/>
+					<field name="emp_dept"/>
+					<field name="name"/>
+					<field name="milestone_id"/>
+					<field name="training"/>
+					<button class="btn btn-sm btn-info" attrs="{'invisible': ['|',('button_hide','=',True),('goal_btn','=',True)]}" string='Update Progress' type="object" name="update_goal" />
+				</tree>
+			</field>
+		</record>
+
+		<record id="kw_appraisal_set_goal_actions" model="ir.actions.act_window">
+			<field name="name">Set Goal and Milestones</field>
+			<field name="res_model">kw_appraisal_goal</field>
+			<field name="view_mode">tree</field>
+			<field name="domain">[]</field>
+		</record>
+
+		<!-- <record id="kw_appraisal_set_goal_view_from" model="ir.actions.act_window.view">
+			<field eval="2" name="sequence"/>
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="kw_appraisal_set_goal_form"/>
+			<field name="act_window_id" ref="kw_appraisal_set_goal_actions"/>
+		</record> -->
+
+		<record id="kw_appraisal_set_goal_view_tree" model="ir.actions.act_window.view">
+			<field eval="1" name="sequence"/>
+			<field name="view_mode">tree</field>
+			<field name="view_id" ref="kw_appraisal_set_goal_tree"/>
+			<field name="act_window_id" ref="kw_appraisal_set_goal_actions"/>
+		</record>
+
+		<!-- - - - - - - - - - - - - - - - - - - - - - - -Take action- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+		<record id="kw_appraisal_set_goal_take_action_form" model="ir.ui.view">
+			<field name="name">Appraisal goal form</field>
+			<field name="model">kw_appraisal_goal</field>
+			<field name="arch" type="xml">
+				<form create='false' delete='false' duplicate='false'>
+					<field name="state" invisible='1'/>
+					<field name="updated_list_hide" invisible='1'/>
+					<header>
+						<button attrs="{'invisible': [('state','not in',['sent'])]}" class="btn btn-sm btn-success" string='Approve' type="object" name="action_approve" />
+						<button attrs="{'invisible': [('state','not in',['sent'])]}" class="btn btn-sm btn-danger" string='Reject' type="object" name="action_reject" />
+					</header>
+					<sheet>
+						<label for="appraisal_period" class="oe_edit_only"/>
+						<h1>
+							<field name="appraisal_period" readonly='1' class="oe_inline" placeholder="Appraisal period" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}"/>
+						</h1>
+						<group>
+							<group>
+								<field name="name"/>
+								<field name="updated_goal" attrs="{'invisible': [('updated_goal','=', False)]}" readonly='1' force_save='1'/>
+							</group>
+							<group>
+								<field name="employee_id" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}" readonly='1'/>
+								<field name="emp_deg" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}" readonly="1" attrs="{'invisible': ['|',('employee_id','=', False),('emp_deg','=', False)]}"/>
+							</group>
+						</group>
+						<group string="Milestones">
+							<field name="milestone_id" nolabel='1'>
+								<tree editable='bottom' delete='false'>
+									<field name="make_readonly" invisible='1'/>
+									<field name="name" attrs="{'readonly': [('make_readonly','=', True)]}"/>
+									<field name="milestone_date" required='1'/>
+									<field name="status"/>
+									<field name="remark"/>
+								</tree>
+							</field>
+						</group>
+						<group string="New Milestones" context="{'form_view_ref':'kw_appraisal.kw_appraisal_updated_milestone_form_ref'}" attrs="{'invisible': [('updated_list_hide','=', True)]}">
+							<field name="updated_milstones" readonly='1' nolabel='1'>
+								<tree edit='false' create='false' delete='false'>
+									<field name="milestone_name"/>
+									<field name="milestone_date"/>
+									<field name="milestone_status"/>
+									<field name="milestone_remark"/>
+									<button name="reject_updated_milestone" string='Reject' type="object" class="btn btn-sm btn-danger oe_edit_only"/>
+								</tree>
+							</field>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record id="kw_appraisal_set_goal_take_action_tree" model="ir.ui.view">
+			<field name="name">Appraisal goal tree</field>
+			<field name="model">kw_appraisal_goal</field>
+			<field name="arch" type="xml">
+				<tree create='false' import='false'>
+					<field name="appraisal_period" class='text-info font-weight-bold'/>
+					<field name="employee_id"/>
+					<field name="emp_deg"/>
+					<field name="emp_dept"/>
+					<field name="name"/>
+					<field name="milestone_id"/>
+					<field name="updated_on"/>
+					<button class="btn btn-sm btn-info" string='Take Action' type="object" name="take_action_goal" />
+				</tree>
+			</field>
+		</record>
+
+		<record id="kw_appraisal_set_goal_take_action_actions" model="ir.actions.act_window">
+			<field name="name">Take Action</field>
+			<field name="res_model">kw_appraisal_goal</field>
+			<field name="view_mode">tree</field>
+			<field name="domain">[('state','=','sent'),('employee_id.parent_id.user_id','=',uid)]</field>
+		</record>
+
+		<!-- <record id="kw_appraisal_set_goal_take_action_view_from" model="ir.actions.act_window.view">
+			<field eval="2" name="sequence"/>
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="kw_appraisal_set_goal_take_action_form"/>
+			<field name="act_window_id" ref="kw_appraisal_set_goal_take_action_actions"/>
+		</record> -->
+
+		<record id="kw_appraisal_set_goal_take_action_view_tree" model="ir.actions.act_window.view">
+			<field eval="1" name="sequence"/>
+			<field name="view_mode">tree</field>
+			<field name="view_id" ref="kw_appraisal_set_goal_take_action_tree"/>
+			<field name="act_window_id" ref="kw_appraisal_set_goal_take_action_actions"/>
+		</record>
+
+		<record id="kw_appraisal_goal_milestone_approve_form" model="ir.ui.view">
+			<field name="name">Approve</field>
+			<field name="model">kw_appraisal_goal</field>
+			<field name="arch" type="xml">
+				<form>
+					<script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+					</script>
+					<div class="row">
+						<div class="col-sm-12 mx-auto">
+							<field name="remark"/>
+							<center>
+								<button name="approve_goal" type="object" class="btn-success mr-2">Approve</button>
+								<button string="Cancel" class="btn-danger" special="cancel"/>
+								<footer></footer>
+							</center>
+						</div>
+					</div>
+				</form>
+			</field>
+		</record>
+
+		<record id="kw_appraisal_goal_milestone_reject_form" model="ir.ui.view">
+			<field name="name">Reject</field>
+			<field name="model">kw_appraisal_goal</field>
+			<field name="arch" type="xml">
+				<form>
+					<script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+					</script>
+					<div class="row">
+						<div class="col-sm-12 mx-auto">
+							<field name="remark"/>
+							<center>
+								<button name="reject_goal" type="object" class="btn-success mr-2">Reject</button>
+								<button string="Cancel" class="btn-danger" special="cancel"/>
+								<footer></footer>
+							</center>
+						</div>
+					</div>
+				</form>
+			</field>
+		</record>
+
+		<record id="kw_appraisal_updated_milestone_approval_form" model="ir.ui.view">
+			<field name="name">Approve</field>
+			<field name="model">kw_appraisal_updated_milestone</field>
+			<field name="priority">56</field>
+			<field name="arch" type="xml">
+				<form>
+					<script>
+                    $(document).ready(function(){
+                        $(".modal-footer").hide();
+                        $(".modal-title").show();
+                        $(".o_form_statusbar").hide();
+                    });
+					</script>
+					<div class="row">
+						<div class="col-sm-12 mx-auto">
+							<field name="remark"/>
+							<center>
+								<button name="action_reject" type="object" class="btn-success mr-2">Reject</button>
+								<button string="Cancel" class="btn-danger" special="cancel"/>
+								<footer></footer>
+							</center>
+						</div>
+					</div>
+				</form>
+			</field>
+		</record>
+
+		<record id="kw_appraisal_updated_milestone_form_ref" model="ir.ui.view">
+			<field name="name">Form Update milestone</field>
+			<field name="model">kw_appraisal_updated_milestone</field>
+			<field name="arch" type="xml">
+				<form>
+					<sheet>
+						<group>
+							<field name="milestone_name"/>
+							<field name="milestone_date"/>
+							<field name="milestone_status"/>
+							<field name="milestone_remark"/>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<menuitem id="kw_appraisal_set_goal_parent_menu" name="Goal Set" parent="kw_appraisal.menu_hr_appraisal_root" sequence="5"/>
+		<menuitem id="kw_appraisal_set_goal_child_menu" name="Update Progress" parent="kw_appraisal_set_goal_parent_menu" action="kw_appraisal_set_goal_actions" sequence="1"/>
+		<menuitem id="kw_appraisal_set_goal_take_action_menu" name="Take Action" parent="kw_appraisal_set_goal_parent_menu" action="kw_appraisal_set_goal_take_action_actions" sequence="2"/>
+	</data>
+</odoo>

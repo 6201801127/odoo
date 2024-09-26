@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="kw_induction_assessment_ques_bank_master_view_form" model="ir.ui.view">
+            <field name="name">kw_ques_bank_master.view.form.assessment</field>
+            <field name="model">kw_skill_question_bank_master</field>
+            <field name="arch" type="xml">
+                <form create="false" delete="false" duplicate="false">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="type" readonly="context.get('default_type',False)" attrs="{'invisible': [('type','=', 'skill')]}"/>
+                            <field name="skill_types" readonly="context.get('default_skill_types',False)"
+                            options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                            <field name="skill" readonly="context.get('default_skill',False)"
+                            options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                            <field name="total_no_of_questions" />
+                        </group>
+                        <group>
+                            <field name="questions" string="Questions">
+                                <tree>
+                                    <field name="question" string="Question"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+       
+        <record id="kw_induction_assessment_question_set_config_form_view" model="ir.ui.view">
+			<field name="name">Question Set Configuration</field>
+			<field name="model">kw_skill_question_set_config</field>
+			<field name="arch" type="xml">
+				<form create="false" delete="false" export="false" copy="false">
+                    <header>
+                        <field name="state" widget="statusbar" statusbar_visible="1,2" />
+                        <button string='Publish' name="publish_test" attrs="{'invisible':[('state','=','2')]}" class="btn font-weight-bold text-white" style="background-color: #108fbb;" type="object" />
+                        <button string='Draft' attrs="{'invisible':[('state','=','1')]}" class="btn font-weight-bold text-white" style="background-color: #d83d2b;" type="object" name="unpublish_test" />
+                    </header>
+					<sheet>
+						<group>
+							<group>
+                                <field name="set_config_id_readonly" invisible="1" />
+								<field name="name" string="Name" attrs="{'readonly':[('set_config_id_readonly', '=',True)]}"/>
+								<field name="skill_types" string="Skill Category" attrs="{'readonly':['|',('assessment_type', '=', 'Induction'),('set_config_id_readonly', '=',True)]}" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+								<field name="skill" string="Skill" attrs="{'readonly':['|',('assessment_type', '=', 'Induction'),('set_config_id_readonly', '=',True)]}" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+								<field name="dept" widget="many2many_tags" attrs="{'readonly':['|',('set_config_id_readonly', '=',True),('assessment_type', '=', 'Induction')]}"
+									options="{'no_open': True,'no_create': 1, 'no_edit': 1}"/>
+								
+								<field name="applicable_candidate" string="Applicable Candidate" attrs="{'readonly':['|',('set_config_id_readonly', '=',True),('assessment_type', '=', 'Induction')]}" widget="radio"/>
+								<field name="select_deg" string="Designation"
+								       attrs="{'invisible': [('applicable_candidate', 'in', ['1','3','4',False])],'required': [('applicable_candidate','=','2')]}"
+								       widget='many2many_tags'
+								       options="{'no_open': True,'no_create': 1, 'no_edit': 1}"/>
+								<field name="select_individual" string="Individual"
+								       attrs="{'invisible': [('applicable_candidate', 'in', ['1','2','4',False])], 'required': [('applicable_candidate','=','3')],'readonly':['|',('set_config_id_readonly', '=',True),('assessment_type', '=', 'Induction')]}"
+								       widget='many2many_tags'
+								       options="{'no_open': True,'no_create': 1, 'no_edit': 1}"/>
+								<field name="experience_id" string="Experience" 
+								attrs="{'invisible': [('applicable_candidate', 'in', ['1','2','3',False])], 'required': [('applicable_candidate','=','4')]}" 
+								options="{'no_open': True,'no_create': 1, 'no_edit': 1}"/>
+
+								<field name="frequency" string="Frequency" attrs="{'readonly':['|',('set_config_id_readonly', '=',True),('assessment_type', '=', 'Induction')]}"/>
+								<field name="interval" attrs="{'invisible': [('frequency','in',['y','h','q','m','o','n'])]}"/>
+								
+							</group>
+							<group>
+								
+								<field name="question_bank_id" 
+								attrs="{'required': [('assessment_type','=','Induction')],'invisible': [('assessment_type','=','skill')]}" 
+								options="{'no_open': True,'no_create': 1, 'no_edit': 1}" 
+								domain="[('type','=','Induction'),('skill_types','=',skill_types)]"/>
+
+								<field name="add_questions" string="Questions"	attrs="{'readonly':[('set_config_id_readonly', '=',True)]}">
+									<tree editable="bottom">
+										<field name="question_type" string="Question Type"/>
+										<field name="no_of_question" string="Number Of Questions"/>
+									</tree>
+								</field>
+								<field name="duration" string="Duration" attrs="{'readonly':[('set_config_id_readonly', '=',True)]}"/>
+								<field name="total_questions" string="Total Questions"/>
+								<field name="total_marks" string="Total Marks"/>
+								<field name="designation_id" attrs="{'invisible': 1}"/>
+								<field name="question_type" attrs="{'invisible': 1}"/>
+								<field name="frequency_val" attrs="{'invisible': 1}"/>
+								<field name="expected_duration" string="Expected Duration (HH:MM:SS)" attrs="{'invisible': [('expected_duration', '=', False)]}"/>
+							</group>
+							<group>
+								<field name="assessment_type" invisible="1"/>
+								<field name="start_on" widget="datetime" 
+								attrs="{'invisible': [('assessment_type','=','skill')]}"
+								invisible="1"/>
+								<field name="expire_on" widget="datetime" 
+								attrs="{'invisible': [('assessment_type','=','skill')]}"
+								invisible="1"/>
+							</group>
+						</group>
+						
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+    </data>
+</odoo>

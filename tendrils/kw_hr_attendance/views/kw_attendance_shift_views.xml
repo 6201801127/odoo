@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="kw_attendance_shift_assignment_employee_kanban">
+            <field name="name">Shift Assignment Kanban</field>
+            <field name="model">hr.employee</field>
+            <field name="priority" eval='70'/>
+            <field name="arch" type="xml">
+                <kanban class="o_hr_employee_kanban" on_create="kw_hr_attendance.action_kw_shift_assignment_wizard" quick_create="false" group_create='false'>
+                    <field name="id"/>
+                    <field name="name"/>
+                    <field name="resource_calendar_id"/>
+                    <field name="attendance_mode_ids"/>
+                    <field name="tz"/>
+                    <field name="id"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click o_kanban_record_has_image_fill o_hr_kanban_record">
+                                <div class="o_kanban_image_fill_left d-none d-md-block" t-attf-style="background-image: url(#{kanban_image('hr.employee', 'image_medium', record.id.raw_value)})" role="img"/>
+                                <div class="o_kanban_image d-md-none rounded-circle" t-attf-style="background-image: url(#{kanban_image('hr.employee', 'image_small', record.id.raw_value)})" role="img"/>
+                                <div class="oe_kanban_details">
+                                    <div class="o_kanban_record_top">
+                                        <div class="o_kanban_record_headings">
+                                            <strong class="o_kanban_record_title">
+                                                <field name="name"/>
+                                            </strong>
+                                            <span t-if="record.attendance_mode_ids.raw_value" class="o_kanban_record_subtitle">
+                                                <field name="attendance_mode_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                                            </span>
+                                            <span t-if="record.tz.raw_value" class="o_kanban_record_subtitle">
+                                                Timezone : <field name="tz"/>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="kw_attendance_shift_assignment_employee_form" model="ir.ui.view">
+            <field name="name">Shift Assignment Employee</field>
+            <field name="model">hr.employee</field>
+            <field name="priority" eval='70'/>
+            <field name="arch" type="xml">
+                <form string="Employee" create='false'>
+                    <sheet>
+                        <div id="o_employee_container">
+                            <div id="o_employee_main">
+                                <field readonly='1' name="image" widget="image" class="oe_avatar" options="{&quot;preview_image&quot;:&quot;image_medium&quot;}"/>
+                                <div class="oe_title">
+                                    <label for="name" class="oe_edit_only"/>
+                                    <h1>
+                                        <field name="name" placeholder="Employee's Name" readonly='1'/>
+                                    </h1>
+                                </div>
+                                <field name="company_id" invisible='1'/>
+                                <group>
+                                    <group>
+                                        <field name="branch_id" readonly='1' options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="effective_from"/>
+                                        <field name="resource_calendar_id" options="{'no_open': True,'no_create':True,'no_edit':True}" required='1'  domain="[('employee_id','=',False)]"/>
+                                        <field name="tz" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="no_attendance"/>
+                                        <field name="attendance_mode_ids" widget="many2many_tags" options="{'no_open': True,'no_create':True,'no_edit':True}" attrs="{'invisible': [('no_attendance', '=', True)],}" />
+                                    </group>
+                                </group>
+                            </div>
+                        </div>
+                        <notebook>
+                            <page string="Shift Log">
+                                <group>
+                                    <field name="shift_change_log_ids" nolabel='1'>
+                                        <tree editable='bottom' create='false'>
+                                            <field name="employee_id" readonly='1' options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                            <field name="shift_id" readonly='1' options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                            <field name="effective_from" />
+                                            <field name="effective_to" />     
+                                        </tree>
+                                    </field>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="kw_attendance_shift_assignment_employee_tree" model="ir.ui.view">
+            <field name="name">Shift Assignment Tree</field>
+            <field name="model">hr.employee</field>
+            <field name="priority" eval='70'/>
+            <field name="arch" type="xml">
+                <tree create='false'>
+                    <field name="name"/>
+                    <field name="resource_calendar_id"/>
+                    <field name="attendance_mode_ids" widget="many2many_tags"/>
+                    <field name="tz"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kw_attendance_shift_assignment_employee_seach" model="ir.ui.view">
+            <field name="name">Shift Assignment search</field>
+            <field name="model">hr.employee</field>
+            <field name="priority" eval='70'/>
+            <field name="arch" type="xml">
+                <search string="Search Description">
+                    <field name="name" string='Employee Name'/>
+                    <filter name="group_resource_calendar_id" string="Shift" icon="terp-partner" context="{'group_by':'resource_calendar_id'}"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="kw_attendance_shift_assignment_employee_action" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Shift Assignment</field>
+            <field name="res_model">hr.employee</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="search_view_id" ref='kw_hr_attendance.kw_attendance_shift_assignment_employee_seach'/>
+            <field name="context">{'search_default_group_resource_calendar_id': 1}</field>
+            <field name="view_type">form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No record found
+                </p>
+            </field>
+        </record>
+
+        <record id="kw_attendance_shift_assignment_employee_kanban_action_view" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">kanban</field>
+            <field name="view_id" ref="kw_attendance_shift_assignment_employee_kanban"/>
+            <field name="act_window_id" ref="kw_attendance_shift_assignment_employee_action"/>
+        </record>
+
+        <record id="kw_attendance_shift_assignment_employee_tree_action_view" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="kw_attendance_shift_assignment_employee_tree"/>
+            <field name="act_window_id" ref="kw_attendance_shift_assignment_employee_action"/>
+        </record>
+
+        <record id="kw_attendance_shift_assignment_employee_form_action_view" model="ir.actions.act_window.view">
+            <field eval="3" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="kw_attendance_shift_assignment_employee_form"/>
+            <field name="act_window_id" ref="kw_attendance_shift_assignment_employee_action"/>
+        </record>
+
+    </data>
+</odoo>

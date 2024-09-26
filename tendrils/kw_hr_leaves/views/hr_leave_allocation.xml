@@ -1,0 +1,324 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<odoo>
+    <data>
+        <record id="hr_leave_allocation_users_view" model="ir.ui.view">
+            <field name="name">hr.leave.allocation.users.view</field>
+            <field name="model">hr.leave.allocation</field>
+            <field name="inherit_id" ref="hr_holidays.hr_leave_allocation_view_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='holiday_status_id']" position="replace">
+                    <field name="holiday_status_id" context="{'employee_id':employee_id}" domain="[('valid', '=', True),('leave_code', '!=', 'CMP'), ('allocation_type', 'in', ['fixed_allocation'])]"/>
+                </xpath>
+                <!-- <field name="accural" position="attributes">  
+                <attribute name="invisible">1</attribute>
+            </field> -->
+
+                <field name="notes" position="after">
+                    <div attrs="{'invisible': [('cancel_reason', '=', False)]}">
+                        <separator string="Reason of Cancellation"/>
+                        <field name="cancel_reason" />
+                    </div>
+                </field>
+            </field>
+        </record>
+
+        <record id="hr_leave_allocation_view" model="ir.ui.view">
+            <field name="name">hr.leave.allocation.view</field>
+            <field name="model">hr.leave.allocation</field>
+            <field name="inherit_id" ref="hr_holidays.hr_leave_allocation_view_form_manager"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form" position="attributes">
+                    <attribute name="create">false</attribute>
+                </xpath>
+                <xpath expr="//header/button[@name='action_draft']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+
+                <xpath expr="//header/button[@name='action_approve']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//header/button[@name='action_validate']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <!-- <xpath expr="//header/button[@name='action_confirm']" position="attributes">  
+                <attribute name="invisible">1</attribute>
+            </xpath> -->
+                <xpath expr="//header/button[@name='action_refuse']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//header/button[@name='action_refuse']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+
+
+                <field name="notes" position="after">
+                    <div attrs="{'invisible': [('cancel_reason', '=', False)]}">
+                        <separator string="Reason of Cancellation"/>
+                        <field name="cancel_reason" />
+                    </div>
+
+                    <!-- <button string="Allocate Leaves" name="leave_allocation_as_per_cycle" type="object" /> -->
+                </field>
+
+
+                <!-- <xpath expr="//field[@name='holiday_type']" position="after">
+                <field name="grade_id" groups="hr_holidays.group_hr_holidays_user" widget='many2many_tags' attrs="{'required': [('holiday_type', '=', 'grade')],'invisible': [('holiday_type', '!=', 'grade')]}"/>
+            </xpath> -->
+                <xpath expr="//field[@name='notes']" position="replace">
+                    <group>
+                        <field name="notes"/>
+                    </group>
+                    <separator/>
+                    <!-- <notebook attrs="{'invisible': [('approval_log_ids','=',False)]}" groups="base.group_no_one">
+                    <page string="Approval Logs">
+                        <group>
+                            <field name="approval_log_ids" string="Approval Logs"></field>
+                        </group>
+                    </page>
+                </notebook> -->
+                </xpath>
+                <xpath expr="//field[@name='holiday_status_id']" position="replace">
+                    <field name="holiday_status_id" domain="[('valid', '=', True), ('allocation_type', 'in', ['fixed_allocation'])]"/>
+                </xpath>
+
+                <xpath expr="//field[@name='accrual']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Inheriting existing kanban view -->
+        <record id="view_hr_leave_allocation_kanban_inherit" model="ir.ui.view">
+            <field name="name">hr.leave.allocation.inherit kanban view</field>
+            <field name="model">hr.leave.allocation</field>
+            <field name="inherit_id" ref="hr_holidays.hr_leave_allocation_view_kanban"/>
+            <field name="arch" type="xml">
+                <xpath expr="//a[@name='action_approve']" position="replace">
+                    <!--make changes-->
+                    <a t-if="record.can_approve.value" name="%(kw_hr_leaves.action_leave_approval_wizard_window)d" type="action" role="menuitem" context="{'default_leave_allocation_request_id': active_id,'default_action_type':'approve'}" class="dropdown-item">Approve</a>
+                </xpath>
+
+                <xpath expr="//a[@name='action_refuse']" position="replace">
+                    <a t-if="record.can_approve.value" name="%(kw_hr_leaves.action_leave_approval_wizard_window)d" type="action" role="menuitem" context="{'default_leave_allocation_request_id': active_id,'default_action_type':'reject'}" class="dropdown-item">Reject</a>
+                </xpath>
+
+                <xpath expr="//a[@type='delete']" position="replace">
+                </xpath>
+
+                <!-- <xpath expr="//div[@class='dropdown-menu']" position="inside">
+                <a t-if="record.can_approve.value" name="%(kw_hr_leaves.action_leave_approval_wizard_window)d" type="action" role="menuitem" context="{'default_leave_allocation_request_id': active_id,'default_action_type':'forward','default_forward_request':True}" class="dropdown-item">Forward</a>
+            </xpath> -->
+
+            </field>
+        </record>
+
+        <record id="hr_leave_allocation_my_tree_view" model="ir.ui.view">
+            <field name="name">hr.leave.allocation.my.view.tree.cal</field>
+            <field name="model">hr.leave.allocation</field>
+            <field name="inherit_id" ref="hr_holidays.hr_leave_allocation_view_tree_my"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='state']" position="after">
+                    <button string="Cancel" name="cancel_allocation" type="object" class="btn-danger" attrs="{'invisible': [('state', 'not in', ['confirm'])]}"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_kw_hr_allocation_cancel_comment_form">
+            <field name="name">Reason of Cancellation</field>
+            <field name="model">hr.leave.allocation</field>
+            <field name="priority">100</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <separator string="Reason of Cancellation"/>
+                        <field name="cancel_reason" required="1"/>
+                    </sheet>
+                    <footer>
+                        <button string="Submit" name="cancel_allocation" type="object" class="oe_highlight" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- <record id="hr_leave_allocation_tree_view" model="ir.ui.view">
+        <field name="name">hr.leave.allocation.view.tree.cal</field>
+        <field name="model">hr.leave.allocation</field>
+        <field name="inherit_id" ref="hr_holidays.hr_leave_allocation_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="before">
+                <field name="action_taken_id"/>
+            </xpath>
+        </field>
+    </record> -->
+
+
+        <!-- START : Form view for approving leave allocation -->
+        <!-- <record id="view_leave_allocation_approval_form" model="ir.ui.view">
+        <field name="name">Leave Allocation Approval Form</field>
+        <field name="model">hr.leave.allocation</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Leave Allocation Approval ">               
+               
+                <sheet>
+                    <div class="oe_title">
+                        <h2><field name="display_name"/></h2>
+                    </div>
+                    <group>
+                        <group name="alloc_left_col">
+                            <field name="state" invisible="1"/>      
+                            <field name="type_request_unit" invisible="1"/>
+                            <field name="employee_id" groups="hr_holidays.group_hr_holidays_user" readonly="1"/>
+                            <field name="holiday_status_id" readonly="1" context="{'employee_id':employee_id}" domain="[('valid', '=', True), ('allocation_type', 'in', ['fixed_allocation', 'no'])]" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" />
+
+                            <field name="number_of_days" invisible="1"/>
+                            <label for="number_of_days" string="Duration" />
+                            <div>
+                                <field name="number_of_days_display" required="1" class="oe_inline" nolabel="1" attrs="{'readonly': ['|', ('type_request_unit', '=', 'hour'), ('state', 'not in', ('draft', 'confirm'))], 'invisible': [('type_request_unit', '=', 'hour')]}"/>
+                                <field name="number_of_hours_display" required="1" class="oe_inline" nolabel="1" attrs="{'readonly': ['|', ('type_request_unit', '!=', 'hour'), ('state', 'not in', ('draft', 'confirm'))], 'invisible': [('type_request_unit', '!=', 'hour')]}"/>
+                                <span class="ml8" attrs="{'invisible': [('type_request_unit', '=', 'hour')]}">Days</span>
+                                <span class="ml8" attrs="{'invisible': [('type_request_unit', '!=', 'hour')]}">Hours</span>
+                            </div>
+
+                           <field name="notes" readonly="1" string="Reason" placeholder="Add a reason..."/>
+                        </group>
+                        <group name="alloc_right_col">
+                           <field name="number_of_days" invisible="1"/>                         
+                        </group>
+                    </group>
+                    <group>                     
+                        <field name="forward_request" string="Forward Request" /> 
+                        <field name="forwarded_to" string="Forward To" attrs="{'invisible': [('forward_request', '=', False)],'required': [('forward_request', '=', True)]}" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"/> 
+                  
+                        <field name="authority_remark" string="Remark" required="1" placeholder="Enter your remark..."/>
+                    </group>
+                </sheet>
+
+               
+            </form>
+        </field>
+    </record> -->
+        <!-- END : Form view for approving leave allocation-->
+
+
+        <record id="hr_holidays.hr_leave_allocation_action_approve_department" model="ir.actions.act_window">
+            <field name="name">Allocations to Approve</field>
+            <field name="domain">[('second_approver_id.user_id','=',uid),('holiday_status_id.is_comp_off','=',False),('state','in',['confirm'])]</field>
+            <field name="context">{"create": False,"edit": False,"import": False,"delete": False }</field>
+        </record>
+
+        <record id="hr_holidays.hr_leave_allocation_action_all" model="ir.actions.act_window">
+            <field name="context">{'take_action_visibility':True,'search_default_current_financial_year':1}</field>
+        </record>
+
+        <record id="hr_leave_allocation_tree_restrict_actions" model="ir.ui.view">
+            <field name="name">hr.leave.allocation.view.tree.restrict_actions</field>
+            <field name="model">hr.leave.allocation</field>
+            <field name="inherit_id" ref="hr_holidays.hr_leave_allocation_view_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="attributes">
+                    <attribute name="create">0</attribute>
+                    <attribute name="edit">0</attribute>
+                </xpath>
+                <xpath expr="//button[@name='action_approve']" position="attributes">
+                    <attribute name="groups">hr_holidays.group_hr_holidays_manager</attribute>
+                    <!-- <attribute name="invisible">context.get('take_action_visibility',False)</attribute> -->
+                </xpath>
+                <xpath expr="//button[@name='action_validate']" position="attributes">
+                    <attribute name="groups">hr_holidays.group_hr_holidays_manager</attribute>
+                    <!-- <attribute name="invisible">context.get('take_action_visibility',False)</attribute> -->
+                </xpath>
+                <xpath expr="//button[@name='action_refuse']" position="attributes">
+                    <attribute name="groups">hr_holidays.group_hr_holidays_manager</attribute>
+                    <!-- <attribute name="invisible">context.get('take_action_visibility',False)</attribute> -->
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_hr_leave_allocation_filter_inherits" model="ir.ui.view">
+            <field name="name">hr.leave.allocationinherit search view</field>
+            <field name="model">hr.leave.allocation</field>
+            <field name="inherit_id" ref="hr_holidays.view_hr_leave_allocation_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="designation" />
+                    <field name="department" />
+                    <field name="division" />
+                    <field name="section"/>
+                    <separator/>
+                    <filter string="Current Financial Year" name="current_financial_year" domain="[('current_financial_year','=',True)]"/>
+                    <filter string="Previous Financial Year" name="previous_financial_year" domain="[('previous_financial_year','=',True)]"/>
+                    
+                    <separator/>
+                    <filter string="To Approve" domain="[('state', '=', 'confirm')]" name="confirmed"/>
+                    <filter string="Forwarded" domain="[('state', '=', 'forward')]" name="forward"/>
+                    <filter string="Approved" domain="[('state', '=', 'validate')]" name="approved"/>
+                    <filter string="Cancelled" domain="[('state', '=', 'cancel')]" name="cancelled"/>
+                    <separator/>
+                </xpath>
+                <xpath expr="//filter[@name='approve']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//filter[@name='validated']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//filter[@name='accrual_allocation']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//filter[@name='active_types']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//filter[@name='message_needaction']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//filter[@name='department']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//filter[@name='year']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//filter[@name='activities_overdue']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//filter[@name='activities_today']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//filter[@name='activities_upcoming_all']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//filter[@name='my_leaves']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//filter[@name='my_team_leaves']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//filter[@name='my_leaves']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//filter[@name='group_name']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//filter[@name='group_category']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//filter[@name='group_second_approver_id']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//filter[@name='group_type']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//filter[@name='group_second_approver_id']" position="after">
+                    <filter name="group_second_approver_id" string="Pending At" context="{'group_by':'second_approver_id'}"/>
+                </xpath>
+                <xpath expr="//filter[@name='group_type']" position="after">
+                    <filter name="group_type" string="Leave Type" context="{'group_by':'holiday_status_id'}"/>
+                </xpath>
+                <xpath expr="//filter[@name='my_team_leaves']" position="after">
+                    <filter string="My Leaves" name="my_leaves" domain="[('employee_id.user_id', '=', uid)]"/>
+                    <filter string="My Subordinate Leaves" name="my_team_leaves" domain="[('employee_id.parent_id.user_id', '=', uid)]" help="Leaves of Your Subordinate"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

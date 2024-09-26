@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="claim_report_template_view">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.internal_layout">
+                    <style>
+                        table {
+                            font-family: arial, sans-serif;
+                            border-collapse: collapse;
+                            width: 100%;
+                        }
+                        
+                        td, th {
+                            border: 1px solid black;
+                            text-align: left;
+                            padding: 8px;
+                        }
+                        
+                        <!-- tr:nth-child(even) {
+                            background-color: red;
+                        } -->
+                    </style>
+                    <table style="border:0; width:100%" >
+                    <tr>
+                        <td style="font-size:12px;border:0; width:20%;padding:0;">
+                            <strong>Employee Name :</strong>
+                        </td>
+                        <td style="font-size:12px;border:0; padding:0;width:50%;">
+                            <span t-field="o.employee_id.name" />
+                        </td>
+                        <td style="font-size:12px;border:0; width:10%;padding:0;">
+                            <strong>Division :</strong>
+                        </td>
+                        <td style="font-size:12px;border:0; padding:0;width:20%;">
+                            <span t-field="o.division.name" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-size:12px;border:0; padding:0;">
+                            <strong>Employee Code :</strong>
+                        </td>
+                        <td style="font-size:12px;border:0; padding:0">
+                            <span t-field="o.employee_id.emp_code" />
+                        </td>
+                        <td style="font-size:12px;border:0; padding:0;">
+                            <strong> Practise:</strong>
+                        </td>
+                        <td style="font-size:12px;border:0; padding:0">
+                            <span t-field="o.section.name" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-size:12px;border:0; padding:0;">
+                            <strong>Designation :</strong>
+                        </td>
+                        <td style="font-size:12px;border:0; padding:0;">
+                            <span t-field="o.job_id.name" />
+                        </td>
+                        <td style="font-size:12px;border:0; padding:0;">
+                            <strong>Section :</strong>
+                        </td>
+                        <td style="font-size:12px;border:0; padding:0;">
+                            <span t-field="o.practise.name" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-size:12px;border:0; padding:0;">
+                            <strong>Department :</strong>
+                        </td>
+                        <td style="font-size:12px;border:0; padding:0;">
+                            <span t-field="o.department_id.name" />
+                        </td>
+                        <td style="font-size:12px;border:0; padding:0;">
+                            <strong>Grade :</strong>
+                        </td>
+                        <td style="font-size:12px;border:0;padding:0;">
+                            <span t-field="o.grade_id.name" />
+                        </td>
+                    </tr>
+                </table>
+                    <br/>
+                    <h4>Item Details :</h4>
+                    <table>
+                            <tr>
+                                <th>
+                                    <b>Item category</b>
+                                </th>
+                                <th>
+                                    <b>Item sub-category</b>
+                                </th>
+                                <th>
+                                    <b>Make/Model/Description</b>
+                                </th>
+                                <th>
+                                    <b>Unit</b>
+                                </th>
+                                <th>
+                                    <b>Quantity</b>
+                                </th>
+                                <th>
+                                    <b>Rate(per unit)	</b>
+                                </th>
+                                <th>
+                                    <b>Amount</b>
+                                </th>
+                            </tr>
+                        <tbody>
+                            <tr t-foreach="o.sub_category_ids" t-as="item">
+                                <td>
+                                    <span t-esc="o.category_id.name" />
+                                </td>
+                                <td class="text-center">
+                                    <span t-esc="item.claim_category_id.claim_type" />
+
+                                </td>
+                                <td class="text-center">
+                                    <span t-esc="item['item_model']" />
+                                </td>
+                                <td class="text-center">
+                                    <span t-esc="item['item_unit']" />
+
+                                </td>
+                                <td class="text-center">
+                                    <span t-esc="item['item_quantity']" />
+
+                                </td>
+
+                                <td class="text-right">
+                                    <span t-esc="item['item_rate']" t-options="{'widget': 'monetary', 'display_currency':  o.employee_id.company_id.currency_id}" />
+                                </td>
+                                <td class="text-right">
+                                    <span t-esc="item['amount']" t-options="{'widget': 'monetary', 'display_currency': o.employee_id.company_id.currency_id}" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="text-right">
+                        <strong>Total:</strong>
+                        <span t-esc="sum(o.sub_category_ids.mapped('amount'))" t-options="{'widget': 'monetary', 'display_currency':  o.employee_id.company_id.currency_id}" />
+                    </div>
+                    <br/>
+                    <h4>Action Log :</h4><br/>
+                    <table>
+                        <tr>
+                            <th class="text-center">
+                                <b>Date</b>
+                            </th>
+                            <th class="text-center">
+                                <b>Action Taken By</b>
+                            </th>
+                            <th class="text-center">
+                                <b>Status</b>
+                            </th>
+                            <th class="text-center">
+                                <b>Remark</b>
+                            </th>
+                        </tr>
+                    <tbody>
+                        <tr t-foreach="o.log_ids" t-as="log">
+                            <td class="text-center">
+                                <span t-esc="log.date" />
+
+                            </td>
+                            <td class="text-center">
+                                <span t-esc="log.action_taken_by.name" />
+                            </td>
+                            <td class="text-center">
+                                <span t-esc="log.state" />
+
+                            </td>
+                            <td class="text-center">
+                                <span t-esc="log.remark" />
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                </t>
+            </t>
+        </t>
+    </template>
+    <report id="emp_claim_print_id" string="Claim Reort"  model="kw_claim" report_type="qweb-pdf" file="claim.claim_report_template_view" name="claim.claim_report_template_view" />
+
+
+</odoo>

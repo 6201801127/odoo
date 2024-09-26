@@ -1,0 +1,181 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+
+
+    <!-- Material Request -->
+        <record id="kw_materail_request_report_view_tree" model="ir.ui.view">
+            <field name="name">kw_material_management.report.tree</field>
+            <field name="model">kw_material_management</field>
+            <field name="arch" type="xml">
+                <tree default_order="id desc" import='0'>
+                    <field name="item_sequence" string="Sequence" class='serial_no'/>
+                    <field name="employee_id" readonly='1' class='serial_no'/>
+                    <field name="department_id" string="Department" class='product'/>
+                    <field name="section_id" readonly='1' class='product'/>
+                    <field name="division_id" readonly='1' class='product'/>
+                    <field name="section_id" readonly='1' class='product'/>
+                    <field name="practice_id" readonly='1' class='product'/>
+                    <field name="branch_id" readonly='1' class='action_date'/>
+                    <field name="date" string="Date" class='action_date'/>
+                    <!-- <field name="dept_code" string="Department Code" /> -->
+                    <field name="state" string="Status" class='action_date'/>
+                </tree>
+            </field>
+        </record>
+        <record id="kw_materail_request_report_view_form" model="ir.ui.view">
+            <field name="name">kw_material_management.reprot.form</field>
+            <field name="model">kw_material_management</field>
+            <field name="priority">17</field>
+            <field name="arch" type="xml">
+                <form string="" duplicate="0" >
+                    <header>
+                        <button name="redirect_user_action" context='{"submit_material_request":True}' attrs="{'invisible': [('state', '!=', 'Draft')]}" string="Send For Approval" type="object" class="btn btn-success"/>
+                        <button name="redirect_user_action" context='{"send_back_request":True}' attrs="{'invisible': [('state', '!=', 'Pending')]}" string="Send Back" type="object" class="btn btn-info"/>
+                        <button name="redirect_user_action" context='{"cancel_item_request":True}' attrs="{'invisible': [('state', '!=', 'Pending')]}" string="Cancel" type="object" class="btn btn-danger"/>
+                        <field name="state" widget="statusbar" statusbar_visible="Draft,Pending,Approved,Issued" readonly="1"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="item_sequence" string="Sequence" />
+                                <field name="employee_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" readonly='1'/>
+                                <field name="department_id" string="Department" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" readonly='1'/>
+                                <field name="division_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" readonly='1'/>
+                                <field name="section_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" readonly='1'/>
+                                <field name="practice_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" readonly='1'/>
+                                <field name="branch_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" readonly='1'/>                                
+                            </group>
+                            <group>
+                                <field name="date" string="Date" attrs="{'readonly': [('state', 'not in', ['Draft'])]}"/>
+                                <field name="dept_code" string="Department Code" readonly='1'/>
+                                <field name="project_code" readonly='1'/>
+                            </group>
+                            <h1 class="my-3"> Item Details </h1>
+                            <field name="add_product_items_ids" string="Item Details" context="{'form_view_ref' : 'kw_inventory.kw_add_product_items_view_trees'}" attrs="{'readonly': [('state', 'not in', ['Draft'])]}">
+                                <tree editable="bottom"  create='1' edit='1' delete='1'>
+                                    <field name="product_type" string="Product Category" />
+                                    <!-- <field name="product_category" string=" Product Category"/> -->
+                                    <field name="product_template_id" string=" Product Type" options="{'no_create':True,'no_edit':True,'no_open': True,}"/>
+                                    <field name="item_code" string="Item Code" options="{'no_create':True,'no_edit':True,'no_open': True,}" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                                    <field name="item_description" string="Item Description" invisible='1' readonly='0'/>
+                                    <field name="uom" string="Uom" style="pointer-events:none;" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                                    <field name="quantity_required" string="Qty Required" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                                    <field name="expected_days"   required='1' string="Required Date" attrs="{'readonly': [('status', 'in', ['Approved','Rejected'])]}"/>
+                                    <field name="check_availability" invisible="1" force_save='1' />
+                                    <field name="employee_id" string='Isuued to' force_save='1' required='1' options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                                    <field name="item_in_stock" invisible='1'/>
+                                    <field name="alternate_name" invisible='1'/>
+                                    <!-- <field name="material_ids" widget="many2many_tags"/>
+                                    <field name="alternate_material_ids" widget="many2many_tags"/> -->
+                                    <!-- <field name="approved_quantity"/> -->
+                                    <field name="status" string="Status" readonly="1" />
+                                    <!-- <button name="redirect_request_items" attrs="{'invisible': [('status', '!=', 'Draft')]}" string="Send For Approvel" type="object" class="btn btn-success"/> -->
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+    
+        <record id="kw_material_request_report_action_window" model="ir.actions.act_window">
+            <field name="name">Material Request Report</field>
+            <field name="res_model">kw_material_management</field>
+            <field name="view_mode">tree,form,pivot,graph</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_materail_request_report_view_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('kw_materail_request_report_view_form')})]"/>
+            <!-- <field name="context">{'group_by':'state'}</field> -->
+            <field name="context">{}</field>
+            <field name="domain">[('create_uid', '=', uid)]</field> 
+        </record>
+    <menuitem id="kw_material_request_report_menu" name='Material Request Report' parent="purchase.purchase_report" action="kw_material_request_report_action_window"/>
+    
+    <!-- advance view render -->
+    <record id="material_request_list_panel" model="ir.ui.view">
+            <field name="name">kw_material_management.list.panel</field>
+            <field name="model">kw_material_management</field>
+            <field name="inherit_id" ref="kw_inventory.kw_materail_request_report_view_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="attributes">
+                    <attribute name="banner_route">
+                        /inventory/material_request_list_panel
+                    </attribute>
+                </xpath>
+            </field>
+        </record>
+        
+    <template id="material_request_template" name="material.request.template">
+        <div class="row" style="margin: 10px 0px 10px 250px;">
+            <table class="table table-bordered" style="width:80%;">
+                <thead>
+                    <tr class="text-center">
+                        <td class="text-center" style="width:10%;font-weight: bold;">
+                            <div>Draft</div>
+                        </td>
+                        <td class="text-center" style="background-color:#6dadbd;width:10%;color:#FFFFFF;font-weight: bold;" >
+                           <t t-esc="values['draft_count']"/>
+                        </td>   
+                        <td class="text-center" style="width:10%;font-weight: bold;">
+                            <div>Pending</div>
+                        </td>
+                        <td class="text-center" style="width:10%;background-color:#6dadbd;color:#FFFFFF;font-weight: bold;">
+                            <t t-esc="values['pending_count']"/>
+                        </td>
+                        <td class="text-center" style="width:10%;font-weight: bold;">
+                            <div>Hold</div>
+                        </td>
+                        <td class="text-center" style="background-color:#c8c967;width:10%;color:#FFFFFF;font-weight: bold;" >
+                           <t t-esc="values['hold_count']"/>
+                        </td>
+                        <td class="text-center" style="width:10%;font-weight: bold;">
+                            <div>Approved</div>
+                        </td>
+                        <td class="text-center" style="width:10%;background-color:#81b891;color:#FFFFFF;font-weight: bold;">
+                            <t t-esc="values['approved_count']"/>
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="text-center">
+                        <td class="text-center" style="width:10%;font-weight: bold;">
+                            <div>Cancelled</div>
+                        </td>
+                        <td class="text-center" style="width:10%;background-color:#d48b8a;color:#FFFFFF;font-weight: bold;">
+                            <t t-esc="values['cancelled_count']"/>
+                        </td>
+                        <td class="text-center" style="width:10%;font-weight: bold;">
+                            <div>Rejected</div>
+                        </td>
+                        <td class="text-center" style="width:10%;background-color:#d48b8a;color:#FFFFFF;font-weight: bold;">
+                            <t t-esc="values['rejected_count']"/>
+                        </td>
+                         <td class="text-center" style="width:10%;font-weight: bold;">
+                            <div>Issued</div>
+                        </td>
+                        <td class="text-center" style="width:10%;background-color:#6dadbd;color:#FFFFFF;font-weight: bold;">
+                            <t t-esc="values['issued_count']"/>
+                        </td>
+                        <td class="text-center" style="width:10%;font-weight: bold;">
+                            <div>Released</div>
+                        </td>
+                        <td class="text-center" style="width:10%;background-color:#81b891;color:#FFFFFF;font-weight: bold;">
+                            <t t-esc="values['released_count']"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </template>
+
+    <!-- Action remark form view -->
+
+    </data>
+</odoo>

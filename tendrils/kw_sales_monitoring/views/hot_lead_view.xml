@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="hot_lead_view_form" model="ir.ui.view">
+            <field name="name">Hot Lead Form View</field>
+            <field name="model">crm.lead</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="action_update_hot_lead" string="Update" type="object" class="btn-primary"/>
+                    </header>
+                    <sheet>
+                        <div class="row">
+                            <div class="col-12">
+                                <label for="name" class="oe_edit_only" string="Lead Name"/>
+                                <h1><field name="name" placeholder="Lead Name" readonly="1"/> <span attrs="{'invisible':[('id','=',False)]}">
+                                    (code <field name="code" style="color:#108fbb;font-weight:bold" nolabel="1" readonly="1"/>)
+                                    </span>
+                                </h1>
+                            </div>
+                        </div>
+                        <group>
+                            <group string="Client Details" >
+                                <field name="partner_id" required="1" string="Client Name" options="{'no_create':True,'no_delete':True,'no_open':True,'no_update':True}" />
+                                <field name="client_type" string="Client Type" options="{'no_create':True,'no_delete':True,'no_open':True,'no_update':True}" />
+                                <field name="country_id" options="{'no_create_edit': True,'no_open':True,'no_create':True}" />
+                                <field name="state_id" string="State and UT" options="{'no_create_edit': True,'no_open':True,'no_create':True}" />
+                            </group>
+                            <group string="Project Details">
+                                <field name="project_detail_ids">
+                                    <tree editable="1" delete="1">
+                                        <field name="line_of_business_id" options="{'no_open': True,'no_create':True,'no_edit':True}" required="1"/>
+                                        <field name="domain_offering_service_line_id" options="{'no_open': True,'no_create':True,'no_edit':True}" required="1"/>
+                                        <field name="solution_service_line_id" options="{'no_open': True,'no_create':True,'no_edit':True}" />
+                                    </tree>
+                                </field>
+                            </group>
+                            
+                            <separator string="Commercial Info" colspan="4" />
+                                
+                            <group>
+                                <field name="procurement_id" options="{'no_create':True,'no_delete':True,'no_open':True,'no_update':True}"/>
+                                <field name="tender_piblising_date"/>
+                            </group>
+                            <group>
+                                <field name="value_in_inr" readonly = "1"/>
+                                <field name="lead_currency_id" string="Currency Type" options="{'no_open': True, 'no_create': True, 'no_edit': False}"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Contact Info (Client Nodal Officer)">
+                                <field name="nodal_officer_id" string="Nodal Officer Name" domain="[('parent_id','=',partner_id)]" options="{'no_create': True, 'no_delete': True, 'no_open': True, 'no_update': True}" attrs="{'invisible': [('partner_id', '=', False)]}"/>
+                                <field name="nodal_officer_name" readonly="0" required="1"/>
+                                <field name="nodal_officer_designation" readonly="0" required="1"/>
+                                <field name="nodal_officer_mobile_no" readonly="0" required="1"/>
+                                <field name="nodal_officer_email_address" readonly="0" required="1"/>
+                            </group>
+                            <group string="Document Upload">
+                                <field name="document_ids">
+                                    <tree editable="bottom" delete="1">
+                                        <field name="doc_name_selection" options="{'no_create':True,'no_delete':True,'no_open':True,'no_update':True}"/>
+                                        <field name="upload_filename" invisible="1"/>
+                                        <field name="upload_file" filename="upload_filename" widget="FieldBinary" string="Upload File"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            <group string="Account Holder">
+                                <field name="department_id" options="{'no_create':True,'no_delete':True,'no_open':True,'no_update':True}"/>
+                                <field name="division_id" options="{'no_create':True,'no_delete':True,'no_open':True,'no_update':True}"/>
+                                <field name="section_id" options="{'no_create':True,'no_delete':True,'no_open':True,'no_update':True}"/>
+                                <field name="account_holder_id" options="{'no_create':True,'no_delete':True,'no_open':True,'no_update':True}"/>
+                            </group>
+                            <group string="Reviewer">
+                                <field name="reviewer_id" string="Reviewer"/>
+                                <separator string="Remarks" colspan="4" />
+                                <field name="remark" string="Remarks"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="hot_lead_view_tree" model="ir.ui.view">
+            <field name="name">Hot Lead Tree View</field>
+            <field name="model">crm.lead</field>
+            <field name="arch" type="xml">
+                <tree class="lead_tree_view">
+                    <field name="code" class="code" string="Opp Code"/>
+                    <field name="state_id" string="Country|State"/>
+                    <field name="partner_id" string="Client" />
+                    <field name="name" string="Opportunity Name" />
+                    <field name="lead_currency_id" string = "Currency"/>
+                    <field name="value_in_inr" />
+                    <field name="create_date" string = "Creation Date"/>
+                    <field name="account_holder_id" string = "Account Holder"/>
+                    <field name="source_id" />
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="hot_lead_action_window">
+            <field name="name">Hot Lead</field>
+            <field name="res_model">crm.lead</field>
+            <field name="view_mode">tree</field>
+            <field name="view_type">form</field>
+            <field name="domain">[('stage_id.code','=','pac_approved')]</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                   (0, 0, {'view_mode': 'tree', 'view_id': ref('hot_lead_view_tree')}),
+                   (0, 0, {'view_mode': 'form', 'view_id': ref('hot_lead_view_form')})]" />
+        </record>
+    </data>
+</odoo>

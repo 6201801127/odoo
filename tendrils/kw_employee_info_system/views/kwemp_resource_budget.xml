@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="employee_resource_budget_tree_view" model="ir.ui.view">
+            <field name="name">Employee Resource Budget</field>
+            <field name="model">hr.employee</field>
+            <field name="priority" eval="1005"/>
+            <field name="arch" type="xml">
+                <tree string="Resource Budget Setting" editable="top" create="false" import="false" delete="false">
+                    <field name="job_branch_id" string="Branch/SBU" readonly="1"
+                           options="{'no_create': True, 'no_open': True, 'no_create_edit':True}"/>
+                    <field name="department_id" string="Department" readonly="1"
+                           options="{'no_create': True, 'no_open': True, 'no_create_edit':True}"/>
+                    <field name="emp_code" string="Emp. Code" readonly="1"/>
+                    <field name="name" string="Name" readonly="1"/>
+                    <field name="job_id" string="Designation" readonly="1"
+                           options="{'no_create': True, 'no_open': True, 'no_create_edit':True}"/>
+                    <field name="budget_type" options="{'no_create': True, 'no_open': True, 'no_create_edit':True}"
+                           readonly="1"/>
+                    <field name="employement_type" readonly="1"
+                           options="{'no_create': True, 'no_open': True, 'no_create_edit':True}" />
+                    <field name="emp_role" required="1" 
+                        domain="[('budget_type','=',budget_type)]" 
+                        options="{'no_create': True, 'no_open': True, 'no_create_edit':True}"/>
+                    <field name="emp_category" required="1" 
+                        domain="[('role_ids', '=', emp_role)]"
+                        options="{'no_create': True, 'no_open': True, 'no_create_edit':True}"/>
+                    <field name="budget_effective_from" required="1"/>
+                    <button class="btn btn-info" string="Budget History"
+                            name="button_budget_settings" type="object" 
+                            groups="kw_onboarding.group_kw_onboarding_finance,hr.group_hr_manager"/>
+                            
+                       
+                </tree>
+            </field>
+        </record>
+        <record id="emp_resource_budget_action" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Resource Budget Setting</field>
+            <field name="res_model">hr.employee</field>
+            <field name="view_mode">tree</field>
+            <field name="view_type">form</field>
+            <field name="domain">[('employement_type.code','!=','O')]</field>
+            <field name="view_id" ref="employee_resource_budget_tree_view"/>
+        </record>
+
+        <menuitem name="Resource Budget Setting"
+                  parent="hr.menu_human_resources_configuration"
+                  id="menu_employee_resource_budget"
+                  action="emp_resource_budget_action"
+                  groups="kw_onboarding.group_kw_onboarding_finance"/>
+
+        <record id="hr.menu_human_resources_configuration" model="ir.ui.menu">
+            <field name="groups_id" eval="[(4,ref('kw_onboarding.group_kw_onboarding_finance'))]"/>
+        </record>
+        
+        <record model="ir.ui.view" id="kw_employee_budget_settings_form_view">
+			<field name="name">hr.employee.budget_settings.form.inherit</field>
+			<field name="model">hr.employee</field>
+			<field name="inherit_id" ref="hr.view_employee_form"/>
+			<field name="arch" type="xml">
+
+                <xpath expr="//form/sheet/div/button[@name='button_employee_document']" position="after">
+                    <button class="oe_stat_button"
+                            name="button_budget_settings" type="object" icon="fa-info"
+                            groups="kw_onboarding.group_kw_onboarding_finance,hr.group_hr_manager">
+                        <span class="o_stat_text font-weight-bold">
+                            Budget Settings
+                        </span>
+                    </button>
+                </xpath>
+            </field>
+        </record>
+
+
+    </data>
+</odoo>

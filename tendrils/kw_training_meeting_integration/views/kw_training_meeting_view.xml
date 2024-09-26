@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_kw_training_meeting_calendar_event_form" model="ir.ui.view">
+            <field name="name">kw_meeting_schedule.event.form</field>
+            <field name="model">kw_meeting_events</field>
+            <field name="priority" eval="1"/>
+            <field name="arch" type="xml">
+                <form string="Meetings" create="false" delete="false">
+                    <sheet>
+
+                        <div name="button_box" class="oe_button_box">
+
+                            <button class="oe_stat_button" type="action" name="%(kw_meeting_schedule.action_get_meeting_proposals)d" icon="fa-lightbulb-o">
+                                <field string="Input(s)" name="agenda_proposals" widget="statinfo" />
+                            </button>
+
+                            <button class="oe_stat_button" type="action" name="%(kw_meeting_schedule.action_get_meeting_all_attendee)d" icon="fa-users" attrs="{'invisible': ['|',('mom_required', '=', False),('state', 'not in', ['attendance_complete','draft_mom','final_mom'])]}">
+                                <field string="Attendees" name="total_attendee_count" widget="statinfo" />
+                            </button>
+
+                            <button class="oe_stat_button" type="object" name="get_meeting_mom" icon="fa-file-pdf-o" attrs="{'invisible': ['|',('mom_required', '=', False),('state', 'not in', ['final_mom'])]}">
+                                <field string="MOM" name="draft_mom" filename="ref_name" />
+                                <field name="ref_name" invisible="1"/>
+                            </button>
+
+                            <button class="oe_stat_button" type="action" name="%(kw_meeting_schedule.action_get_meeting_task)d" icon="fa-tasks" attrs="{'invisible': ['|',('mom_required', '=', False),('state', 'not in', ['final_mom'])]}">
+                                <field string="Action Items" name="mom_activity_count" widget="statinfo"/>
+                            </button>
+
+                            <!-- <button attrs="{'invisible': ['|', ('is_meeting_responsible', '=', False),'|', ('state', 'not in', ['confirmed']),('meeting_start_status', '=', True)]}" string="Cancel" icon="fa-times-circle" type="object" name="action_open_cancel_meeting_form" class="float-right">   
+                        </button> -->
+
+                        </div>
+
+                        <!-- <button string="Document" class="oe_stat_button float-right" icon="fa-bars" type="object" name="action_open_calendar_event" attrs="{'invisible': ['|', ('res_model', '=', False), ('res_id', '=', False)]}"/> -->
+                        <!-- <button attrs="{'invisible': ['|', ('is_meeting_responsible', '=', False),'|', ('state', 'not in', ['confirmed']),('meeting_start_status', '=', True)]}" string="Cancel" icon="fa-times-circle" type="object" name="action_open_cancel_meeting_form" class="btn-warning float-right" />   -->
+
+
+                        <field name="res_model" invisible="1" />
+                        <field name="res_id" invisible="1" />
+                        <field name="state" invisible="1" />
+                        <field name="is_meeting_responsible" invisible="1" />
+                        <field name="meeting_start_status" invisible="1" />
+                        <!--  <field name="is_attendee" invisible="1"/>
+                    <field name="attendee_status" invisible="1"/> -->
+                        <!-- <div class="oe_title">
+                        <div class="oe_edit_only">
+                            <label for="name"/>
+                        </div>
+                        <h1>
+                            <field name="name" placeholder="e.g. Project Review" attrs="{'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False),('recurrency','=',True)]}" />  
+                        </h1>                        
+                    </div> -->                        <!-- ,'readonly': ['|',('state', 'in', ['attendance_complete','draft_mom','final_mom','cancelled']),'&amp;',('recurrency','=',True),('state','in',['confirmed'])] -->
+                        <group name="meeting_name">
+                            <group>
+                                <field name="name" placeholder="e.g. Project Review" attrs="{'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False),('recurrency','=',True)]}" string="Meeting Title" autocomplete="off"/>
+                                <field name="meeting_category" attrs="{'required':True,'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}" widget="radio" options="{'horizontal': true}" />
+
+                                <field name="project_category" options="{'no_create': True,'no_open': True}" attrs="{'required': [('meeting_category','=','project')],'invisible': [('meeting_category','!=','project')],'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}" />
+                                <field name="project" options="{'no_create': True,'no_open': True}" attrs="{'required': [('meeting_category','=','project')],'invisible': [('meeting_category','!=','project')],'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}" />
+                            </group>
+                            <group>
+                                <field name="categ_ids" widget="many2many_tags" options="{'limit':1,'no_create': True}" attrs="{'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}" invisible="1"/>
+                                <field name="meeting_type_id" options="{'no_create': True,'no_open': True}" attrs="{'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)], 'required':True}" />
+                            </group>
+                        </group>
+                        <group name="meeting_detail_main">
+                            <group string="Meeting Details" name="meeting_detail">
+                                <field name="start" attrs="{'invisible': True}"/>
+                                <field name="stop" attrs="{'invisible': True}"/>
+                                <field name="id" attrs="{'invisible': True}"/>
+
+                                <field name="start_date" string="Starting at" attrs="{'required': [('allday','=',True)], 'invisible': [('allday','=',False)], 'readonly': [('id', '!=', False), ('recurrency','=',True)]}"/>
+                                <field name="stop_date" string="Ending at" attrs="{'required': [('allday','=',True)],'invisible': [('allday','=',False)], 'readonly': [('id', '!=', False), ('recurrency','=',True)]}"/>
+
+                                <field name="start_datetime" invisible="1" />
+
+                                <label for="kw_start_meeting_date" string="Date &amp; Time" />
+                                <div class="address_format">
+                                    <field name="kw_start_meeting_date" style="width: 50%" attrs="{'required': [('allday','=',False)], 'invisible': [('allday','=',True)], 'readonly': ['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}" autocomplete="off"/>
+                                    <field name="kw_start_meeting_time" style="width: 50%;" attrs="{'required': [('allday','=',False)], 'invisible': [('allday','=',True)], 'readonly': ['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}" />
+                                </div>
+
+                                <field name="stop_datetime" invisible="1"/>
+
+                                <label for="duration" attrs="{'invisible': [('allday','=',True)]}"/>
+                                <div attrs="{'invisible': [('allday','=',True)]}">
+                                    <field name="duration" invisible="1" string="Duration"/>
+                                    <field name="kw_duration" attrs="{'required':True,'invisible': [('allday','=',True)],'readonly': ['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}" string="Duration"/>
+                                </div>
+                                <field name="allday" invisible="1" />
+                                <field name="company_id" invisible="1"/>
+                                <field name="location_id" options="{'no_create': True,'no_open': True}" attrs="{'required':True,'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/>
+                                <field name="meeting_room_id" options="{'no_create': True,'no_open': True}" widget="form.kwmeeting_room_onchange" attrs="{'required':True,'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/>
+                            </group>
+                            <group name="meeting_detail_right">
+                                <div>
+                                    <group>
+                                        <field name="recurrency" attrs="{'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),('id', '!=', False)],'invisible': [('id', '!=', False),('recurrency', '=',False)] }" />
+                                        <field name="recurrent_id" invisible="1" />
+                                    </group>
+                                    <div attrs="{'invisible': [('recurrency', '=', False)]}">
+                                        <group>
+                                            <label for="interval"/>
+                                            <div class="o_row">
+                                                <field name="interval" attrs="{'required': [('recurrency', '=', True)],'readonly':[('id', '!=', False)]}"/>
+                                                <field name="rrule_type" attrs="{'required': [('recurrency', '=', True)],'readonly':[('id', '!=', False)]}"/>
+                                            </div>
+                                            <label string="Until" for="end_type"/>
+                                            <div class="o_row">
+                                                <field name="end_type" attrs="{'required': [('recurrency', '=', True)],'readonly':[('id', '!=', False)]}"/>
+                                                <field name="count" attrs="{'invisible': [('end_type', '!=', 'count')], 'required': [('recurrency', '=', True)],'readonly':[('id', '!=', False)]}"/>
+                                                <field name="final_date" attrs="{'invisible': [('end_type', '!=', 'end_date')], 'required': [('end_type', '=', 'end_date')], 'readonly':[('id', '!=', False)]}"/>
+                                            </div>
+                                        </group>
+                                        <group attrs="{'invisible': [('rrule_type', '!=', 'weekly')] }" name="weekdays">
+                                            <field name="mo" attrs="{'readonly':[('id', '!=', False)]}"/>
+                                            <field name="tu" attrs="{'readonly':[('id', '!=', False)]}"/>
+                                            <field name="we" attrs="{'readonly':[('id', '!=', False)]}"/>
+                                            <field name="th" attrs="{'readonly':[('id', '!=', False)]}"/>
+                                            <field name="fr" attrs="{'readonly':[('id', '!=', False)]}"/>
+                                            <field name="sa" attrs="{'readonly':[('id', '!=', False)]}" />
+                                            <field name="su" attrs="{'readonly':[('id', '!=', False)]}"/>
+                                        </group>
+                                        <group attrs="{'invisible': [('rrule_type', '!=', 'monthly')],'readonly':[('id', '!=', False)]}">
+                                            <label string="Day of Month" for="month_by"/>
+                                            <div class="o_row">
+                                                <field name="month_by" attrs="{'readonly':[('id', '!=', False)]} " />
+                                                <field name="day" attrs="{'required': [('month_by', '=', 'date'), ('rrule_type', '=', 'monthly')],
+                                                                'invisible': [('month_by', '!=', 'date')],'readonly':[('id', '!=', False)]}"/>
+                                                <field name="byday" string="The" attrs="{'required': [('month_by', '=', 'day'), ('rrule_type', '=', 'monthly')],
+                                                                'invisible': [('month_by', '!=', 'day')],'readonly':[('id', '!=', False)]}"/>
+                                                <field name="week_list" nolabel="1" attrs="{'required': [('month_by', '=', 'day'), ('rrule_type', '=', 'monthly')],
+                                                                'invisible': [('month_by', '!=', 'day')],'readonly':[('id', '!=', False)]}"/>
+                                            </div>
+                                        </group>
+                                    </div>
+                                </div>
+                            </group>
+                        </group>
+                        <label for="meeting_room_availability_status" />
+                        <field name="meeting_room_availability_status" invisible="1" />
+                        <!-- widget="form.kwmeeting_room_availability" -->
+                        <div id="meeting_room_availability_status"></div>
+                        <!-- </page> -->
+                        <!-- <page name="agenda_page" string="Meeting Agenda"> -->
+                        <group string="Meeting Agenda">
+
+                            <field name="agenda_ids" attrs="{'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}">
+                                <tree create="true" delete="true" editable="top">
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+
+                            <field name="description" string="Required Information/ Pre-Preparatory" attrs="{'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}" />
+
+                            <field name="reference_document" attrs="{'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}" filename="ref_name"/>
+                            <field name="ref_name" invisible="1"/>
+
+                        </group>
+                        <!-- </page> -->
+                        <!-- <page name="participant_page" string="Participant Details"> -->
+                        <group string="Participant Details">
+                            <group>
+                                <field name="internal_attendee_ids" invisible="1" string="Internal" attrs="{'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}">
+                                    <tree editable="bottom">
+                                        <field name="employee_id" options="{'no_create': True,'no_open': False,'no_create': True}" required="1" attrs="{'readonly':[('is_saved_attendee','=', True)]}"/>
+
+                                        <field name="job_id" string="Designation"/>
+                                        <field name="image_small" string="Photo" class="oe_avatar" widget="image" height="25px" width="25px"/>
+                                        <field name="is_saved_attendee" invisible="1"/>
+                                        <field name="attendance_status" invisible="1"/>
+                                    </tree>
+                                </field>
+
+
+                                <field name="employee_ids" options="{'no_create': True,'no_open': False}" context="{'tree_view_ref':'kw_meeting_schedule.view_hr_employee_recruitment_tree'}" string="Internal" attrs="{'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}">
+                                    <tree editable="bottom" create="true" delete="true" edit="true">
+                                        <field name="image_small" string="Photo" class="oe_avatar" widget="image" height="25px" width="25px"/>
+                                        <field name="name" />
+                                        <field name="job_id" string="Designation" options="{'no_open': False}"/>
+                                    </tree>
+                                </field>
+
+                                <field name="attendee_notify_option" widget="radio" attrs="{'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)], 'invisible': [('id', '=', 'False')], }" invisible="1"/>
+                                <!-- <field name="partner_ids" string="Attendees" invisible="1"/> -->
+                            </group>
+                            <group>
+                                <field name="external_attendee_ids" attrs="{'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}">
+                                    <tree create="true" editable="bottom">
+                                        <field name="partner_id" required="1" string="Name" domain="[('is_meeting_participant','=', True)]" context="{'default_is_meeting_participant':1,'default_consultancy':0, 'search_default_is_meeting_participant': 1,'default_customer': 0,'default_supplier': 0, 'default_is_company': False}" />
+                                        <field name="phone" />
+                                        <field name="email" required="1"/>
+                                        <field name="attendance_status" invisible="1"/>
+                                    </tree>
+                                </field>
+                                <!--                                    <field name="external_participant_ids" options="{'no_open': True}" attrs="{'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}" />-->
+                            </group>
+                        </group>
+                        <!-- </page> -->
+                        <!-- <page name="page_options" string="Other Details"> -->
+                        <group string="Other Details">
+                            <group>
+                                <field name="mom_required" attrs="{'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/>
+
+                                <field name="mom_controller_id" options="{'no_create': True,'no_open': True}" attrs="{'required': [('mom_required', '=', True)],'invisible': [('mom_required','=',False)],'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}" domain="[('id','in',employee_ids)]" />
+
+                            </group>
+                            <group>
+                                <field name="privacy" invisible="1" attrs="{'readonly':['|',('state', 'in', ['cancelled']),'|',('meeting_start_status', '=',True),'&amp;',('id', '!=', False), ('recurrency','=',True)]}"/>
+                                <!-- <field name="show_as"/> -->
+                                <field name="reminder_id" options="{'no_create': True}" attrs="{'readonly':['|',('meeting_start_status', '=',True),('id', '!=', False)]}" />
+
+                            </group>
+                        </group>
+
+                        <group string="Notification">
+                            <group>
+
+                                <field name="send_email" string="E-mail" attrs="{'readonly':[('meeting_start_status', '=',True)]}" />
+                                <field name="send_sms" string="SMS" attrs="{'readonly':[('meeting_start_status', '=',True)]}" />
+                                <field name="send_whatsapp" string="WhatsApp" attrs="{'readonly':[('meeting_start_status', '=',True)]}" />
+                                <field name="notify_to_nsa" attrs="{'readonly':[('meeting_start_status', '=',True)]}" string="IT Authority"/>
+                                <field name="notify_to_admin" attrs="{'readonly':[('meeting_start_status', '=',True)]}" string="Admin Authority"/>
+                            </group>
+                            <group>
+                                <field name="email_subject_line" readonly="1" />
+                                <field name="sms_content" attrs="{'invisible': [('send_sms','=',False)]}" string="SMS Content"/>
+                                <field name="whatsapp_message" attrs="{'invisible': [('send_whatsapp','=',False)]}" string="WhatsApp Content"/>
+                            </group>
+                        </group>
+
+                        <!-- </page> -->
+                        <!-- <page name="page_invitations" string="Invitations" groups="base.group_no_one" attrs="{'invisible': ['|',('recurrency','=',True),('state', 'in', ['cancelled'])]}"> -->
+                        <group string="Invitations" groups="base.group_no_one" attrs="{'invisible': ['|',('recurrency','=',True),('state', 'in', ['cancelled'])]}">
+                            <button name="action_sendmail" type="object" string="Send mail" icon="fa-envelope" class="oe_link"/>
+                            <field name="attendee_ids" widget="one2many" attrs="{'invisible': [('recurrency','=',True)],'readonly':[('state', 'in', ['cancelled'])]}">
+                                <tree string="Invitation details" editable="top" create="false" delete="false">
+                                    <field name="partner_id" />
+                                    <field name="state" />
+                                    <field name="email" widget="email"/>
+                                    <field name="event_recurrency" invisible="1" />
+                                    <field name="event_state" invisible="1"/>
+                                    <button name="do_tentative" states="needsAction,declined,accepted" string="Uncertain" type="object" icon="fa-asterisk" />
+                                    <button name="do_accept" string="Accept" states="needsAction,tentative,declined" type="object" icon="fa-check text-success" />
+                                    <button name="do_decline" string="Decline" states="needsAction,tentative,accepted" type="object" icon="fa-times-circle text-danger" />
+                                </tree>
+                            </field>
+                        </group>
+                        <!-- </page> -->
+                        <!--  <page name="page_misc" string="Misc" groups="base.group_no_one">
+                            <group>
+                                <label for="user_id" string="Owner"/>
+                                <field name="user_id" nolabel="1"/>
+                            </group>
+                        </page> -->
+                        <!-- </notebook> -->
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread" />
+                    </div>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

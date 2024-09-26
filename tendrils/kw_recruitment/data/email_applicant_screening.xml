@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="for_screening_mail_to_panel_member" model="mail.template">
+            <field name="name">Recruitment: Mail to Screening application</field>
+            <field name="email_from">tendrils@csm.tech</field>
+            <field name="subject"> Recruitment | Applicant Screening | ${ctx['applicant_name']} </field>
+            <field name="email_to">${ctx['emails']}</field>
+            <field name="model_id" ref="kw_recruitment.model_hr_recruitment_stage"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+              <![CDATA[
+                <table border="0" cellspacing="0" cellpadding="0" width="100%" >
+                <tr>
+                    <td>
+
+                        <div style="margin-left: 1.2rem;">
+                            <h5 style="font-weight: 400;margin-bottom: 0;font-size: 18px;color:#676767;">
+                                <small style="color:rgb(22, 123, 158);font-size: 18px;margin-right: 2px;font-weight: 600;">Dear </small>
+                                <strong>${ctx['names']}</strong>,
+                            </h5>
+                            <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 17px;">
+                               The following applicant is sent for screening.
+                               
+                            </p>
+                            <br/>
+
+                            <p style="color: rgb(22, 123, 158);line-height: 145%;margin: 10px 0 0 0;font-size: 17px;"><strong>Applicant Details:</strong></p>
+                            <br/>
+                            <br/>
+                            <table class="table table-bordered table-striped" border="0" cellspacing="0" cellpadding="0" width="100%" >
+                                <tbody style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 17px;">
+                                    <tr>
+                                        <td><strong>Applicant's Name</strong></td>
+                                        <td><strong>Email</strong></td>
+                                        <td><strong>Job Position</strong></td>
+                                    </tr>
+
+                                    % for record in ctx['record_ids']:
+                                        <tr>
+                                            <td>
+                                                % if record.name:
+                                                    ${record.partner_name}
+                                                % endif
+                                            </td>
+                                            <td>
+                                                % if record.email_from:
+                                                    ${record.email_from}
+                                                % endif
+                                            </td>
+                                            <td>
+                                                % if record.job_position.title:
+                                                    ${record.job_position.title}
+                                                % else:
+                                                    NA
+                                                % endif
+                                            </td>
+                                        </tr>
+                                    %endfor
+
+                                </tbody>
+                            </table>
+                        <br/>
+                        <br/>
+                        <div style="margin-bottom:1em;">
+                            <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">Click the below button to view the applicant details</p>
+                            <div style="margin: 16px 0px 16px 0px;">
+                                <a href="/web#action=${ctx['view_id']}&amp;model=hr.applicant&amp;view_type=list" style="background-color: rgb(22, 123, 158); padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;" target="new">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                            <br/>
+                        <br/>    
+                            <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 17px;">
+                                <strong>Thanks & regards 
+                                    <br/>
+                                        CSM Technologies Pvt. Ltd.
+                                </strong>
+                            </p>
+                            <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 17px;">
+                                % if object.create_uid and object.create_uid.signature:
+                                    ${object.create_uid.signature | safe}
+                                % else:
+                                    ${object.create_uid.name | safe}
+                                % endif
+                            </p>
+                             <br/>
+                            
+                        </div>
+                    
+                    </td>
+                </tr>
+                
+            </table> 
+                ]]>   
+               
+            </field>
+
+        </record>
+
+        <record id="screening_reminder_mail_to_panel_member" model="mail.template">
+            <field name="name">Recruitment: Reminder mail to panel member for application screening by scheduler</field>
+            <field name="email_from">tendrils@csm.tech</field>
+            <field name="subject"> Recruitment | Reminder for applications pending for screening</field>
+            <field name="email_to">${ctx['emails']}</field>
+            <field name="model_id" ref="kw_recruitment.model_screening_reminder_log"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+              <![CDATA[
+                <table border="0" cellspacing="0" cellpadding="0" width="100%" >
+                <tr>
+                    <td>
+
+                        <div style="margin-left: 1.2rem;">
+                            <h5 style="font-weight: 400;margin-bottom: 0;font-size: 18px;color:#676767;">
+                                <small style="color:rgb(22, 123, 158);font-size: 18px;margin-right: 2px;font-weight: 600;">Dear </small>
+                                <strong>${ctx['panel_member_name']}</strong>,
+                            </h5>
+                            <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 17px;">
+                                This is a gentle reminder for applications pending for screening. 
+                                Please login to the system and take action.
+                            </p>
+                            
+                        </div>
+                        <br/>
+                        % if ctx['applicant']:
+                            <table class="table table-bordered table-striped" border="0" cellspacing="0" cellpadding="0" width="100%" style="margin-left: 20px;" >
+                                <tbody style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 17px;">
+                                        <tr>
+                                            <th style="width:50%"><strong>Applicant's Name</strong></th>
+                                            <th style="width:50%"><strong>Job Position</strong></th>
+                                        </tr>
+                                        % for applicant in ctx['applicant']:
+                                            <tr>
+                                                <td>
+                                                    % if applicant.partner_name:
+                                                        ${applicant.partner_name}
+                                                    % else:
+                                                        NA
+                                                    % endif
+                                                </td>
+                                                
+                                                <td>
+                                                    % if applicant.job_position.title:
+                                                        ${applicant.job_position.title}
+                                                    % else:
+                                                        NA
+                                                    % endif
+                                                </td>
+                                            </tr>
+                                        
+                                        %endfor
+                                        
+                                </tbody>
+                            </table>
+                        % endif
+                        <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                            <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">Click the below button to view the applications</p>
+                            <div style="margin: 16px 0px 16px 0px;">
+                                <a href="/web#id=${ctx['record_id']}&action=${ctx['view_id']}&amp;model=hr_applicant&amp;view_type=kanban" style="background-color: rgb(22, 123, 158); padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;" target="new">
+                                    View Details
+                                </a>
+                            </div>
+                            <br/>
+                        </div>
+
+                        <div style="margin-left: 1.2rem;margin-bottom:1em;">
+                            <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 17px;">
+                                <strong>
+                                    Thanks & regards
+                                    <br/>
+                                    CSM Technologies Pvt. Ltd.
+                                </strong>
+                            </p>
+                            <br/>
+                            <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                                This is a system generated mail. Please do not reply to this email. 
+                            </p>
+                        </div>
+                        <br/>
+                    </td>
+                </tr>
+                
+            </table> 
+                ]]>   
+               
+            </field>
+
+        </record>
+
+        <record id="for_cv_screening_mail_to_assign_panel_member" model="mail.template">
+            <field name="name">Recruitment: Mail to Panel Member</field>
+            <field name="email_from">${object.env.user.employee_ids.work_email}</field>
+            <field name="subject"> CV Screening | ${ctx['job']}</field>
+            <field name="email_to">${ctx['mail_to']}</field>
+            <field name="email_cc">${object.env.user.employee_ids.work_email}</field>
+            <field name="model_id" ref="kw_recruitment.model_cvscreening_wizard"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+            <![CDATA[
+                <table border="0" cellspacing="0" cellpadding="0" width="100%" >
+                <tr>
+                    <td>
+
+                        <div style="margin-left: 1.2rem;">
+                            <h5 style="font-weight: 400;margin-bottom: 0;font-size: 18px;color:#676767;">
+                                <small style="color:rgb(22, 123, 158);font-size: 18px;margin-right: 2px;font-weight: 600;">Dear </small>
+                                <strong>${ctx['name']}</strong>,
+                            </h5>
+                            <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 17px;">
+                               Please find the following applicants, kindly review them and
+                                share us the shortlisted profiles for interview.
+                            </p>
+                            <br/>
+
+                            <p style="color: rgb(22, 123, 158);font-size: 17px;">
+                                <strong>Applicant Details:</strong>
+                            </p>
+                            <br/>
+                            <table class="table table-bordered">
+							<thead>
+							<tr>
+                                <th scope="col" class="col-sm-1"> Sl#</th>
+                                <th scope="col" class="col-sm-2"> Applicant's Name </th>
+                                <th scope="col" class="col-sm-1"> Job Position</th>
+                                <th scope="col" class="col-sm-3"> Details</th>
+							</tr>
+							</thead>
+							<tbody>
+							% for applicant in ctx['record_ids']:
+								<tr>
+                                    <td style="padding-left:20px; color:#676767; height:34px; width:10%" >
+                                        ${loop.index}
+                                    </td>
+									<td style="padding-left:20px; color:#676767; height:34px; width:30%">
+										% if applicant.partner_name:
+                                            ${applicant.partner_name}
+                                        % else:
+                                            NA
+                                        % endif
+									</td>
+									<td style="padding-left:10px; color:#676767; height:34px; width:30%">
+                                        % if applicant.job_position.title:
+                                            ${applicant.job_position.title}
+                                        % else:
+                                            NA
+                                        % endif
+									</td>
+									<td style="padding-left:30px; color:#676767; height:34px; width:30%" >
+                                        <a href="/web#id=${applicant.id}&action=${ctx['view_id']}&amp;model=hr_applicant&amp;view_type=form" style="background-color: rgb(22, 123, 158); padding: 8px 3px 5px 5px; text-decoration: none; color: #fff; border-radius: 2px; font-size:13px;" target="new">
+                                            View Details
+                                        </a>
+                                        &nbsp;
+                                        <!-- <a href="/recruitment/applicant_shortlisted" style="background-color: rgb(45, 158, 22); padding: 8px 3px 5px 5px; text-decoration: none; color: #fff; border-radius: 2px; font-size:13px;" target="new">
+                                            Shortlisted
+                                        </a>
+                                        &nbsp;
+                                        <a href="/web#id=${ctx['record_id']}&action=${ctx['view_id']}&amp;model=hr_applicant&amp;view_type=form" style="background-color: rgb(158, 22, 54); padding: 8px 8px 8px 8px; text-decoration: none; color: #fff; border-radius: 2px; font-size:13px;" target="new">
+                                            Profile Mismatch
+                                        </a> -->
+                                        &nbsp;
+									</td>
+								</tr>
+							%endfor
+							</tbody>
+                        </table>
+                        <br/>    
+                        <p>
+                            Thanks & regards
+                            <br/>
+                            CSM Technologies Pvt. Ltd.
+                        </p>
+                            
+                        </div>
+                    
+                    </td>
+                </tr>
+                </table> 
+            ]]>   
+            </field>
+        </record>
+    </data>
+</odoo>

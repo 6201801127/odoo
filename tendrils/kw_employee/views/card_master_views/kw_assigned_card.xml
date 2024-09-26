@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+
+		<record id="kw_card_master_tree1" model="ir.ui.view">
+			<field name="name">kw_card_master.tree</field>
+			<field name="model">kw_card_master</field>
+			<field name="arch" type="xml">
+				<tree string="Card Master" editable="top" delete="false">
+					<field name="card_type" required="1" attrs="{'readonly': [('state', '=', 'assigned')]}"/>
+					<field name="name" />
+<!--					attrs="{'readonly': [('state', '=', 'assigned')]}"-->
+					<field name="active" widget="boolean_toggle"/>
+					<field name="code" invisible="1"/>
+					<field name="assigned" invisible="1"/>
+					<field name="designation_id" invisible="1"/>
+					<field name="employee_id" string="Employee Tagged" options="{'no_open': True,'no_create':True,'no_edit':True}" readonly="1"/>
+					<field name="state" readonly="1"/>
+					<field name="active" invisible="1"/>
+					<field name="compute_onboarding" invisible="1"/>
+					<button name="button_assign_card" type="object" string="Assign/Reassign" class="oe_highlight"
+					        attrs="{'invisible': ['|',('active', '=', False),('compute_onboarding','=', True)]}"/>
+					<button name="button_release_card" type="object" string="Release Card" class="btn btn-warning"
+					        attrs="{'invisible': [('state', '=', 'unassigned')]}"/>
+				</tree>
+			</field>
+		</record>
+		<record id="kw_card_master_view_search" model="ir.ui.view">
+			<field name="name">kw_card_master.view.search</field>
+			<field name="model">kw_card_master</field>
+			<field name="arch" type="xml">
+				<search string="Card">
+					<!-- Add your fields here -->
+					<field name="name"/>
+					<field name="card_type"/>
+					<field name="assigned"/>
+					<field name="active"/>
+					<field name="employee_id" string="Employee Tagged"/>
+
+					<filter string="Active Assigned Card" name="state"
+					        domain="['&amp;',('state','=','assigned'),('active','=', True)]"/>
+					<filter string="Active Unassigned Card" name="state"
+					        domain="['&amp;',('state','=','unassigned'),('active','=', True)]"/>
+
+					<filter string="Access Card" name="card_type" domain="[('card_type','=', '2')]"/>
+					<filter string="Id Card" name="card_type" domain="[('card_type','=', '1')]"/>
+
+					<filter string="Assigned" name="state" domain="[('state','=','assigned')]"/>
+					<filter string="Not Assigned" name="state" domain="[('state','=','unassigned')]"/>
+
+					<filter string="Active" name="active" domain="[('active','=',True)]"/>
+					<filter string="Archived" name="active" domain="[('active','=',False)]"/>
+
+					<group expand="0" string="Group By">
+						<filter name="card_type" string="Card Type" context="{'group_by': 'card_type'}"/>
+					</group>
+				</search>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="kw_card_action">
+			<field name="name">Assign Card</field>
+			<field name="res_model">kw_card_master</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree</field>
+			<!-- <field name="groups_id" eval="[(6,0,[ref('kw_employee.group_kw_card_master_admin'),ref('kw_onboarding.group_kw_onboarding_admin'),ref('hr.group_hr_manager')])]"/> -->
+			<field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_card_master_tree1')})]"/>
+		</record>
+
+		<record model="ir.actions.act_window" id="onb_kw_card_action">
+			<field name="name">Assign Card</field>
+			<field name="res_model">kw_card_master</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree</field>
+			<field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('kw_card_master_tree1')})]"/>
+		</record>
+
+		<!-- <menuitem name="Assign Card" id="kw_card_master_menu_for_admin" parent="root_menu_for_card_act" action="kw_card_action" sequence="2" groups="kw_employee.group_kw_card_master_admin"/>  -->
+		<menuitem name="Assign Card"
+				  id="kw_assign_card_menu"
+				  parent="hr.menu_human_resources_configuration"
+				  action="kw_employee.kw_card_action"
+				  sequence="99"
+				  groups="kw_employee.group_kw_card_master_admin,hr.group_hr_manager,kw_onboarding.group_kw_onboarding_admin"/>
+		<menuitem id="kwonboard_assign_card_menu"
+				  name="Assign Card"
+				  action='kw_employee.onb_kw_card_action'
+				  parent="manage_card"
+				  groups="kw_onboarding.group_kw_onboarding_admin,kw_employee.group_kw_card_master_admin"
+				  sequence="2"/>
+
+		<record id="hr.menu_human_resources_configuration" model="ir.ui.menu">
+			<field name="groups_id" eval="[(4,ref('kw_employee.group_kw_card_master_admin'))]"/>
+		</record>
+	</data>
+</odoo>

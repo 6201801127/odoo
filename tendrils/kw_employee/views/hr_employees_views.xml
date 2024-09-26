@@ -1,0 +1,1507 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!--START : hr.employee, Add the customized field to existing view -->
+        <record model="ir.ui.view" id="kw_empl_form_view">
+            <field name="name">hr.employee.view.form.inherit</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="arch" type="xml">
+                <form position="attributes">
+                    <attribute name="create">false</attribute>
+                    <attribute name="delete">false</attribute>
+                </form>
+                <sheet position="before">
+                    <header>
+                        <!-- <button name="create_emp_user" string="Create User" class="oe_highlight oe_inline " type="object" attrs="{'invisible': [('user_id','>',0)]}" groups="hr.group_hr_manager"/> -->
+                        <field name="current_user" invisible="1"/>
+                        <field name="current_user_id" invisible="1"/>
+                        <field name="check_manager_group" invisible='1'/>
+                    </header>
+                </sheet>
+                <xpath expr="//div[@id='o_employee_container']/div[@id='o_employee_main']/field[@name='image']"
+                       position="attributes">
+                    <attribute name="attrs">{'readonly': [('check_manager_group', '=', False)]}</attribute>
+                </xpath>
+                <xpath expr="//div[@id='o_employee_container']/div[@id='o_employee_main']/field[@name='category_ids']"
+                       position="attributes">
+                    <attribute name="attrs">{'readonly': [('check_manager_group', '=', False)]}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='name']" position="after">
+                    <h5>
+                        <field name="rel_job_id"/>
+                        <!-- <xpath expr="//page[@string='Contacts']" position="attributes">
+                        <attribute name="attrs">{}</attribute>
+                        </xpath> -->
+                        <br/>
+                        <field name="emp_code" readonly="1"/>
+                    </h5>
+                </xpath>
+                <xpath expr="//page[@name='public']" position="attributes">
+                    <attribute name="string">User Information</attribute>
+                </xpath>
+                <xpath expr="//page[@name='public']/group/group[1]" position="attributes">
+                    <attribute name="string">Work Information</attribute>
+                </xpath>
+                <!-- Hiding existing fields in form view  and changing their position -->
+                <xpath expr="//field[@name='tz']" position="replace">
+                </xpath>
+                <xpath expr="//field[@name='resource_calendar_id']" position="replace">
+                </xpath>
+                <xpath expr="//field[@name='department_id']" position="replace">
+                </xpath>
+                <xpath expr="//field[@name='work_email']" position="replace">
+                </xpath>
+                <xpath expr="//field[@name='work_phone']" position="replace">
+                </xpath>
+                <xpath expr="//field[@name='mobile_phone']" position="replace">
+                </xpath>
+                <xpath expr="//field[@name='job_id']" position="replace">
+                </xpath>
+                <!-- <xpath expr="//field[@name='epbx_no']" position="replace">
+                </xpath> -->
+                <!-- START : Work Information domain="[('parent_id', '>',0)]"-->
+
+                <field name="address_id" position="replace">
+                    <field name="joining_type" groups="hr.group_hr_manager"/>
+                    <field name="date_of_joining" options="{'datepicker':{'maxDate': 'now'}}"
+                           groups="hr.group_hr_manager" readonly='1'/>
+                    <field name="company_id" groups="base.group_multi_company"
+                           attrs="{'readonly': [('check_manager_group', '=', False)]}"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="base_branch_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           required="1"/>
+                    <field name="base_branch_name" invisible="1"/>
+                    <field name="location" widget="radio" options="{'horizontal': true}" groups="hr.group_hr_manager"/>
+                    <field name="client_loc_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           domain="[('is_company','=',True)]" invisible="1"/>
+                    <field name="client_location"
+                           attrs="{'invisible':[('location','!=','onsite')], 'required': [('location','=','onsite')]}"
+                           groups="hr.group_hr_manager"/>
+                    <field name="wfa_city"
+                           attrs="{'invisible':[('location','!=','wfa')], 'required': [('location','=','wfa')]}"
+                           groups="hr.group_hr_manager" options="{'no_open': True}"/>
+                    <!-- <field name="address_id" context="{'show_city_country': 1}" options="{'always_reload': True,'highlight_first_line': True,'no_open': True,'no_create': True}" domain="[('is_company', '=',True)]" invisible="1"/> -->
+                </field>
+
+                <field name="work_location" position="replace">
+                    <field name="work_location_id" string="Work Location" context="{'show_city_country': 1}"
+                           options='{"always_reload": True,"highlight_first_line": True,"no_open": True, "no_create": True}'
+                           invisible="1"/>
+                    <!-- <field name="work_location" invisible="1"/> -->
+                    <field name="job_branch_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           required="1"/>
+                    <field name="acc_branch_unit_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="department_id" domain="[('company_id','child_of',[user.company_id.id])]" required="1"/>
+                    <field name="division" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           attrs="{'invisible': [('department_id', '=', False)],'readonly': [('check_manager_group', '=', False)]}"
+                           domain="[('parent_id','=', department_id)]"/>
+                    <field name="section" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           attrs="{'invisible': [('division', '=', False)],'readonly': [('check_manager_group', '=', False)]}"
+                           domain="[('parent_id','=', division)]"/>
+                    <field name="practise" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           attrs="{'invisible': [('section', '=', False)],'readonly': [('check_manager_group', '=', False)]}"
+                           domain="[('parent_id','=', section)]"/>
+                    <field name="job_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           attrs="{'readonly': [('check_manager_group', '=', False)]}" required="1"/>
+                    <field name="grade" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           groups="hr.group_hr_manager" required="1"/>
+                    <field name="emp_band" groups="hr.group_hr_manager"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                    <field name="level" groups="hr.group_hr_manager"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"/>       
+                    <field name="primary_skill_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           groups="hr.group_hr_manager" string="Core Skills"/>
+                    <!-- <field name="resource_calendar_id" invisible="0"/> -->
+                    <!-- <field name="tz" widget="timezone_mismatch" readonly="0" groups="hr.group_hr_manager"/> -->
+                </field>
+
+                <field name="job_branch_id" position="attributes">
+                    <attribute name="attrs">{'readonly': [('check_manager_group', '=', False)]}</attribute>
+                </field>
+                <field name="base_branch_id" position="attributes">
+                    <attribute name="attrs">{'readonly': [('check_manager_group', '=', False)]}</attribute>
+                </field>
+                <field name="acc_branch_unit_id" position="attributes">
+                    <attribute name="attrs">{'readonly': [('check_manager_group', '=', False)]}</attribute>
+                </field>
+                <field name="job_title" position="attributes">
+                    <!-- <attribute name="attrs">{'readonly': [('check_manager_group', '=', False)]}</attribute> -->
+                    <attribute name="invisible">1</attribute>
+                </field>
+
+                <!--				<field name="job_id" position="replace">-->
+                <!--					<field name="job_id" string="Designation" options="{'no_open': True,'no_create':True,'no_edit':True}"/>-->
+                <!--				</field>-->
+                <!-- <field name="mobile_phone" position="attributes">
+                    <attribute name="options">{'no_open': True}</attribute>
+                </field> -->
+                <field name="job_id" position="attributes">
+                    <attribute name="widget">ztree_select</attribute>
+                    <attribute name="ztree_parent_key">parent_id</attribute>
+                    <attribute name="ztree_expend_level">2</attribute>
+                    <attribute name="limit">16</attribute>
+                    <attribute name="order">name</attribute>
+                    <attribute name="attrs">{'readonly': [('check_manager_group', '=', False)]}</attribute>
+                </field>
+
+                <!-- <field name="resource_calendar_id" position="replace">
+                    <field name="resource_calendar_id" invisible="1"/>
+                </field> -->
+
+                <!-- <field name="job_title" position="replace">
+                    <field name="job_title" string="Job Role"/>
+                </field> -->
+
+                <field name="parent_id" position="replace">
+                    <field name="parent_id" string="Administrative Authority" required="1"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           attrs="{'readonly': [('check_manager_group', '=', False)]}"
+                    />
+                </field>
+
+
+                <field name="coach_id" position="replace">
+                    <field name="coach_id" string="Functional Authority"
+                           options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           attrs="{'readonly': [('check_manager_group', '=', False)]}"
+                    />
+                </field>
+
+                <field name="coach_id" position="after">
+                    <field name="work_email" string="Work Email"
+                           attrs="{'required': True, 'readonly': [('check_manager_group', '=', False)]}"/>
+                    <field name="work_phone" string="Work Phone No"
+                           attrs="{'readonly': [('check_manager_group', '=', False)]}"/>
+                    <field name="mobile_phone" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           attrs="{'readonly': [('check_manager_group', '=', False)]}"/>
+                    <field name="whatsapp_no" string="WhatsApp No"
+                           attrs="{'readonly': [('check_manager_group', '=', False)]}"/>
+                    <field name="epbx_no" string="EPBX" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                           attrs="{'readonly': [('check_manager_group', '=', False)]}"/>
+                </field>
+
+                <field name="epbx_no" position="after">
+                    <field name="resource_calendar_id" invisible="0"/>
+                    <field name="tz" widget="timezone_mismatch" readonly="0" groups="hr.group_hr_manager"/>
+                </field>
+
+                <field name="resource_calendar_id" position="attributes">
+                    <attribute name="string">Shift</attribute>
+                    <attribute name="groups">hr.group_hr_user</attribute>
+                    <attribute name="attrs">{'readonly': [('check_manager_group', '=', False)]}</attribute>
+                    <attribute name="options">{'no_open': True,'no_create':True,'no_edit':True}</attribute>
+                </field>
+
+                <field name="name" position="attributes">
+                    <attribute name="attrs">{'readonly': [('check_manager_group', '=', False)]}</attribute>
+                </field>
+                <field name="notes" position="attributes">
+                    <attribute name="attrs">{'readonly': [('check_manager_group', '=', False)]}</attribute>
+                </field>
+
+                <!--  -->
+                <xpath expr="//page[@name='public']" position="inside">
+
+                    <group name="extra_info1" class="oe_read_only">
+                        <field name="emp_code" string="Emp. Code"/>
+                        <field name="date_of_joining" string="Dt. of Joining"/>
+                    </group>
+
+                    <!--  <group string="Home Address Details" name="extra_info2" class="oe_read_only">
+                        <group>
+                            <label for="street" string="Present Address"/>
+                            <div class="o_address_format">
+                                <field name="present_addr_street" placeholder="Address Line 1..." class="o_address_street oe_read_only"/>
+                                <field name="present_addr_street2" placeholder="Address Line 2..." class="o_address_street"/>
+                                <field name="present_addr_country_id" placeholder="Country" class="o_address_country" options="{'no_open': True}"/>
+                                <field name="present_addr_city" placeholder="City" class="o_address_city"/>
+                                <field name="present_addr_state_id" class="o_address_state" placeholder="State" options="{'no_open': True}"/>
+                                <field name="present_addr_zip" placeholder="ZIP" class="o_address_zip"/>
+
+                            </div>
+                        </group>
+
+                        <group>
+                            <label for="street" string="Permanent Address"/>
+                            <div class="o_address_format">
+                                <field name="permanent_addr_street" placeholder="Address Line 1..." class="o_address_street"/>
+                                <field name="permanent_addr_street2" placeholder="Address Line 2..." class="o_address_street"/>
+                                <field name="permanent_addr_country_id" placeholder="Country" class="o_address_country" options="{'no_open': True}"/>
+                                <field name="permanent_addr_city" placeholder="City" class="o_address_city"/>
+                                <field name="permanent_addr_state_id" class="o_address_state" placeholder="State" options="{'no_open': True}"/>
+                                <field name="permanent_addr_zip" placeholder="ZIP" class="o_address_zip"/>
+                            </div>
+                        </group>
+
+                    </group>
+ -->
+
+                </xpath>
+
+
+                <!-- END : Work Information  -->
+
+
+                <!-- START : Private Information  -->
+
+                <!-- groups="hr.group_hr_user,base.group_user"> -->
+                <xpath expr="//page[@name='public']/group/group[1]" position="after">
+                    <group col="2" string="Budget Setting" groups="hr.group_hr_manager">
+                        <field name="mrf_id" options="{'no_open': True,'no_create':True,'no_edit':True}" string="MRF"
+                               readonly="1"/>
+                        <field name="budget_type" required="0" readonly="1"/>
+                        <field name="emp_role" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                               domain="[('budget_type','=',budget_type)]"
+                               required="0" readonly="1"/>
+                        <field name="emp_category" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                               domain="[('role_ids', '=', emp_role)]"
+                               required="0" readonly="1"/>
+                        <field name="onboarding_create_check" invisible='1'/>
+                        <field name="employement_type" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                               required="1"/>
+                        <field name="code" invisible='1'/>
+                        <field name="direct_indirect" widget='radio' options="{'horizontal': true}"
+                               attrs="{'required':[('code', 'in', ['O'])]}" invisible="1"/>
+                        <field name="emp_project_id"
+                               attrs="{'required':[('code', 'in', ['C','O']),('budget_type', '=', 'project')]}"
+                               options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                        <field name="vendor_id"
+                               options="{'no_open': True,'no_create':True,'no_edit':True}" invisible="1"/>
+                        <!-- attrs="{'required':[('code', 'in', ['S','C','O'])]}" -->
+                        <field name="start_date"
+                               attrs="{'required':[('code', 'in', ['C','O']),('budget_type', '=', 'project')]}"/>
+                        <field name="end_date"
+                               attrs="{'required':[('code', 'in', ['C','O']),('budget_type', '=', 'project')]}"/>
+                    </group>
+                    <group string='Additional Charges' groups="hr.group_hr_manager">
+                        <field name="additional_department" widget='many2many_tags'
+                               options="{'no_open': True,'no_create':True,'no_edit':True}"
+                               attrs="{'readonly': [('check_manager_group', '=', False)]}"
+                               domain="[('dept_type.code', '=', 'department')]"/>
+                        <field name="additional_division" widget='many2many_tags'
+                               options="{'no_open': True,'no_create':True,'no_edit':True}"
+                               attrs="{'readonly': [('check_manager_group', '=', False)]}"
+                               domain="[('dept_type.code', '=', 'division'),('parent_id','=', department_id)]"/>
+                        <field name="additional_section" widget='many2many_tags'
+                               options="{'no_open': True,'no_create':True,'no_edit':True}"
+                               attrs="{'readonly': [('check_manager_group', '=', False)]}"
+                               domain="[('dept_type.code', '=', 'section'),('parent_id','=', division)]"/>
+                        <field name="additional_practice" widget='many2many_tags'
+                               options="{'no_open': True,'no_create':True,'no_edit':True}"
+                               attrs="{'readonly': [('check_manager_group', '=', False)]}"
+                               domain="[('dept_type.code', '=', 'practice'),('parent_id','=', section)]"/>
+                    </group>
+
+                </xpath>
+                <xpath expr="//page[@name='personal_information']" position="replace">
+                    <!-- <attribute name="groups">hr.group_hr_user,base.group_user</attribute> -->
+                </xpath>
+                <!-- END : Private Information  -->
+
+                <!-- START : HR Setting  -->
+                <field name="user_id" position="attributes">
+                    <attribute name="options">{'no_open': True,'no_create':True,'no_edit':True}</attribute>
+                </field>
+                <xpath expr="//field[@name='user_id']" position="after">
+                    <field name="ex_emp_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                </xpath>
+
+                <xpath expr="//page[@name='hr_settings']" position="attributes">
+                    <attribute name="groups">hr.group_hr_manager</attribute>
+                </xpath>
+
+                <!-- <xpath expr="//sheet/div/field[@name='name']" position="attributes">
+                    <attribute name="attrs">{'invisible': [('check_officer_group', '=', True)]}</attribute>
+                </xpath> -->
+
+                <xpath expr="//page[@name='hr_settings']" position="inside">
+                    <group groups="hr.group_hr_manager,hr.group_hr_user">
+                        <group string="Status" name="active_group" groups="hr.group_hr_manager">
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="user_id" string="Related User"/>
+                            <field name="emp_odisha_domicile" widget="radio" options="{'horizontal': true}"/>
+                        </group>
+
+                        <!--Additional Field Modified By:Chandrasekhar-->
+                        <group string="Project Info">
+                            <field name="budget_type"/>
+                            <field name="type_of_project"/>
+                            <field name="engagement"/>
+                            <field name="project_name"/>
+                        </group>
+                        <!--____________________________________________-->
+
+                        <group string="Payroll Information"
+                               groups="kw_employee.group_payroll_manager,hr.group_hr_manager">
+                            <field name="enable_payroll" widget="radio" options="{'horizontal': true}"/>
+                            <field name="enable_epf" widget="radio" options="{'horizontal': true}"
+                                   attrs="{'invisible':[('enable_payroll','!=','yes')]}"/>
+                            <field name="pf_deduction"
+                                   attrs="{'invisible': ['|',('enable_epf','=', False),('enable_epf','=', 'no')]}"
+                                   widget='radio' options="{'horizontal': true}"/>
+                            <field name="enable_gratuity" widget="radio" options="{'horizontal': true}"
+                                   attrs="{'invisible':[('enable_payroll','!=','yes')]}"/>
+                            <field name="uan_id" groups="hr.group_hr_manager"/>
+                            <field name="esi_id" groups="hr.group_hr_manager"/>
+                        </group>
+                        <group string="Salary Information (CTC)" attrs="{'invisible':[('enable_payroll','!=','yes')]}"
+                               groups="kw_employee.group_payroll_manager">
+                            <field name="at_join_time_ctc" required="1"/>
+                            <field name="current_ctc"/>
+                            <field name="esi_applicable" invisible="0"/>
+                        </group>
+                        <group name="Basic Amount" string="Basic Amount" attrs="{'invisible':[('enable_payroll','!=','yes')]}"
+                               groups="kw_employee.group_payroll_manager">
+                            <field name="basic_at_join_time" force_save="1"
+                                   attrs="{'required':[('enable_payroll','=','yes')]}"/>
+                            <field name="current_basic" attrs="{'required':[('enable_payroll','=','yes')]}"/>
+                            <field name="hra" attrs="{'required':[('enable_payroll','=','yes')]}"/>
+                            <field name="conveyance" attrs="{'required':[('enable_payroll','=','yes')]}"/>
+                        </group>
+                        <group name="Allowance Information at Joining Time" string="Allowance Information at Joining Time"
+                               attrs="{'invisible':[('enable_payroll','!=','yes')]}"
+                               groups="kw_employee.group_payroll_manager">
+                            <field name="productivity" attrs="{'required':[('enable_payroll','=','yes')]}"/>
+                            <field name="commitment" attrs="{'required':[('enable_payroll','=','yes')]}"/>
+                            <field name="lta_amount" attrs="{'required':[('enable_payroll','=','yes')]}"/>
+                            <field name="pp_amount" attrs="{'required':[('enable_payroll','=','yes')]}"/>
+                        </group>
+                        <group string="Consolidate Amount" attrs="{'invisible':[('enable_payroll','=','yes')]}"
+                               groups="kw_employee.group_payroll_manager">
+                            <field name="cosolid_amnt" attrs="{'required':[('enable_payroll','!=','yes')]}"/>
+                        </group>
+                        <group string="Personal Bank Details">
+                                <field name="personal_bank_name"/>
+                                <field name="personal_bank_account"/>
+                                <field name="personal_bank_ifsc"/>
+                        </group>
+                        <group string="Salary Bank Details" attrs="{'invisible':[('enable_payroll','!=','yes')]}"
+                               groups="kw_employee.group_payroll_manager">
+                            <field name="bankaccount_id" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                   invisible="1"/>
+                            <field name="partner_id" invisible="1"/>
+                            <field name="bank_account_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Onboarding" name="emp_onboarding">
+                            <!-- Employee refference start -->
+                            <field name="emp_refered_from" invisible="1"/>
+                            <field name="emp_code_ref" invisible="1"/>
+                            <field name="emp_refered" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="emp_reference_walkindrive"
+                                   attrs="{'invisible':[('emp_code_ref','!=','walkindrive')]}"/>
+                            <field name="emp_reference_print_media"
+                                   attrs="{'invisible':[('emp_code_ref','!=','printmedia')]}"/>
+                            <field name="emp_reference_job_fair"
+                                   attrs="{'invisible':[('emp_code_ref','!=','jobfair')]}"/>
+                            <field name="emp_employee_referred" attrs="{'invisible':[('emp_code_ref','!=','employee')]}"
+                                   options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="emp_media_id" attrs="{'invisible':[('emp_code_ref','!=','social')]}"
+                                   options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="emp_institute_id" attrs="{'invisible':[('emp_code_ref','!=','institute')]}"
+                                   domain="[('institute','=',True)]"
+                                   options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="emp_consultancy_id" attrs="{'invisible':[('emp_code_ref','!=','consultancy')]}"
+                                   domain="[('consultancy','=',True)]"
+                                   options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="emp_jportal_id" attrs="{'invisible':[('emp_code_ref','!=','job')]}"
+                                   options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="emp_service_partner_id"
+                                   attrs="{'invisible':[('emp_code_ref','!=','partners')]}"
+                                   domain="[('service_partner','=',True)]"
+                                   options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="emp_reference"
+                                   attrs="{'invisible':['|', ('emp_code_ref','in',['job','consultancy','social','employee','institute','partners','website','career','walkindrive','printmedia','jobfair']),('emp_code_ref','=', False)]}"/>
+                            <field name="emp_refered_detail" attrs="{'invisible': [('emp_refered_from', '=', False)]}"/>
+                            <!-- Employee refference end -->
+                            <field name="emp_grade" groups="hr.group_hr_user" invisible="1"/>
+                            <field name="on_probation" groups="hr.group_hr_manager"/>
+                            <field name="date_of_completed_probation" groups="hr.group_hr_manager"/>
+<!--                                   attrs="{'required': [('on_probation', '=',False)]}"-->
+                            <!-- <field name="last_working_day" string='Exit date' groups="hr.group_hr_user" attrs="{'invisible':[('active','=',True)]}"/> -->
+                            <field name="confirmation_sts" groups="hr.group_hr_manager" invisible="1"/>
+                            <field name="proj_bill_amnt" invisible="1"/>
+                            <field name="date_of_completed_probation" invisible="1"/>
+                            <field name="medical_reimb" invisible="1"/>
+                            <field name="transport" invisible="1"/>
+                            <field name="need_sync" invisible="1"/>
+                            <field name="image_url" invisible="1" force_save="True"/>
+                            <field name="bond_required" widget="radio" options="{'horizontal': true}"/>
+                            <field name="bond_years"
+                                   attrs="{'required': [('bond_required','=', '1')],'invisible': [('bond_required','=', '0')]}"/>
+                            <field name="bond_months"
+                                   attrs="{'required': [('bond_required','=', '1')],'invisible': [('bond_required','=', '0')]}"/>
+                        </group>
+                        <group string="Insurance Information">
+                            <field name="personal_insurance" widget="radio" options="{'horizontal': true}" readonly = '1'/>
+                            <field name="uplod_insurance_doc" filename="file_name_insurance" class="oe_avatar" widget="binary"
+                                options="{'preview_image':'image'}" readonly = '1'/>
+                            <field name="file_name_insurance" invisible="1"/>
+                            <field name="insurance_validate_date" readonly="1"/>
+
+                        </group>
+                    </group>
+                </xpath>
+                <!-- END : HR Setting groups="hr.group_hr_manager,base.group_user" attrs="{'invisible': [('user_id', '!=','current_user')]}" -->
+                <notebook position="inside">
+                    <page string="Environmental Config" name="environmental_details" groups="hr.group_hr_manager">
+                        <group>
+                            <!-- <field name="system_configuration" /> -->
+                            <!-- <group col="2" string="Budget Setting" groups="hr.group_hr_manager">
+                                <field name="emp_role" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="emp_category" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="onboarding_create_check" invisible='1'/>
+                                <field name="employement_type" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="code" invisible='1'/>
+                                <field name="direct_indirect" widget='radio' options="{'horizontal': true}" attrs="{'invisible':[('code', 'not in', ['O'])]}"/>
+                                <field name="emp_project_id" attrs="{'invisible':[('code','in',['P', False])]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="vendor_id" attrs="{'invisible':[('code', 'not in', ['S','C','O'])]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="start_date" attrs="{'invisible':[('code', 'not in', ['S','C','O'])],'required':[('code', 'in', ['S','C','O'])]}"/>
+                                <field name="end_date" attrs="{'invisible':[('code', 'not in', ['S','C','O'])],'required':[('code', 'in', ['S','C','O'])]}"/>
+                            </group> -->
+
+                            <group col="4" string="NSA Setting" colspan="2">
+                                <field name="work_email"/>
+                                <field name="outlook_pwd" groups="hr.group_hr_manager" password="True"/>
+                                <field name="domain_login_id" groups="hr.group_hr_manager"/>
+                                <field name="domain_login_pwd" groups="hr.group_hr_manager" password="True"/>
+                                <field name="biometric_id" groups="hr.group_hr_manager"/>
+                                <field name="epbx_no"/>
+                            </group>
+                            <group col="2" string="Admin Setting" groups="hr.group_hr_manager">
+                                <field name="id_card_no" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+                <notebook position="inside">
+                    <page string="Personal Info" name="personal_details" groups="hr.group_hr_manager">
+                        <group>
+                            <group string="Personal Information">
+                                <field name="birthday" options="{'datepicker':{'maxDate': 'now'}}"/>
+                                <field name="gender"/>
+                                <field name="emp_differently_abled" />
+                                <field name="emp_blind" attrs="{'invisible':[('emp_differently_abled', 'in', ['No',False])]}"/>
+                                <field name="emp_deaf" attrs="{'invisible':[('emp_differently_abled', 'in', ['No',False])]}"/>
+                                <field name="emp_dumb" attrs="{'invisible':[('emp_differently_abled', 'in', ['No',False])]}"/>
+                                <field name="emp_orthopedically" attrs="{'invisible':[('emp_differently_abled', 'in', ['No',False])]}"/>
+                                <field name="emp_of_disability" attrs="{'invisible':[('emp_differently_abled', 'in', ['No',False])]}"/>
+
+                                <field name="blood_group" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       required='0'/>
+                                <field name="emp_religion" options="{'no_open': True,'no_create':True,'no_edit':True}"
+                                       required='0'/>
+                                <!-- <field name="marital" invisible="1"/> -->
+                                <field name="marital_sts" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <!-- <field name="wedding_anniversary" attrs="{'invisible': [('marital', 'not in', ['married', 'cohabitant'])]}" options="{'datepicker':{'maxDate': 'now'}}"/>    -->
+                                <field name="marital_code" invisible="1"/>
+                                <field name="wedding_anniversary"
+                                       attrs="{'invisible': [('marital_code', 'not in', ['M', 'C'])]}"
+                                       options="{'datepicker':{'maxDate': 'now'}}"/>
+                                <field name="mother_tongue_id"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            </group>
+
+                            <group string="Contact Information">
+                                <field name="emergency_contact"/>
+                                <field name="emergency_phone"/>
+                                <field name="emergency_phone_2"/>
+                                <field name="km_home_work"/>
+                                <field name="personal_email" string="Personal Email Id"/>
+                                <!-- <field name="bank_account_id" invisible="1"/> -->
+                                <field name="address_home_id" invisible="1"/>
+                                <field name="linkedin_url"/>
+                            </group>
+                            <group string="Citizenship &amp; Other Information">
+                                <field name="country_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="identification_id" invisible="1"/>
+                                <field name="passport_id" invisible="1"/>
+                                <!-- <field name="whatsapp_no" string="WhatsApp No" /> -->
+                                <field name="will_travel" widget="radio" options="{'horizontal': true}"/>
+                                <field name="travel_abroad" widget="radio" options="{'horizontal': true}"
+                                       attrs="{'invisible':[('will_travel','=','0')]}"/>
+                                <field name="travel_domestic" widget="radio" options="{'horizontal': true}"
+                                       attrs="{'invisible':[('will_travel','=','0')]}"/>
+                                <field name="certificate_name" invisible="1"/>
+                                <field name="medical_certificate" filename="certificate_name"/>
+                            </group>
+                            <group string="Work Permit" name="work_permit">
+                                <field name="visa_no"/>
+                                <field name="permit_no"/>
+                                <field name="visa_expire"/>
+                            </group>
+                        </group>
+
+                        <!-- <group>
+                        <group>
+                            <field name="emp_refered_from" invisible="1"/>
+                            <field name="emp_code_ref" invisible="1"/>
+                            <field name="emp_refered" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="emp_reference_walkindrive" attrs="{'invisible':[('emp_code_ref','!=','walkindrive')]}"/>
+                            <field name="emp_reference_print_media" attrs="{'invisible':[('emp_code_ref','!=','printmedia')]}"/>
+                            <field name="emp_reference_job_fair" attrs="{'invisible':[('emp_code_ref','!=','jobfair')]}"/>
+                            <field name="emp_employee_referred" attrs="{'invisible':[('emp_code_ref','!=','employee')]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="emp_media_id" attrs="{'invisible':[('emp_code_ref','!=','social')]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="emp_institute_id" attrs="{'invisible':[('emp_code_ref','!=','institute')]}" domain="[('institute','=',True)]" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="emp_consultancy_id" attrs="{'invisible':[('emp_code_ref','!=','consultancy')]}" domain="[('consultancy','=',True)]" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="emp_jportal_id" attrs="{'invisible':[('emp_code_ref','!=','job')]}" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="emp_service_partner_id" attrs="{'invisible':[('emp_code_ref','!=','partners')]}" domain="[('service_partner','=',True)]" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="emp_reference" attrs="{'invisible':['|', ('emp_code_ref','in',['job','consultancy','social','employee','institute','partners','website','career','walkindrive','printmedia','jobfair']),('emp_code_ref','=', False)]}"/>
+                            <field name="emp_refered_detail" attrs="{'invisible': [('emp_refered_from', '=', False)]}"/>
+                        </group>
+                        </group> -->
+                        <group>
+                            <field name="known_language_ids"/>
+                        </group>
+
+                        <group string="Address Information" name="contact_info" groups="hr.group_hr_user">
+                            <group>
+                                <label for="street" string="Present Address"/>
+                                <div class="o_address_format">
+                                    <field name="present_addr_street" placeholder="Address Line 1..."
+                                           class="o_address_street"/>
+                                    <field name="present_addr_street2" placeholder="Address Line 2..."
+                                           class="o_address_street"/>
+                                    <field name="present_addr_country_id" placeholder="Country"
+                                           class="o_address_country"
+                                           options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                    <field name="present_addr_city" placeholder="City" class="o_address_city"/>
+                                    <field name="present_addr_state_id" class="o_address_state" placeholder="State"
+                                           options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                    <field name="present_addr_zip" placeholder="ZIP" class="o_address_zip"/>
+
+                                </div>
+                            </group>
+
+                            <group>
+                                <field name="same_address"/>
+                                <label for="street" string="Permanent Address"/>
+                                <div class="o_address_format">
+                                    <field name="permanent_addr_street" placeholder="Address Line 1..."
+                                           class="o_address_street"/>
+                                    <field name="permanent_addr_street2" placeholder="Address Line 2..."
+                                           class="o_address_street"/>
+                                    <field name="permanent_addr_country_id" placeholder="Country"
+                                           class="o_address_country"
+                                           options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                    <field name="permanent_addr_city" placeholder="City" class="o_address_city"/>
+                                    <field name="permanent_addr_state_id" class="o_address_state" placeholder="State"
+                                           options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                    <field name="permanent_addr_zip" placeholder="ZIP" class="o_address_zip"/>
+
+                                </div>
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+
+                <notebook position="inside">
+                    <page string="Identification Details" name="identification_details"
+                          groups="hr.group_hr_manager,kw_employee.group_payroll_manager">
+                        <group>
+                            <field name="identification_ids"/>
+                        </group>
+                        <group string="Membership Association Details" groups="hr.group_hr_manager">
+                            <field name="membership_assc_ids"/>
+                        </group>
+                    </page>
+                </notebook>
+                <notebook position="inside">
+                    <page string="Educational &amp; Training" name="educational_details" groups="hr.group_hr_manager">
+                        <group>
+                            <field name="educational_details_ids">
+                                <tree>
+                                    <field name="course_id"/>
+                                    <field name="stream_id"/>
+                                    <field name="university_name"/>
+                                    <field name="passing_details" widget="many2many_tags" string="Specialization"/>
+                                    <field name="passing_year"/>
+                                    <field name="division"/>
+                                    <field name="marks_obtained"/>
+                                    <field name="expiry_date"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </page>
+                </notebook>
+
+                <notebook position="inside">
+                    <page string="Work Experience" name="experience_details" groups="hr.group_hr_manager">
+                        <group>
+                            <field name="experience_sts" invisible="1"/>
+                        </group>
+                        <group string="Technical Skills">
+                            <field name="technical_skill_ids" force_save="1">
+                                <tree>
+                                    <field name="category_id" force_save="1"/>
+                                    <field name="skill_id" force_save="1"/>
+                                    <field name="proficiency" force_save="1"/>
+                                    <field name="kw_id" force_save="1"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <group string="Countries Of Work Experience">
+                            <field name="worked_country_ids" widget="many2many_tags"
+                                   options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                        </group>
+                        <group string="Work Experience">
+                            <field name="work_experience_ids"/>
+                        </group>
+
+                        <group>
+                            <field name="total_experience_display"/>
+                        </group>
+                    </page>
+                </notebook>
+                <notebook position="inside">
+                    <page string="CV Info" name="cv_info_details_ids" groups="hr.group_hr_manager">
+                        <group>
+                            <field name="cv_info_details_ids" context="{'current_id': id}">
+                                <form>
+                                    <group>
+                                        <field name="project_of" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="activity" widget="radio" options="{'horizontal': true}"
+                                               attrs="{'invisible':[('project_of','=','others')]}"/>
+                                        <field name="other_activity"
+                                               attrs="{'invisible':['|',('activity','=','project'),('project_of','=','others')],'required':[('activity','=','others')]}"/>
+                                        <field name="emp_project_id"
+                                               attrs="{'invisible':['|',('project_of','=','others'),('activity','=','others')],'required':['&amp;',('project_of','=','csm'),('activity','=','project')]}"
+                                               options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                        <field name="project_name"
+                                               attrs="{'invisible':[('project_of','=','csm')],'required':[('project_of','=','others')]}"/>
+                                        <field name="location" required="True"/>
+                                        <field name="client_name"
+                                               attrs="{'invisible':[('project_of','=','csm')],'required':[('project_of','=','others')]}"/>
+                                        <field name="organization_id"
+                                               attrs="{'invisible':[('project_of','=','csm')],'required':[('project_of','=','others')]}"
+                                               options="{'no_open': True}"/>
+                                        <field name="start_month_year" required="True"/>
+                                        <field name="end_month_year" required="True"/>
+                                        <field name="project_feature"/>
+                                        <field name="role" required="True"/>
+                                        <field name="responsibility_activity"/>
+                                    </group>
+                                </form>
+                                <tree>
+                                    <field name="project_of"/>
+                                    <field name="compute_project" string='Project Name'/>
+                                    <field name="location"/>
+                                    <field name="start_month_year"/>
+                                    <field name="end_month_year"/>
+                                    <field name="project_feature"/>
+                                    <field name="role"/>
+                                    <field name="responsibility_activity"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </page>
+                </notebook>
+
+                <notebook position="inside">
+                    <field name="show_handbook" invisible="1"/>
+					<page string="Organisational Policies" attrs="{'invisible': [('show_handbook', '=', False)]}">
+						<group>
+							<field name="handbook_info_details_ids" readonly="1">
+								<tree>
+									<field name="title"/>
+									<!-- <field name="category"/> -->
+									<field name="handbook_type_id"/>
+									<!-- <field name="content_file"/> -->
+									<field name="understood"/>
+									<field name="date"/>
+								</tree>
+							</field>
+						</group>
+					</page>
+				</notebook>
+                
+                <notebook position="inside">
+                    <page string="Family Info" name="family_info" groups="hr.group_hr_manager">
+                        <group>
+                            <field name="family_details_ids"/>
+                        </group>
+                    </page>
+                </notebook>
+
+                <!-- <notebook position="inside">
+                    <page string="Onboarding Checklist" name="onboarding_checklist" groups="hr.group_hr_user">
+                        <group>
+                            <field name="onboarding_checklist"/>
+                        </group>
+                    </page>
+                </notebook> -->
+
+                <!-- <xpath expr="//page[@name='hr_settings']" position="after">
+                    <page string="Onboarding Checklist" name="onboarding_checklist">
+                        <group>
+                            <field name="onboarding_checklist"/>
+                        </group>
+                    </page>
+                </xpath> -->
+                <xpath expr="//form/sheet/div/button[@name='toggle_active']" position="replace">
+                    <button name="toggle_active" type="object" groups="hr.group_hr_user" class="oe_stat_button"
+                            icon="fa-archive" confirm="Are you sure to Archive the employee?">
+                        <field name="active" widget="boolean_button"
+                               options="{&quot;terminology&quot;: &quot;archive&quot;}"/>
+                    </button>
+
+                    <!-- <button class="oe_stat_button text-center" icon="fa-tasks" type="object" name="view_onboarding_checklist" groups="hr.group_hr_manager">
+                            <span class="o_stat_text font-weight-bold">
+                                Onboarding Checklist
+                            </span>
+                        </button> -->
+
+                    <button class="oe_stat_button text-center" icon="fa-lock" type="object"
+                            attrs="{'invisible': [('user_id', '=', False)]}"
+                            name="action_employee_permissions"
+                            groups="kw_employee.group_payroll_manager">
+                        <span class="o_stat_text font-weight-bold">
+                            Permissions
+                        </span>
+                    </button>
+                    <field name="is_wfh" invisible="1"/>
+                    <!-- <button name="toggle_work" type="object" groups="hr.group_hr_user" class="oe_stat_button" icon="fa-home" attrs="{'invisible': [('is_wfh', '=', False)]}">
+                            <span class="o_stat_text font-weight-bold">
+                                Work From Home
+                            </span>
+                        </button> -->
+                    <!-- <button name="toggle_work" type="object" groups="hr.group_hr_user" class="oe_stat_button" icon="fa-building" attrs="{'invisible': [('is_wfh', '=', True)]}">
+                            <span class="o_stat_text font-weight-bold">
+                                Work From Office
+                            </span>
+                        </button> -->
+
+                    <button class="oe_stat_button"
+                            name="button_employee_history" type="object" icon="fa-edit"
+                            groups="hr.group_hr_manager">
+                        <span class="o_stat_text font-weight-bold">
+                            Employee History
+                        </span>
+                    </button>
+
+                    <button class="oe_stat_button"
+                            name="button_employee_document" type="object" icon="fa-download"
+                            groups="hr.group_hr_manager">
+                        <span class="o_stat_text font-weight-bold">
+                            Documents
+                        </span>
+                    </button>
+                    <button class="oe_stat_button"
+                            name="button_employee_profile_document" type="object" icon="fa-edit"
+                            groups="hr.group_hr_manager">
+                        <span class="o_stat_text font-weight-bold">
+                            Employee Profile 
+                        </span>
+                    </button>
+                    <!-- <button class="oe_stat_button" name="button_profile_check" type="object" icon="fa-user">
+                            <span class="o_stat_text font-weight-bold">
+                                Profile Check
+                            </span>
+                        </button> -->
+                </xpath>
+                <xpath expr="//form/sheet/div/button[@name='toggle_active']" position="attributes">
+                    <attribute name="groups">hr.group_hr_manager</attribute>
+                </xpath>
+                <xpath expr="//form/sheet/div/button[@name='button_employee_history']" position="attributes">
+                    <attribute name="groups">hr.group_hr_manager</attribute>
+                </xpath>
+
+                <field name="department_id" position="attributes">
+                    <attribute name="domain">[('dept_type.code', '=', 'department')]</attribute>
+                    <attribute name="options">{'no_open': True,'no_create':True,'no_edit':True}</attribute>
+                    <attribute name="attrs">{'readonly': [('check_manager_group', '=', False)]}</attribute>
+                </field>
+
+                <xpath expr="//div[@class='oe_chatter']" position="replace">
+                    <group name="hide_chatter_user" groups="hr.group_hr_manager">
+                        <div class='oe_chatter'>
+                            <field name="message_follower_ids" widget="mail_followers"/>
+                            <field name="activity_ids" widget="mail_activity"/>
+                            <field name="message_ids" widget="mail_thread"/>
+                        </div>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="hr.view_employee_tree">
+            <field name="name">hr.employee.view.tree</field>
+            <field name="model">hr.employee</field>
+            <field name="arch" type="xml">
+                <tree import="false" create="false" delete="false">
+                    <field name="emp_code" string="Emp. Code"/>
+                    <field name="name" string="Name"/>
+                    <field name="department_id" string="Department"/>
+                    <field name="division"/>
+                    <field name="section"/>
+                    <field name="practise"/>
+                    <field name="job_id" string="Designation"/>
+                    <field name="job_branch_id"/>
+                    <field name="parent_id" string="Administrative Authority"/>
+                    <field name="work_email" string="Email" invisible="context.get('outsourced', False)"/>
+                    <field name="mobile_phone" string="Mobile"/>
+                    <field name="epbx_no" string="Extn." invisible="context.get('outsourced', False)"/>
+                    <field name="base_branch_name" invisible='1'/>
+                    <field name="division" string="Division" invisible="1"/>
+                    <field name="image_small" string="Photo" class="oe_avatar" widget="image" invisible="1"/>
+                    <field name="is_wfh" string="WFH" widget="boolean_toggle" groups="hr.group_hr_manager"
+                           invisible="1"/>
+                    <field name="date_of_joining" string="Joining Date" invisible="context.get('outsourced', False)"/>
+                    <field name="blood_group" string="Blood Group" invisible="context.get('outsourced', False)"/>
+                    <field name="start_date" invisible="not context.get('outsourced', False)"/>
+                    <field name="end_date" invisible="not context.get('outsourced', False)"/>
+                    <field name="emp_project_id" invisible="not context.get('outsourced', False)"/>
+                    <field name="vendor_id" invisible="not context.get('outsourced', False)"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="kwemp_hremp_kanban_view_extended">
+            <field name="inherit_id" ref="hr.hr_kanban_view_employees"/>
+            <field name="model">hr.employee</field>
+            <field name="arch" type="xml">
+                <kanban position="attributes">
+                    <attribute name="create">false</attribute>
+                    <attribute name="import">false</attribute>
+                </kanban>
+                <xpath expr='//kanban/templates/t/div/div[3]/ul' position="inside">
+                    <t t-esc="record.raw_value"/>
+
+                    <li t-if="record.mobile_phone.raw_value or record.epbx_no.raw_value ">
+                        <i class="fa fa-mobile"/>
+                        <field name="mobile_phone"/>
+                        <t t-if="record.epbx_no.raw_value">
+                            <i class="fa fa-phone"/>
+                            <field name="epbx_no"/>
+                        </t>
+                    </li>
+
+                    <li>
+                        <!-- <t t-if="record.emp_grade.raw_value"> <i class="fa fa-star"></i> <field name="emp_grade" /></t>
+                       <t t-if="record.blood_group.raw_value"> <i class="fa fa-tint"></i> <field name="blood_group" /></t>  -->
+                        <t t-if="record.work_email.raw_value">
+                            <i class="fa fa-envelope-square"/>
+                            <field name="work_email"/>
+                        </t>
+                    </li>
+                </xpath>
+                <xpath expr="//kanban/templates/t/div/div[3]/ul/li[2]" position="replace">
+                    <li t-if="record.client_location.raw_value">
+                        <field name="client_location"/>
+                    </li>
+                    <li t-else="">
+                        <field name="job_branch_id"/> 
+                    </li>
+                </xpath>
+                <!-- <xpath expr="//kanban/templates/t/div/div[3]/ul/li[2]" position="replace">
+                    <li t-if="record.job_branch_id.raw_value">
+                        <field name="job_branch_id"/>
+                    </li>
+                </xpath> -->
+                <xpath expr="//kanban/templates/t/div/div[3]/field[@name='category_ids']" position="after">
+                    <t t-if="record.emp_code.raw_value">
+                        <i class="fa fa-id-badge"/>
+                        <field name="emp_code"/>
+                        <br/>
+                    </t>
+                    <field name="department_id"/>
+                </xpath>
+                <!--  <xpath expr="//field[@name='name']" position="after">
+                    <field name="color" invisible='1'/>
+                    <t t-if="record.color.raw_value == 'green'">
+                        <span class='text-success float-right'>
+                            <i class="fa fa-circle" title='Present'/>
+                        </span>
+                    </t>
+                    <t t-elif="record.color.raw_value == 'yellow'">
+                        <span class='text-warning float-right'>
+                            <i class="fa fa-circle" title='Tour'/>
+                        </span>
+                    </t>
+                    <t t-elif="record.color.raw_value == 'info'">
+                        <span class='text-info float-right'>
+                            <i class="fa fa-circle" title='Leave'/>
+                        </span>
+                    </t>
+                    <t t-elif="record.color.raw_value == 'red'">
+                        <span class='text-danger float-right'>
+                            <i class="fa fa-circle" title='Absent'/>
+                        </span>
+                    </t>
+                    <t t-elif="record.color.raw_value == 'gray'">
+                        <span style='color: #8e8e8e;' class='float-right'>
+                            <i class="fa fa-circle" title='Local Visit'/>
+                        </span>
+                    </t>
+                    <t t-elif="record.color.raw_value == 'NA'">
+                        <span class='text-primary float-right'>
+                            <i class="fa fa-circle" title='No Status'/>
+                        </span>
+                    </t>
+                </xpath> -->
+            </field>
+        </record>
+        <!--END : hr.employee, Add the customized field to existing view -->
+
+        <!--START : kwemp_language_known, view -->
+        <record id="kwmasters_emp_language_view_tree" model="ir.ui.view">
+            <field name="name">Languages Known Tree</field>
+            <field name="model">kwemp_language_known</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="language_id"/>
+                    <field name="reading_status"/>
+                    <field name="writing_status"/>
+                    <field name="speaking_status"/>
+                    <field name="understanding_status"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kwmasters_emp_language_view_form" model="ir.ui.view">
+            <field name="name">Languages Known Form</field>
+            <field name="model">kwemp_language_known</field>
+            <field name="arch" type="xml">
+                <form string="Languages Known">
+                    <group>
+                        <field name="language_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                        <field name="reading_status" widget="radio" options="{'horizontal': true}"/>
+                        <field name="writing_status" widget="radio" options="{'horizontal': true}"/>
+                        <field name="speaking_status" widget="radio" options="{'horizontal': true}"/>
+                        <field name="understanding_status" widget="radio" options="{'horizontal': true}"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+        <!--END : kwemp_language_known, view -->
+
+        <!--START : kwemp_identity_docs, view -->
+        <record id="kwemp_identity_docs_view_form" model="ir.ui.view">
+            <field name="name">Identification Details Form</field>
+            <field name="model">kwemp_identity_docs</field>
+            <field name="arch" type="xml">
+                <form string="Identification Details">
+                    <group>
+                        <sheet>
+                            <group>
+                                <group>
+                                    <field name="name"/>
+                                    <field name="date_of_issue" options="{'datepicker':{'maxDate': 'now'}}"/>
+                                    <field name="renewal_sts"/>
+                                </group>
+                                <group>
+                                    <field name="doc_number"/>
+                                    <field name="date_of_expiry"/>
+                                    <field name="uploaded_doc" widget="binary" filename="doc_file_name"/>
+
+                                    <!-- <field name="content_file" widget="binary" filename="file_name" />
+                                     <field name="file_name" invisible="1"/> -->
+
+                                    <div class="file-format-note">(Only .jpeg,.png, .pdf format are allowed.Maximum file
+                                        size is 4 MB) &#x2063;<span style="color:red;">*</span>
+                                    </div>
+                                    <!-- widget="pdf_viewer" -->
+                                    <field name="doc_file_name" invisible="1"/>
+                                </group>
+                            </group>
+                        </sheet>
+
+                    </group>
+                </form>
+            </field>
+        </record>
+        <record id="kwemp_identity_docs_view_tree" model="ir.ui.view">
+            <field name="name">Identification Details Tree</field>
+            <field name="model">kwemp_identity_docs</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="doc_number"/>
+                    <field name="date_of_issue"/>
+                    <field name="date_of_expiry"/>
+                    <field name="renewal_sts"/>
+
+                    <!--                    <field name="uploaded_doc" filename="doc_file_name" widget="binary"/>-->
+                    <field name="doc_file_name" invisible="1"/>
+
+                    <!-- <field name="content_file" filename="file_name" />
+                    <field name="file_name" invisible="1" /> -->
+
+                </tree>
+            </field>
+        </record>
+        <!--END : kwemp_identity_docs, view -->
+
+        <!--START : kwemp_membership_assc, view -->
+        <record id="kwemp_membership_assc_view_form" model="ir.ui.view">
+            <field name="name">Membership Association Details Form</field>
+            <field name="model">kwemp_membership_assc</field>
+            <field name="arch" type="xml">
+                <form string="Membership Association Details">
+                    <group>
+                        <field name="name"/>
+                        <field name="date_of_issue" options="{'datepicker':{'maxDate': 'now'}}"/>
+                        <field name="date_of_expiry"/>
+                        <field name="renewal_sts"/>
+                        <field name="uploaded_doc" widget="binary" filename="doc_file_name"/>
+
+                        <!-- <field name="content_file" widget="binary" filename="file_name" />
+                        <field name="file_name" invisible="1" /> -->
+                        <div class="file-format-note">(Only .jpeg, .png, .pdf format are allowed. Maximum file size is 4
+                            MB) &#x2063;<span style="color:red;">*</span>
+                        </div>
+                        <field name="doc_file_name" invisible="1"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+        <record id="kwemp_membership_assc_view_tree" model="ir.ui.view">
+            <field name="name">Membership Association Details Tree</field>
+            <field name="model">kwemp_membership_assc</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="date_of_issue"/>
+                    <field name="date_of_expiry"/>
+                    <field name="renewal_sts"/>
+                </tree>
+            </field>
+        </record>
+        <!--END : kwemp_membership_assc, view -->
+
+        <!--START : kwemp_educational_details, view -->
+        <record id="kwemp_educational_details_view_form" model="ir.ui.view">
+            <field name="name">Educational Details Form</field>
+            <field name="model">kwemp_educational_qualification</field>
+            <field name="arch" type="xml">
+                <form string="Educational Details">
+                    <sheet>
+                        <group>
+                            <group>
+
+                                <field name="course_type"/>
+                                <field name="course_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="stream_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="university_name"
+                                       options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                                <field name="passing_details" string="Specialization">
+                                    <tree>
+                                        <field name="name"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            <group>
+                                <field name="passing_year"/>
+                                <field name="division"/>
+                                <field name="marks_obtained"/>
+                                <field name="expiry_date"/>
+                                <field name="uploaded_doc" widget="binary" filename="doc_file_name"/>
+
+                                <!--  <field name="content_file" widget="binary" filename="file_name" />
+                                <field name="file_name" invisible="1" /> -->
+
+                                <div class="file-format-note">
+                                    (Only .jpeg,.png, .pdf format are allowed.Maximum file size is 4 MB) &#x2063;
+                                    <span style="color:red;">*</span>
+                                </div>
+                                <field name="doc_file_name" invisible="1"/>
+
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="kwemp_educational_details_view_tree" model="ir.ui.view">
+            <field name="name">Educational Details Tree</field>
+            <field name="model">kwemp_educational_qualification</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="course_id"/>
+                    <field name="stream_id"/>
+                    <field name="university_name"/>
+                    <field name="passing_year"/>
+                    <!--                    <field name="uploaded_doc" filename="doc_file_name" widget="binary"/>-->
+                    <field name="doc_file_name" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+        <!--END : kwemp_educational_details, view -->
+
+        <!--START : kwemp_technical_skills, view -->
+        <record id="kwemp_technical_skills_view_form" model="ir.ui.view">
+            <field name="name">Technical Skills Form</field>
+            <field name="model">kwemp_technical_skills</field>
+            <field name="arch" type="xml">
+                <form string="Technical Skills">
+                    <group>
+                        <field name="category_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                        <field name="skill_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                        <field name="proficiency" widget="radio" options="{'horizontal': true}"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+        <record id="kwemp_technical_skills_view_tree" model="ir.ui.view">
+            <field name="name">Technical Skills Tree</field>
+            <field name="model">kwemp_technical_skills</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="category_id" options="{'no_create_edit': True}"/>
+                    <field name="skill_id" options="{'no_create_edit': True}"/>
+                    <field name="proficiency"/>
+                    <field name="kw_id" groups="base.group_no_one"/>
+                    <field name="active" widget="boolean_toggle"/>
+                </tree>
+            </field>
+        </record>
+        <!--END : kwemp_technical_skills, view -->
+
+        <!--START : kwemp_work_experience, view -->
+        <record id="kwemp_work_experience_view_form" model="ir.ui.view">
+            <field name="name">Work Experience Form</field>
+            <field name="model">kwemp_work_experience</field>
+            <field name="arch" type="xml">
+                <form string="Work Experience">
+                    <group>
+                        <group>
+                            <field name="country_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="name"/>
+                            <field name="designation_name"/>
+                            <field name="organization_type"
+                                   options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                        </group>
+                        <group>
+                            <field name="industry_type" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="effective_from" options="{'datepicker':{'maxDate': 'now'}}"/>
+                            <field name="effective_to" options="{'datepicker':{'minDate': 0,'maxDate': 'now'}}"/>
+                            <field name="effective_experiance"/>
+                            <field name="uploaded_doc" widget="binary" filename="doc_file_name"/>
+                            <!-- <field name="content_file" widget="binary" filename="file_name" />
+                                <field name="file_name" invisible="1" /> -->
+                            <div class="file-format-note">
+                                (Only .jpeg, .png, .pdf format are allowed. Maximum file size is 4 MB) &#x2063;
+                                <span style="color:red;">*</span>
+                            </div>
+                            <field name="doc_file_name" invisible="1"/>
+                        </group>
+                    </group>
+                </form>
+            </field>
+        </record>
+        <record id="kwemp_work_experience_view_tree" model="ir.ui.view">
+            <field name="name">Work Experience Tree</field>
+            <field name="model">kwemp_work_experience</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="country_id"/>
+                    <field name="name"/>
+                    <field name="designation_name"/>
+                    <field name="organization_type"/>
+                    <field name="industry_type"/>
+                    <field name="effective_from"/>
+                    <field name="effective_to"/>
+                    <field name="effective_experiance"/>
+                    <!--                    <field name="uploaded_doc" filename="doc_file_name" widget="FieldBinary"/>-->
+                    <field name="doc_file_name" invisible="1"/>
+                    <field name="kw_id" groups="base.group_no_one"/>
+                </tree>
+            </field>
+        </record>
+        <!--END : kwemp_work_experience, view -->
+
+        <!--START : kwemp_family_info, view -->
+        <record id="kwemp_family_info_view_form" model="ir.ui.view">
+            <field name="name">Family Info Form</field>
+            <field name="model">kwemp_family_info</field>
+            <field name="arch" type="xml">
+                <form string="Family Info">
+                    <group>
+                        <group>
+                            <field name="relationship_id" options="{'no_open': True,'no_create':True,'no_edit':True}"/>
+                            <field name="name"/>
+                            <field name="gender" widget="radio"/>
+                        </group>
+                        <group>
+                            <field name="date_of_birth" options="{'datepicker':{'maxDate': 'now'}}"/>
+                            <field name="dependent" widget="radio"/>
+                            <field name="is_insure_allowed" invisible='1'/>
+                            <field name="is_insured" attrs="{'readonly': [('is_insure_allowed', '=', False)]}"/>
+                            <field name="phone_no"/>
+                        </group>
+                    </group>
+                </form>
+            </field>
+        </record>
+        <record id="kwemp_family_info_view_tree" model="ir.ui.view">
+            <field name="name">Family Info Tree</field>
+            <field name="model">kwemp_family_info</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="relationship_id"/>
+                    <field name="name"/>
+                    <field name="gender"/>
+                    <field name="date_of_birth"/>
+                    <field name="dependent"/>
+                    <field name="is_insured"/>
+                    <field name="phone_no"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="kwemp_additional_search" model="ir.ui.view">
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_filter"/>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="id_card_no" string="Id Card No."/>
+                    <field name="work_email" string="Email ID"/>
+                    <field name="epbx_no" string="Extension No"/>
+                    <field name="mobile_phone" string="Phone Number"/>
+                    <field name="job_branch_id" string="Work Location"/>
+                    <field name="last_working_day" string="Last Working Day"/>
+                    <field name="filter_experience_year" string="Experience"/>
+                    <field name="filter_stream" string='Stream'/>
+                    <field name="blood_group" string='Blood Group'/>
+                    <field name="level" string='Level'/>
+
+
+                    <filter name="date_of_joining" string="Newly Hired"
+                            domain="[('date_of_joining', '&gt;', (context_today()-relativedelta(days=30)).strftime('%Y-%m-%d'))]"
+                            groups="hr.group_hr_manager"/>
+                    <filter string="Ex Employee" name="archived" domain="[('active','=',False)]"/>
+                    <separator/>
+
+                    <filter name="location" string="Onsite" domain="[('location','=','onsite')]"
+                            groups="hr.group_hr_manager"/>
+                    <filter name="location" string="Offsite" domain="[('location','=','offsite')]"
+                            groups="hr.group_hr_manager"/>
+                    <filter name="location" string="WFA" domain="[('location','=','wfa')]"
+                            groups="hr.group_hr_manager"/>
+                    <separator/>
+
+                    <filter name="employement_type" string="FTE" domain="[('employement_type.code','=','P')]"
+                            groups="hr.group_hr_manager"/>
+                    <filter name="employement_type" string="RET" domain="[('employement_type.code','in',['S','C'])]"
+                            groups="hr.group_hr_manager"/>
+                    <!-- <filter name="employement_type" string="RET-Project" domain="[('employement_type.code','=','C')]" groups="hr.group_hr_manager"/> -->
+                    <!-- <filter name="employement_type" string="Offshore" domain="[('employement_type.code','=','R')]" groups="hr.group_hr_manager"/> -->
+                    <filter name="employement_type" string="Contractual" domain="[('employement_type.code','=','CE')]"
+                            groups="hr.group_hr_manager"/>
+                    <separator/>
+
+                    <!-- <filter name="employement_type" string="Contractual In-Direct" domain="[('employement_type.code','=','O'),('direct_indirect','=','2')]" groups="hr.group_hr_manager"/> -->
+                    <filter name="last_working_day" string="Last Working Day" date="last_working_day"
+                            groups="hr.group_hr_manager"/>
+                    <separator/>
+
+                    <filter name="filter_experience_year_below_2_year" string="Experience (0-2 yrs)"
+                            domain="[('filter_experience_year','&lt;',2)]" groups="hr.group_hr_manager"/>
+                    <filter name="filter_experience_year_2_5_year" string="Experience (2-5 yrs)"
+                            domain="[('filter_experience_year','&gt;=',2),('filter_experience_year','&lt;=',5)]"
+                            groups="hr.group_hr_manager"/>
+                    <filter name="filter_experience_year_greater_than_5_year" string="Experience (above 5 yrs)"
+                            domain="[('filter_experience_year','&gt;',5)]" groups="hr.group_hr_manager"/>
+                </search>
+
+                <xpath expr="//search/field[@name='department_id']" position="attributes">
+                    <attribute name="filter_domain">"[('department_id','ilike',self)]"</attribute>
+                </xpath>
+                <xpath expr="//search/field[@name='department_id']" position="after">
+                    <field name="division" string="Division" filter_domain="[('division','ilike',self)]"/>
+                    <field name="section" string="Practice" filter_domain="[('section','ilike',self)]"/>
+                    <field name="practise" string="Section" filter_domain="[('practise','ilike',self)]"/>
+                </xpath>
+                <xpath expr="//search/group/filter[@name='group_manager']" position="attributes">
+                    <attribute name="string">Administrative Authority</attribute>
+                </xpath>
+                <xpath expr="//search/group/filter[@name='group_coach']" position="attributes">
+                    <attribute name="string">Functional Authority</attribute>
+                </xpath>
+                <xpath expr="//search/group/filter[@name='group_job']" position="attributes">
+                    <attribute name="string">Designation</attribute>
+                </xpath>
+                <xpath expr="//search/group/filter[@name='group_company']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+            </field>
+        </record>
+        <record id="hr_employee_view_search_holiday_inherit" model="ir.ui.view">
+            <field name="name">hr.employee.holiday.search.view.inherit</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr_holidays.hr_employee_view_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='is_absent_totay']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+            </field>
+        </record>
+        <record id="hr_employee_view_search_hr_recruitment_inherit" model="ir.ui.view">
+            <field name="name">hr.employee.hr_recruitment.search.view.inherit</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr_recruitment.hr_employee_view_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='newly_hired_employee']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+            </field>
+        </record>
+        <!--END : kwemp_family_info, view -->
+        <!--  <record model="ir.actions.act_window.view" id="kw_hr_emp_act_window_view_tree">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="hr.view_employee_tree"/>
+            <field name="act_window_id" ref="hr.open_view_employee_list_my"/>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="kw_hr_emp_act_window_view_form">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="hr.view_employee_form"/>
+            <field name="act_window_id" ref="hr.open_view_employee_list_my"/>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="kw_hr_emp_act_window_view_kanban">
+            <field name="sequence" eval="0"/>
+            <field name="view_mode">kanban</field>
+            <field name="view_id" ref="hr.hr_kanban_view_employees"/>
+            <field name="act_window_id" ref="hr.open_view_employee_list_my"/>
+        </record> -->
+
+        <!-- <record id="hr.open_view_employee_list_custom" model="ir.actions.act_window">
+            <field name="name">Employee</field>
+            <field name="res_model">hr.employee</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">kanban,tree,form,activity</field>
+            <field name="domain">[('onboarding_checklist','=',False)]</field>
+            <field name="context">{}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+    (0, 0, {'view_mode': 'kanban', 'view_id': ref('hr.hr_kanban_view_employees')}),
+    (0, 0, {'view_mode': 'tree', 'view_id': ref('hr.view_employee_tree')}),
+    (0, 0, {'view_mode': 'form', 'view_id': ref('hr.view_employee_form')})]"/>
+            <field name="search_view_id" ref="hr.view_employee_filter"/>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Add a new employee
+              </p><p>
+                With just a quick glance on the Odoo employee screen, you
+                can easily find all the information you need for each person;
+                contact data, job position, availability, etc.
+              </p>
+            </field>
+        </record> -->
+
+        <!-- To make image in preference readonly -->
+        <record id="view_users_preferences_form" model="ir.ui.view">
+            <field name="name">res_users_preferences_form</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+            <field name="arch" type="xml">
+                <field name="image" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+                <field name="email" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+                <field name="company_id" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+                <button name="preference_change_password" position="attributes">
+                    <attribute name="string">Change Password</attribute>
+                    <attribute name="class">btn btn-primary btn-lg mb-2</attribute>
+                </button>
+                <group name="preference_email" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </group>
+                <group name="preference_contact" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </group>
+                <xpath expr="//form/group[2]" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="hr.open_view_employee_list_my" model="ir.actions.act_window">
+            <field name="name">Manage Employees</field>
+            <field name="res_model">hr.employee</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">kanban,tree,form,activity</field>
+            <field name="limit">40</field>
+            <field name="sequence">5</field>
+            <field name="domain">[('employement_type.code','!=','O')]</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+    (0, 0, {'view_mode': 'kanban', 'view_id': ref('hr.hr_kanban_view_employees')}),
+    (0, 0, {'view_mode': 'tree', 'view_id': ref('hr.view_employee_tree')}),
+    (0, 0, {'view_mode': 'form', 'view_id': ref('hr.view_employee_form')})]"/>
+            <field name="search_view_id" ref="hr.view_employee_filter"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Add a new employee
+                </p>
+                <p>
+                    With just a quick glance on the Odoo employee screen, you
+                    can easily find all the information you need for each person;
+                    contact data, job position, availability, etc.
+                </p>
+            </field>
+        </record>
+
+        <record id="kw_outsourced_emp_search" model="ir.ui.view">
+            <field name="model">hr.employee</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name" string="Name"/>
+                    <field name="work_email" string="Email ID"/>
+                    <field name="epbx_no" string="Extension No"/>
+                    <field name="mobile_phone" string="Phone Number"/>
+                    <field name="job_branch_id" string="Work Location"/>
+                    <field name="last_working_day" string="Last Working Day"/>
+                    <field name="start_date" string="Contract Start Date"/>
+                    <field name="end_date" string="Contract End Date"/>
+                    <field name="emp_project_id" string="Project" groups="hr.group_hr_manager"/>
+                    <field name="vendor_id" string="Vendor" groups="hr.group_hr_manager"/>
+                    <filter string="Ex Employee" name="archived" domain="[('active','=',False)]"
+                    />
+                    <filter name="start_date" string="Contract Start Date" date="start_date"
+                            groups="hr.group_hr_manager"/>
+                    <filter name="end_date" string="Contract End Date" date="end_date" groups="hr.group_hr_manager"/>
+                    <filter name="last_working_day" string="Last Working Day" date="last_working_day"
+                            groups="hr.group_hr_manager"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="open_view_contractual_employee_list" model="ir.actions.act_window">
+            <field name="name">Manage Outsourced</field>
+            <field name="res_model">hr.employee</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">kanban,tree,form,activity</field>
+            <field name="domain">[('employement_type.code','=','O')]</field>
+            <field name="context">{'outsourced': True}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+    (0, 0, {'view_mode': 'kanban', 'view_id': ref('hr.hr_kanban_view_employees')}),
+    (0, 0, {'view_mode': 'tree', 'view_id': ref('hr.view_employee_tree')}),
+    (0, 0, {'view_mode': 'form', 'view_id': ref('hr.view_employee_form')})]"/>
+            <field name="search_view_id" ref="kw_outsourced_emp_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Add a new employee
+                </p>
+                <p>
+                    With just a quick glance on the Odoo employee screen, you
+                    can easily find all the information you need for each person;
+                    contact data, job position, availability, etc.
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_open_view_employee_contractual_list"
+                  name="Manage Outsourced"
+                  action="open_view_contractual_employee_list"
+                  parent="hr.menu_open_view_employee_list_my"
+                  sequence="6" groups="hr.group_hr_manager"/>
+
+    </data>
+</odoo>

@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <record id="training_assessment_marks_mail" model="mail.template">
+            <field name="name">Training Assessment Result: Marks Of The Participants</field>
+            <field name="model_id" ref="kw_training.model_kw_training_assessment"/>
+            <field name="subject">Training Assessment Result Of : ${object.name}</field>
+            <field name="email_from">${user.email or object.create_uid.email}</field>
+            <field name="email_to">${(ctx.get('participants') if ctx.get('participants') else ''|safe)}</field>
+            <field name="email_cc">${(ctx.get('cc_emails') if ctx.get('cc_emails') else ''|safe)}</field>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                <span style="color:rgb(22, 123, 158);font-size: 16px;margin-right: 2px;font-weight: 600;">
+                    Hi,
+                </span>
+                    <p style="color: #676767;line-height: 145%;margin: 10px 0 0 0;font-size: 16px;">
+                            Please find below the ${object.test_type.capitalize()} Assessment score on <span style="font-weight: 600;">“${object.training_id.name}”</span>.
+                            The highest score is <span style="font-weight: 600;">${(ctx.get('max_mark',0))}</span> out of <span style="font-weight: 600;">${(ctx.get('full_mark',0))}</span> 
+                            and is achieved by <span style="font-weight: 600;">${(ctx.get('max_mark_participants',''))}</span>.
+                    </p>
+                    <table  style="border: 1px solid black; border-collapse: collapse;  margin-left:auto; margin-right:auto;">
+                        <thead style="background-color:#eee; color:black;">
+                            <tr style="border: 1px solid black;">
+                                <th style="border: 1px solid black;padding: 20px;">Sl#</th>
+                                <th style="border: 1px solid black;padding: 20px;">Name</th>
+                                <th style="border: 1px solid black;padding: 20px;">Scores Achieved</th>
+                            </tr><br/>
+                        </thead>
+                        <tbody>
+                            % if ctx.get('data') :
+                                % for data in ctx.get('data',[]) :
+                                    <tr style="border: 1px solid black;">
+                                        <td style="border: 1px solid black;text-align:center;">${loop.index}</td>
+                                        <td style="border: 1px solid black;padding: 20px;">${data['name']}</td>
+                                        <td style="border: 1px solid black;text-align:center">${data['score']}</td>
+                                    </tr>
+                                % endfor
+                            % endif
+                        </tbody>
+                    </table>
+                ]]>
+            </field>
+            <field name="auto_delete" eval="False"/>
+            <field name="user_signature" eval="False"/>
+        </record>
+    </data>
+</odoo>

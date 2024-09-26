@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="kw_training_dynamic_workflow_main" model="odoo.workflow">
+            <field name="name">Training Plan Approval</field>
+            <field name="activities_add" eval="True"/>
+            <field name="followers_add" eval="False"/>
+            <field name="mail_thread_add" eval="True"/>
+            <field name="remove_default_attrs_mod" eval="False"/>
+            <field name="model_id" ref="kw_training.model_kw_training_plan"/>
+        </record>
+
+        <record id="kw_training_dynamic_workflow_node_draft" model="odoo.workflow.node">
+            <field name="name">Draft</field>
+            <field name="workflow_id" ref="kw_training_dynamic_workflow_main"/>
+            <field name="node_name">draft</field>
+            <field name="sequence" eval="1"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_start" eval="True"/>
+        </record>
+    
+        <record id="kw_training_dynamic_workflow_node_1" model="odoo.workflow.node">
+            <field name="name">Applied</field>
+            <field name="workflow_id" ref="kw_training_dynamic_workflow_main"/>
+            <field name="node_name">apply</field>
+            <field name="sequence" eval="2"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_start" eval="False"/>
+        </record>
+
+        <record id="kw_training_dynamic_workflow_node_2" model="odoo.workflow.node">
+            <field name="name">Approved</field>
+            <field name="workflow_id" ref="kw_training_dynamic_workflow_main"/>
+            <field name="node_name">approved</field>
+            <field name="sequence" eval="3"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+        <record id="kw_training_dynamic_workflow_node_3" model="odoo.workflow.node">
+            <field name="name">Rejected</field>
+            <field name="workflow_id" ref="kw_training_dynamic_workflow_main"/>
+            <field name="node_name">rejected</field>
+            <field name="sequence" eval="4"/>
+            <field name="is_visible" eval="True"/>
+            <field name="flow_end" eval="True"/>
+        </record>
+
+        <record id="kw_training_dynamic_workflow_link_1" model="odoo.workflow.link">
+            <field name="name">Apply -> Approved</field>
+            <field name="node_from" ref="kw_training_dynamic_workflow_node_1"/>
+            <field name="node_to" ref="kw_training_dynamic_workflow_node_2"/>
+
+        </record>
+
+        <record id="kw_training_dynamic_workflow_link_2" model="odoo.workflow.link">
+            <field name="name">Apply -> Rejected</field>
+            <field name="node_from" ref="kw_training_dynamic_workflow_node_1"/>
+            <field name="node_to" ref="kw_training_dynamic_workflow_node_3"/>
+        </record>  
+             
+        <record id="kw_training_dynamic_workflow_button_1" model="odoo.workflow.node.button">
+            <field name="sequence" eval="1"/>
+            <field name="workflow_id" ref="kw_training_dynamic_workflow_main"/>
+            <field name="name">Approve</field>
+            <field name="node_id" ref="kw_training_dynamic_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('state', '!=', 'apply'),('ra_access','=',False)]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+emp_id = env['hr.employee'].search([('user_id','=',user.id)])
+child_users = emp_id.child_ids
+if obj.employee_id and obj.employee_id.id in child_users.ids:
+    result= True
+else:
+    warning("You are not allowed to approve this plan")
+    result = False
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_training.kw_training_plan_approve_remark_form_view").id
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_training_plan',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'res_id': obj.id,
+    'view_id': form_view_id,
+    'target': 'new',
+    'domain': [('id', '=', obj.id)]
+    }
+            </field>
+            
+        </record>
+
+        <record id="kw_training_dynamic_workflow_button_2" model="odoo.workflow.node.button">
+            <field name="sequence" eval="2"/>
+            <field name="workflow_id" ref="kw_training_dynamic_workflow_main"/>
+            <field name="name">Reject</field>
+            <field name="node_id" ref="kw_training_dynamic_workflow_node_1"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="['|',('state', '!=', 'apply'),('ra_access','=',False)]"/>
+            <field name="btn_class">btn-danger</field>
+            <field name="condition_code">
+emp_id = env['hr.employee'].search([('user_id','=',user.id)])
+child_users = emp_id.child_ids
+if obj.employee_id and obj.employee_id.id in child_users.ids:
+    result= True
+else:
+    warning("You are not allowed to reject this plan")
+    result = False
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+form_view_id = env.ref("kw_training.kw_training_plan_reject_remark_form_view").id
+action= {
+    'name':'Remarks',
+    'type': 'ir.actions.act_window',
+    'res_model': 'kw_training_plan',
+    'view_mode': 'form',
+    'view_type': 'form',
+    'res_id': obj.id,
+    'view_id': form_view_id,
+    'target': 'new',
+    'domain': [('id', '=', obj.id)]
+    }
+            </field>
+        </record>
+
+        <record id="kw_training_dynamic_workflow_button_3" model="odoo.workflow.node.button">
+            <field name="sequence" eval="3"/>
+            <field name="workflow_id" ref="kw_training_dynamic_workflow_main"/>
+            <field name="name">Replan</field>
+            <field name="node_id" ref="kw_training_dynamic_workflow_node_3"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="btn_hide_domain" eval="[('state', '!=', 'rejected')]"/>
+            <field name="btn_class">btn-warning</field>
+            <field name="custom_domain" eval="True"/>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+existing_plan = env['kw_training_plan'].search([('state','!=','rejected'),('training_id','=',obj.training_id.id)])
+if existing_plan:
+  warning("There is already a plan exists in "+existing_plan[-1].state.capitalize()+" state.")
+else:
+  data_context = {
+      'default_hide_training': True,     
+      'default_financial_year':obj.financial_year.id,
+      'default_training_id':obj.training_id.id,
+      'default_period_from':obj.period_from,
+      'default_period_to':obj.period_to,
+      'default_details':obj.details,
+      'default_instructor_type':obj.instructor_type,
+      'default_cost':obj.cost,
+      'default_instructor_partner':obj.instructor_partner and obj.instructor_partner.id or False,
+      'default_internal_user_ids':[[6,0,obj.internal_user_ids.ids]],
+      'default_participant_ids':[[6,0,obj.participant_ids.ids]],
+      'default_plan_doc':obj.plan_doc,
+      'default_plan_doc_name':obj.plan_doc_name
+      }
+  form_view_id = env.ref('kw_training.kw_training_plan_edit_only_form').id
+  action = {
+        'type': 'ir.actions.act_window',
+        'res_model': 'kw_training_plan',
+        'view_mode': 'form',
+        'view_type': 'form',
+        'view_id':form_view_id,
+        'context':data_context,
+        'target': 'self'
+        }
+            </field>
+        </record>
+
+        <record id="kw_training_dynamic_workflow_button_apply" model="odoo.workflow.node.button">
+            <field name="sequence" eval="5"/>
+            <field name="workflow_id" ref="kw_training_dynamic_workflow_main"/>
+            <field name="name">Apply</field>
+            <field name="node_id" ref="kw_training_dynamic_workflow_node_draft"/>
+            <field name="is_highlight" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="btn_hide_domain" eval="[('state', '!=', 'draft')]"/>
+            <field name="btn_class">btn-success</field>
+            <field name="condition_code">
+result = True
+            </field>
+            <field name="action_type">code</field>
+            <field name="code">
+employee_id = user.employee_ids and user.employee_ids[-1].id or False
+obj.write({'state':'apply','employee_id':employee_id})
+template = env.ref('kw_training.training_plan_applied_mail')
+if template:
+  template.send_mail(obj.id, force_send=False, raise_exception=False,notif_layout="kwantify_theme.csm_mail_notification_light")
+user.notify_success('Plan applied successfully.')
+            </field>
+        </record>
+    </data>
+</odoo>
