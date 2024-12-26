@@ -15,5 +15,5 @@ from dateutil.relativedelta import relativedelta
 class InheritEmployee(models.Model):
     _inherit = 'hr.employee'
 
-    appraisal_reporting_officer = fields.Many2one('hr.employee', string='Appraisal Reporting Officer / मूल्यांकन रिपोर्टिंग अधिकारी')
-    appraisal_reviewing_officer = fields.Many2one('hr.employee', string='Appraisal Reviewing Officer / मूल्यांकन समीक्षा अधिकारी')
+    appraisal_reporting_officer = fields.Many2one('hr.employee', string='Appraisal Reporting Officer')
+    appraisal_reviewing_officer = fields.Many2one('hr.employee', string='Appraisal Reviewing Officer')

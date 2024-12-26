@@ -10,10 +10,10 @@
 
 from odoo import fields, models, api, _ 
 
-class BssclAppraisalGrade(models.Model):
+class AppraisalGrade(models.Model):
     _name = "appraisal.rating"
     _description = "Appraisal Grade Model"
 
-    from_int = fields.Integer(string='From / से')
-    to_int = fields.Integer(string='To / को')
-    name = fields.Char(string="Name / नाम")
+    from_int = fields.Integer(string='From')
+    to_int = fields.Integer(string='To')
+    name = fields.Char(string="Name")
